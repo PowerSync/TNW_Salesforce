@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="TNW_Salesforce::css/tnw-salesforce.css"/>
+        <css src="TNW_Salesforce::css/sync-status.css"/>
+    </head>
+    <body>
+        <referenceBlock name="head.components">
+            <block class="Magento\Framework\View\Element\Js\Components" name="salesforce_connection_create_head_components" template="TNW_Salesforce::js/components.phtml"/>
+        </referenceBlock>
+        <referenceBlock name="adminhtml.system.store.container">
+            <uiComponent name="tnw_adminhtml_store_website_sync"/>
+        </referenceBlock>
+    </body>
+</page>

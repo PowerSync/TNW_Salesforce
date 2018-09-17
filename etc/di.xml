@@ -1,0 +1,346 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="TNW\Salesforce\Api\WebsiteInterface" type="TNW\Salesforce\Client\Website" />
+    <type name="TNW\Salesforce\Client\Salesforce" shared="true" />
+    <virtualType name="TNW\Salesforce\Setup\Module\DataSetup" type="Magento\Setup\Module\DataSetup">
+        <arguments>
+            <argument name="context" xsi:type="object">Magento\Framework\Module\Setup\Context</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Eav\Setup\EavSetup">
+        <arguments>
+            <argument name="setup" xsi:type="object">TNW\Salesforce\Setup\Module\DataSetup</argument>
+        </arguments>
+    </type>
+
+    <preference for="Magento\Framework\Interception\Code\Generator\Interceptor"
+                type="TNW\Salesforce\Code\Generator\Interceptor" />
+
+    <preference for="TNW\Salesforce\Synchronize\Unit\IdentificationInterface"
+                type="TNW\Salesforce\Synchronize\Unit\Identification" />
+    <preference for="TNW\Salesforce\Synchronize\Transport\Calls\QueryInterface"
+                type="TNW\Salesforce\Synchronize\Transport\Soap\Calls\Query" />
+    <preference for="TNW\Salesforce\Synchronize\Transport\Calls\UpsertInterface"
+                type="TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert" />
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Load">
+        <arguments>
+            <argument name="name" xsi:type="string">customerLoad</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup\ByContact">
+        <arguments>
+            <argument name="name" xsi:type="string">customerAccountLookupByContact</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+            <argument name="dependents" xsi:type="array">
+                <item name="lookup" xsi:type="string">customerContactLookup</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Salesforce\Entity\Attribute">
+        <arguments>
+            <argument name="cache" xsi:type="object">Magento\Framework\App\Cache\Type\Collection</argument>
+            <argument name="objectTypeMap" xsi:type="array"></argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup\ByName">
+        <arguments>
+            <argument name="name" xsi:type="string">customerAccountLookupByName</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup" type="TNW\Salesforce\Synchronize\Unit\Collect">
+        <arguments>
+            <argument name="name" xsi:type="string">customerAccountLookup</argument>
+            <argument name="collect" xsi:type="array">
+                <item name="10" xsi:type="string">customerAccountLookupByContact</item>
+                <item name="20" xsi:type="string">customerAccountLookupByName</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping">
+        <arguments>
+            <argument name="name" xsi:type="string">customerAccountMapping</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="lookup" xsi:type="string">customerAccountLookup</argument>
+            <argument name="objectType" xsi:type="string">Account</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert">
+        <arguments>
+            <argument name="name" xsi:type="string">customerAccountUpsert</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="mapping" xsi:type="string">customerAccountMapping</argument>
+            <argument name="salesforceType" xsi:type="string">Account</argument>
+            <argument name="fieldSalesforceId" xsi:type="string">sforce_account_id</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="TNW\Customer\Account\Save" type="TNW\Salesforce\Synchronize\Unit\Customer\Save">
+        <arguments>
+            <argument name="name" xsi:type="string">customerAccountSave</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="attribute" xsi:type="string">sforce_account_id</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+            <argument name="dependents" xsi:type="array">
+                <item name="upsert" xsi:type="string">customerAccountUpsert</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup">
+        <arguments>
+            <argument name="name" xsi:type="string">customerContactLookup</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Contact\Mapping">
+        <arguments>
+            <argument name="name" xsi:type="string">customerContactMapping</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="lookup" xsi:type="string">customerContactLookup</argument>
+            <argument name="objectType" xsi:type="string">Contact</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+            <argument name="dependents" xsi:type="array">
+                <item name="accountUpsert" xsi:type="string">customerAccountUpsert</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Contact\Upsert">
+        <arguments>
+            <argument name="name" xsi:type="string">customerContactUpsert</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="mapping" xsi:type="string">customerContactMapping</argument>
+            <argument name="salesforceType" xsi:type="string">Contact</argument>
+            <argument name="fieldSalesforceId" xsi:type="string">sforce_id</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="TNW\Customer\Contact\Save" type="TNW\Salesforce\Synchronize\Unit\Customer\Save">
+        <arguments>
+            <argument name="name" xsi:type="string">customerContactSave</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="attribute" xsi:type="string">sforce_id</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+            <argument name="dependents" xsi:type="array">
+                <item name="upsert" xsi:type="string">customerContactUpsert</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="TNW\Unit\Customer\Check" type="TNW\Salesforce\Synchronize\Unit\Customer\Check">
+        <arguments>
+            <argument name="name" xsi:type="string">customerCheck</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="upsert" xsi:type="array">
+                <item name="accountUpsert" xsi:type="string">customerAccountUpsert</item>
+                <item name="contactUpsert" xsi:type="string">customerContactUpsert</item>
+            </argument>
+            <argument name="dependents" xsi:type="array">
+                <item name="saveAccount" xsi:type="string">customerAccountSave</item>
+                <item name="saveContact" xsi:type="string">customerContactSave</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="TNW\Soap\Synchronize\Customer" type="TNW\Salesforce\Synchronize\Group">
+        <arguments>
+            <argument name="groupCode" xsi:type="string">customer</argument>
+            <argument name="units" xsi:type="array">
+                <item name="customerLoad" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Load</item>
+
+                <item name="accountLookupByContact" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup\ByContact</item>
+                <item name="accountLookupByName" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup\ByName</item>
+                <item name="accountLookup" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup</item>
+                <item name="accountMapping" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping</item>
+                <item name="accountUpsert" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert</item>
+                <item name="accountSave" xsi:type="string">TNW\Customer\Account\Save</item>
+
+                <item name="contactLookup" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup</item>
+                <item name="contactMapping" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Contact\Mapping</item>
+                <item name="contactUpsert" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Contact\Upsert</item>
+                <item name="contactSave" xsi:type="string">TNW\Customer\Contact\Save</item>
+
+                <item name="customerCheck" xsi:type="string">TNW\Unit\Customer\Check</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Website\Load">
+        <arguments>
+            <argument name="name" xsi:type="string">websiteLoad</argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Website\Website\Lookup">
+        <arguments>
+            <argument name="name" xsi:type="string">websiteWebsiteLookup</argument>
+            <argument name="load" xsi:type="string">websiteLoad</argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Website\Website\Mapping">
+        <arguments>
+            <argument name="name" xsi:type="string">websiteWebsiteMapping</argument>
+            <argument name="load" xsi:type="string">websiteLoad</argument>
+            <argument name="lookup" xsi:type="string">websiteWebsiteLookup</argument>
+            <argument name="objectType" xsi:type="string">Website</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="TNW\Salesforce\Synchronize\Unit\Website\Website\Upsert" type="TNW\Salesforce\Synchronize\Unit\Upsert">
+        <arguments>
+            <argument name="name" xsi:type="string">websiteWebsiteUpsert</argument>
+            <argument name="load" xsi:type="string">websiteLoad</argument>
+            <argument name="mapping" xsi:type="string">websiteWebsiteMapping</argument>
+            <argument name="salesforceType" xsi:type="string">tnw_mage_basic__Magento_Website__c</argument>
+            <argument name="fieldSalesforceId" xsi:type="string">salesforce_id</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Website\Website\Save">
+        <arguments>
+            <argument name="name" xsi:type="string">websiteWebsiteSave</argument>
+            <argument name="dependents" xsi:type="array">
+                <item name="load" xsi:type="string">websiteLoad</item>
+                <item name="upsert" xsi:type="string">websiteWebsiteUpsert</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="TNW\Salesforce\Synchronize\Unit\Website\Check" type="TNW\Salesforce\Synchronize\Unit\Check">
+        <arguments>
+            <argument name="name" xsi:type="string">websiteCheck</argument>
+            <argument name="upsert" xsi:type="array">
+                <item name="upsertWebsite" xsi:type="string">websiteWebsiteUpsert</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="TNW\Soap\Synchronize\Website" type="TNW\Salesforce\Synchronize\Group">
+        <arguments>
+            <argument name="groupCode" xsi:type="string">website</argument>
+            <argument name="units" xsi:type="array">
+                <item name="websiteLoad" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Load</item>
+
+                <item name="lookup" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Website\Lookup</item>
+                <item name="mapping" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Website\Mapping</item>
+                <item name="upsert" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Website\Upsert</item>
+                <item name="save" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Website\Save</item>
+
+                <item name="check" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Check</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="TNW\Salesforce\Synchronize\Entity\Customer" type="TNW\Salesforce\Synchronize\Entity">
+        <arguments>
+            <argument name="synchronizeGroup" xsi:type="object">TNW\Soap\Synchronize\Customer</argument>
+        </arguments>
+    </virtualType>
+    <type name="TNW\Salesforce\Controller\Adminhtml\Customer\SyncCustomer">
+        <arguments>
+            <argument name="entityCustomer" xsi:type="object">TNW\Salesforce\Synchronize\Entity\Customer</argument>
+        </arguments>
+    </type>
+    <type name="TNW\Salesforce\Controller\Adminhtml\Customer\MassSync">
+        <arguments>
+            <argument name="entityCustomer" xsi:type="object">TNW\Salesforce\Synchronize\Entity\Customer</argument>
+        </arguments>
+    </type>
+    <virtualType name="TNW\Salesforce\Observer\Entities\Customer" type="TNW\Salesforce\Observer\Entities" />
+    <virtualType name="TNW\Salesforce\Observer\CustomerEntitiesSync" type="TNW\Salesforce\Observer\EntitiesSync">
+        <arguments>
+            <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Customer</argument>
+            <argument name="entitySynchronize" xsi:type="object">TNW\Salesforce\Synchronize\Entity\Customer</argument>
+        </arguments>
+    </virtualType>
+    <type name="TNW\Salesforce\Observer\CustomerSaveCommitAfter">
+        <arguments>
+            <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Customer</argument>
+        </arguments>
+    </type>
+    <type name="TNW\Salesforce\Observer\CustomerAddressSaveCommitAfter">
+        <arguments>
+            <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Customer</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="TNW\Salesforce\Synchronize\Entity\Website" type="TNW\Salesforce\Synchronize\Entity">
+        <arguments>
+            <argument name="synchronizeGroup" xsi:type="object">TNW\Soap\Synchronize\Website</argument>
+        </arguments>
+    </virtualType>
+    <type name="TNW\Salesforce\Controller\Adminhtml\System\Store\SyncAll">
+        <arguments>
+            <argument name="entityWebsite" xsi:type="object">TNW\Salesforce\Synchronize\Entity\Website</argument>
+        </arguments>
+    </type>
+    <virtualType name="TNW\Salesforce\Observer\Entities\Website" type="TNW\Salesforce\Observer\Entities" />
+    <virtualType name="TNW\Salesforce\Observer\WebsiteEntitiesSync" type="TNW\Salesforce\Observer\EntitiesSync">
+        <arguments>
+            <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Website</argument>
+            <argument name="entitySynchronize" xsi:type="object">TNW\Salesforce\Synchronize\Entity\Website</argument>
+        </arguments>
+    </virtualType>
+    <type name="TNW\Salesforce\Observer\WebsiteSaveCommitAfter">
+        <arguments>
+            <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Customer</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="TNW\Logger" type="Monolog\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">tnw_synchronize</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="1" xsi:type="object">TNW\Salesforce\Model\Logger\Handler\Filesystem</item>
+                <item name="2" xsi:type="object">TNW\Salesforce\Model\Logger\Handler\Database</item>
+                <item name="3" xsi:type="object">TNW\Salesforce\Model\Logger\Handler\Admin</item>
+            </argument>
+            <argument name="processors" xsi:type="array">
+                <item name="uid" xsi:type="object">TNW\Salesforce\Model\Logger\Processor\UidProcessor</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="TNW\Salesforce\Model\Logger">
+        <arguments>
+            <argument name="systemLogger" xsi:type="object">TNW\Logger</argument>
+        </arguments>
+    </type>
+    <type name="TNW\Salesforce\Synchronize\Group">
+        <arguments>
+            <argument name="systemLogger" xsi:type="object">TNW\Logger</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="salesforceLogSearchResult" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">tnw_salesforce_log</argument>
+            <argument name="resourceModel" xsi:type="string">\TNW\Salesforce\Model\ResourceModel\Log</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="tnw_salesforce_log_data_source" xsi:type="string">salesforceLogSearchResult</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

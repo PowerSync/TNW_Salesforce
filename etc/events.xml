@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="customer_save_commit_after">
+        <observer name="tnw_observer" instance="TNW\Salesforce\Observer\CustomerSaveCommitAfter" />
+    </event>
+    <event name="customer_address_save_commit_after">
+        <observer name="tnw_observer" instance="TNW\Salesforce\Observer\CustomerAddressSaveCommitAfter" />
+    </event>
+    <event name="website_save_commit_after">
+        <observer name="tnw_observer" instance="TNW\Salesforce\Observer\WebsiteSaveCommitAfter" />
+    </event>
+    <event name="controller_front_send_response_before">
+        <observer name="tnw_observer" instance="TNW\Salesforce\Observer\ControllerActionPostDispatch" />
+    </event>
+    <event name="tnw_salesforce_entities_sync">
+        <observer name="tnw_salesforce_customer" instance="TNW\Salesforce\Observer\CustomerEntitiesSync" />
+        <observer name="tnw_salesforce_website" instance="TNW\Salesforce\Observer\WebsiteEntitiesSync" />
+    </event>
+</config>
