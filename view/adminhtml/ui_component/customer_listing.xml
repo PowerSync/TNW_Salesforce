@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <columns name="customer_columns" class="Magento\Customer\Ui\Component\Listing\Columns">
+        <column name="sforce_sync_status" class="TNW\Salesforce\Ui\Component\Listing\Columns\SyncStatus">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">TNW_Salesforce/js/grid/columns/sync_status</item>
+                    <item name="sortable" xsi:type="boolean">false</item>
+                    <item name="altField" xsi:type="string">name</item>
+                    <item name="has_preview" xsi:type="string">1</item>
+                    <item name="label" xsi:type="string" translate="true">Salesforce Sync Status</item>
+                    <item name="sortOrder" xsi:type="number">194</item>
+                </item>
+            </argument>
+        </column>
+        <actionsColumn name="sforce_id" class="TNW\Salesforce\Ui\Component\Listing\Columns\Sforceid">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">TNW_Salesforce/js/grid/columns/sforceid</item>
+                    <item name="indexField" xsi:type="string">sforce_id</item>
+                    <item name="sortable" xsi:type="boolean">true</item>
+                    <item name="label" xsi:type="string" translate="true">Salesforce Contact Id</item>
+                    <item name="sortOrder" xsi:type="number">196</item>
+                </item>
+            </argument>
+        </actionsColumn>
+        <actionsColumn name="sforce_account_id" class="TNW\Salesforce\Ui\Component\Listing\Columns\Sforceid">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">TNW_Salesforce/js/grid/columns/sforceid</item>
+                    <item name="indexField" xsi:type="string">sforce_account_id</item>
+                    <item name="sortable" xsi:type="boolean">true</item>
+                    <item name="label" xsi:type="string" translate="true">Salesforce Account Id</item>
+                    <item name="sortOrder" xsi:type="number">200</item>
+                </item>
+            </argument>
+        </actionsColumn>
+    </columns>
+    <listingToolbar name="listing_top">
+        <massaction name="listing_massaction">
+            <action name="sforce_sync">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="component" xsi:type="string">TNW_Salesforce/js/grid/columns/sync_status</item>
+                        <item name="type" xsi:type="string">sforce_sync</item>
+                        <item name="label" xsi:type="string" translate="true">Sync with Salesforce</item>
+                        <item name="url" xsi:type="url" path="tnw_salesforce/customer/massSync"/>
+                    </item>
+                </argument>
+            </action>
+        </massaction>
+    </listingToolbar>
+</listing>
