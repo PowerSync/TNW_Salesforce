@@ -1,0 +1,32 @@
+<?php
+// @codingStandardsIgnoreFile
+?>
+<div class="content">
+    <h1><?php echo __('Salesforce Accounts') ?></h1>
+    <p><?php echo __('Salesforce account configuration settings') ?></p>
+</div>
+<form method="post" action id="wizard_salesforce_accounts_form" class="tnw-form" autocomplete="off">
+    <input class="section" name="section" style="display:none" value="tnwsforce_customer" />
+    <div class="field clearfix">
+        <div class="field-control">
+            <input id="account_name" class="checkbox" type="checkbox" name="groups[general][fields][account_name]" value="1" />
+        </div>
+        <span class="field-label"><?php echo __('Allow Magento to change name of Accounts') ?></span>
+    </div>
+    <div class="field admin__fieldset">
+        <div class="admin__field">
+            <?php $owners = $block->getOwners(); ?>
+            <?php if (count($owners)): ?>
+                <label class="admin__field-label" for="default_owner"><?php echo __('Default Owner') ?></label>
+                <div class="admin__field-control">
+                    <select id="default_owner" class="select admin__control-select" name="groups[general][fields][default_owner]">
+                        <?php foreach($owners as $group): ?>
+                            <option value="<?php echo $group['value'] ?>"><?php echo $group['label'] ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</form>
+<div class="next-btn-text submit"><?php echo __('Continue') ?></div>

@@ -1,0 +1,68 @@
+<?php
+// @codingStandardsIgnoreFile
+?>
+<div class="content">
+    <h1><?php echo __('PowerSync Test') ?></h1>
+</div>
+<?php foreach ($block->getTests() as $test): ?>
+    <div class="test <?php echo $test['status'] ?>">
+        <div class="status-icon"></div>
+        <div class="name" id="<?php echo $test['id'] ?>"><?php echo $test['label'] ?></div>
+    </div>
+<?php endforeach; ?>
+<button class="re-test-btn ui-button additional-btn disabled"><span><?php echo __('Re-Test')?></span></button>
+<div class="next-btn-text"><?php echo __('Continue') ?></div>
+<script>
+    var testUrl = "<?php echo $block->getValidateTestsUrl() ?>";
+    require([
+        "jquery"
+    ], function($) {
+        $(document).ready(function () {
+            $('div.test').each(function () {
+                if ($(this).hasClass('failed')) {
+                    $('button.next-step').addClass('disabled');
+                    $('.re-test-btn').removeClass('disabled').addClass('action-button');
+                }
+            });
+            $('.re-test-btn').click(function () {
+                var reTestBtn = $(this);
+                $('button.next-step').addClass('disabled');
+                reTestBtn.addClass('disabled');
+                var failedTests = [];
+                $('div.test').each(function () {
+                    failedTests.push($(this).find('.name').attr('id'));
+                    $(this).removeClass('passed failed').addClass('processed');
+                });
+                if (failedTests.length) {
+                    $.post(
+                        testUrl,
+                        {tests: failedTests},
+                        function (response) {
+                            for (var i= 0; i < response.tests.length; i++) {
+                                var test = $('#' + response.tests[i].id);
+                                if (typeof test !== "undefined") {
+                                    test.parent('div.test')
+                                        .removeClass('failed processed')
+                                        .addClass(response.tests[i].status);
+                                }
+                            }
+                            var failedTests = false;
+                            $('div.test').each(function () {
+                                if ($(this).hasClass('failed')) {
+                                    failedTests = true;
+                                }
+                            });
+                            if (!failedTests) {
+                                $('button.next-step').removeClass('disabled').addClass('action-button');
+                                reTestBtn.removeClass('action-button');
+                            } else {
+                                reTestBtn.removeClass('disabled').addClass('action-button');
+                            }
+                        },
+                        'json'
+                    );
+                }
+            });
+        });
+    });
+</script>

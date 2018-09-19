@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <tnwsforce_general>
+            <general>
+                <active>0</active>
+            </general>
+            <salesforce>
+                <wsdl>var/enterprise.wsdl.xml</wsdl>
+            </salesforce>
+            <debug>
+                <db_log_limit>10000</db_log_limit>
+                <dblogstatus>1</dblogstatus>
+                <logbaseday>7</logbaseday>
+            </debug>
+        </tnwsforce_general>
+        <tnwsforce_customer>
+            <general>
+                <active>1</active>
+                <account_name>0</account_name>
+                <sync_groups>1</sync_groups>
+                <contact_assignee>0</contact_assignee>
+            </general>
+        </tnwsforce_customer>
+    </default>
+</config>

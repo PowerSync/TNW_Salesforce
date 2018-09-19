@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="tnw" translate="label" sortOrder="350">
+            <label>TNW Salesforce</label>
+        </tab>
+
+        <section id="tnwsforce_general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+            <class>separator-top</class>
+            <label>General Configuration</label>
+            <tab>tnw</tab>
+
+            <resource>Magento_Customer::config_customer</resource>
+
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>General</label>
+                <comment><![CDATA[<div class="message message-info">For installation &amp; configuration instructions visit our <a href="https://technweb.atlassian.net/wiki/spaces/IWS/pages/590839809/Starter+Package" target="_blank">online documentation</a>.</div>]]></comment>
+                <field id="version" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Base Version</label>
+                    <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Extension\Version</frontend_model>
+                </field>
+            </group>
+
+
+            <group id="salesforce" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Salesforce API</label>
+
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1">
+                    <label>Enable Saleseforce Integration</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="username" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Username</label>
+                </field>
+
+                <field id="password" translate="label" type="obscure" sortOrder="10" showInDefault="1" showInWebsite="1">
+                    <label>Password</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+
+                <field id="token" translate="label" type="obscure" sortOrder="20" showInDefault="1" showInWebsite="1">
+                    <label>Token</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+
+                <field id="wsdl" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>WSDL Path</label>
+                    <frontend_model>TNW\Salesforce\Block\Adminhtml\Config\Form\Field\Wsdl</frontend_model>
+                    <backend_model>TNW\Salesforce\Model\Config\Backend\Wsdl</backend_model>
+                </field>
+
+                <field id="validate_vat_number" translate="button_label" sortOrder="62" showInDefault="1" showInWebsite="1">
+                    <button_label>Test Connection</button_label>
+                    <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Salesforce\TestConnection</frontend_model>
+                </field>
+            </group>
+
+            <group id="debug" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Debug and Logging</label>
+                <field id="logstatus" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0">
+                    <label>Enable Log</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Location is {{base_dir}}/var/log/sforce.log</comment>
+                </field>
+                <field id="logdebug" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0">
+                    <label>Enable Debug Log</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Location is {{base_dir}}/var/log/sforce.log</comment>
+                    <depends>
+                        <field id="logstatus">1</field>
+                    </depends>
+                </field>
+                <field id="dblogstatus" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="0">
+                    <label>Enable DB Log</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Add log to the database</comment>
+                </field>
+                <field id="db_log_limit" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0">
+                    <label>DB log Limit</label>
+                </field>
+                <field id="logbaseday" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0">
+                    <label>Log period (base)</label>
+                </field>
+            </group>
+        </section>
+
+        <section id="tnwsforce_customer" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Customers</label>
+            <resource>Magento_Customer::config_customer</resource>
+            <tab>tnw</tab>
+
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Account &amp; Contact Configuration</label>
+                <field id="account_name" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Account Name</label>
+                    <source_model>TNW\Salesforce\Model\Config\Source\Customer\AccountName</source_model>
+                    <comment>Keep Account Name in Salesforce read only.</comment>
+                </field>
+                <field id="sync_groups" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1">
+                    <label>Sync All Groups</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Synchronizes all customer groups by default, if set to NO you can choose the groups you wish to synchronize.</comment>
+                </field>
+                <field id="customer_group" translate="label" type="multiselect" sortOrder="35" showInDefault="1" showInWebsite="1">
+                    <label>Customer Groups</label>
+                    <source_model>Magento\Customer\Model\Config\Source\Group\Multiselect</source_model>
+                    <comment>Only synchronize customers and orders placed by customers from these groups.</comment>
+                    <depends>
+                        <field id="sync_groups">0</field>
+                    </depends>
+                </field>
+                <field id="default_owner" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1">
+                    <label>Default Owner</label>
+                    <source_model>TNW\Salesforce\Model\Config\Source\Customer\Owner</source_model>
+                    <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Customer\Owner</frontend_model>
+                    <comment>This default owner will be assigned to Contact and/or Account when created.</comment>
+                </field>
+                <field id="contact_assignee" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1">
+                    <label>Contact Assignee</label>
+                    <source_model>TNW\Salesforce\Model\Config\Source\Customer\ContactAssignee</source_model>
+                    <comment>
+                        <![CDATA[<b>Use Default Owner</b> - when a new Contact is created, the Contact will be assigned to the 'Default Owner' value set above.<br>
+                        <b>Retain Owner from Existing Account</b> - If a matching Account already exists in Salesforce, Magento will assign a new Contact to whomever owns the Account. Otherwise Magento will fall back to 'Default Owner' value set above.]]>
+                    </comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

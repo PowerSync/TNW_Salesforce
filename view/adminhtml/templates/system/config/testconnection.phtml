@@ -1,0 +1,16 @@
+<?php
+/**
+ * @see \TNW\Salesforce\Controller\Adminhtml\System\Config\Testconnection
+ */
+?>
+<div class="actions actions-test-salesforce-connection"
+     data-mage-init='{"TNW_Salesforce/js/connection":{"url": "<?php echo $block->getAjaxUrl()?>",
+        "type": "<?php echo $block->getFormId() ?>",
+        "successMessage": "<?php echo __('Connection successful!') ?>",
+        "inProgressMessage": "<?php echo __('Testing...') ?>"
+        }}'>
+    <button disabled type="button" class="action test-connection action-primary">
+        <span><?php echo $block->escapeHtml($block->getButtonLabel()) ?></span>
+    </button>
+    <div class="message-box connection-test-status"><div class="connection-test-status-label"></div></div>
+</div>
