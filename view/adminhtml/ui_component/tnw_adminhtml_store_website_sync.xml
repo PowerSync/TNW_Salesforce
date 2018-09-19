@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Ui/etc/ui_configuration.xsd">
+   <argument name="data" xsi:type="array">
+        <item name="buttons" xsi:type="array">
+            <item name="sync_sf" xsi:type="array">
+                <item name="name" xsi:type="string">SF_websites_sync</item>
+                <item name="label" xsi:type="string" translate="true">Sync Websites with Salesforce</item>
+                <item name="class" xsi:type="string">sf-website-sync</item>
+                <item name="url" xsi:type="url" path="tnw_salesforce/system_store/syncall" />
+            </item>
+        </item>
+    </argument>
+</listing>
