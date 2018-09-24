@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Copyright © 2018 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+-->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" class="TNW\Marketing\Ui\Component\Form" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">salesforce_interview.salesforce_interview_data_source</item>
+            <item name="deps" xsi:type="string">salesforce_interview.salesforce_interview_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true"> Interview</item>
+        <item name="config" xsi:type="array">
+            <item name="dataScope" xsi:type="string">data</item>
+            <item name="namespace" xsi:type="string">salesforce_interview</item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+
+    <argument name="module" xsi:type="string">tnw_salesforce</argument>
+
+    <dataSource name="salesforce_interview_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">TNW\Marketing\Ui\DataProvider\DataProvider</argument>
+            <argument name="name" xsi:type="string">salesforce_interview_data_source</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="submit_url" xsi:type="url" path="marketing/interview/markUserInterviewed"/>
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+    <modal name="quick_survey_modal" >
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="component" xsi:type="string">TNW_Marketing/js/modal/component</item>
+                <item name="provider" xsi:type="string">salesforce_interview.salesforce_interview_data_source</item>
+                <item name="onCancel" xsi:type="string">closeSnoozeSurvey</item>
+                <item name="state" xsi:type="boolean">true</item>
+                <item name="options" xsi:type="array">
+                    <item name="modalClass" xsi:type="string">quick-survey-modal</item>
+                    <item name="title" xsi:type="string" translate="true">Thank you for putting your trust in us!</item>
+                    <item name="type" xsi:type="string">popup</item>
+                    <item name="responsive" xsi:type="boolean">true</item>
+                    <item name="innerScroll" xsi:type="boolean">true</item>
+                    <item name="autoOpen" xsi:type="boolean">true</item>
+                    <item name="buttons" xsi:type="array">
+                        <item name="0" xsi:type="array">
+                            <item name="text" xsi:type="string">Send Your Feedback</item>
+                            <item name="class" xsi:type="string">action-primary</item>
+                            <item name="actions" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="targetName" xsi:type="string">${ $.name }</item>
+                                    <item name="actionName" xsi:type="string">closeReleaseSurvey</item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </item>
+            </item>
+        </argument>
+        <container name="salesforce_interview_text">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="template" xsi:type="string">ui/form/components/complex</item>
+                    <item name="label" xsi:type="string"/>
+                    <item name="additionalClasses" xsi:type="string">quick-survey-text</item>
+                    <item name="content" xsi:type="string" translate="true"> <![CDATA[
+                            <p>We hope you are enjoying the FREE Salesforce integration. Did you know that we offer a version of this integration which has a lot more features?</p>
+                            <p>Watch this video to get an idea of what you could have available at your fingertips.</p>
+                            <p><a href="https://powersync.biz/contact-us/" target="_blank">Contact us</a> if you would like to talk to one of our certified Salesforce specialists or <a href="https://powersync.biz/integrations-magento2-salesforce/" target="_blank">visit our website</a> to learn more about the paid version.</p>
+                            <p class="quick-survey-video-wrapper"><iframe src="https://www.youtube.com/embed/6Z38jwLMj2g?enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></p>
+                        ]]></item>
+                </item>
+            </argument>
+        </container>
+        <fieldset name="quick_survey_fieldset">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Quick Survey</item>
+                    <item name="additionalClasses" xsi:type="array">
+                        <item name="quick-survey-fieldset-wrapper" xsi:type="boolean">true</item>
+                    </item>
+                </item>
+            </argument>
+            <field name="survey_result">
+                <argument name="data" xsi:type="array">
+                    <item name="options" xsi:type="object">TNW\Marketing\Model\Config\Source\Survey\Options</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true" />
+                        <item name="formElement" xsi:type="string">checkboxset</item>
+                        <item name="componentType" xsi:type="string">field</item>
+                        <item name="dataScope" xsi:type="string">survey_result</item>
+                        <item name="visible" xsi:type="boolean">true</item>
+                        <item name="multiple" xsi:type="boolean">false</item>
+                        <item name="validation" xsi:type="array">
+                            <item name="required-entry" xsi:type="boolean">true</item>
+                        </item>
+                    </item>
+                </argument>
+            </field>
+
+            <field name="rating">
+                <argument name="data" xsi:type="array">
+                    <item name="options" xsi:type="object">TNW\Marketing\Model\Config\Source\Survey\Stars</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">How would you rate this extension?</item>
+                        <item name="component" xsi:type="string">TNW_Marketing/js/form/element/rating</item>
+                        <item name="formElement" xsi:type="string">select</item>
+                        <item name="dataScope" xsi:type="string">rating</item>
+                        <item name="dataType" xsi:type="string">text</item>
+                        <item name="additionalClasses" xsi:type="string">quick-survey-field</item>
+                        <item name="value" xsi:type="number">5</item>
+                    </item>
+                </argument>
+            </field>
+
+            <field name="comments">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true" />
+                        <item name="formElement" xsi:type="string">textarea</item>
+                        <item name="dataScope" xsi:type="string">comments</item>
+                        <item name="dataType" xsi:type="string">text</item>
+                        <item name="placeholder" xsi:type="string" translate="true">Tell us more about you experience?</item>
+                    </item>
+                </argument>
+            </field>
+
+            <field name="module">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="value" xsi:type="string">tnw_salesforce</item>
+                        <item name="formElement" xsi:type="string">hidden</item>
+                        <item name="dataScope" xsi:type="string">module</item>
+                        <item name="dataType" xsi:type="string">text</item>
+                    </item>
+                </argument>
+            </field>
+
+            <field name="moduleName">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="value" xsi:type="string">TNW Salesforce Basic</item>
+                        <item name="formElement" xsi:type="string">hidden</item>
+                        <item name="dataScope" xsi:type="string">moduleName</item>
+                        <item name="dataType" xsi:type="string">text</item>
+                    </item>
+                </argument>
+            </field>
+
+            <field name="type">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="value" xsi:type="string">tnw_marketing</item>
+                        <item name="formElement" xsi:type="string">hidden</item>
+                        <item name="dataScope" xsi:type="string">type</item>
+                        <item name="dataType" xsi:type="string">text</item>
+                    </item>
+                </argument>
+            </field>
+
+        </fieldset>
+
+    </modal>
+</form>
