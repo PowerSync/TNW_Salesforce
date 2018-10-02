@@ -88,7 +88,7 @@ jobs:
         command: |
           cd /var/www/html/magento2-$MAGENTO_VERSION
           php bin/magento setup:di:compile
-          php bin/magento deploy:mode:set:developer
+          php bin/magento deploy:mode:set developer
 
   update-wiki:
     docker:
@@ -241,7 +241,7 @@ jobs:
         command: |
           cd /var/www/html/magento2-$MAGENTO_VERSION
           ./bin/magento setup:di:compile
-          php bin/magento deploy:mode:set:developer
+          php bin/magento deploy:mode:set developer
     - run:
         name: Installing Magento EE
         command: |
@@ -272,7 +272,7 @@ jobs:
         command: |
           cd /var/www/html/magento2-ee-$MAGENTO_VERSION
           ./bin/magento setup:di:compile
-          php bin/magento deploy:mode:set:developer
+          php bin/magento deploy:mode:set developer
     - run:
         name: Run Magento Coding Standard
         command: |
