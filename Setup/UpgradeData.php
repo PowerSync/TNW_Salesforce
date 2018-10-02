@@ -441,6 +441,8 @@ class UpgradeData implements UpgradeDataInterface
 
         $this->version_2_1_11($context, $setup);
 
+        $this->version_2_3_11($context, $setup);
+
         $setup->endSetup();
     }
 
@@ -629,5 +631,26 @@ class UpgradeData implements UpgradeDataInterface
 
         $setup->getConnection()
             ->insertOnDuplicate($setup->getTable('tnw_salesforce_mapper'), $defaultMap);
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function version_2_3_11(
+        ModuleContextInterface $context,
+        ModuleDataSetupInterface $setup
+    ) {
+        if (version_compare($context->getVersion(), '2.3.11') < 0) {
+        $setup->getConnection()->insert(
+            $setup->getTable('core_config_data'),
+            [
+                'scope' => 'default',
+                'scope_id' => 0,
+                'path' => 'tnw_salesforce/survey/start_date',
+                'value' => date_create()->modify('+7 day')->getTimestamp()
+            ]
+        );
+    }
     }
 }
