@@ -6,7 +6,7 @@
         "tnw/soap-client": "~1.0.7"
     },
     "type": "magento2-module",
-    "version": "2.3.11",
+    "version": "2.3.12",
     "autoload": {
         "files": [ "registration.php" ],
         "psr-4": {
