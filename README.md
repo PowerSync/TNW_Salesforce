@@ -1,5 +1,6 @@
 # Magento 2 and Salesforce Integration (Starter Pack)
 The simplest and most flexible way of integrating Magento entities with Salesforce objects.
+
 _NOTE:_ we also do offer [integration between Magneto 1.x and Salesforce](https://powersync.biz/integrations-magento-salesforce/) and you can find more information on our website. 
 
 #### Build Status
