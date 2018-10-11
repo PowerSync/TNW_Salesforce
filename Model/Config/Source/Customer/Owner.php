@@ -1,6 +1,7 @@
 <?php
 namespace TNW\Salesforce\Model\Config\Source\Customer;
 
+use TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Owner as SalesforceOwnerRepository;
 /**
  * Class Owner
  * @package TNW\Salesforce\Model\Config\Source\Customer
@@ -18,18 +19,28 @@ class Owner extends \Magento\Framework\DataObject implements \Magento\Framework\
     private $messageManager;
 
     /**
+     * @var \TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Base
+     */
+    private $salesforceOwnerRepository;
+
+    /**
+     * Owner constructor.
      * @param \TNW\Salesforce\Client\Customer $client
+     * @param \Magento\Framework\Message\ManagerInterface $messageManager
+     * @param \TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Base $salesforceRepository
      * @param array $data
      */
     public function __construct(
         \TNW\Salesforce\Client\Customer $client,
         \Magento\Framework\Message\ManagerInterface $messageManager,
+        SalesforceOwnerRepository $salesforceOwnerRepository,
         array $data = []
     ) {
         parent::__construct($data);
 
         $this->client = $client;
         $this->messageManager = $messageManager;
+        $this->salesforceOwnerRepository = $salesforceOwnerRepository;
     }
 
     /**
@@ -37,14 +48,16 @@ class Owner extends \Magento\Framework\DataObject implements \Magento\Framework\
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray($connectionTested = false)
     {
-        $options = [];
+        $options = $owners= [];
+
         try {
-            $owners = $this->client->getOwners();
+
+            $owners = $this->salesforceOwnerRepository->search();
             $options[''] = ' ';
-            foreach($owners as $value => $label) {
-                $options[$value] = $label;
+            foreach($owners as $data) {
+                $options[$data['Id']] = $data['Name'];
             }
         } catch (\Exception $e) {
             $this->messageManager->addExceptionMessage($e);
@@ -64,15 +77,20 @@ class Owner extends \Magento\Framework\DataObject implements \Magento\Framework\
         $options =array();
 
         try {
-            $owners = $this->client->getOwners($connectionTested);
+            $owners = $this->toOptionArray($connectionTested);
         } catch (\Exception $e) {
             $this->messageManager->addExceptionMessage($e);
         }
 
-        foreach ($owners as $key => $value) {
+        foreach ($owners as $value => $label) {
+
+            if (empty($value)) {
+                continue;
+            }
+
             $options[] = array(
-                'value' => $key,
-                'label' => $value
+                'value' => $value,
+                'label' => $label
             );
         }
         return $options;
