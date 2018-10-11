@@ -10,6 +10,8 @@ use TNW\Salesforce\Model\Customer\Config;
  *
  * Class Customer
  * @package TNW\Salesforce\Client
+ *
+ * @TODO: delete and test!
  */
 class Customer extends Salesforce
 {
@@ -29,11 +31,13 @@ class Customer extends Salesforce
         Collection $cacheCollection,
         Config $config,
         State $cacheState,
-        \TNW\Salesforce\Model\Logger $logger
+        \TNW\Salesforce\Model\Logger $logger,
+        \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector
+
     ) {
         $this->config = $config;
 
-        parent::__construct($config, $cacheCollection, $cacheState, $logger);
+        parent::__construct($config, $cacheCollection, $cacheState, $logger, $websiteDetector);
     }
 
     /**
