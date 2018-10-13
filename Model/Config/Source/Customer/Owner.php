@@ -27,7 +27,7 @@ class Owner extends \Magento\Framework\DataObject implements \Magento\Framework\
      * Owner constructor.
      * @param \TNW\Salesforce\Client\Customer $client
      * @param \Magento\Framework\Message\ManagerInterface $messageManager
-     * @param \TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Base $salesforceRepository
+     * @param $salesforceOwnerRepository $salesforceRepository
      * @param array $data
      */
     public function __construct(
@@ -53,7 +53,6 @@ class Owner extends \Magento\Framework\DataObject implements \Magento\Framework\
         $options = $owners= [];
 
         try {
-
             $owners = $this->salesforceOwnerRepository->search();
             $options[''] = ' ';
             foreach($owners as $data) {
