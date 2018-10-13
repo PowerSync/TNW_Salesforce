@@ -97,17 +97,9 @@ class Config extends DataObject
      */
     public function getSalesforceStatus($websiteId = null)
     {
-        if (!is_null($websiteId)) {
-            $value = $this->scopeConfig->getValue(
-                'tnwsforce_general/salesforce/active',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteId
-            );
-        } else {
             $value = $this->getStoreConfig(
                 'tnwsforce_general/salesforce/active'
             );
-        }
 
         return $value ? true : false;
     }
@@ -120,10 +112,8 @@ class Config extends DataObject
      */
     public function getSalesforceUsername($websiteId = null)
     {
-        $username = $this->scopeConfig->getValue(
-            'tnwsforce_general/salesforce/username',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteId
+        $username = $this->getStoreConfig(
+            'tnwsforce_general/salesforce/username'
         );
         return $username;
     }
@@ -136,10 +126,8 @@ class Config extends DataObject
      */
     public function getSalesforcePassword($websiteId = null)
     {
-        $password = $this->scopeConfig->getValue(
-            'tnwsforce_general/salesforce/password',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteId
+        $password = $this->getStoreConfig(
+            'tnwsforce_general/salesforce/password'
         );
 
         $decrypt = $this->encryptor->decrypt($password);
@@ -158,10 +146,8 @@ class Config extends DataObject
      */
     public function getSalesforceToken($websiteId = null)
     {
-        $token = $this->scopeConfig->getValue(
-            'tnwsforce_general/salesforce/token',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteId
+        $token = $this->getStoreConfig(
+            'tnwsforce_general/salesforce/token'
         );
 
         $decrypt = $this->encryptor->decrypt($token);
@@ -180,10 +166,8 @@ class Config extends DataObject
      */
     public function getSalesforceWsdl($websiteId = null)
     {
-        $dir = $this->scopeConfig->getValue(
-            'tnwsforce_general/salesforce/wsdl',
-            ScopeInterface::SCOPE_WEBSITE,
-            $websiteId
+        $dir = $this->getStoreConfig(
+            'tnwsforce_general/salesforce/wsdl'
         );
 
         if (strpos(trim($dir), '{var}') === 0) {
@@ -204,7 +188,7 @@ class Config extends DataObject
      */
     public function getLogStatus($websiteId = null)
     {
-        $status = (int) $this->scopeConfig->getValue(
+        $status = (int) $this->getStoreConfig(
             'tnwsforce_general/debug/logstatus'
         );
 
@@ -216,7 +200,7 @@ class Config extends DataObject
      */
     public function logBaseDay()
     {
-        $baseDay = $this->scopeConfig->getValue(
+        $baseDay = $this->getStoreConfig(
             'tnwsforce_general/debug/logbaseday'
         );
 
@@ -235,7 +219,7 @@ class Config extends DataObject
      */
     public function getDbLogStatus($websiteId = null)
     {
-        $status = (int) $this->scopeConfig->getValue(
+        $status = (int) $this->getStoreConfig(
             'tnwsforce_general/debug/dblogstatus'
         );
 
@@ -249,7 +233,7 @@ class Config extends DataObject
      */
     public function getLogDebug($websiteId = null)
     {
-        $status = (int) $this->scopeConfig->getValue(
+        $status = (int) $this->getStoreConfig(
             'tnwsforce_general/debug/logdebug'
         );
 
@@ -324,24 +308,22 @@ class Config extends DataObject
      */
     protected function getStoreConfig($path)
     {
-        $storeId = $this->getStoreId();
-        if ($storeId) {
-            return $this->scopeConfig->getValue(
-                $path,
-                ScopeInterface::SCOPE_STORE,
-                $this->storeManager->getStore($storeId)
-            );
-        }
-        $websiteId = $this->getWebsiteId();
-        if ($websiteId) {
-            return $this->scopeConfig->getValue(
-                $path,
-                ScopeInterface::SCOPE_WEBSITE,
-                $this->storeManager->getWebsite($websiteId)->getCode()
-            );
+        $scopeType = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
+        $scopeCode = null;
+
+        switch (true) {
+            case !empty($this->getStoreId()) :
+                $scopeType = ScopeInterface::SCOPE_STORE;
+                $scopeCode = $this->getStoreId();
+                break;
+
+            case !empty($this->getWebsiteId()):
+                $scopeType = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
+                $scopeCode = $this->getWebsiteId();
+                break;
         }
 
-        $value = $this->scopeConfig->getValue($path);
+        $value = $this->scopeConfig->getValue($path, $scopeType, $scopeCode);
 
         return $value;
     }
