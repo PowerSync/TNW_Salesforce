@@ -318,7 +318,7 @@ class Config extends DataObject
                 break;
 
             case !empty($this->getWebsiteId()):
-                $scopeType = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
+                $scopeType = ScopeInterface::SCOPE_WEBSITE;
                 $scopeCode = $this->getWebsiteId();
                 break;
         }
