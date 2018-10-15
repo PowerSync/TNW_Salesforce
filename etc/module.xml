@@ -7,7 +7,6 @@
             <module name="Magento_Customer"/>
             <module name="Magento_Store"/>
             <module name="TNW_Marketing"/>
-            <!-- <module name="TNW_Wizard"/> -->
         </sequence>
     </module>
 </config>
