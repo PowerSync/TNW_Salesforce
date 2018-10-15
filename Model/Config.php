@@ -46,6 +46,14 @@ class Config extends DataObject
      */
     private $filesystem;
 
+    /** @var array  */
+    private $credentialsConfigPaths = [
+        'tnwsforce_general/salesforce/username',
+        'tnwsforce_general/salesforce/password',
+        'tnwsforce_general/salesforce/token',
+        'tnwsforce_general/salesforce/wsdl'
+    ];
+
     /**
      * @param ScopeConfigInterface  $scopeConfig
      * @param DirectoryList         $directoryList
@@ -178,6 +186,21 @@ class Config extends DataObject
         $root = $this->directoryList->getPath(DirectoryList::ROOT);
 
         return $root.DIRECTORY_SEPARATOR.$dir;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDefaultOrg()
+    {
+        foreach ($this->credentialsConfigPaths as $configPath) {
+
+            if ($this->getStoreConfig($configPath) != $this->scopeConfig->getValue($configPath)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

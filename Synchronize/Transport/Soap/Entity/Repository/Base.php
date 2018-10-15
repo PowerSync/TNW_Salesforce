@@ -9,7 +9,7 @@ use TNW\Salesforce\Synchronize\Transport;
  * Class Base
  * @package TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository
  */
-class Base
+abstract class Base
 {
     /** @var array  */
     protected $defaultConditionsData = [];
@@ -48,15 +48,6 @@ class Base
     }
 
     /**
-     * @param Transport\Calls\Query\Input $input
-     * @param Transport\Calls\Query\Output $output
-     */
-    public function getList(Transport\Calls\Query\Input $input, Transport\Calls\Query\Output $output)
-    {
-        $this->query->process($input, $output);
-    }
-
-    /**
      * @param $conditionsData
      * @return Transport\Calls\Query\Output
      */
@@ -66,18 +57,7 @@ class Base
             $conditionsData = $this->defaultConditionsData;
         }
 
-        $input = $this->inputFactory->create();
-        foreach ($conditionsData as $property => $data) {
-            if ($property == 'where') {
-                $input[$this] = $data;
-                continue;
-            }
-            $input->{$property} = $data;
-        }
-
-        $output = $this->outputFactory->create();
-
-        $this->getList($input, $output);
+        $output = $this->query->exec($conditionsData);
 
         return $output;
     }

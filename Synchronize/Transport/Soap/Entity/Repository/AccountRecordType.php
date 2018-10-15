@@ -47,13 +47,12 @@ class AccountRecordType extends RecordType
     {
         $this->config = $config;
         parent::__construct($inputFactory, $outputFactory, $query);
-
     }
 
 
     /**
      * Get list of all B2C record types in SF
-     * @return array|bool
+     * @return array|Transport\Calls\Query\Output
      */
     public function getPersonTypes()
     {
@@ -87,8 +86,8 @@ class AccountRecordType extends RecordType
     /**
      * Get list of all B2B record types in SF
      * in case of PROFESSIONAL version of Salesforce catch error and return default empty value
-     * @return array
      * @throws \Exception
+     * @return array|Transport\Calls\Query\Output
      */
     public function getBusinessTypes()
     {

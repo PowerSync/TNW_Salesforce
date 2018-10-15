@@ -82,7 +82,7 @@ class Website extends Salesforce implements WebsiteInterface
         if (!$forceSync && $this->addToQueue($websites)) {
             return null;
         }
-        
+
         $transferWebsiteObjects = [];
         foreach ($websites as $website) {
             $stdObject = new \stdClass();
