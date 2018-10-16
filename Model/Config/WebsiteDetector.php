@@ -15,12 +15,20 @@ class WebsiteDetector
     /** @var \Magento\Store\Model\StoreManagerInterface  */
     protected $storeManager;
 
+    /** @var array  */
+    protected $websiteStores = [];
+
     /**
      * Request object
      *
      * @var \Magento\Framework\App\RequestInterface
      */
     protected $request;
+
+    /**
+     * @var \Magento\Framework\App\ResourceConnection
+     */
+    protected $resourceConnection;
 
     /**
      * @var \Magento\Store\Model\WebsiteFactory
@@ -33,17 +41,20 @@ class WebsiteDetector
     protected $appState;
 
     /**
-     * WebsiteEmulator constructor.
+     * WebsiteDetector constructor.
      * @param \Magento\Framework\App\RequestInterface $request
      * @param \Magento\Store\Model\App\Emulation $storeEmulator
      * @param \Magento\Store\Model\WebsiteFactory $websiteFactory
      * @param \Magento\Framework\App\State $appState
+     * @param \Magento\Framework\App\ResourceConnection $resourceConnection
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      */
     public function __construct(
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Store\Model\App\Emulation $storeEmulator,
         \Magento\Store\Model\WebsiteFactory $websiteFactory,
         \Magento\Framework\App\State $appState,
+        \Magento\Framework\App\ResourceConnection $resourceConnection,
         \Magento\Store\Model\StoreManagerInterface $storeManager
     )
     {
@@ -51,6 +62,7 @@ class WebsiteDetector
         $this->storeEmulator = $storeEmulator;
         $this->websiteFactory = $websiteFactory;
         $this->appState = $appState;
+        $this->resourceConnection = $resourceConnection;
         $this->storeManager = $storeManager;
     }
 
@@ -92,7 +104,13 @@ class WebsiteDetector
     public function detectCurrentWebsite($websiteId = null)
     {
         if (empty($websiteId)) {
-            $websiteId = ($this->isAdminArea()) ? $this->getWebsiteFromRequest() : $this->getCurrentStoreWebsite()->getId();
+            if ($this->isAdminArea()) {
+                $websiteId = $this->getWebsiteFromRequest();
+            }
+
+            if (empty($websiteId)) {
+                $websiteId = $this->getCurrentStoreWebsite()->getId();
+            }
         }
 
         return $websiteId;
@@ -107,10 +125,15 @@ class WebsiteDetector
     {
         $websiteId = $this->detectCurrentWebsite($websiteId);
 
-        $website = $this->websiteFactory->create()->load($websiteId);
+        if (!$this->websiteStores) {
 
-        $website->getStoreId();
+            $website = $this->websiteFactory->create();
 
-        return $website->getStoreId();
+            $this->websiteStores = $website->getDefaultStoresSelect(true);
+
+            $this->websiteStores =  $this->resourceConnection->getConnection()->fetchPairs($website->getDefaultStoresSelect(true));
+        }
+
+        return $this->websiteStores[$websiteId];
     }
 }
