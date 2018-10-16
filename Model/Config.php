@@ -33,6 +33,12 @@ class Config extends DataObject
     /** @var StoreManagerInterface  */
     protected $storeManager;
 
+    /** @var \Magento\Store\Api\WebsiteRepositoryInterface  */
+    protected $websiteRepository;
+
+    /** @var array  */
+    protected $websitesGrouppedByOrg = [];
+
     /**
      * @var array;
      */
@@ -55,17 +61,21 @@ class Config extends DataObject
     ];
 
     /**
-     * @param ScopeConfigInterface  $scopeConfig
-     * @param DirectoryList         $directoryList
-     * @param EncryptorInterface    $encryptor
+     * Config constructor.
+     * @param ScopeConfigInterface $scopeConfig
+     * @param DirectoryList $directoryList
+     * @param EncryptorInterface $encryptor
      * @param StoreManagerInterface $storeManager
-     * @param Http                  $request
+     * @param \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository
+     * @param Http $request
+     * @param \Magento\Framework\Filesystem $filesystem
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         DirectoryList $directoryList,
         EncryptorInterface $encryptor,
         StoreManagerInterface $storeManager,
+        \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
         Http $request,
         \Magento\Framework\Filesystem $filesystem
     ) {
@@ -74,6 +84,7 @@ class Config extends DataObject
         $this->filesystem = $filesystem;
         $this->encryptor = $encryptor;
         $this->storeManager = $storeManager;
+        $this->websiteRepository = $websiteRepository;
         $this->request = $request;
 
         parent::__construct();
@@ -201,6 +212,37 @@ class Config extends DataObject
         }
 
         return true;
+    }
+
+    /**
+     * @return array
+     */
+    public function getWebsitesGrouppedByOrg()
+    {
+        if (empty($this->websitesGrouppedByOrg)) {
+            $websites = $this->websiteRepository->getList();
+            foreach ($websites as $website) {
+                foreach ($websites as $websiteToCompare) {
+
+                    $isSame = true;
+                    foreach ($this->credentialsConfigPaths as $configPath) {
+                        if ($this->scopeConfig->getValue($configPath, ScopeInterface::SCOPE_WEBSITE, $websiteToCompare->getId()) != $this->scopeConfig->getValue($configPath, ScopeInterface::SCOPE_WEBSITE, $website->getId())) {
+                            $isSame = false;
+                        }
+                    }
+
+                    /**
+                     * first website with the same credentials was found
+                     */
+                    if ($isSame) {
+                        $this->websitesGrouppedByOrg[$website->getId()] = $websiteToCompare->getId();
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $this->websitesGrouppedByOrg;
     }
 
     /**

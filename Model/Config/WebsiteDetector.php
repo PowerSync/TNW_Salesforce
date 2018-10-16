@@ -76,6 +76,15 @@ class WebsiteDetector
     }
 
     /**
+     * @return \Magento\Store\Api\Data\WebsiteInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getCurrentStoreWebsite()
+    {
+        return $this->storeManager->getWebsite();
+    }
+
+    /**
      * @param $websiteId int
      * @return int|mixed
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -83,7 +92,7 @@ class WebsiteDetector
     public function detectCurrentWebsite($websiteId = null)
     {
         if (empty($websiteId)) {
-            $websiteId = ($this->isAdminArea()) ? $this->getWebsiteFromRequest() : $this->storeManager->getWebsite()->getId();
+            $websiteId = ($this->isAdminArea()) ? $this->getWebsiteFromRequest() : $this->getCurrentStoreWebsite()->getId();
         }
 
         return $websiteId;
@@ -104,48 +113,4 @@ class WebsiteDetector
 
         return $website->getStoreId();
     }
-
-//
-//    /**
-//     * emulate specific store
-//     *
-//     * @param null $websiteId
-//     * @throws \Magento\Framework\Exception\LocalizedException
-//     */
-//    public function startEnvironmentEmulation($websiteId = null)
-//    {
-//        $storeId = $this->getStroreIdByWebsite($websiteId);
-//
-//        $this->storeEmulator->startEnvironmentEmulation($storeId);
-//    }
-//
-//    /**
-//     * @return \Magento\Store\Model\App\Emulation
-//     */
-//    public function stopEnvironmentEmulation()
-//    {
-//        return $this->storeEmulator->stopEnvironmentEmulation();
-//    }
-//
-//
-//    /**
-//     * @param $callback
-//     * @param null $websiteId
-//     * @return mixed
-//     * @throws \Magento\Framework\Exception\LocalizedException
-//     */
-//    public function wrapEmulationWebsite($callback, $websiteId = null)
-//    {
-//        $this->startEnvironmentEmulation($websiteId);
-//
-//        try {
-//            $return = call_user_func($callback);
-//        } catch (\Exception $e) {
-//            $this->stopEnvironmentEmulation();
-//            throw $e;
-//        }
-//
-//        $this->stopEnvironmentEmulation();
-//        return $return;
-//    }
 }
