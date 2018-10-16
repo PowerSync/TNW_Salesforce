@@ -12,7 +12,7 @@ class WebsiteEmulator
     /** @var \Magento\Store\Model\App\Emulation */
     protected $storeEmulator;
 
-    /** @var WebsiteDetector  */
+    /** @var WebsiteDetector */
     protected $websiteDetector;
 
     /**
@@ -33,10 +33,21 @@ class WebsiteEmulator
      * emulate specific store
      *
      * @param null $websiteId
+     * @return bool
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function startEnvironmentEmulation($websiteId = null)
     {
+
+        if (
+            $this->websiteDetector->getCurrentStoreWebsite()->getId() ==
+            $this->websiteDetector->detectCurrentWebsite($websiteId)
+        ) {
+            /**
+             * we in the necessary website already
+             */
+            return false;
+        }
 
         $storeId = $this->websiteDetector->getStroreIdByWebsite($websiteId);
 
