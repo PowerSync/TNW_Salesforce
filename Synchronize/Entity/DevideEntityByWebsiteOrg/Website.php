@@ -2,6 +2,7 @@
 
 namespace TNW\Salesforce\Synchronize\Entity\DevideEntityByWebsiteOrg;
 
+use function PHPSTORM_META\type;
 use TNW\Salesforce\Synchronize\Entity\DevideEntityByWebsiteOrg;
 
 class Website extends DevideEntityByWebsiteOrg
@@ -31,6 +32,11 @@ class Website extends DevideEntityByWebsiteOrg
      */
     public function loadEntities($ids)
     {
+        foreach ($ids as $data) {
+            if (is_object($data)) {
+                return $ids;
+            }
+        }
         $entities = $this->collection->addFieldToFilter($this->collection->getIdFieldName(), $ids);
 
         return $entities;

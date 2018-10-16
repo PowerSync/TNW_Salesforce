@@ -52,6 +52,9 @@ class Config extends DataObject
      */
     private $filesystem;
 
+    /** @var Config\WebsiteDetector  */
+    private $websiteDetector;
+
     /** @var array  */
     private $credentialsConfigPaths = [
         'tnwsforce_general/salesforce/username',
@@ -77,7 +80,8 @@ class Config extends DataObject
         StoreManagerInterface $storeManager,
         \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
         Http $request,
-        \Magento\Framework\Filesystem $filesystem
+        \Magento\Framework\Filesystem $filesystem,
+        \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->directoryList = $directoryList;
@@ -86,6 +90,7 @@ class Config extends DataObject
         $this->storeManager = $storeManager;
         $this->websiteRepository = $websiteRepository;
         $this->request = $request;
+        $this->websiteDetector = $websiteDetector;
 
         parent::__construct();
     }
@@ -376,16 +381,11 @@ class Config extends DataObject
         $scopeType = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
         $scopeCode = null;
 
-        switch (true) {
-            case !empty($this->getStoreId()) :
-                $scopeType = ScopeInterface::SCOPE_STORE;
-                $scopeCode = $this->getStoreId();
-                break;
+        $websiteId = $this->websiteDetector->detectCurrentWebsite();
 
-            case !empty($this->getWebsiteId()):
-                $scopeType = ScopeInterface::SCOPE_WEBSITE;
-                $scopeCode = $this->getWebsiteId();
-                break;
+        if ($websiteId) {
+            $scopeType = ScopeInterface::SCOPE_WEBSITE;
+            $scopeCode = $websiteId;
         }
 
         $value = $this->scopeConfig->getValue($path, $scopeType, $scopeCode);
