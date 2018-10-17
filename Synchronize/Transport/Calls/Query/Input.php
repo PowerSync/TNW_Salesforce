@@ -160,7 +160,7 @@ class Input extends \SplObjectStorage
      */
     public function offsetSet($object, $data = null)
     {
-        $index = \count($this->conditions)?: 1;
+        $index = \count($this->conditions);
         parent::offsetSet($object, $index);
         $this->conditions[$index] = $data;
     }
