@@ -1,11 +1,11 @@
 <?php
 
-namespace TNW\Salesforce\Synchronize\Entity\DevideEntityByWebsiteOrg;
+namespace TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
 use function PHPSTORM_META\type;
-use TNW\Salesforce\Synchronize\Entity\DevideEntityByWebsiteOrg;
+use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
-class Website extends DevideEntityByWebsiteOrg
+class Website extends DivideEntityByWebsiteOrg
 {
     /**
      * @var \Magento\Store\Model\ResourceModel\Website\Collection

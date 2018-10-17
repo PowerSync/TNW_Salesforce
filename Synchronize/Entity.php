@@ -9,24 +9,26 @@ class Entity
      */
     protected $synchronizeGroup;
 
-    /** @var DevideEntityByWebsiteOrg */
-    protected $devideEntityByWebsiteOrg;
+    /** @var Entity\DivideEntityByWebsiteOrg  */
+    protected $divideEntityByWebsiteOrg;
 
     /** @var \TNW\Salesforce\Model\Config\WebsiteEmulator  */
     protected $websiteEmulator;
 
     /**
      * Entity constructor.
-     * @param \TNW\Salesforce\Synchronize\Entity\DevideEntityByWebsiteOrg $devideEntityByWebsiteOrg
+     * @param Group $synchronizeGroup
+     * @param Entity\DivideEntityByWebsiteOrg $divideEntityByWebsiteOrg
+     * @param \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
      */
     public function __construct(
         \TNW\Salesforce\Synchronize\Group $synchronizeGroup,
-        \TNW\Salesforce\Synchronize\Entity\DevideEntityByWebsiteOrg $devideEntityByWebsiteOrg,
+        \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg $divideEntityByWebsiteOrg,
         \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
     )
     {
         $this->synchronizeGroup = $synchronizeGroup;
-        $this->devideEntityByWebsiteOrg = $devideEntityByWebsiteOrg;
+        $this->divideEntityByWebsiteOrg = $divideEntityByWebsiteOrg;
         $this->websiteEmulator = $websiteEmulator;
     }
 
@@ -46,7 +48,7 @@ class Entity
         $this->synchronizeGroup->messageDebug('Start entity "%s" synchronize', $this->synchronizeGroup->code());
 
         try {
-            $entitiesByWebsite = $this->devideEntityByWebsiteOrg->process($entities);
+            $entitiesByWebsite = $this->divideEntityByWebsiteOrg->process($entities);
             foreach ($entitiesByWebsite as $websiteId => $ents) {
 
                 $synchronizeGroup = $this->synchronizeGroup;
