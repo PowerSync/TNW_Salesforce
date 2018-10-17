@@ -42,7 +42,7 @@ class AccountRecordType extends RecordType
         Transport\Calls\Query\InputFactory $inputFactory,
         Transport\Calls\Query\OutputFactory $outputFactory,
         Transport\Calls\QueryInterface $query,
-        \TNW\SForceBusiness\Model\Customer\Config $config
+        \TNW\Salesforce\Model\Customer\Config $config
     )
     {
         $this->config = $config;
