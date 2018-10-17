@@ -8,27 +8,27 @@ use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 class Website extends DivideEntityByWebsiteOrg
 {
     /**
-     * @var \Magento\Store\Model\ResourceModel\Website\Collection
+     * @var \Magento\Store\Model\ResourceModel\Website\CollectionFactory
      */
-    protected $collection;
+    protected $collectionFactory;
 
     /**
      * Customer constructor.
      * @param \TNW\Salesforce\Model\Config $config
-     * @param \Magento\Store\Model\ResourceModel\Website\Collection $collection
+     * @param \Magento\Store\Model\ResourceModel\Website\CollectionFactory $collectionFactory
      */
     public function __construct(
         \TNW\Salesforce\Model\Config $config,
-        \Magento\Store\Model\ResourceModel\Website\Collection $collection
+        \Magento\Store\Model\ResourceModel\Website\CollectionFactory $collectionFactory
     )
     {
-        $this->collection = $collection;
+        $this->collectionFactory = $collectionFactory;
         parent::__construct($config);
     }
 
     /**
      * @param $ids
-     * @return \Magento\Customer\Model\ResourceModel\Customer\Collection|\Magento\Framework\Data\Collection\AbstractDb
+     * @return \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory|\Magento\Framework\Data\CollectionFactory\AbstractDb
      */
     public function loadEntities($ids)
     {
@@ -37,7 +37,8 @@ class Website extends DivideEntityByWebsiteOrg
                 return $ids;
             }
         }
-        $entities = $this->collection->addFieldToFilter($this->collection->getIdFieldName(), $ids);
+        $collection = $this->collectionFactory->create();
+        $entities = $collection->addFieldToFilter($collection->getIdFieldName(), $ids);
 
         return $entities;
     }
