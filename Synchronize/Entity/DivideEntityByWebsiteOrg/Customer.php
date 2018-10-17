@@ -1,10 +1,10 @@
 <?php
 
-namespace TNW\Salesforce\Synchronize\Entity\DevideEntityByWebsiteOrg;
+namespace TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
-use TNW\Salesforce\Synchronize\Entity\DevideEntityByWebsiteOrg;
+use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
-class Customer extends DevideEntityByWebsiteOrg
+class Customer extends DivideEntityByWebsiteOrg
 {
     /**
      * @var \Magento\Customer\Model\ResourceModel\Customer\Collection

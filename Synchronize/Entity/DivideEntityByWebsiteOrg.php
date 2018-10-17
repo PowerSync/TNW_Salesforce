@@ -1,7 +1,7 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Entity;
 
-abstract class DevideEntityByWebsiteOrg
+abstract class DivideEntityByWebsiteOrg
 {
 
     /** @var \TNW\Salesforce\Model\Config  */
