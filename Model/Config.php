@@ -270,7 +270,7 @@ class Config extends DataObject
      */
     public function logBaseDay()
     {
-        $baseDay = $this->getStoreConfig(
+        $baseDay = $this->scopeConfig->getValue(
             'tnwsforce_general/debug/logbaseday'
         );
 
