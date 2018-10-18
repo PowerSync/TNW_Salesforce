@@ -253,6 +253,7 @@
     <virtualType name="TNW\Salesforce\Synchronize\Entity\Customer" type="TNW\Salesforce\Synchronize\Entity">
         <arguments>
             <argument name="synchronizeGroup" xsi:type="object">TNW\Soap\Synchronize\Customer</argument>
+            <argument name="divideEntityByWebsiteOrg" xsi:type="object">TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Customer</argument>
         </arguments>
     </virtualType>
     <type name="TNW\Salesforce\Controller\Adminhtml\Customer\SyncCustomer">
@@ -286,6 +287,7 @@
     <virtualType name="TNW\Salesforce\Synchronize\Entity\Website" type="TNW\Salesforce\Synchronize\Entity">
         <arguments>
             <argument name="synchronizeGroup" xsi:type="object">TNW\Soap\Synchronize\Website</argument>
+            <argument name="divideEntityByWebsiteOrg" xsi:type="object">TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Website</argument>
         </arguments>
     </virtualType>
     <type name="TNW\Salesforce\Controller\Adminhtml\System\Store\SyncAll">
