@@ -351,24 +351,6 @@ workflows:
             - master
             - /^hotfix*/
             - /^release*/
-    - m225_php70:
-        context: powersync
-        filters:
-          branches:
-            only:
-            - develop
-            - master
-            - /^hotfix*/
-            - /^release*/
-    - m224_php70:
-        context: powersync
-        filters:
-          branches:
-            only:
-            - develop
-            - master
-            - /^hotfix*/
-            - /^release*/
     - m223_php70:
         context: powersync
         filters:
