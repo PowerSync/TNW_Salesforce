@@ -287,6 +287,10 @@ jobs:
     <<: *php71-base
     environment:
       MAGENTO_VERSION: "2.2.4"
+  m226_php71:
+    <<: *php71-base
+    environment:
+      MAGENTO_VERSION: "2.2.6"
   m223_php71:
     <<: *php71-base
     environment:
@@ -333,12 +337,21 @@ workflows:
 
   test-deploy-wiki:
     jobs:
-    - m225_php71:
+    - m226_php71:
         context: powersync
         filters:
           branches:
             only: /.*/
     - m224_php71:
+        context: powersync
+        filters:
+          branches:
+            only:
+            - develop
+            - master
+            - /^hotfix*/
+            - /^release*/
+    - m225_php71:
         context: powersync
         filters:
           branches:
