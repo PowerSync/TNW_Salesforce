@@ -12,4 +12,11 @@ interface QueryInterface
      * @param Query\Output $output
      */
     public function process(Query\Input $input, Query\Output $output);
+
+    /**
+     * @param $data
+     * @return mixed
+     */
+    public function exec($data);
+
 }
