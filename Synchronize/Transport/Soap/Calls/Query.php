@@ -17,6 +17,10 @@ class Query implements Transport\Calls\QueryInterface
      * @var \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory
      */
     private $factory;
+    /**
+     * @var \TNW\Salesforce\Synchronize\Transport\Calls\Query\Soql
+     */
+    private $soql;
 
     /**
      * Soap constructor.
@@ -25,10 +29,12 @@ class Query implements Transport\Calls\QueryInterface
      */
     public function __construct(
         \Magento\Framework\Event\Manager $eventManager,
-        \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory
+        \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
+        \TNW\Salesforce\Synchronize\Transport\Calls\Query\Soql $soql
     ) {
         $this->eventManager = $eventManager;
         $this->factory = $factory;
+        $this->soql = $soql;
     }
 
     /**
@@ -72,6 +78,29 @@ class Query implements Transport\Calls\QueryInterface
             'input' => $input,
             'output' => $output
         ]);
+    }
+
+    /**
+     * @param $data
+     * @return array|mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function exec($data)
+    {
+        $output = array();
+
+        $query = $this->soql->build($data);
+        if (empty($query)) {
+            throw new \RuntimeException(sprintf('Query exceeded limit of %d characters', self::MAX_LENGTH));
+        }
+
+        $results = $this->factory->client()->query($query);
+
+        foreach ($results as $result) {
+            $output[] = $this->prepareOutput($result);
+        }
+
+        return $output;
     }
 
     /**

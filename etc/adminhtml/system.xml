@@ -114,7 +114,7 @@
                 <field id="default_owner" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1">
                     <label>Default Owner</label>
                     <source_model>TNW\Salesforce\Model\Config\Source\Customer\Owner</source_model>
-                    <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Customer\Owner</frontend_model>
+                    <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Salesforce</frontend_model>
                     <comment>This default owner will be assigned to Contact and/or Account when created.</comment>
                 </field>
                 <field id="contact_assignee" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1">

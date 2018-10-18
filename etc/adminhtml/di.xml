@@ -1,10 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <type name="TNW\Wizard\Block\WizardInterface">
-        <plugin name="powersync_wizard" type="TNW\Salesforce\Plugin\SetupWizard"
-                sortOrder="1"/>
-    </type>
+
     <type name="Magento\Customer\Ui\Component\Listing\Column\Actions">
         <plugin name="customer_grid_add_sync_action"
                 type="TNW\Salesforce\Plugin\CustomerGridAddAction"

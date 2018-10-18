@@ -1,42 +1,32 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Query;
 
-class Input extends \SplObjectStorage
+class Soql
 {
-    /**
-     * @var string
-     */
-    public $from;
 
     /**
-     * @var array
-     */
-    public $columns;
-
-    /**
-     * @var array
-     */
-    protected $conditions = [];
-
-    /**
-     * @param array $entities
+     * @param array
      * @return string
      */
-    public function query(array $entities = [])
+    public function build($data)
     {
-        if (empty($this->from)) {
+        if (empty($data['from'])) {
             throw new \RuntimeException('SOQL part "from" is Empty');
         }
 
-        if (empty($this->columns)) {
+        if (empty($data['columns'])) {
             throw new \RuntimeException('SOQL part "columns" is Empty');
         }
 
-        if (empty($entities)) {
-            $entities = iterator_to_array($this);
+        $soqlTemplate = 'SELECT %s FROM %s';
+
+        if (!empty($data['where'])) {
+            $soqlTemplate .=' WHERE %s';
+        } else {
+            $data['where'] = [];
         }
 
-        return sprintf('SELECT %s FROM %s WHERE %s', $this->select($this->columns), $this->from, $this->where($entities));
+        return sprintf($soqlTemplate, $this->select($data['columns']), $data['from'], $this->where($data['where']));
     }
 
     /**
@@ -52,9 +42,13 @@ class Input extends \SplObjectStorage
      * @param array $entities
      * @return string
      */
-    public function where(array $entities)
+    public function where($conditions)
     {
-        $groups = $this->mergeGroup($entities);
+        if (empty($conditions)) {
+            return;
+        }
+
+        $groups = $this->mergeGroup($conditions);
 
         $this->prepareLookupWhereGroup($groups);
         return $this->generateLookupWhereGroup($groups);
@@ -64,14 +58,14 @@ class Input extends \SplObjectStorage
      * @param $entities
      * @return array
      */
-    protected function mergeGroup(array $entities)
+    protected function mergeGroup($conditions)
     {
-        $group = [];
-        foreach ($entities as $entity) {
-            $group['OR'][] = $this->offsetGet($entity);
-        }
+//        $group = [];
+//        foreach ($conditions as $condition) {
+//            $group['OR'][] = $condition;
+//        }
 
-        return $group;
+        return $conditions;
     }
 
     /**
@@ -152,47 +146,5 @@ class Input extends \SplObjectStorage
         }
 
         return $sql;
-    }
-
-    /**
-     * @param object $object
-     * @param array $data
-     */
-    public function offsetSet($object, $data = null)
-    {
-        $index = \count($this->conditions);
-        parent::offsetSet($object, $index);
-        $this->conditions[$index] = $data;
-    }
-
-    /**
-     * @param object $object
-     * @return array
-     */
-    public function &offsetGet($object)
-    {
-        if(!$this->contains($object)) {
-            $this->offsetSet($object, []);
-        }
-
-        return $this->conditions[parent::offsetGet($object)];
-    }
-
-    /**
-     * @return array
-     */
-    public function getInfo()
-    {
-        return $this->conditions[parent::getInfo()];
-    }
-
-    /**
-     * @param array $data
-     */
-    public function setInfo($data)
-    {
-        $index = \count($this->conditions);
-        parent::setInfo($index);
-        $this->conditions[$index] = $data;
     }
 }

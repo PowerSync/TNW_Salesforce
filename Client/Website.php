@@ -56,9 +56,10 @@ class Website extends Salesforce implements WebsiteInterface
         \TNW\Salesforce\Model\Logger $logger,
         ObjectManagerInterface $objectManager,
         ResourceSfWebsite $resourceSfWebsite,
-        ManagerInterface $messageManager
+        ManagerInterface $messageManager,
+        \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector
     ) {
-        parent::__construct($salesForceConfig, $cacheCollection, $cacheState, $logger);
+        parent::__construct($salesForceConfig, $cacheCollection, $cacheState, $logger, $websiteDetector);
         $this->objectManager = $objectManager;
         $this->resourceSfWebsite = $resourceSfWebsite;
         $this->messageManager = $messageManager;
@@ -81,7 +82,7 @@ class Website extends Salesforce implements WebsiteInterface
         if (!$forceSync && $this->addToQueue($websites)) {
             return null;
         }
-        
+
         $transferWebsiteObjects = [];
         foreach ($websites as $website) {
             $stdObject = new \stdClass();
