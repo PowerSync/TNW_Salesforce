@@ -9,7 +9,7 @@ use Tnw\SoapClient\Client;
 use Tnw\SoapClient\Result\LoginResult;
 use TNW\Salesforce\Lib\Tnw\SoapClient\ClientBuilder;
 use TNW\Salesforce\Model\Config;
-
+use TNW\Salesforce\Model\Config\WebsiteDetector;
 /**
  * Class Salesforce
  *
@@ -28,8 +28,8 @@ class Salesforce extends DataObject
     /** @var Collection  */
     protected $cacheCollection;
 
-    /** @var null|Client */
-    protected $client = null;
+    /** @var array|Client[] */
+    protected $client = array();
 
     /** @var LoginResult $loginResult */
     protected $loginResult = null;
@@ -43,6 +43,9 @@ class Salesforce extends DataObject
     /** @var \TNW\Salesforce\Model\Logger */
     protected $logger;
 
+    /** @var WebsiteDetector  */
+    protected $websiteDetector;
+
     /**
      * Salesforce constructor.
      *
@@ -54,12 +57,14 @@ class Salesforce extends DataObject
         Config $salesForceConfig,
         Collection $cacheCollection,
         State $cacheState,
-        \TNW\Salesforce\Model\Logger $logger
+        \TNW\Salesforce\Model\Logger $logger,
+        WebsiteDetector $websiteDetector
     ) {
         $this->cacheCollection = $cacheCollection;
         $this->salesforceConfig = $salesForceConfig;
         $this->cacheState = $cacheState;
 
+        $this->websiteDetector = $websiteDetector;
         parent::__construct();
         $this->logger = $logger;
     }
@@ -74,24 +79,25 @@ class Salesforce extends DataObject
      */
     public function getClient($websiteId = null)
     {
-        if ($this->client == null) {
+        $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
+        if (empty($this->client[$websiteId])) {
             try {
-                $this->client = $this->buildClient(
+                $this->client[$websiteId] = $this->buildClient(
                     $this->salesforceConfig->getSalesforceWsdl($websiteId),
                     $this->salesforceConfig->getSalesforceUsername($websiteId),
                     $this->salesforceConfig->getSalesforcePassword($websiteId),
                     $this->salesforceConfig->getSalesforceToken($websiteId)
                 );
                 /** @var LoginResult $loginResult */
-                $loginResult = $this->client->getLoginResult();
+                $loginResult = $this->client[$websiteId]->getLoginResult();
                 $this->loginResult = $loginResult;
             } catch (\Exception $e) {
-                $this->client = null;
+                $this->client[$websiteId] = null;
                 throw $e;
             }
         }
 
-        return $this->client;
+        return $this->client[$websiteId];
     }
 
     /**
@@ -149,6 +155,8 @@ class Salesforce extends DataObject
      */
     protected function saveCache($value, $identifier)
     {
+        $websiteId = $this->websiteDetector->detectCurrentWebsite();
+
         if ($this->cacheState->isEnabled(Collection::TYPE_IDENTIFIER)) {
 
             /** @var mixed $serialized */
@@ -156,10 +164,10 @@ class Salesforce extends DataObject
 
             $this->cacheCollection->save(
                 $serialized,
-                self::CACHE_TAG . $identifier
+                self::CACHE_TAG . $identifier . '_' . $websiteId
             );
         } else {
-            $this->handCache[$identifier] = $value;
+            $this->handCache[$identifier . '_' . $websiteId] = $value;
         }
     }
 
@@ -173,10 +181,12 @@ class Salesforce extends DataObject
         /** @var mixed $result */
         $result = null;
 
+        $websiteId = $this->websiteDetector->detectCurrentWebsite();
+
         if ($this->cacheState->isEnabled(Collection::TYPE_IDENTIFIER)) {
             /** @var mixed $cachedData */
             $cachedData = $this->cacheCollection->load(
-                self::CACHE_TAG . $identifier
+                self::CACHE_TAG . $identifier . '_' . $websiteId
             );
 
             if ($cachedData) {
@@ -184,8 +194,8 @@ class Salesforce extends DataObject
             }
 
         } else {
-            if (key_exists($identifier, $this->handCache)) {
-                $result = $this->handCache[$identifier];
+            if (key_exists($identifier . '_' . $websiteId, $this->handCache)) {
+                $result = $this->handCache[$identifier . '_' . $websiteId];
             }
         }
 
