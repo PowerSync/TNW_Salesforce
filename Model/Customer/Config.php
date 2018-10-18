@@ -1,4 +1,5 @@
 <?php
+
 namespace TNW\Salesforce\Model\Customer;
 
 use Magento\Framework\DataObject;
@@ -20,15 +21,7 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function getCustomerStatus($websiteId = null)
     {
-        if ($websiteId) {
-            $value = $this->scopeConfig->getValue(
-                'tnwsforce_customer/general/active',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteId
-            );
-        } else {
-            $value = $this->getStoreConfig('tnwsforce_customer/general/active');
-        }
+        $value = $this->getStoreConfig('tnwsforce_customer/general/active');
 
         return $value ? true : false;
     }
@@ -40,15 +33,9 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function canRenameAccount($websiteId = null)
     {
-        if ($websiteId) {
-            $value = $this->scopeConfig->getValue(
-                'tnwsforce_customer/general/account_name',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteId
-            );
-        } else {
-            $value = $this->getStoreConfig('tnwsforce_customer/general/account_name');
-        }
+
+        $value = $this->getStoreConfig('tnwsforce_customer/general/account_name');
+
 
         return $value ? true : false;
     }
@@ -61,15 +48,8 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function getCustomerAllGroups($websiteId = null)
     {
-        if ($websiteId) {
-            $value = $this->scopeConfig->getValue(
-                'tnwsforce_customer/general/sync_groups',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteId
-            );
-        } else {
-            $value = $this->getStoreConfig('tnwsforce_customer/general/sync_groups');
-        }
+
+        $value = $this->getStoreConfig('tnwsforce_customer/general/sync_groups');
 
         return $value ? true : false;
     }
@@ -82,15 +62,8 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function getCustomerSyncGroups($websiteId = null)
     {
-        if ($websiteId) {
-            $value = $this->scopeConfig->getValue(
-                'tnwsforce_customer/general/customer_group',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteId
-            );
-        } else {
-            $value = $this->getStoreConfig('tnwsforce_customer/general/customer_group');
-        }
+
+        $value = $this->getStoreConfig('tnwsforce_customer/general/customer_group');
 
         $result = [];
         $value = trim($value);
@@ -110,15 +83,7 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function defaultOwner($websiteId = null)
     {
-        if ($websiteId) {
-            $value = $this->scopeConfig->getValue(
-                'tnwsforce_customer/general/default_owner',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteId
-            );
-        } else {
-            $value = $this->getStoreConfig('tnwsforce_customer/general/default_owner');
-        }
+        $value = $this->getStoreConfig('tnwsforce_customer/general/default_owner');
 
         return $value;
     }
@@ -134,15 +99,8 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function contactAssignee($websiteId = null)
     {
-        if ($websiteId) {
-            $value = $this->scopeConfig->getValue(
-                'tnwsforce_customer/general/contact_assignee',
-                ScopeInterface::SCOPE_WEBSITE,
-                $websiteId
-            );
-        } else {
-            $value = $this->getStoreConfig('tnwsforce_customer/general/contact_assignee');
-        }
+
+        $value = $this->getStoreConfig('tnwsforce_customer/general/contact_assignee');
 
         return $value;
     }
@@ -154,7 +112,7 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function accountShareScope()
     {
-        return (int)$this->scopeConfig->getValue(
+        return (int)$this->getStoreConfig(
             'customer/account_share/scope'
         );
     }
