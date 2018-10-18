@@ -99,7 +99,7 @@ class Config extends DataObject
      * Get magento product Id field name in Salesforce database
      * @return string
      */
-    public function getMagentoIdField()
+    public static function getMagentoIdField()
     {
         return self::SFORCE_BASIC_PREFIX . self::SFORCE_MAGENTO_ID;
     }
