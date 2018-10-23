@@ -11,7 +11,7 @@
             <label>General Configuration</label>
             <tab>tnw</tab>
 
-            <resource>Magento_Customer::config_customer</resource>
+            <resource>TNW_Salesforce::config_general</resource>
 
             <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>General</label>
@@ -88,7 +88,7 @@
 
         <section id="tnwsforce_customer" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
             <label>Customers</label>
-            <resource>Magento_Customer::config_customer</resource>
+            <resource>TNW_Salesforce::config_customer</resource>
             <tab>tnw</tab>
 
             <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
