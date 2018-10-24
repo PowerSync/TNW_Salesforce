@@ -4,7 +4,7 @@
     <menu>
         <!--Salesforce root menu item-->
         <add id="TNW_Salesforce::salesforce" title="Salesforce" module="TNW_Salesforce" sortOrder="100"
-             dependsOnModule="Magento_Catalog" resource="Magento_Catalog::catalog"/>
+             dependsOnModule="Magento_Catalog" resource="TNW_Salesforce::salesforce"/>
 
         <add id="TNW_Salesforce::configuration" title="Configuration" module="TNW_Salesforce" sortOrder="15"
              parent="TNW_Salesforce::salesforce" resource="TNW_Salesforce::config"/>
