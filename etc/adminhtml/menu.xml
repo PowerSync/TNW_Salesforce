@@ -1,20 +1,37 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
         <!--Salesforce root menu item-->
-        <add id="TNW_Salesforce::salesforce" title="Salesforce" module="TNW_Salesforce" sortOrder="100" dependsOnModule="Magento_Catalog" resource="Magento_Catalog::catalog"/>
+        <add id="TNW_Salesforce::salesforce" title="Salesforce" module="TNW_Salesforce" sortOrder="100"
+             dependsOnModule="Magento_Catalog" resource="TNW_Salesforce::salesforce"/>
 
-        <add id="TNW_Salesforce::configuration" title="Configuration" module="TNW_Salesforce" sortOrder="15" parent="TNW_Salesforce::salesforce" resource="Magento_Catalog::products"/>
-        <add id="TNW_Salesforce::general_configuration" title="General Configuration" module="TNW_Salesforce" action="adminhtml/system_config/edit/section/tnwsforce_general" sortOrder="15" parent="TNW_Salesforce::configuration" resource="Magento_Catalog::products"/>
-        <add id="TNW_Salesforce::customers_configuration" title="Customers" module="TNW_Salesforce" action="adminhtml/system_config/edit/section/tnwsforce_customer" sortOrder="25" parent="TNW_Salesforce::configuration" resource="Magento_Catalog::products"/>
+        <add id="TNW_Salesforce::configuration" title="Configuration" module="TNW_Salesforce" sortOrder="15"
+             parent="TNW_Salesforce::salesforce" resource="TNW_Salesforce::config"/>
 
-        <add id="TNW_Salesforce::tools" title="Tools" module="TNW_Salesforce" sortOrder="90" parent="TNW_Salesforce::salesforce" resource="TNW_Salesforce::tools"/>
-        <add id="TNW_Salesforce::tools_log" action="tnw_salesforce/system_log/view" title="Salesforce Sync Log" translate="title" module="TNW_Salesforce" sortOrder="90" parent="TNW_Salesforce::tools" resource="TNW_Salesforce::tools_log"/>
-        <!--<add id="TNW_Salesforce::tools_login" action="tnw_salesforce/system_log/login" title="Salesforce Login" translate="title" module="TNW_Salesforce" sortOrder="90" parent="TNW_Salesforce::tools" resource="TNW_Salesforce::tools_login"/>-->
+        <add id="TNW_Salesforce::general_configuration" title="General Configuration" module="TNW_Salesforce"
+             action="adminhtml/system_config/edit/section/tnwsforce_general" sortOrder="15"
+             parent="TNW_Salesforce::configuration" resource="TNW_Salesforce::config_general"/>
+
+        <add id="TNW_Salesforce::customers_configuration" title="Customers" module="TNW_Salesforce"
+             action="adminhtml/system_config/edit/section/tnwsforce_customer" sortOrder="25"
+             parent="TNW_Salesforce::configuration" resource="TNW_Salesforce::config_customer"/>
+
+        <add id="TNW_Salesforce::tools" title="Tools" module="TNW_Salesforce" sortOrder="90"
+             parent="TNW_Salesforce::salesforce" resource="TNW_Salesforce::tools_log"/>
+
+        <add id="TNW_Salesforce::tools_log" action="tnw_salesforce/system_log/view" title="Salesforce Sync Log"
+             translate="title" module="TNW_Salesforce" sortOrder="90" parent="TNW_Salesforce::tools"
+             resource="TNW_Salesforce::tools_log"/>
 
         <!-- Customer menu -->
-        <add id="TNW_Salesforce::tnw_customer" title="TNW Salesforce" module="TNW_Salesforce" sortOrder="50" dependsOnModule="TNW_Salesforce" parent="Magento_Customer::customer" resource="Magento_Customer::customers"/>
-        <add id="TNW_Salesforce::salesforce_customer_configuration" title="Configuration" module="TNW_Salesforce" sortOrder="150" parent="TNW_Salesforce::tnw_customer" action="adminhtml/system_config/edit/section/tnwsforce_customer" resource="Magento_Catalog::customers"/>
+        <add id="TNW_Salesforce::tnw_customer" title="TNW Salesforce" module="TNW_Salesforce" sortOrder="50"
+             dependsOnModule="TNW_Salesforce" parent="Magento_Customer::customer"
+             resource="Magento_Customer::customers"/>
+
+        <add id="TNW_Salesforce::salesforce_customer_configuration" title="Configuration" module="TNW_Salesforce"
+             sortOrder="150" parent="TNW_Salesforce::tnw_customer"
+             action="adminhtml/system_config/edit/section/tnwsforce_customer" resource="TNW_Salesforce::config_customer"/>
 
     </menu>
 
