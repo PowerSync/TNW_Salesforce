@@ -132,14 +132,13 @@ class Config extends DataObject
      * Get Salesfoce username from config
      *
      * @param int|null $websiteId
+     *
      * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getSalesforceUsername($websiteId = null)
     {
-        $username = $this->getStoreConfig(
-            'tnwsforce_general/salesforce/username'
-        );
-        return $username;
+        return $this->getStoreConfig('tnwsforce_general/salesforce/username', $websiteId);
     }
 
     /**
@@ -248,6 +247,16 @@ class Config extends DataObject
         }
 
         return $this->websitesGrouppedByOrg;
+    }
+
+    /**
+     * @param int $websiteId
+     *
+     * @return mixed
+     */
+    public function uniqueWebsiteIdLogin($websiteId)
+    {
+        return $this->getWebsitesGrouppedByOrg()[$websiteId];
     }
 
     /**
@@ -374,23 +383,23 @@ class Config extends DataObject
 
     /**
      * @param $path
+     * @param int|null $websiteId
+     *
      * @return mixed|null|string
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function getStoreConfig($path)
+    protected function getStoreConfig($path, $websiteId = null)
     {
         $scopeType = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
         $scopeCode = null;
 
-        $websiteId = $this->websiteDetector->detectCurrentWebsite();
-
-        if ($websiteId) {
+        $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
+        if ($websiteId !== null) {
             $scopeType = ScopeInterface::SCOPE_WEBSITE;
             $scopeCode = $websiteId;
         }
 
-        $value = $this->scopeConfig->getValue($path, $scopeType, $scopeCode);
-
-        return $value;
+        return $this->scopeConfig->getValue($path, $scopeType, $scopeCode);
     }
     #endregion
 

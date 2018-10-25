@@ -102,9 +102,7 @@ class Sforceid extends Column
                         $field
                     );
                 } else {
-                    $result .= sprintf('%s<br/>',
-                        $value
-                    );
+                    $result .= sprintf('%s<br/>', $value);
                 }
             }
         }
