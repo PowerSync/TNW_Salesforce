@@ -16,7 +16,7 @@
         <actionsColumn name="sforce_id" class="TNW\Salesforce\Ui\Component\Listing\Columns\Sforceid">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="component" xsi:type="string">TNW_Salesforce/js/grid/columns/sforceid</item>
+                    <item name="component" xsi:type="string">TNW_Salesforce/js/grid/columns/raw</item>
                     <item name="indexField" xsi:type="string">sforce_id</item>
                     <item name="sortable" xsi:type="boolean">true</item>
                     <item name="label" xsi:type="string" translate="true">Salesforce Contact Id</item>
@@ -27,7 +27,7 @@
         <actionsColumn name="sforce_account_id" class="TNW\Salesforce\Ui\Component\Listing\Columns\Sforceid">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="component" xsi:type="string">TNW_Salesforce/js/grid/columns/sforceid</item>
+                    <item name="component" xsi:type="string">TNW_Salesforce/js/grid/columns/raw</item>
                     <item name="indexField" xsi:type="string">sforce_account_id</item>
                     <item name="sortable" xsi:type="boolean">true</item>
                     <item name="label" xsi:type="string" translate="true">Salesforce Account Id</item>

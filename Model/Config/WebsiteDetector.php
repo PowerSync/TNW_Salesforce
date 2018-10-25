@@ -71,11 +71,7 @@ class WebsiteDetector
      */
     public function getWebsiteFromRequest()
     {
-        $websiteId = $this->request->getParam(
-            'website'
-        );
-
-        return $websiteId;
+        return $this->request->getParam('website');
     }
 
     /**
@@ -103,12 +99,12 @@ class WebsiteDetector
      */
     public function detectCurrentWebsite($websiteId = null)
     {
-        if (empty($websiteId)) {
+        if ($websiteId === null) {
             if ($this->isAdminArea()) {
                 $websiteId = $this->getWebsiteFromRequest();
             }
 
-            if (empty($websiteId)) {
+            if ($websiteId === null) {
                 $websiteId = $this->getCurrentStoreWebsite()->getId();
             }
         }
