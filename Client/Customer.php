@@ -15,9 +15,9 @@ use TNW\Salesforce\Model\Customer\Config;
  */
 class Customer extends Salesforce
 {
-//    const CACHE_CUSTOMER_OWNERS_LIST = 'customer_owners';
-//    const SFORCE_CONTACT_OBJECT = 'Contact';
-//    const SFORCE_ACCOUNT_OBJECT = 'Account';
+    const CACHE_CUSTOMER_OWNERS_LIST = 'customer_owners';
+    const SFORCE_CONTACT_OBJECT = 'Contact';
+    const SFORCE_ACCOUNT_OBJECT = 'Account';
 //
 //    /** @var Config */
 //    protected $config;
