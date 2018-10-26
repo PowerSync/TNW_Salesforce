@@ -14,6 +14,8 @@
             </argument>
         </column>
         <actionsColumn name="sforce_id" class="TNW\Salesforce\Ui\Component\Listing\Columns\Sforceid">
+            <argument name="groupName" xsi:type="string">customer</argument>
+            <argument name="entityIdName" xsi:type="string">entity_id</argument>
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="component" xsi:type="string">TNW_Salesforce/js/grid/columns/raw</item>
@@ -25,6 +27,8 @@
             </argument>
         </actionsColumn>
         <actionsColumn name="sforce_account_id" class="TNW\Salesforce\Ui\Component\Listing\Columns\Sforceid">
+            <argument name="groupName" xsi:type="string">customer</argument>
+            <argument name="entityIdName" xsi:type="string">entity_id</argument>
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="component" xsi:type="string">TNW_Salesforce/js/grid/columns/raw</item>
