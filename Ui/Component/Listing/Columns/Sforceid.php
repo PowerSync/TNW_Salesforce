@@ -82,14 +82,13 @@ class Sforceid extends Column
             }
 
             foreach ($entityGroup as $websiteId => $entities) {
-                if (isset($entities[$this->entityId($item)])) {
+                if (!isset($entities[$this->entityId($item)])) {
                     continue;
                 }
 
+                $item["{$fieldName}_html"] = $this->generateLinkToSalesforce($item[$fieldName], $websiteId);
                 continue 2;
             }
-
-            $item["{$fieldName}_html"] = $this->generateLinkToSalesforce($item[$fieldName], $websiteId);
         }
 
         return $dataSource;
@@ -118,33 +117,31 @@ class Sforceid extends Column
     {
         $result = [];
 
-        if ($field) {
-            $valuesArray = explode("\n", $field);
+        $url = $this->client->getSalesForceUrl($websiteId);
+        foreach (explode("\n", $field) as $value) {
+            $currency = '';
+            if (strpos($value, ':') !== false) {
+                list($currency, $value) = explode(':', $value);
+                $currency .= ': ';
+            }
 
-            $url = $this->client->getSalesForceUrl($websiteId);
-            foreach ($valuesArray as $value) {
-                $currency = '';
-                if (strpos($value, ':') !== false) {
-                    list($currency, $value) = explode(':', $value);
-                    $currency .= ': ';
-                }
+            if (empty($value)) {
+                continue;
+            }
 
-                if (empty($value)) {
-                    continue;
-                }
-
-                if ($url) {
-                    $result[] = sprintf('%s<a target="_blank" href="%s" title="%s">%s</a>',
-                        $currency,
-                        $url . '/' . $value,
-                        __('Show on Salesforce'),
-                        $field
-                    );
-                } else {
-                    $result[] = sprintf('%s', $value);
-                }
+            if ($url) {
+                $result[] = sprintf(
+                    '%1$s<a target="_blank" href="%2$s/%3$s" title="%4$s">%3$s</a>',
+                    $currency,
+                    $url,
+                    $value,
+                    __('Show on Salesforce')
+                );
+            } else {
+                $result[] = sprintf('%s', $value);
             }
         }
+
 
         return implode('<br>', $result);
     }
