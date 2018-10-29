@@ -131,7 +131,7 @@ class Sforceid extends Column
 
             if ($url) {
                 $result[] = sprintf(
-                    '%1$s<a target="_blank" href="%2$s/%3$s" title="%4$s">%3$s</a>',
+                    '%1$s<a target="_blank" style="font-family:monospace;" href="%2$s/%3$s" title="%4$s">%3$s</a>',
                     $currency,
                     $url,
                     $value,
