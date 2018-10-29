@@ -296,7 +296,7 @@ class Salesforce extends DataObject
         if (!$url) {
             if (empty($this->loginResult[$cacheKey])) {
                 try {
-                    $this->getClient();
+                    $this->getClient($websiteId);
                 } catch (\Exception $e) {
                     $this->logger->messageError($e);
                 }
