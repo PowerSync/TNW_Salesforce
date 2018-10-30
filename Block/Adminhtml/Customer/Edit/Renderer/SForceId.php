@@ -18,8 +18,7 @@ class SForceId extends \Magento\Framework\Data\Form\Element\Link
         \TNW\Salesforce\Client\Salesforce $client,
         array $data
     ) {
-        parent::__construct($factoryElement, $factoryCollection, $escaper,
-            $data);
+        parent::__construct($factoryElement, $factoryCollection, $escaper, $data);
         $this->client = $client;
     }
 
@@ -31,46 +30,40 @@ class SForceId extends \Magento\Framework\Data\Form\Element\Link
     /**
      * Generate link to specified object
      *
-     * @param $field salesforceId or string type1:salesforceId1;type2:salesforceId2
+     * @param string $field
+     *
      * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function generateLinkToSalesforce($field)
     {
-        $result = null;
         $results = [];
-        if ($field) {
-            $valuesArray = explode("\n", $field);
 
-            $url = $this->client->getSalesForceUrl();
-            foreach ($valuesArray as $value) {
-                $currency = '';
-                if (strpos($value, ':') !== false) {
-                    $tmp = explode(':', $value);
-                    $currency = $tmp[0] . ': ';
-                    $field = $tmp[1];
-                    $value = $tmp[1];
-                }
+        $url = $this->client->getSalesForceUrl($this->getData('website_id'));
+        foreach (explode("\n", $field) as $value) {
+            $currency = '';
+            if (strpos($value, ':') !== false) {
+                list($currency, $value) = explode(':', $value);
+                $currency .= ': ';
+            }
 
-                if (empty($value)) {
-                    continue;
-                }
+            if (empty($value)) {
+                continue;
+            }
 
-                if ($url) {
-                    $results[] = sprintf('%s<a target="_blank" href="%s" title="%s">%s</a>',
-                        $currency,
-                        $url . '/' . $value,
-                        __('Show on Salesforce'),
-                        $field
-                    );
-                } else {
-                    $results[] = $value;
-                }
+            if ($url) {
+                $results[] = sprintf(
+                    '%1$s<a target="_blank" style="font-family:monospace;" href="%2$s/%3$s" title="%4$s">%3$s</a>',
+                    $currency,
+                    $url,
+                    $value,
+                    __('Show on Salesforce')
+                );
+            } else {
+                $results[] = $value;
             }
         }
 
-        return
-            '<div class="control-value">'
-            . implode('<br/>', $results)
-            . '</div>';
+        return sprintf('<div class="control-value">%s</div>', implode('<br>', $results));
     }
 }
