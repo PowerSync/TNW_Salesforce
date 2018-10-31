@@ -15,8 +15,9 @@ interface QueryInterface
 
     /**
      * @param $data
+     * @param int|null $websiteId
+     *
      * @return mixed
      */
-    public function exec($data);
-
+    public function exec($data, $websiteId = null);
 }
