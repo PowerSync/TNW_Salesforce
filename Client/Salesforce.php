@@ -60,13 +60,12 @@ class Salesforce extends DataObject
         \TNW\Salesforce\Model\Logger $logger,
         WebsiteDetector $websiteDetector
     ) {
-        $this->cacheCollection = $cacheCollection;
-        $this->salesforceConfig = $salesForceConfig;
-        $this->cacheState = $cacheState;
-
-        $this->websiteDetector = $websiteDetector;
         parent::__construct();
+        $this->salesforceConfig = $salesForceConfig;
+        $this->cacheCollection = $cacheCollection;
+        $this->cacheState = $cacheState;
         $this->logger = $logger;
+        $this->websiteDetector = $websiteDetector;
     }
 
     /**

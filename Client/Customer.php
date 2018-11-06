@@ -24,20 +24,22 @@ class Customer extends Salesforce
 
     /**
      * Customer constructor.
-     * @param Collection $cacheCollection
+     *
      * @param Config $config
+     * @param Collection $cacheCollection
+     * @param State $cacheState
+     * @param \TNW\Salesforce\Model\Logger $logger
+     * @param \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector
      */
     public function __construct(
-        Collection $cacheCollection,
         Config $config,
+        Collection $cacheCollection,
         State $cacheState,
         \TNW\Salesforce\Model\Logger $logger,
         \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector
-
     ) {
-        $this->config = $config;
-
         parent::__construct($config, $cacheCollection, $cacheState, $logger, $websiteDetector);
+        $this->config = $config;
     }
 
     /**
