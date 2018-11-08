@@ -23,17 +23,15 @@ class WebsiteEmulator
     public function __construct(
         WebsiteDetector $websiteDetector,
         \Magento\Store\Model\App\Emulation $storeEmulator
-    )
-    {
+    ) {
         $this->websiteDetector = $websiteDetector;
-        $this->storeEmulator = $storeEmulator;;
+        $this->storeEmulator = $storeEmulator;
     }
 
     /**
      * emulate specific store
      *
      * @param null $websiteId
-     * @return bool
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function startEnvironmentEmulation($websiteId = null)
@@ -46,7 +44,7 @@ class WebsiteEmulator
             /**
              * we in the necessary website already
              */
-            return false;
+            return;
         }
 
         $storeId = $this->websiteDetector->getStroreIdByWebsite($websiteId);
@@ -62,7 +60,6 @@ class WebsiteEmulator
         return $this->storeEmulator->stopEnvironmentEmulation();
     }
 
-
     /**
      * @param $callback
      * @param null $websiteId
@@ -74,13 +71,9 @@ class WebsiteEmulator
         $this->startEnvironmentEmulation($websiteId);
 
         try {
-            $return = call_user_func($callback);
-        } catch (\Exception $e) {
+            return $callback($websiteId);
+        } finally {
             $this->stopEnvironmentEmulation();
-            throw $e;
         }
-
-        $this->stopEnvironmentEmulation();
-        return $return;
     }
 }

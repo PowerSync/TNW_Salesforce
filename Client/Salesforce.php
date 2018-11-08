@@ -28,11 +28,11 @@ class Salesforce extends DataObject
     /** @var Collection  */
     protected $cacheCollection;
 
-    /** @var array|Client[] */
-    protected $client = array();
+    /** @var Client[] */
+    private $client = array();
 
-    /** @var LoginResult $loginResult */
-    protected $loginResult = null;
+    /** @var LoginResult[] $loginResult */
+    private $loginResult = [];
 
     /** @var  State */
     protected $cacheState;
@@ -60,13 +60,12 @@ class Salesforce extends DataObject
         \TNW\Salesforce\Model\Logger $logger,
         WebsiteDetector $websiteDetector
     ) {
-        $this->cacheCollection = $cacheCollection;
-        $this->salesforceConfig = $salesForceConfig;
-        $this->cacheState = $cacheState;
-
-        $this->websiteDetector = $websiteDetector;
         parent::__construct();
+        $this->salesforceConfig = $salesForceConfig;
+        $this->cacheCollection = $cacheCollection;
+        $this->cacheState = $cacheState;
         $this->logger = $logger;
+        $this->websiteDetector = $websiteDetector;
     }
 
     /**
@@ -80,24 +79,24 @@ class Salesforce extends DataObject
     public function getClient($websiteId = null)
     {
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
-        if (empty($this->client[$websiteId])) {
+        $cacheKey = $this->salesforceConfig->uniqueWebsiteIdLogin($websiteId);
+
+        if (empty($this->client[$cacheKey])) {
             try {
-                $this->client[$websiteId] = $this->buildClient(
+                $this->client[$cacheKey] = $this->buildClient(
                     $this->salesforceConfig->getSalesforceWsdl($websiteId),
                     $this->salesforceConfig->getSalesforceUsername($websiteId),
                     $this->salesforceConfig->getSalesforcePassword($websiteId),
                     $this->salesforceConfig->getSalesforceToken($websiteId)
                 );
-                /** @var LoginResult $loginResult */
-                $loginResult = $this->client[$websiteId]->getLoginResult();
-                $this->loginResult = $loginResult;
+                $this->loginResult[$cacheKey] = $this->client[$cacheKey]->getLoginResult();
             } catch (\Exception $e) {
-                $this->client[$websiteId] = null;
+                $this->client[$cacheKey] = null;
                 throw $e;
             }
         }
 
-        return $this->client[$websiteId];
+        return $this->client[$cacheKey];
     }
 
     /**
@@ -152,10 +151,13 @@ class Salesforce extends DataObject
      *
      * @param String $value
      * @param String $identifier
+     * @param int|null $websiteId
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function saveCache($value, $identifier)
+    protected function saveCache($value, $identifier, $websiteId = null)
     {
-        $websiteId = $this->websiteDetector->detectCurrentWebsite();
+        $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
 
         if ($this->cacheState->isEnabled(Collection::TYPE_IDENTIFIER)) {
 
@@ -174,14 +176,17 @@ class Salesforce extends DataObject
     /**
      * @param $identifier
      *
+     * @param int|null $websiteId
+     *
      * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function loadCache($identifier)
+    protected function loadCache($identifier, $websiteId = null)
     {
         /** @var mixed $result */
         $result = null;
 
-        $websiteId = $this->websiteDetector->detectCurrentWebsite();
+        $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
 
         if ($this->cacheState->isEnabled(Collection::TYPE_IDENTIFIER)) {
             /** @var mixed $cachedData */
@@ -193,10 +198,8 @@ class Salesforce extends DataObject
                 $result = unserialize($cachedData);
             }
 
-        } else {
-            if (key_exists($identifier . '_' . $websiteId, $this->handCache)) {
-                $result = $this->handCache[$identifier . '_' . $websiteId];
-            }
+        } else if (array_key_exists($identifier . '_' . $websiteId, $this->handCache)) {
+            $result = $this->handCache[$identifier . '_' . $websiteId];
         }
 
         return $result;
@@ -276,28 +279,33 @@ class Salesforce extends DataObject
     /**
      * Get Salesforce url that will be used to generate links to objects
      *
+     * @param int|null $websiteId
+     *
      * @return null|string
-     * @throws \Exception
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getSalesForceUrl()
+    public function getSalesForceUrl($websiteId = null)
     {
+        $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
+        $cacheKey = $this->salesforceConfig->uniqueWebsiteIdLogin($websiteId);
+
         /** @var string|null $url */
-        $url = $this->loadCache(self::SFORCE_URL_CACHE_IDENTIFIER);
+        $url = $this->loadCache(self::SFORCE_URL_CACHE_IDENTIFIER, $websiteId);
 
         if (!$url) {
-            if (!$this->loginResult) {
+            if (empty($this->loginResult[$cacheKey])) {
                 try {
-                    $this->getClient();
+                    $this->getClient($websiteId);
                 } catch (\Exception $e) {
-                    //todo: add reaction on exception
+                    $this->logger->messageError($e);
                 }
             }
 
-            if ($this->loginResult) {
-                $serverUrl = $this->loginResult->getServerUrl();
+            if ($this->loginResult[$cacheKey]) {
+                $serverUrl = $this->loginResult[$cacheKey]->getServerUrl();
                 $instance_url = explode('/', $serverUrl);
                 $url = 'https://' . $instance_url[2];
-                $this->saveCache($url, self::SFORCE_URL_CACHE_IDENTIFIER);
+                $this->saveCache($url, self::SFORCE_URL_CACHE_IDENTIFIER, $websiteId);
             }
         }
 

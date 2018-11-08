@@ -5,8 +5,9 @@ namespace TNW\Salesforce\Block\Adminhtml\Customer\Edit;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Controller\RegistryConstants;
 use Magento\Ui\Component\Layout\Tabs\TabInterface;
-use Magento\Backend\Block\Widget\Form;
 use Magento\Backend\Block\Widget\Form\Generic;
+use TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SForceId;
+use TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SyncStatus;
 
 class Tabs extends Generic implements TabInterface
 {
@@ -14,8 +15,6 @@ class Tabs extends Generic implements TabInterface
     protected $coreRegistry;
     /** @var CustomerRepositoryInterface */
     protected $customerRepository;
-    /** @var bool|\Magento\Customer\Api\Data\CustomerInterface */
-    protected $customer = false;
 
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
@@ -41,20 +40,15 @@ class Tabs extends Generic implements TabInterface
 
     /**
      * Get current customer object
-     * @return bool|\Magento\Customer\Api\Data\CustomerInterface|null
+     *
+     * @return \Magento\Customer\Api\Data\CustomerInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     protected function getCustomer()
     {
-        if ($this->customer === false) {
-            $customerId = $this->getCustomerId();
-            $customer = $this->customerRepository->getById($customerId);
-            if ($customer && !$customer->getId()) {
-                $customer = null;
-            }
-            $this->customer = $customer;
-        }
-
-        return $this->customer;
+        $customerId = $this->getCustomerId();
+        return $this->customerRepository->getById($customerId);
     }
 
     /**
@@ -125,89 +119,69 @@ class Tabs extends Generic implements TabInterface
         return false;
     }
 
+    /**
+     * @return $this
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     public function initForm()
     {
         if (!$this->canShowTab()) {
             return $this;
         }
+
         /**@var \Magento\Framework\Data\Form $form */
         $form = $this->_formFactory->create();
         $form->setHtmlIdPrefix('salesforce_');
         $form->setFieldNameSuffix('customer');
 
-        /** @var  $fieldSet */
         $fieldSet = $form->addFieldset('base_fieldset', ['legend' => __('Salesforce')]);
+        $fieldSet->addType('sync_status', SyncStatus::class);
+        $fieldSet->addType('sforce_id', SForceId::class);
 
-        $fieldSet->addType(
-            'sync_status',
-            'TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SyncStatus'
-        );
+        $fieldSet->addField('sforce_sync_status', 'sync_status', [
+            'name' => 'sforce_sync_status',
+            'data-form-part' => $this->getData('target_form'),
+            'label' => __('Sync Status'),
+            'title' => __('Sync Status'),
+            'value' => $this->getAttributeValue('sforce_sync_status'),
+        ]);
 
-        $fieldSet->addType(
-            'sforce_id',
-            'TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SForceId'
-        );
-        
-        $fieldSet->addField(
-            'sforce_sync_status',
-            'sync_status',
-            [
-                'name' => 'sforce_sync_status',
-                'data-form-part' => $this->getData('target_form'),
-                'label' => __('Sync Status'),
-                'title' => __('Sync Status'),
-                'value' => $this->getAttributeValue('sforce_sync_status'),
-            ]
-        );
+        $fieldSet->addField('sforce_id', 'sforce_id', [
+            'name' => 'sforce_id',
+            'data-form-part' => $this->getData('target_form'),
+            'label' => __('Salesforce Contact Id'),
+            'title' => __('Salesforce Contact Id'),
+            'value' => $this->getAttributeValue('sforce_id'),
+            'website_id' => $this->getCustomer()->getWebsiteId(),
+        ]);
 
-        $fieldSet->addField(
-            'sforce_id',
-            'sforce_id',
-            [
-                'name' => 'sforce_id',
-                'data-form-part' => $this->getData('target_form'),
-                'label' => __('Salesforce Contact Id'),
-                'title' => __('Salesforce Contact Id'),
-                'value' => $this->getAttributeValue('sforce_id'),
-            ]
-        );
+        $fieldSet->addField('sforce_account_id', 'sforce_id', [
+            'name' => 'sforce_account_id',
+            'data-form-part' => $this->getData('target_form'),
+            'label' => __('Salesforce Account Id'),
+            'title' => __('Salesforce Account Id'),
+            'value' => $this->getAttributeValue('sforce_account_id'),
+            'website_id' => $this->getCustomer()->getWebsiteId(),
+        ]);
 
-        $fieldSet->addField(
-            'sforce_account_id',
-            'sforce_id',
-            [
-                'name' => 'sforce_account_id',
-                'data-form-part' => $this->getData('target_form'),
-                'label' => __('Salesforce Account Id'),
-                'title' => __('Salesforce Account Id'),
-                'value' => $this->getAttributeValue('sforce_account_id'),
-            ]
-        );
-
-        $fieldSet->addField(
-            'sforce_lead_id',
-            'sforce_id',
-            [
-                'name' => 'sforce_lead_id',
-                'data-form-part' => $this->getData('target_form'),
-                'label' => __('Salesforce Lead Id'),
-                'title' => __('Salesforce Lead Id'),
-                'value' => $this->getAttributeValue('sforce_lead_id'),
-            ]
-        );
+        $fieldSet->addField('sforce_lead_id', 'sforce_id', [
+            'name' => 'sforce_lead_id',
+            'data-form-part' => $this->getData('target_form'),
+            'label' => __('Salesforce Lead Id'),
+            'title' => __('Salesforce Lead Id'),
+            'value' => $this->getAttributeValue('sforce_lead_id'),
+            'website_id' => $this->getCustomer()->getWebsiteId(),
+        ]);
 
         $this->additionalFields($fieldSet);
 
         // Sync button
-        $fieldSet->addField(
-            'salesforce-sync-button',
-            'note',
-            [
-                'name' => 'salesforce-sync-button',
-                'label' => '',
-                'after_element_html' => $this->getSyncButtonHtml($this->getCustomerId())
-            ]
-        );
+        $fieldSet->addField('salesforce-sync-button', 'note', [
+            'name' => 'salesforce-sync-button',
+            'label' => '',
+            'after_element_html' => $this->getSyncButtonHtml($this->getCustomerId())
+        ]);
 
         $this->setForm($form);
 
@@ -271,18 +245,18 @@ EOT;
 
     /**
      * Get value by customer attribute code
+     *
      * @param $attributeCode
+     *
      * @return \Magento\Framework\Api\AttributeInterface|mixed|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     protected function getAttributeValue($attributeCode)
     {
-        $value = null;
-        $customer = $this->getCustomer();
-        if ($customer) {
-            $value = $customer->getCustomAttribute($attributeCode);
-            if ($value) {
-                $value = $value->getValue();
-            }
+        $value = $this->getCustomer()->getCustomAttribute($attributeCode);
+        if ($value) {
+            $value = $value->getValue();
         }
 
         return $value;
@@ -290,31 +264,16 @@ EOT;
 
     /**
      * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     protected function _toHtml()
     {
         if ($this->canShowTab()) {
             $this->initForm();
             return parent::_toHtml();
-        } else {
-            return '';
         }
-    }
 
-//    /**
-//     * Prepare the layout.
-//     *
-//     * @return $this
-//     */
-//    // You can call other Block also by using this function if you want to add phtml file.
-//    public function getFormHtml()
-//    {
-//        $html = parent::getFormHtml();
-//        return $html;
-//
-//        $html .= $this->getLayout()->createBlock(
-//            'Webkul\CustomerEdit\Block\Adminhtml\Customer\Edit\Tab\EdditionalBlock'
-//        )->toHtml();
-//        return $html;
-//    }
+        return '';
+    }
 }

@@ -1,7 +1,6 @@
 <?php
 namespace TNW\Salesforce\Ui\Component\Listing\Columns;
 
-use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
@@ -9,58 +8,86 @@ use Magento\Ui\Component\Listing\Columns\Column;
 class Sforceid extends Column
 {
     /**
-     * @var UrlInterface
+     * @var \TNW\Salesforce\Client\Salesforce
      */
-    protected $urlBuilder;
-
-    /** @var \TNW\Salesforce\Client\Salesforce  */
     protected $client;
+
+    /**
+     * @var \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool
+     */
+    private $dividerPool;
+
+    /**
+     * @var string
+     */
+    private $groupName;
+
+    /**
+     * @var string
+     */
+    private $entityIdName;
 
     /**
      * Constructor
      *
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
-     * @param UrlInterface $urlBuilder
+     * @param \TNW\Salesforce\Client\Salesforce $client
+     * @param \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool $dividerPool
+     * @param string $groupName
+     * @param string $entityIdName
      * @param array $components
      * @param array $data
      */
     public function __construct(
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
-        UrlInterface $urlBuilder,
         \TNW\Salesforce\Client\Salesforce $client,
+        \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool $dividerPool,
+        $groupName,
+        $entityIdName,
         array $components = [],
         array $data = []
     ) {
-        $this->urlBuilder = $urlBuilder;
-        $this->client = $client;
         parent::__construct($context, $uiComponentFactory, $components, $data);
+
+        $this->client = $client;
+        $this->dividerPool = $dividerPool;
+        $this->groupName = $groupName;
+        $this->entityIdName = $entityIdName;
     }
 
     /**
      * Prepare Data Source
      *
      * @param array $dataSource
+     *
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function prepareDataSource(array $dataSource)
     {
-        if (isset($dataSource['data']['items'])) {
-            $fieldName = $this->getData('name');
-            foreach ($dataSource['data']['items'] as & $item) {
-                $html = '';
-                if (isset($item[$fieldName])) {
-                    $value = trim($item[$fieldName]);
-                    $html = $value;
-                    if (strlen($value) > 0) {
-                        $link = $this->generateLinkToSalesforce($value);
-                        if ($link) {
-                            $html = $link;
-                        }
-                    }
+        if (empty($dataSource['data']['items'])) {
+            return $dataSource;
+        }
+
+        $entityGroup = $this->dividerPool
+            ->getDividerByGroupCode($this->groupName)
+            ->process(array_map([$this, 'entityId'], $dataSource['data']['items']));
+
+        $fieldName = $this->getData('name');
+        foreach ($dataSource['data']['items'] as &$item) {
+            if (empty($item[$fieldName])) {
+                continue;
+            }
+
+            foreach ($entityGroup as $websiteId => $entities) {
+                if (!isset($entities[$this->entityId($item)])) {
+                    continue;
                 }
-                $item[$fieldName . '_html'] = $html;
+
+                $item["{$fieldName}_html"] = $this->generateLinkToSalesforce($item[$fieldName], $websiteId);
+                continue 2;
             }
         }
 
@@ -68,47 +95,54 @@ class Sforceid extends Column
     }
 
     /**
+     * @param array $items
+     *
+     * @return mixed
+     */
+    private function entityId(array &$items)
+    {
+        return $items[$this->entityIdName];
+    }
+
+    /**
      * Generate link to specified object
      *
-     * @param $field salesforceId or string type1:salesforceId1;type2:salesforceId2
+     * @param string $field
+     * @param int $websiteId
+     *
      * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function generateLinkToSalesforce($field)
+    private function generateLinkToSalesforce($field, $websiteId)
     {
-        $result = null;
+        $result = [];
 
-        if ($field) {
-            $valuesArray = explode("\n", $field);
+        $url = $this->client->getSalesForceUrl($websiteId);
+        foreach (explode("\n", $field) as $value) {
+            $currency = '';
+            if (strpos($value, ':') !== false) {
+                list($currency, $value) = explode(':', $value);
+                $currency .= ': ';
+            }
 
-            $url = $this->client->getSalesForceUrl();
-            foreach ($valuesArray as $value) {
-                $currency = '';
-                if (strpos($value, ':') !== false) {
-                    $tmp = explode(':', $value);
-                    $currency = $tmp[0] . ': ';
-                    $field = $tmp[1];
-                    $value = $tmp[1];
-                }
+            if (empty($value)) {
+                continue;
+            }
 
-                if (empty($value)) {
-                    continue;
-                }
-
-                if ($url) {
-                    $result .= sprintf('%s<a target="_blank" href="%s" title="%s">%s</a><br />',
-                        $currency,
-                        $url . '/' . $value,
-                        __('Show on Salesforce'),
-                        $field
-                    );
-                } else {
-                    $result .= sprintf('%s<br/>',
-                        $value
-                    );
-                }
+            if ($url) {
+                $result[] = sprintf(
+                    '%1$s<a target="_blank" style="font-family:monospace;" href="%2$s/%3$s" title="%4$s">%3$s</a>',
+                    $currency,
+                    $url,
+                    $value,
+                    __('Show on Salesforce')
+                );
+            } else {
+                $result[] = sprintf('%s', $value);
             }
         }
 
-        return $result;
+
+        return implode('<br>', $result);
     }
 }
