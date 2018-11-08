@@ -35,15 +35,11 @@ abstract class DivideEntityByWebsiteOrg
      */
     public function process(array $entities)
     {
-        $groupedWebsites = $this->config->getWebsitesGrouppedByOrg();
-
-        $entities = $this->loadEntities($entities);
-
         $entitiesByWebsites = [];
-        foreach ($entities as $entity) {
+        foreach ($this->loadEntities($entities) as $entity) {
             foreach ($this->getEntityWebsiteIds($entity) as $entityWebsiteId) {
-                $generalWebsiteId = $groupedWebsites[$entityWebsiteId];
-                $entitiesByWebsites[$generalWebsiteId][$entity->getId()] = $entity->getId();
+                $uniqueWebsiteId = $this->config->uniqueWebsiteIdLogin($entityWebsiteId);
+                $entitiesByWebsites[$uniqueWebsiteId][$entity->getId()] = $entity->getId();
             }
         }
 

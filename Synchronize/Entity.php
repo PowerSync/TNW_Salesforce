@@ -1,5 +1,4 @@
 <?php
-
 namespace TNW\Salesforce\Synchronize;
 
 class Entity
@@ -9,26 +8,29 @@ class Entity
      */
     protected $synchronizeGroup;
 
-    /** @var Entity\DivideEntityByWebsiteOrg  */
-    protected $divideEntityByWebsiteOrg;
+    /**
+     * @var Entity\DivideEntityByWebsiteOrg\Pool
+     */
+    protected $dividerPool;
 
-    /** @var \TNW\Salesforce\Model\Config\WebsiteEmulator  */
+    /**
+     * @var \TNW\Salesforce\Model\Config\WebsiteEmulator
+     */
     protected $websiteEmulator;
 
     /**
      * Entity constructor.
      * @param Group $synchronizeGroup
-     * @param Entity\DivideEntityByWebsiteOrg $divideEntityByWebsiteOrg
+     * @param Entity\DivideEntityByWebsiteOrg\Pool $dividerPool
      * @param \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
      */
     public function __construct(
-        \TNW\Salesforce\Synchronize\Group $synchronizeGroup,
-        \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg $divideEntityByWebsiteOrg,
+        Group $synchronizeGroup,
+        Entity\DivideEntityByWebsiteOrg\Pool $dividerPool,
         \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
-    )
-    {
+    ) {
         $this->synchronizeGroup = $synchronizeGroup;
-        $this->divideEntityByWebsiteOrg = $divideEntityByWebsiteOrg;
+        $this->dividerPool = $dividerPool;
         $this->websiteEmulator = $websiteEmulator;
     }
 
@@ -42,26 +44,35 @@ class Entity
 
     /**
      * @param array $entities
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function synchronize(array $entities)
     {
-        $this->synchronizeGroup->messageDebug('Start entity "%s" synchronize', $this->synchronizeGroup->code());
+        $entitiesByWebsite = $this->dividerPool
+            ->getDividerByGroupCode($this->synchronizeGroup->code())
+            ->process($entities);
 
-        try {
-            $entitiesByWebsite = $this->divideEntityByWebsiteOrg->process($entities);
-            foreach ($entitiesByWebsite as $websiteId => $ents) {
+        foreach ($entitiesByWebsite as $websiteId => $entityIds) {
+            $this->websiteEmulator->wrapEmulationWebsite(function($websiteId) use ($entityIds) {
+                $this->synchronizeGroup->messageDebug(
+                    'Start entity "%s" synchronize for website %s',
+                    $this->synchronizeGroup->code(),
+                    $websiteId
+                );
 
-                $synchronizeGroup = $this->synchronizeGroup;
+                try {
+                    $this->synchronizeGroup->synchronize($entityIds);
+                } catch (\Exception $e) {
+                    $this->synchronizeGroup->messageError($e);
+                }
 
-                $this->websiteEmulator->wrapEmulationWebsite(function() use ($synchronizeGroup, $ents) {
-                    $synchronizeGroup->synchronize($ents);
-                }, $websiteId);
-
-            }
-        } catch (\Exception $e) {
-            $this->synchronizeGroup->messageError($e);
+                $this->synchronizeGroup->messageDebug(
+                    'Stop entity "%s" synchronize for website %s',
+                    $this->synchronizeGroup->code(),
+                    $websiteId
+                );
+            }, $websiteId);
         }
-
-        $this->synchronizeGroup->messageDebug('Stop entity "%s" synchronize', $this->synchronizeGroup->code());
     }
 }

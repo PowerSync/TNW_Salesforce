@@ -33,22 +33,16 @@ class AccountRecordType extends RecordType
 
     /**
      * AccountRecordType constructor.
-     * @param Transport\Calls\Query\InputFactory $inputFactory
-     * @param Transport\Calls\Query\OutputFactory $outputFactory
      * @param Transport\Calls\QueryInterface $query
-     * @param \TNW\SForceBusiness\Model\Customer\Config $config
+     * @param \TNW\Salesforce\Model\Customer\Config $config
      */
     public function __construct(
-        Transport\Calls\Query\InputFactory $inputFactory,
-        Transport\Calls\Query\OutputFactory $outputFactory,
         Transport\Calls\QueryInterface $query,
         \TNW\Salesforce\Model\Customer\Config $config
-    )
-    {
+    ) {
         $this->config = $config;
-        parent::__construct($inputFactory, $outputFactory, $query);
+        parent::__construct($query);
     }
-
 
     /**
      * Get list of all B2C record types in SF

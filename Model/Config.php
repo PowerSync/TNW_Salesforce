@@ -121,25 +121,19 @@ class Config extends DataObject
      */
     public function getSalesforceStatus($websiteId = null)
     {
-            $value = $this->getStoreConfig(
-                'tnwsforce_general/salesforce/active'
-            );
-
-        return $value ? true : false;
+        return (bool)$this->getStoreConfig('tnwsforce_general/salesforce/active', $websiteId);
     }
 
     /**
      * Get Salesfoce username from config
      *
      * @param int|null $websiteId
+     *
      * @return string
      */
     public function getSalesforceUsername($websiteId = null)
     {
-        $username = $this->getStoreConfig(
-            'tnwsforce_general/salesforce/username'
-        );
-        return $username;
+        return $this->getStoreConfig('tnwsforce_general/salesforce/username', $websiteId);
     }
 
     /**
@@ -150,9 +144,7 @@ class Config extends DataObject
      */
     public function getSalesforcePassword($websiteId = null)
     {
-        $password = $this->getStoreConfig(
-            'tnwsforce_general/salesforce/password'
-        );
+        $password = $this->getStoreConfig('tnwsforce_general/salesforce/password', $websiteId);
 
         $decrypt = $this->encryptor->decrypt($password);
         if (!empty($decrypt)) {
@@ -170,9 +162,7 @@ class Config extends DataObject
      */
     public function getSalesforceToken($websiteId = null)
     {
-        $token = $this->getStoreConfig(
-            'tnwsforce_general/salesforce/token'
-        );
+        $token = $this->getStoreConfig('tnwsforce_general/salesforce/token', $websiteId);
 
         $decrypt = $this->encryptor->decrypt($token);
         if (!empty($decrypt)) {
@@ -186,13 +176,13 @@ class Config extends DataObject
      * Get Salesfoce wsdl path from config
      *
      * @param int|null $websiteId
+     *
      * @return string
+     * @throws \Magento\Framework\Exception\FileSystemException
      */
     public function getSalesforceWsdl($websiteId = null)
     {
-        $dir = $this->getStoreConfig(
-            'tnwsforce_general/salesforce/wsdl'
-        );
+        $dir = $this->getStoreConfig('tnwsforce_general/salesforce/wsdl', $websiteId);
 
         if (strpos(trim($dir), '{var}') === 0) {
             $varDir = $this->filesystem->getDirectoryRead(DirectoryList::VAR_DIR);
@@ -251,6 +241,16 @@ class Config extends DataObject
     }
 
     /**
+     * @param int $websiteId
+     *
+     * @return mixed
+     */
+    public function uniqueWebsiteIdLogin($websiteId)
+    {
+        return $this->getWebsitesGrouppedByOrg()[$websiteId];
+    }
+
+    /**
      * Get Log status
      *
      * @param int|null $websiteId
@@ -258,11 +258,7 @@ class Config extends DataObject
      */
     public function getLogStatus($websiteId = null)
     {
-        $status = (int) $this->getStoreConfig(
-            'tnwsforce_general/debug/logstatus'
-        );
-
-        return $status;
+        return (int)$this->getStoreConfig('tnwsforce_general/debug/logstatus', $websiteId);
     }
 
     /**
@@ -289,38 +285,36 @@ class Config extends DataObject
      */
     public function getDbLogStatus($websiteId = null)
     {
-        $status = (int) $this->getStoreConfig(
-            'tnwsforce_general/debug/dblogstatus'
-        );
-
-        return $status;
+        return (int)$this->getStoreConfig('tnwsforce_general/debug/dblogstatus', $websiteId);
     }
 
     /**
      * Get Log status
      *
+     * @param int|null $websiteId
+     *
      * @return int
      */
     public function getLogDebug($websiteId = null)
     {
-        $status = (int) $this->getStoreConfig(
-            'tnwsforce_general/debug/logdebug'
-        );
-
-        return $status;
+        return (int)$this->getStoreConfig('tnwsforce_general/debug/logdebug', $websiteId);
     }
 
     /**
+     * @param int|null $websiteId
+     *
      * @return string
      */
-    public function getDbLogLimit()
+    public function getDbLogLimit($websiteId = null)
     {
-        return $this->getStoreConfig('tnwsforce_general/debug/db_log_limit');
+        return $this->getStoreConfig('tnwsforce_general/debug/db_log_limit', $websiteId);
     }
 
     /**
      * Get log path
+     *
      * @return string
+     * @throws \Magento\Framework\Exception\FileSystemException
      */
     public function getLogDir()
     {
@@ -328,71 +322,30 @@ class Config extends DataObject
             . DIRECTORY_SEPARATOR . 'sforce.log';
     }
 
-    #region Common methods to get config values
-    /**
-     * Get Store Id passed to request or get current if nothing
-     * @return int
-     */
-    public function getStoreId()
-    {
-        $store = null;
-        $storeId = $this->request->getParam('store');
-        if ($storeId) {
-            if ($storeId == 'undefined') {
-                $storeId = 0;
-            }
-            if (!is_array($storeId)) {
-                $store = $this->storeManager->getStore($storeId);
-            }
-        }
-        if (!$store) {
-            $store = $this->storeManager->getStore(0);
-        }
-
-        return (int)$store->getId();
-    }
-
-    /**
-     * Get Website Id passed to request or get current if nothing
-     * @return int
-     */
-    public function getWebsiteId()
-    {
-        $website = null;
-        $websiteId = $this->request->getParam('website');
-        if ($websiteId) {
-            if (!is_array($websiteId)) {
-                $website = $this->storeManager->getWebsite($websiteId);
-            }
-        }
-        if (!$website) {
-            $website = $this->storeManager->getWebsite(0);
-        }
-
-        return (int)$website->getId();
-    }
-
     /**
      * @param $path
+     * @param int|null $websiteId
+     *
      * @return mixed|null|string
      */
-    protected function getStoreConfig($path)
+    protected function getStoreConfig($path, $websiteId = null)
     {
         $scopeType = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
         $scopeCode = null;
 
-        $websiteId = $this->websiteDetector->detectCurrentWebsite();
+        try {
+            $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            $websiteId = null;
+        }
 
-        if ($websiteId) {
+        if ($websiteId !== null) {
             $scopeType = ScopeInterface::SCOPE_WEBSITE;
             $scopeCode = $websiteId;
         }
 
-        $value = $this->scopeConfig->getValue($path, $scopeType, $scopeCode);
-
-        return $value;
+        return $this->scopeConfig->getValue($path, $scopeType, $scopeCode);
     }
-    #endregion
 
     /**
      * @return array|bool
