@@ -82,10 +82,12 @@ class Query implements Transport\Calls\QueryInterface
 
     /**
      * @param $data
+     * @param int|null $websiteId
+     *
      * @return array|mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function exec($data)
+    public function exec($data, $websiteId = null)
     {
         $output = array();
 
@@ -94,8 +96,7 @@ class Query implements Transport\Calls\QueryInterface
             throw new \RuntimeException(sprintf('Query exceeded limit of %d characters', self::MAX_LENGTH));
         }
 
-        $results = $this->factory->client()->query($query);
-
+        $results = $this->factory->client($websiteId)->query($query);
         foreach ($results as $result) {
             $output[] = $this->prepareOutput($result);
         }

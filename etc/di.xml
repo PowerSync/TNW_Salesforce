@@ -253,7 +253,6 @@
     <virtualType name="TNW\Salesforce\Synchronize\Entity\Customer" type="TNW\Salesforce\Synchronize\Entity">
         <arguments>
             <argument name="synchronizeGroup" xsi:type="object">TNW\Soap\Synchronize\Customer</argument>
-            <argument name="divideEntityByWebsiteOrg" xsi:type="object">TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Customer</argument>
         </arguments>
     </virtualType>
     <type name="TNW\Salesforce\Controller\Adminhtml\Customer\SyncCustomer">
@@ -287,7 +286,6 @@
     <virtualType name="TNW\Salesforce\Synchronize\Entity\Website" type="TNW\Salesforce\Synchronize\Entity">
         <arguments>
             <argument name="synchronizeGroup" xsi:type="object">TNW\Soap\Synchronize\Website</argument>
-            <argument name="divideEntityByWebsiteOrg" xsi:type="object">TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Website</argument>
         </arguments>
     </virtualType>
     <type name="TNW\Salesforce\Controller\Adminhtml\System\Store\SyncAll">
@@ -342,6 +340,15 @@
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="tnw_salesforce_log_data_source" xsi:type="string">salesforceLogSearchResult</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool">
+        <arguments>
+            <argument name="dividers" xsi:type="array">
+                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Website</item>
+                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Customer</item>
             </argument>
         </arguments>
     </type>
