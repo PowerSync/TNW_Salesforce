@@ -71,7 +71,12 @@ class WebsiteDetector
      */
     public function getWebsiteFromRequest()
     {
-        return $this->request->getParam('website');
+        $website = $this->request->getParam('website');
+        if (is_numeric($website)) {
+            return $website;
+        }
+
+        return null;
     }
 
     /**
