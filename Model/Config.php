@@ -247,7 +247,12 @@ class Config extends DataObject
      */
     public function uniqueWebsiteIdLogin($websiteId)
     {
-        return $this->getWebsitesGrouppedByOrg()[$websiteId];
+        $grouped = $this->getWebsitesGrouppedByOrg();
+        if (isset($grouped[$websiteId])) {
+            return $grouped[$websiteId];
+        }
+
+        return $websiteId;
     }
 
     /**
