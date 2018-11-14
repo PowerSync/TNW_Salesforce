@@ -301,7 +301,7 @@ class Salesforce extends DataObject
                 }
             }
 
-            if ($this->loginResult[$cacheKey]) {
+            if (!empty($this->loginResult[$cacheKey])) {
                 $serverUrl = $this->loginResult[$cacheKey]->getServerUrl();
                 $instance_url = explode('/', $serverUrl);
                 $url = 'https://' . $instance_url[2];
