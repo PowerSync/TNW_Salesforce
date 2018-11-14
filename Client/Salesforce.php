@@ -289,6 +289,11 @@ class Salesforce extends DataObject
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
         $cacheKey = $this->salesforceConfig->uniqueWebsiteIdLogin($websiteId);
 
+        $active = $this->salesforceConfig->getSalesforceStatus($websiteId);
+        if (!$active) {
+            return null;
+        }
+
         /** @var string|null $url */
         $url = $this->loadCache(self::SFORCE_URL_CACHE_IDENTIFIER, $websiteId);
 
@@ -301,7 +306,7 @@ class Salesforce extends DataObject
                 }
             }
 
-            if ($this->loginResult[$cacheKey]) {
+            if (!empty($this->loginResult[$cacheKey])) {
                 $serverUrl = $this->loginResult[$cacheKey]->getServerUrl();
                 $instance_url = explode('/', $serverUrl);
                 $url = 'https://' . $instance_url[2];
