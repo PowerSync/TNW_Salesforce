@@ -37,8 +37,10 @@ class Website extends DivideEntityByWebsiteOrg
                 return $ids;
             }
         }
+
         $collection = $this->collectionFactory->create();
-        $entities = $collection->addFieldToFilter($collection->getIdFieldName(), $ids);
+
+        $entities = $collection->addFieldToFilter($collection->getResource()->getIdFieldName(), $ids);
 
         return $entities;
     }
