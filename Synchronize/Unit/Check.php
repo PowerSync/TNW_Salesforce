@@ -51,7 +51,7 @@ class Check extends Synchronize\Unit\UnitAbstract
                 throw new \RuntimeException(__('Unit "%1" not complete', $this->name()));
             }
 
-            foreach ($upsert->load()->entities() as $entity) {
+            foreach ($upsert->load()->get('entities') as $entity) {
                 $parentEntity = $this->findParentEntity($upsert->load(), $entity);
                 if (empty($parentEntity)) {
                     continue;
@@ -71,7 +71,7 @@ class Check extends Synchronize\Unit\UnitAbstract
                 throw new \RuntimeException(__('Unit "%1" not complete', $this->name()));
             }
 
-            foreach ($process->load()->entities() as $entity) {
+            foreach ($process->load()->get('entities') as $entity) {
                 $parentEntity = $this->findParentEntity($process->load(), $entity);
                 if (empty($parentEntity)) {
                     continue;
