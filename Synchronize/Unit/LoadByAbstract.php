@@ -16,17 +16,24 @@ abstract class LoadByAbstract extends Synchronize\Unit\UnitAbstract
      */
     protected $identification;
 
+    /**
+     * @var \TNW\Salesforce\Model\Entity\Object
+     */
+    private $entityObject;
+
     public function __construct(
         $name,
         $load,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        array $dependents = []
+        array $dependents = [],
+        \TNW\Salesforce\Model\Entity\Object $entityObject = null
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
         $this->load = $load;
         $this->identification = $identification;
+        $this->entityObject = $entityObject;
     }
 
     /**
@@ -46,7 +53,7 @@ abstract class LoadByAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function process()
     {
@@ -57,10 +64,14 @@ abstract class LoadByAbstract extends Synchronize\Unit\UnitAbstract
                 continue;
             }
 
-            $message[] = __("Loaded entities by %1:",
+            $message[] = __('Loaded entities by %1:',
                 $this->load()->identification()->printEntity($parentEntity));
 
             foreach ($loadByEntities as $entity) {
+                if (null !== $this->entityObject && null !== $entity->getId()) {
+                    $this->entityObject->load($entity);
+                }
+
                 $message[] = __("\tentity %1",
                     $this->identification->printEntity($entity));
 

@@ -8,10 +8,24 @@ class Load extends Synchronize\Unit\LoadAbstract
     /**
      * @var \Magento\Customer\Model\CustomerFactory
      */
-    protected $customerFactory;
+    private $customerFactory;
 
     /**
-     * {@inheritdoc}
+     * @var \Magento\Customer\Model\ResourceModel\Customer
+     */
+    private $resourceCustomer;
+
+    /**
+     * Load constructor.
+     *
+     * @param string $name
+     * @param array $entities
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param Synchronize\Unit\IdentificationInterface $identification
+     * @param \TNW\Salesforce\Model\Entity\Object $entityObject
+     * @param \Magento\Customer\Model\CustomerFactory $customerFactory
+     * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
      */
     public function __construct(
         $name,
@@ -19,10 +33,13 @@ class Load extends Synchronize\Unit\LoadAbstract
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        \Magento\Customer\Model\CustomerFactory $customerFactory
+        \TNW\Salesforce\Model\Entity\Object $entityObject,
+        \Magento\Customer\Model\CustomerFactory $customerFactory,
+        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
     ) {
-        parent::__construct($name, $entities, $units, $group, $identification);
+        parent::__construct($name, $entities, $units, $group, $identification, $entityObject);
         $this->customerFactory = $customerFactory;
+        $this->resourceCustomer = $resourceCustomer;
     }
 
     /**
@@ -35,6 +52,7 @@ class Load extends Synchronize\Unit\LoadAbstract
 
     /**
      * @param mixed $entity
+     *
      * @return \Magento\Customer\Model\Customer
      */
     public function loadEntity($entity)
@@ -46,7 +64,7 @@ class Load extends Synchronize\Unit\LoadAbstract
 
         if (is_numeric($entity)) {
             $customer = $this->customerFactory->create();
-            $customer->getResource()->load($customer, $entity);
+            $this->resourceCustomer->load($customer, $entity);
             $entity = $customer;
         }
 

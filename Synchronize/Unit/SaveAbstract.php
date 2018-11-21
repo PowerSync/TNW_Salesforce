@@ -4,6 +4,9 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
 
+/**
+ * @deprecated
+ */
 abstract class SaveAbstract extends Synchronize\Unit\UnitAbstract
 {
     /**

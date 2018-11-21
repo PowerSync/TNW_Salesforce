@@ -162,6 +162,14 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
+     * @return string
+     */
+    public function salesforceType()
+    {
+        return $this->salesforceType;
+    }
+
+    /**
      * @param $entity
      * @return bool
      */
