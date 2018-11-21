@@ -148,6 +148,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->version_2_1_0($context, $setup);
 
+        $this->version_2_4_8($context, $setup);
+
         $setup->endSetup();
     }
 
@@ -190,5 +192,53 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->createTable($table);
+    }
+
+    protected function version_2_4_8(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.4.8') >= 0) {
+            return;
+        }
+
+        $setup->getConnection()
+            ->addColumn($setup->getTable('salesforce_objects'), 'website_id', [
+                'type' => Table::TYPE_SMALLINT,
+                'unsigned' => true,
+                'nullable' => false,
+                'default' => 0,
+                'comment' => 'Website ID'
+            ]);
+
+        $setup->getConnection()
+            ->dropIndex(
+                $setup->getTable('salesforce_objects'),
+                $setup->getIdxName(
+                    'salesforce_objects',
+                    ['entity_id', 'salesforce_type', 'magento_type'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                )
+            );
+
+        $setup->getConnection()
+            ->addIndex(
+                $setup->getTable('salesforce_objects'),
+                $setup->getIdxName(
+                    'salesforce_objects',
+                    ['entity_id', 'salesforce_type', 'magento_type', 'website_id'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                ),
+                ['entity_id', 'salesforce_type', 'magento_type', 'website_id'],
+                \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+            );
+
+        $setup->getConnection()
+            ->addForeignKey(
+                $setup->getFkName('salesforce_objects', 'website_id', 'store_website', 'website_id'),
+                $setup->getTable('salesforce_objects'),
+                'website_id',
+                $setup->getTable('store_website'),
+                'website_id',
+                \Magento\Framework\DB\Ddl\Table::ACTION_CASCADE
+            );
     }
 }
