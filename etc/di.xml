@@ -147,6 +147,7 @@
         <arguments>
             <argument name="name" xsi:type="string">customerCheck</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
             <argument name="upsert" xsi:type="array">
                 <item name="accountUpsert" xsi:type="string">customerAccountUpsert</item>
                 <item name="contactUpsert" xsi:type="string">customerContactUpsert</item>

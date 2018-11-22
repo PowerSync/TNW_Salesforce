@@ -121,6 +121,24 @@ class Object
 
     /**
      * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param bool $status
+     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
+     *
+     * @throws LocalizedException
+     */
+    public function saveStatus($entity, $status, $website = null)
+    {
+        $this->resourceObjects
+            ->saveStatus(
+                $entity->getId(),
+                $this->magentoType,
+                $status,
+                $this->prepareWebsiteId($website)
+            );
+    }
+
+    /**
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $attributeName
      *
      * @return mixed
