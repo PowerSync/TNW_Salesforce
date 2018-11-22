@@ -67,7 +67,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function process()
     {
-        $salesforceType = $this->upsert()->salesforceType();
+        $attributeName = $this->upsert()->fieldSalesforceId();
         $message = [];
 
         foreach ($this->entities() as $entity) {
@@ -75,12 +75,14 @@ class Save extends Synchronize\Unit\UnitAbstract
                 continue;
             }
 
-            $this->entityObject->saveByObject($entity, $salesforceType);
+            // Save Salesforce Id
+            $this->entityObject->saveByAttribute($entity, $attributeName);
+
             $message[] = __(
                 "Updating %1 attribute:\n\t\"%2\": %3",
                 $this->identification->printEntity($entity),
-                $this->entityObject->attributeByObject($salesforceType),
-                $this->entityObject->valueByObject($entity, $salesforceType)
+                $attributeName,
+                $this->entityObject->valueByAttribute($entity, $attributeName)
             );
         }
 

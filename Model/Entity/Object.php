@@ -90,7 +90,7 @@ class Object
             $records[] = [
                 'magento_type' => $this->magentoType,
                 'entity_id' => $entity->getId(),
-                'object_id' => $entity->getData($attributeKey),
+                'object_id' => $this->valueByAttribute($entity, $attributeKey),
                 'salesforce_type' => $objectName,
                 'website_id' => $this->prepareWebsiteId($website)
             ];
@@ -101,18 +101,18 @@ class Object
 
     /**
      * @param \Magento\Framework\Model\AbstractModel $entity
-     * @param string $objectName
+     * @param string $attributeName
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
      *
      * @throws LocalizedException
      */
-    public function saveByObject($entity, $objectName, $website = null)
+    public function saveByAttribute($entity, $attributeName, $website = null)
     {
         $records[] = [
             'magento_type' => $this->magentoType,
             'entity_id' => $entity->getId(),
-            'object_id' => $this->valueByObject($entity, $objectName),
-            'salesforce_type' => $objectName,
+            'object_id' => $this->valueByAttribute($entity, $attributeName),
+            'salesforce_type' => $this->objectByAttribute($attributeName),
             'website_id' => $this->prepareWebsiteId($website)
         ];
 
@@ -121,31 +121,28 @@ class Object
 
     /**
      * @param \Magento\Framework\Model\AbstractModel $entity
-     * @param string $objectName
+     * @param string $attributeName
      *
      * @return mixed
-     * @throws LocalizedException
      */
-    public function valueByObject($entity, $objectName)
+    public function valueByAttribute($entity, $attributeName)
     {
-        $attribute = $this->attributeByObject($objectName);
-        return $entity->getData($attribute);
+        return $entity->getData($attributeName);
     }
 
     /**
-     * @param string $objectName
+     * @param string $attributeName
      *
      * @return false|int|string
      * @throws LocalizedException
      */
-    public function attributeByObject($objectName)
+    public function objectByAttribute($attributeName)
     {
-        $attribute = array_search($objectName, $this->mappingAttribute, true);
-        if (null === $attribute) {
+        if (empty($this->mappingAttribute[$attributeName])) {
             throw new LocalizedException(__('Unknown Salesforce object name'));
         }
 
-        return $attribute;
+        return $this->mappingAttribute[$attributeName];
     }
 
     /**
