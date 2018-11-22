@@ -86,6 +86,10 @@ class Save extends Synchronize\Unit\UnitAbstract
             );
         }
 
+        if (empty($message)) {
+            $message[] = __('Nothing to save');
+        }
+
         $this->group()->messageDebug(\implode("\n", $message));
     }
 
