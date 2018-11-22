@@ -52,11 +52,29 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
 
     /** @var   */
     protected $localeDate;
+
     /**
      * @var
      */
     private $fieldSalesforceId;
 
+    /**
+     * Upsert constructor.
+     *
+     * @param string $name
+     * @param string $load
+     * @param string $mapping
+     * @param string $salesforceType
+     * @param string $fieldSalesforceId
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param IdentificationInterface $identification
+     * @param Synchronize\Transport\Calls\Upsert\InputFactory $inputFactory
+     * @param Synchronize\Transport\Calls\Upsert\OutputFactory $outputFactory
+     * @param Synchronize\Transport\Calls\UpsertInterface $process
+     * @param Synchronize\Transport\Soap\ClientFactory $factory
+     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
+     */
     public function __construct(
         $name,
         $load,
@@ -167,6 +185,14 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     public function salesforceType()
     {
         return $this->salesforceType;
+    }
+
+    /**
+     * @return string
+     */
+    public function fieldSalesforceId()
+    {
+        return $this->fieldSalesforceId;
     }
 
     /**
