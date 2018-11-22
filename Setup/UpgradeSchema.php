@@ -238,7 +238,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'website_id',
                 $setup->getTable('store_website'),
                 'website_id',
-                \Magento\Framework\DB\Ddl\Table::ACTION_CASCADE
+                Table::ACTION_CASCADE
             );
     }
 }
