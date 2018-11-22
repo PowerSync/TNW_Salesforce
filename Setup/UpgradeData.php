@@ -443,6 +443,8 @@ class UpgradeData implements UpgradeDataInterface
 
         $this->version_2_3_11($context, $setup);
 
+        $this->version_2_4_8($context, $setup);
+
         $setup->endSetup();
     }
 
@@ -633,7 +635,6 @@ class UpgradeData implements UpgradeDataInterface
             ->insertOnDuplicate($setup->getTable('tnw_salesforce_mapper'), $defaultMap);
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -652,5 +653,73 @@ class UpgradeData implements UpgradeDataInterface
             ]
         );
     }
+    }
+
+    protected function version_2_4_8(ModuleContextInterface $context, ModuleDataSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.4.8') >= 0) {
+            return;
+        }
+
+        $connection = $setup->getConnection();
+
+        // Website
+        $select = $connection->select()
+            ->from($setup->getTable('store_website'), [
+                'entity_id' => 'website_id',
+                'object_id' => 'salesforce_id',
+                'magento_type' => new \Zend_Db_Expr('"Website"'),
+                'salesforce_type' => new \Zend_Db_Expr('"tnw_mage_basic__Magento_Website__c"'),
+                'website_id' => new \Zend_Db_Expr('0'),
+            ]);
+
+        $query = $connection->insertFromSelect(
+            $select,
+            $setup->getTable('salesforce_objects'),
+            ['entity_id', 'object_id', 'magento_type', 'salesforce_type', 'website_id'],
+            \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
+        );
+
+        $connection->query($query);
+
+        // Account
+        $select = $connection->select()
+            ->from($this->eavSetup->getAttributeTable(Customer::ENTITY, 'sforce_account_id'), [
+                'entity_id' => 'entity_id',
+                'object_id' => 'value',
+                'magento_type' => new \Zend_Db_Expr('"Customer"'),
+                'salesforce_type' => new \Zend_Db_Expr('"Account"'),
+                'website_id' => new \Zend_Db_Expr('0'),
+            ])
+            ->where('attribute_id = ?', $this->eavSetup->getAttribute(Customer::ENTITY, 'sforce_account_id', 'attribute_id'));
+
+        $query = $connection->insertFromSelect(
+            $select,
+            $setup->getTable('salesforce_objects'),
+            ['entity_id', 'object_id', 'magento_type', 'salesforce_type', 'website_id'],
+            \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
+        );
+
+        $connection->query($query);
+
+        // Contact
+        $select = $connection->select()
+            ->from($this->eavSetup->getAttributeTable(Customer::ENTITY, 'sforce_id'), [
+                'entity_id' => 'entity_id',
+                'object_id' => 'value',
+                'magento_type' => new \Zend_Db_Expr('"Customer"'),
+                'salesforce_type' => new \Zend_Db_Expr('"Contact"'),
+                'website_id' => new \Zend_Db_Expr('0'),
+            ])
+            ->where('attribute_id = ?', $this->eavSetup->getAttribute(Customer::ENTITY, 'sforce_id', 'attribute_id'));
+
+        $query = $connection->insertFromSelect(
+            $select,
+            $setup->getTable('salesforce_objects'),
+            ['entity_id', 'object_id', 'magento_type', 'salesforce_type', 'website_id'],
+            \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
+        );
+
+        $connection->query($query);
     }
 }
