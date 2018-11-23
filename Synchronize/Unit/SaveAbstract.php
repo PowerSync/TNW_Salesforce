@@ -21,8 +21,8 @@ abstract class SaveAbstract extends Synchronize\Unit\UnitAbstract
 
     /**
      * Initialize
-     * @param $name
-     * @param $load
+     * @param string $name
+     * @param string $load
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param IdentificationInterface $identification

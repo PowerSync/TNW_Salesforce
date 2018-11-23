@@ -108,10 +108,24 @@ class Object
      */
     public function saveByAttribute($entity, $attributeName, $website = null)
     {
+        $salesforceId = $this->valueByAttribute($entity, $attributeName);
+        $this->saveValueByAttribute($entity, $salesforceId, $attributeName, $website);
+    }
+
+    /**
+     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param $value
+     * @param $attributeName
+     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
+     *
+     * @throws LocalizedException
+     */
+    public function saveValueByAttribute($entity, $value, $attributeName, $website = null)
+    {
         $records[] = [
             'magento_type' => $this->magentoType,
             'entity_id' => $entity->getId(),
-            'object_id' => $this->valueByAttribute($entity, $attributeName),
+            'object_id' => $value,
             'salesforce_type' => $this->objectByAttribute($attributeName),
             'website_id' => $this->prepareWebsiteId($website)
         ];
