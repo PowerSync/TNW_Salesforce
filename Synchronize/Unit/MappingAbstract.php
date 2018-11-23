@@ -35,6 +35,19 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
      */
     protected $identification;
 
+    /**
+     * MappingAbstract constructor.
+     *
+     * @param string $name
+     * @param string $load
+     * @param string $lookup
+     * @param string $objectType
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param IdentificationInterface $identification
+     * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
+     * @param array $dependents
+     */
     public function __construct(
         $name,
         $load,

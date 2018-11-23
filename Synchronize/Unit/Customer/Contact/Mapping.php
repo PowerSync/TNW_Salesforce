@@ -6,17 +6,37 @@ use TNW\Salesforce\Model;
 
 class Mapping extends Synchronize\Unit\MappingAbstract
 {
-
     /**
      * @var \TNW\SForceBusiness\Model\Customer\Config
      */
     private $customerConfig;
 
     /**
-     * @var \Magento\Store\Api\WebsiteRepositoryInterface
+     * @var \Magento\Store\Model\StoreManager
      */
-    private $websiteRepository;
+    private $storeManager;
 
+    /**
+     * @var Model\ResourceModel\Objects
+     */
+    private $resourceObjects;
+
+    /**
+     * Mapping constructor.
+     *
+     * @param string $name
+     * @param string $load
+     * @param string $lookup
+     * @param string $objectType
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param Synchronize\Unit\IdentificationInterface $identification
+     * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
+     * @param Model\Customer\Config $customerConfig
+     * @param \Magento\Store\Model\StoreManager $storeManager
+     * @param Model\ResourceModel\Objects $resourceObjects
+     * @param array $dependents
+     */
     public function __construct(
         $name,
         $load,
@@ -26,16 +46,26 @@ class Mapping extends Synchronize\Unit\MappingAbstract
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
-        \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
-        \TNW\Salesforce\Model\Customer\Config $customerConfig,
+        Model\Customer\Config $customerConfig,
+        \Magento\Store\Model\StoreManager $storeManager,
+        Model\ResourceModel\Objects $resourceObjects,
         array $dependents = []
     ) {
-        parent::__construct($name, $load, $lookup, $objectType, $units, $group,
-            $identification, $mapperCollectionFactory, $dependents);
+        parent::__construct(
+            $name,
+            $load,
+            $lookup,
+            $objectType,
+            $units,
+            $group,
+            $identification,
+            $mapperCollectionFactory,
+            $dependents
+        );
 
-        $this->websiteRepository = $websiteRepository;
         $this->customerConfig = $customerConfig;
-
+        $this->storeManager = $storeManager;
+        $this->resourceObjects = $resourceObjects;
     }
 
     /**
@@ -71,7 +101,12 @@ class Mapping extends Synchronize\Unit\MappingAbstract
         }
 
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'website_id') === 0) {
-            return $this->websiteRepository->getById($entity->getWebsiteId())->getSalesforceId();
+            return $this->resourceObjects
+                ->loadEntityId(
+                    $entity->getWebsiteId(),
+                    'Website',
+                    $this->storeManager->getWebsite()->getId()
+                );
         }
 
         return parent::prepareValue($entity, $attributeCode);
@@ -84,24 +119,17 @@ class Mapping extends Synchronize\Unit\MappingAbstract
      */
     protected function defaultValue($entity, $mapper)
     {
-        if (
-            strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0
-        ) {
-
+        if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0) {
             if (
-                $this->customerConfig->contactAssignee($entity->getWebsiteId()) == Model\Config\Source\Customer\ContactAssignee::DEFAULT_OWNER ||
-                !$this->units()->get('customerAccountLookup')->get('%s/record/OwnerId', $entity)
+                $this->customerConfig->contactAssignee() === Model\Config\Source\Customer\ContactAssignee::DEFAULT_OWNER ||
+                !$this->unit('customerAccountLookup')->get('%s/record/OwnerId', $entity)
             ) {
-                $ownerId = $this->customerConfig->defaultOwner($entity->getWebsiteId());
-            } else {
-                $ownerId = $this->units()->get('customerAccountLookup')->get('%s/record/OwnerId', $entity);
+                return $this->customerConfig->defaultOwner();
             }
 
-            return $ownerId;
+            return $this->unit('customerAccountLookup')->get('%s/record/OwnerId', $entity);
         }
 
         return parent::defaultValue($entity, $mapper);
     }
-
-
 }
