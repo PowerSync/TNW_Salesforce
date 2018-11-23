@@ -93,7 +93,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
             $this->input[$entity]['AND']['EaW']['AND']['Email']['='] = strtolower($entity->getEmail());
             if ($this->customerConfigShare->isWebsiteScope()) {
                 $salesforceId = $this->resourceObjects
-                    ->loadEntityId(
+                    ->loadObjectId(
                         $entity->getWebsiteId(),
                         'Website',
                         $this->storeManager->getWebsite()->getId()
@@ -158,7 +158,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
             if ($this->customerConfigShare->isWebsiteScope()) {
                 try {
                     $websiteId = $this->resourceObjects
-                        ->loadEntityId(
+                        ->loadObjectId(
                             $entity->getWebsiteId(),
                             'Website',
                             $this->storeManager->getWebsite()->getId()
