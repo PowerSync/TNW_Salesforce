@@ -102,7 +102,7 @@ class Mapping extends Synchronize\Unit\MappingAbstract
 
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'website_id') === 0) {
             return $this->resourceObjects
-                ->loadEntityId(
+                ->loadObjectId(
                     $entity->getWebsiteId(),
                     'Website',
                     $this->storeManager->getWebsite()->getId()
