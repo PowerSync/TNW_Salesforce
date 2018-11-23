@@ -9,17 +9,37 @@ use TNW\Salesforce\Synchronize;
  */
 class Lookup extends Synchronize\Unit\LookupAbstract
 {
-
     /**
      * @var \Magento\Customer\Model\Config\Share
      */
     private $customerConfigShare;
 
     /**
-     * @var \Magento\Store\Api\WebsiteRepositoryInterface
+     * @var \Magento\Store\Model\StoreManager
      */
-    private $websiteRepository;
+    private $storeManager;
 
+    /**
+     * @var \TNW\Salesforce\Model\ResourceModel\Objects
+     */
+    private $resourceObjects;
+
+    /**
+     * Lookup constructor.
+     *
+     * @param string $name
+     * @param string $load
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param Synchronize\Unit\IdentificationInterface $identification
+     * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
+     * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
+     * @param Synchronize\Transport\Calls\QueryInterface $process
+     * @param \Magento\Customer\Model\Config\Share $customerConfigShare
+     * @param \Magento\Store\Model\StoreManager $storeManager
+     * @param \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects
+     * @param array $dependents
+     */
     public function __construct(
         $name,
         $load,
@@ -30,16 +50,30 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         Synchronize\Transport\Calls\Query\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\QueryInterface $process,
         \Magento\Customer\Model\Config\Share $customerConfigShare,
-        \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
+        \Magento\Store\Model\StoreManager $storeManager,
+        \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects,
         array $dependents = []
     ) {
-        parent::__construct($name, $load, $units, $group, $identification, $inputFactory, $outputFactory, $process, $dependents);
+        parent::__construct(
+            $name,
+            $load,
+            $units,
+            $group,
+            $identification,
+            $inputFactory,
+            $outputFactory,
+            $process,
+            $dependents
+        );
+
         $this->customerConfigShare = $customerConfigShare;
-        $this->websiteRepository = $websiteRepository;
+        $this->storeManager = $storeManager;
+        $this->resourceObjects = $resourceObjects;
     }
 
     /**
      * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function processInput()
     {
@@ -58,8 +92,14 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         foreach ($this->entities() as $entity) {
             $this->input[$entity]['AND']['EaW']['AND']['Email']['='] = strtolower($entity->getEmail());
             if ($this->customerConfigShare->isWebsiteScope()) {
-                $this->input[$entity]['AND']['EaW']['AND'][$magentoWebsiteField]['IN']
-                    = ['', $this->websiteRepository->getById($entity->getWebsiteId())->getSalesforceId()];
+                $salesforceId = $this->resourceObjects
+                    ->loadEntityId(
+                        $entity->getWebsiteId(),
+                        'Website',
+                        $this->storeManager->getWebsite()->getId()
+                    );
+
+                $this->input[$entity]['AND']['EaW']['AND'][$magentoWebsiteField]['IN'] = ['', $salesforceId];
             }
 
             $magentoId = $entity->getId();
@@ -84,10 +124,8 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         foreach ($this->output as $key => $record) {
 
             $websiteId = '';
-            if ($this->customerConfigShare->isWebsiteScope()) {
-                if (!empty($record[$magentoWebsiteField])) {
-                    $websiteId = $record[$magentoWebsiteField];
-                }
+            if (!empty($record[$magentoWebsiteField]) && $this->customerConfigShare->isWebsiteScope()) {
+                $websiteId = $record[$magentoWebsiteField];
             }
 
             if (!empty($record['Email'])) {
@@ -119,10 +157,17 @@ class Lookup extends Synchronize\Unit\LookupAbstract
 
             if ($this->customerConfigShare->isWebsiteScope()) {
                 try {
-                    $websiteId = $this->websiteRepository->getById($entity->getWebsiteId())->getSalesforceId();
+                    $websiteId = $this->resourceObjects
+                        ->loadEntityId(
+                            $entity->getWebsiteId(),
+                            'Website',
+                            $this->storeManager->getWebsite()->getId()
+                        );
                 } catch (\Exception $e) {
+                    $this->group()->messageError($e);
                     $websiteId = '';
                 }
+
                 $recordsIds[20] = array_keys($searchIndex['eaw'], strtolower("{$entity->getEmail()}:{$websiteId}"));
             }
 

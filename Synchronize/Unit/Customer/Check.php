@@ -72,7 +72,7 @@ class Check extends Synchronize\Unit\Check
         $this->indexerRegistry->get(\Magento\Customer\Model\Customer::CUSTOMER_GRID_INDEXER_ID)
             ->reindexList(array_keys($checkSuccess));
 
-        $this->group()->messageDebug("Save attribute \"sforce_sync_status\":\n%s", $checkSuccess);
+        $this->group()->messageDebug("Save status:\n%s", $checkSuccess);
     }
 
     /**

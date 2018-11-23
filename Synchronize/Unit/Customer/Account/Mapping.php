@@ -100,7 +100,7 @@ class Mapping extends Synchronize\Unit\MappingAbstract
         if (
             strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0
         ) {
-            return $this->customerConfig->defaultOwner($entity->getWebsiteId());
+            return $this->customerConfig->defaultOwner();
         }
 
         return $default;
