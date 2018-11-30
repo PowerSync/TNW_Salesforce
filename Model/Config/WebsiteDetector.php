@@ -107,9 +107,7 @@ class WebsiteDetector
         if ($websiteId === null) {
             if ($this->isAdminArea()) {
                 $websiteId = $this->getWebsiteFromRequest();
-            }
-
-            if ($websiteId === null) {
+            } elseif ($websiteId === null) {
                 $websiteId = $this->getCurrentStoreWebsite()->getId();
             }
         }
