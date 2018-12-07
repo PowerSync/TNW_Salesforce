@@ -2,68 +2,57 @@
 
 namespace TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer;
 
-use Magento\Framework\Data\Form\Element\CollectionFactory;
-use Magento\Framework\Data\Form\Element\Factory;
-use Magento\Framework\Escaper;
+use Magento\Customer\Controller\RegistryConstants;
+use TNW\SForceEnterprise\Model\Cron\Source\MagentoObjectType;
 
-class SForceId extends \Magento\Framework\Data\Form\Element\Link
+/**
+ * Class SForceId
+ * @package TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer
+ */
+class SForceId extends \TNW\Salesforce\Block\Adminhtml\Base\Edit\Renderer\SForceId
 {
-    /** @var \TNW\Salesforce\Client\Salesforce  */
-    private $client;
 
-    public function __construct(
-        Factory $factoryElement,
-        CollectionFactory $factoryCollection,
-        Escaper $escaper,
-        \TNW\Salesforce\Client\Salesforce $client,
-        array $data
-    ) {
-        parent::__construct($factoryElement, $factoryCollection, $escaper, $data);
-        $this->client = $client;
-    }
-
-    public function getElementHtml()
+    /**
+     * @return integer
+     */
+    public function getEntityId()
     {
-        return $this->generateLinkToSalesforce($this->getValue());
+        return $this->registry->registry(RegistryConstants::CURRENT_CUSTOMER_ID);
     }
 
     /**
-     * Generate link to specified object
-     *
-     * @param string $field
-     *
      * @return string
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function generateLinkToSalesforce($field)
+    public function getMagentoObjectType()
     {
-        $results = [];
+        return MagentoObjectType::OBJECT_TYPE_CUSTOMER;
+    }
 
-        $url = $this->client->getSalesForceUrl($this->getData('website_id'));
-        foreach (explode("\n", $field) as $value) {
-            $currency = '';
-            if (strpos($value, ':') !== false) {
-                list($currency, $value) = explode(':', $value);
-                $currency .= ': ';
-            }
+    /**
+     * @return null|string
+     * @throws \Exception
+     */
+    public function getSalesforceObjectByAttribute()
+    {
+        $salesforceObject = null;
+        switch ($this->getId()) {
+            case 'sforce_id':
+                $salesforceObject = 'Contact';
+                break;
 
-            if (empty($value)) {
-                continue;
-            }
+            case 'sforce_account_id':
+                $salesforceObject = 'Account';
+                break;
 
-            if ($url) {
-                $results[] = sprintf(
-                    '%1$s<a target="_blank" style="font-family:monospace;" href="%2$s/%3$s" title="%4$s">%3$s</a>',
-                    $currency,
-                    $url,
-                    $value,
-                    __('Show on Salesforce')
-                );
-            } else {
-                $results[] = $value;
-            }
+            case 'sforce_lead_id':
+                $salesforceObject = 'Lead';
+                break;
+            default:
+                throw new \Exception(__('Unknown attribute: %1', $this->getId()));
+                break;
+
         }
 
-        return sprintf('<div class="control-value">%s</div>', implode('<br>', $results));
+        return $salesforceObject;
     }
 }
