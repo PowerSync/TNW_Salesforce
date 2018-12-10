@@ -1,0 +1,6 @@
+<!-- ko foreach: {data: value, as: '_value'} -->
+<!-- ko if: $parent.prefix(_value) -->
+    <!-- ko text: $parent.prefix(_value) --><!-- /ko -->:
+<!-- /ko -->
+<a target="_blank" style="font-family:monospace;" class="admin__field-value" data-bind="text: $parent.text(_value), attr: {href: $parent.href+$parent.text(_value)}"></a><br>
+<!-- /ko -->
