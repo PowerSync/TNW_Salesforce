@@ -21,6 +21,11 @@ class Objects extends AbstractDb
     private $selectStatus;
 
     /**
+     * @var \Magento\Framework\DB\Select
+     */
+    private $selectPriceBookId;
+
+    /**
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function _construct()
@@ -44,6 +49,13 @@ class Objects extends AbstractDb
             ->where('magento_type = :magento_type')
             ->where('entity_id = :entity_id')
             ->where('website_id = :website_id');
+
+        $this->selectPriceBookId = $this->getConnection()->select()
+            ->from($this->getMainTable(), ['object_id', 'salesforce_type'])
+            ->where('magento_type = "PricebookEntry"')
+            ->where('entity_id = :entity_id')
+            ->where('store_id = :store_id')
+            ->where('website_id = :website_id');
     }
 
     /**
@@ -58,6 +70,22 @@ class Objects extends AbstractDb
         return $this->getConnection()->fetchOne($this->selectObjectId, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
+            'website_id' => $websiteId,
+        ]);
+    }
+
+    /**
+     * @param int $productId
+     * @param int $storeId
+     * @param int $websiteId
+     *
+     * @return string
+     */
+    public function loadPriceBookId($productId, $storeId, $websiteId)
+    {
+        return $this->getConnection()->fetchOne($this->selectPriceBookId, [
+            'entity_id' => $productId,
+            'store_id' => $storeId,
             'website_id' => $websiteId,
         ]);
     }
@@ -145,6 +173,7 @@ class Objects extends AbstractDb
                 'salesforce_type',
                 'status',
                 'website_id',
+                'store_id',
             ]));
         }, $records);
 

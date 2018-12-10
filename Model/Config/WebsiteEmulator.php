@@ -78,10 +78,12 @@ class WebsiteEmulator
         $this->startEnvironmentEmulation($websiteId);
 
         try {
-            return $callback($websiteId);
+            $result = $callback($websiteId);
         } finally {
             $this->stopEnvironmentEmulation();
         }
+
+        return $result;
     }
 
     /**

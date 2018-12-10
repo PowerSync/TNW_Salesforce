@@ -150,6 +150,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->version_2_4_8($context, $setup);
 
+        $this->version_2_4_9($context, $setup);
+
         $setup->endSetup();
     }
 
@@ -238,6 +240,54 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'website_id',
                 $setup->getTable('store_website'),
                 'website_id',
+                Table::ACTION_CASCADE
+            );
+    }
+
+    protected function version_2_4_9(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.4.9') >= 0) {
+            return;
+        }
+
+        $setup->getConnection()
+            ->addColumn($setup->getTable('salesforce_objects'), 'store_id', [
+                'type' => Table::TYPE_SMALLINT,
+                'unsigned' => true,
+                'nullable' => false,
+                'default' => 0,
+                'comment' => 'Store ID'
+            ]);
+
+        $setup->getConnection()
+            ->dropIndex(
+                $setup->getTable('salesforce_objects'),
+                $setup->getIdxName(
+                    'salesforce_objects',
+                    ['entity_id', 'salesforce_type', 'magento_type', 'website_id'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                )
+            );
+
+        $setup->getConnection()
+            ->addIndex(
+                $setup->getTable('salesforce_objects'),
+                $setup->getIdxName(
+                    'salesforce_objects',
+                    ['entity_id', 'salesforce_type', 'magento_type', 'website_id', 'store_id'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                ),
+                ['entity_id', 'salesforce_type', 'magento_type', 'website_id', 'store_id'],
+                \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+            );
+
+        $setup->getConnection()
+            ->addForeignKey(
+                $setup->getFkName('salesforce_objects', 'store_id', 'store', 'store_id'),
+                $setup->getTable('salesforce_objects'),
+                'store_id',
+                $setup->getTable('store'),
+                'store_id',
                 Table::ACTION_CASCADE
             );
     }
