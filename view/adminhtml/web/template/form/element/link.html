@@ -1,12 +1,12 @@
-<!-- ko foreach: {data: value, as: '_value'} -->
-<!-- ko if: $parent.prefix(_value) -->
-    <!-- ko text: $parent.prefix(_value) --><!-- /ko -->:
-<!-- /ko -->
-<!-- ko if: $parent.href -->
-<a target="_blank" style="font-family:monospace;" class="admin__field-value" data-bind="text: $parent.text(_value), attr: {href: $parent.href+$parent.text(_value)}"></a>
-<!-- /ko -->
-<!-- ko ifnot: $parent.href -->
-<span style="font-family:monospace;" class="admin__field-value" data-bind="text: $parent.text(_value)"></span>
-<!-- /ko -->
-<br>
+<!-- ko foreach: {data: values(), as: 'value'} -->
+    <!-- ko if: !$parent.isEmpty($parent.prefix(value)) -->
+        <!-- ko text: $parent.prefix(value) --><!-- /ko -->:
+    <!-- /ko -->
+    <!-- ko if: !$parent.isEmpty($parent.href) -->
+        <a target="_blank" style="font-family:monospace;" class="admin__field-value" data-bind="text: $parent.text(value), attr: {href: $parent.href+$parent.text(value)}"></a>
+    <!-- /ko -->
+    <!-- ko if: $parent.isEmpty($parent.href) -->
+        <span style="font-family:monospace;" class="admin__field-value" data-bind="text: $parent.text(value)"></span>
+    <!-- /ko -->
+    <br>
 <!-- /ko -->

@@ -1,6 +1,7 @@
 define([
+    'underscore',
     'Magento_Ui/js/form/element/abstract'
-], function (Abstract) {
+], function (_, Abstract) {
     'use strict';
 
     return Abstract.extend({
@@ -10,8 +11,11 @@ define([
         },
 
         prefix: function(value) {
-            var explode = value.split(':');
+            if (!_.isString(value)) {
+                return '';
+            }
 
+            var explode = value.split(':');
             if (explode.length === 1) {
                 return '';
             }
@@ -20,6 +24,10 @@ define([
         },
 
         text: function(value) {
+            if (!_.isString(value)) {
+                return '';
+            }
+
             var explode = value.split(':');
 
             if (explode.length === 1) {
@@ -27,6 +35,14 @@ define([
             }
 
             return explode[1];
+        },
+
+        isEmpty: function (value) {
+            return _.isEmpty(value);
+        },
+
+        values: function () {
+            return _.isArray(this.value()) ? this.value() : [];
         }
     });
 });
