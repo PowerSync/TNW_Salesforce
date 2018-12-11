@@ -16,4 +16,7 @@
         </arguments>
     </type>
 
+    <type name="Magento\Customer\Model\ResourceModel\Grid\Collection">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Customer\Model\ResourceModel\Grid\Collection" />
+    </type>
 </config>
