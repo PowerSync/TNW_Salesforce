@@ -19,7 +19,7 @@ define([
             return explode[0];
         },
 
-        text:  function(value) {
+        text: function(value) {
             var explode = value.split(':');
 
             if (explode.length === 1) {
