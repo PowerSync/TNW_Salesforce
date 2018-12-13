@@ -8,23 +8,36 @@ use Magento\Ui\Component\Layout\Tabs\TabInterface;
 use Magento\Backend\Block\Widget\Form\Generic;
 use TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SForceId;
 use TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SyncStatus;
+use TNW\SForceEnterprise\Model\Cron\Source\MagentoObjectType;
 
 class Tabs extends Generic implements TabInterface
 {
-    /** @var \Magento\Framework\Registry */
+    /**
+     * @var \Magento\Framework\Registry
+     */
     protected $coreRegistry;
-    /** @var CustomerRepositoryInterface */
+
+    /**
+     * @var CustomerRepositoryInterface
+     */
     protected $customerRepository;
+
+    /**
+     * @var \TNW\Salesforce\Model\ResourceModel\Objects
+     */
+    private $resourceObjects;
 
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Registry $registry,
         \Magento\Framework\Data\FormFactory $formFactory,
         CustomerRepositoryInterface $customerRepository,
+        \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects,
         array $data = []
     ) {
         $this->coreRegistry = $registry;
         $this->customerRepository = $customerRepository;
+        $this->resourceObjects = $resourceObjects;
 
         parent::__construct($context, $registry, $formFactory, $data);
     }
@@ -139,21 +152,33 @@ class Tabs extends Generic implements TabInterface
         $fieldSet->addType('sync_status', SyncStatus::class);
         $fieldSet->addType('sforce_id', SForceId::class);
 
+        $status = $this->resourceObjects->loadStatus(
+            $this->getCustomerId(),
+            MagentoObjectType::OBJECT_TYPE_CUSTOMER,
+            $this->websiteId()
+        );
+
         $fieldSet->addField('sforce_sync_status', 'sync_status', [
             'name' => 'sforce_sync_status',
             'data-form-part' => $this->getData('target_form'),
             'label' => __('Sync Status'),
             'title' => __('Sync Status'),
-            'value' => $this->getAttributeValue('sforce_sync_status'),
+            'value' => $status,
         ]);
+
+        $salesforceIds = $this->resourceObjects->loadObjectIds(
+            $this->getCustomerId(),
+            MagentoObjectType::OBJECT_TYPE_CUSTOMER,
+            $this->websiteId()
+        );
 
         $fieldSet->addField('sforce_id', 'sforce_id', [
             'name' => 'sforce_id',
             'data-form-part' => $this->getData('target_form'),
             'label' => __('Salesforce Contact Id'),
             'title' => __('Salesforce Contact Id'),
-            'value' => $this->getAttributeValue('sforce_id'),
-            'website_id' => $this->getCustomer()->getWebsiteId(),
+            'value' => isset($salesforceIds['Contact']) ? $salesforceIds['Contact'] : '',
+            'website_id' => $this->websiteId(),
         ]);
 
         $fieldSet->addField('sforce_account_id', 'sforce_id', [
@@ -161,8 +186,8 @@ class Tabs extends Generic implements TabInterface
             'data-form-part' => $this->getData('target_form'),
             'label' => __('Salesforce Account Id'),
             'title' => __('Salesforce Account Id'),
-            'value' => $this->getAttributeValue('sforce_account_id'),
-            'website_id' => $this->getCustomer()->getWebsiteId(),
+            'value' => isset($salesforceIds['Account']) ? $salesforceIds['Account'] : '',
+            'website_id' => $this->websiteId(),
         ]);
 
         $fieldSet->addField('sforce_lead_id', 'sforce_id', [
@@ -170,8 +195,8 @@ class Tabs extends Generic implements TabInterface
             'data-form-part' => $this->getData('target_form'),
             'label' => __('Salesforce Lead Id'),
             'title' => __('Salesforce Lead Id'),
-            'value' => $this->getAttributeValue('sforce_lead_id'),
-            'website_id' => $this->getCustomer()->getWebsiteId(),
+            'value' => isset($salesforceIds['Lead']) ? $salesforceIds['Lead'] : '',
+            'website_id' => $this->websiteId(),
         ]);
 
         $this->additionalFields($fieldSet);
@@ -186,6 +211,16 @@ class Tabs extends Generic implements TabInterface
         $this->setForm($form);
 
         return $this;
+    }
+
+    /**
+     * @return int|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function websiteId()
+    {
+        return $this->getCustomer()->getWebsiteId();
     }
 
     /**
