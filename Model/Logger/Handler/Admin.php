@@ -43,10 +43,6 @@ class Admin extends AbstractProcessingHandler
      */
     protected function write(array $record)
     {
-        if (strcasecmp($this->appState->getAreaCode(), \Magento\Framework\App\Area::AREA_ADMINHTML) !== 0) {
-            return;
-        }
-
         if (strcasecmp($this->request->getActionName(), 'inlineEdit') === 0) {
             return;
         }
