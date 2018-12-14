@@ -13,7 +13,17 @@ class Objects extends AbstractDb
     /**
      * @var \Magento\Framework\DB\Select
      */
+    private $selectObjectIds;
+
+    /**
+     * @var \Magento\Framework\DB\Select
+     */
     private $selectEntityId;
+
+    /**
+     * @var \Magento\Framework\DB\Select
+     */
+    private $selectEntityIds;
 
     /**
      * @var \Magento\Framework\DB\Select
@@ -26,9 +36,30 @@ class Objects extends AbstractDb
     private $selectPriceBookId;
 
     /**
+     * @var \TNW\Salesforce\Model\Config
+     */
+    private $config;
+
+    /**
+     * Objects constructor.
+     *
+     * @param \Magento\Framework\Model\ResourceModel\Db\Context $context
+     * @param \TNW\Salesforce\Model\Config $config
+     * @param null $connectionName
+     */
+    public function __construct(
+        \Magento\Framework\Model\ResourceModel\Db\Context $context,
+        \TNW\Salesforce\Model\Config $config,
+        $connectionName = null
+    ) {
+        parent::__construct($context, $connectionName);
+        $this->config = $config;
+    }
+
+    /**
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function _construct()
+    protected function _construct()
     {
         $this->_init('salesforce_objects', 'row_id');
 
@@ -36,26 +67,58 @@ class Objects extends AbstractDb
             ->from($this->getMainTable(), ['object_id', 'salesforce_type'])
             ->where('magento_type = :magento_type')
             ->where('entity_id = :entity_id')
-            ->where('website_id = :website_id');
+            ->where('website_id IN (:entity_website_id, :base_website_id)')
+            ->order(new \Zend_Db_Expr('FIELD(website_id, :entity_website_id, :base_website_id)'))
+            ->limit(1);
+
+        $this->selectObjectIds = $this->getConnection()->select()
+            ->from($this->getMainTable(), ['object_id', 'salesforce_type'])
+            ->where('magento_type = :magento_type')
+            ->where('entity_id = :entity_id')
+            ->where('website_id IN (:base_website_id, :entity_website_id)')
+            ->order(new \Zend_Db_Expr('FIELD(website_id, :base_website_id, :entity_website_id)'));
 
         $this->selectEntityId = $this->getConnection()->select()
             ->from($this->getMainTable(), ['entity_id', 'magento_type'])
             ->where('salesforce_type = :salesforce_type')
             ->where('object_id = :object_id')
-            ->where('website_id = :website_id');
+            ->where('website_id IN (:entity_website_id, :base_website_id)')
+            ->order(new \Zend_Db_Expr('FIELD(website_id, :entity_website_id, :base_website_id)'))
+            ->limit(1);
+
+        $this->selectEntityIds = $this->getConnection()->select()
+            ->from($this->getMainTable(), ['entity_id', 'magento_type'])
+            ->where('salesforce_type = :salesforce_type')
+            ->where('object_id = :object_id')
+            ->where('website_id IN (:entity_website_id, :base_website_id)')
+            ->order(new \Zend_Db_Expr('FIELD(website_id, :base_website_id, :entity_website_id)'));
 
         $this->selectStatus = $this->getConnection()->select()
             ->from($this->getMainTable(), ['status'])
             ->where('magento_type = :magento_type')
             ->where('entity_id = :entity_id')
-            ->where('website_id = :website_id');
+            ->where('website_id IN(:entity_website_id, :base_website_id)')
+            ->order(new \Zend_Db_Expr('FIELD(website_id, :entity_website_id, :base_website_id)'))
+            ->limit(1);
 
         $this->selectPriceBookId = $this->getConnection()->select()
             ->from($this->getMainTable(), ['object_id', 'salesforce_type'])
             ->where('magento_type = "PricebookEntry"')
             ->where('entity_id = :entity_id')
             ->where('store_id = :store_id')
-            ->where('website_id = :website_id');
+            ->where('website_id IN(:entity_website_id, :base_website_id)')
+            ->order(new \Zend_Db_Expr('FIELD(website_id, :entity_website_id, :base_website_id)'))
+            ->limit(1);
+    }
+
+    /**
+     * @param $websiteId
+     *
+     * @return int
+     */
+    public function baseWebsiteId($websiteId)
+    {
+        return $this->config->uniqueWebsiteIdLogin($websiteId);
     }
 
     /**
@@ -70,7 +133,8 @@ class Objects extends AbstractDb
         return $this->getConnection()->fetchOne($this->selectObjectId, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
-            'website_id' => $websiteId,
+            'entity_website_id' => $websiteId,
+            'base_website_id' => $this->baseWebsiteId($websiteId),
         ]);
     }
 
@@ -86,7 +150,8 @@ class Objects extends AbstractDb
         return $this->getConnection()->fetchOne($this->selectPriceBookId, [
             'entity_id' => $productId,
             'store_id' => $storeId,
-            'website_id' => $websiteId,
+            'entity_website_id' => $websiteId,
+            'base_website_id' => $this->baseWebsiteId($websiteId),
         ]);
     }
 
@@ -99,10 +164,11 @@ class Objects extends AbstractDb
      */
     public function loadObjectIds($entityId, $magentoType, $websiteId)
     {
-        return array_flip($this->getConnection()->fetchPairs($this->selectObjectId, [
+        return array_flip($this->getConnection()->fetchPairs($this->selectObjectIds, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
-            'website_id' => $websiteId,
+            'entity_website_id' => $websiteId,
+            'base_website_id' => $this->baseWebsiteId($websiteId),
         ]));
     }
 
@@ -118,7 +184,8 @@ class Objects extends AbstractDb
         return $this->getConnection()->fetchOne($this->selectStatus, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
-            'website_id' => $websiteId,
+            'entity_website_id' => $websiteId,
+            'base_website_id' => $this->baseWebsiteId($websiteId),
         ]);
     }
 
@@ -134,7 +201,8 @@ class Objects extends AbstractDb
         return $this->getConnection()->fetchOne($this->selectEntityId, [
             'salesforce_type' => $salesforceType,
             'object_id' => $objectId,
-            'website_id' => $websiteId,
+            'entity_website_id' => $websiteId,
+            'base_website_id' => $this->baseWebsiteId($websiteId),
         ]);
     }
 
@@ -150,7 +218,8 @@ class Objects extends AbstractDb
         return array_flip($this->getConnection()->fetchPairs($this->selectEntityId, [
             'salesforce_type' => $salesforceType,
             'object_id' => $objectId,
-            'website_id' => $websiteId,
+            'entity_website_id' => $websiteId,
+            'base_website_id' => $this->baseWebsiteId($websiteId),
         ]));
     }
 
