@@ -11,7 +11,7 @@ class Check extends Synchronize\Unit\Check
     private $load;
 
     /**
-     * @var \TNW\Salesforce\Model\Entity\Object
+     * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage
      */
     private $entityObject;
 
@@ -28,7 +28,7 @@ class Check extends Synchronize\Unit\Check
      * @param array $upsert
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param \TNW\Salesforce\Model\Entity\Object $entityObject
+     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject
      * @param \Magento\Framework\Indexer\IndexerRegistry $indexerRegistry
      * @param array $process
      * @param array $dependents
@@ -39,7 +39,7 @@ class Check extends Synchronize\Unit\Check
         array $upsert,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        \TNW\Salesforce\Model\Entity\Object $entityObject,
+        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject,
         \Magento\Framework\Indexer\IndexerRegistry $indexerRegistry,
         array $process = [],
         array $dependents = []

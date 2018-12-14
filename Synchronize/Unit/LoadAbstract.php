@@ -16,7 +16,7 @@ abstract class LoadAbstract extends Synchronize\Unit\UnitAbstract
     protected $identification;
 
     /**
-     * @var \TNW\Salesforce\Model\Entity\Object
+     * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage
      */
     private $entityObject;
 
@@ -26,7 +26,7 @@ abstract class LoadAbstract extends Synchronize\Unit\UnitAbstract
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        \TNW\Salesforce\Model\Entity\Object $entityObject = null
+        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject = null
     ) {
         parent::__construct($name, $units, $group);
         $this->entities = $entities;

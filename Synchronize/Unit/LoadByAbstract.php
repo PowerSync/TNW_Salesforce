@@ -17,7 +17,7 @@ abstract class LoadByAbstract extends Synchronize\Unit\UnitAbstract
     protected $identification;
 
     /**
-     * @var \TNW\Salesforce\Model\Entity\Object
+     * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage
      */
     private $entityObject;
 
@@ -28,7 +28,7 @@ abstract class LoadByAbstract extends Synchronize\Unit\UnitAbstract
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         array $dependents = [],
-        \TNW\Salesforce\Model\Entity\Object $entityObject = null
+        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject = null
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
         $this->load = $load;

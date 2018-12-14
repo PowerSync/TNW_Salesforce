@@ -3,7 +3,7 @@ namespace TNW\Salesforce\Model\Entity;
 
 use Magento\Framework\Exception\LocalizedException;
 
-class Object
+class SalesforceIdStorage
 {
     /**
      * @var string

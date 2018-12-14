@@ -21,7 +21,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     private $identification;
 
     /**
-     * @var \TNW\Salesforce\Model\Entity\Object
+     * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage
      */
     private $entityObject;
 
@@ -34,7 +34,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param IdentificationInterface $identification
-     * @param \TNW\Salesforce\Model\Entity\Object $entityObject
+     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject
      * @param array $dependents
      */
     public function __construct(
@@ -44,7 +44,7 @@ class Save extends Synchronize\Unit\UnitAbstract
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        \TNW\Salesforce\Model\Entity\Object $entityObject,
+        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject,
         array $dependents = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsert]));
