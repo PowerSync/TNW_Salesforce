@@ -2,14 +2,8 @@
 
 namespace TNW\Salesforce\Model\Customer;
 
-use Magento\Framework\DataObject;
-use Magento\Store\Model\ScopeInterface;
-
 /**
  * Configuration for customer Salesforce client
- *
- * Class Config
- * @package TNW\Salesforce\Model
  */
 class Config extends \TNW\Salesforce\Model\Config
 {
@@ -21,9 +15,7 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function getCustomerStatus($websiteId = null)
     {
-        $value = $this->getStoreConfig('tnwsforce_customer/general/active');
-
-        return $value ? true : false;
+        return (bool)$this->getStoreConfig('tnwsforce_customer/general/active', $websiteId);
     }
 
     /**
@@ -33,11 +25,7 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function canRenameAccount($websiteId = null)
     {
-
-        $value = $this->getStoreConfig('tnwsforce_customer/general/account_name');
-
-
-        return $value ? true : false;
+        return (bool)$this->getStoreConfig('tnwsforce_customer/general/account_name', $websiteId);
     }
 
     /**
@@ -48,10 +36,7 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function getCustomerAllGroups($websiteId = null)
     {
-
-        $value = $this->getStoreConfig('tnwsforce_customer/general/sync_groups');
-
-        return $value ? true : false;
+        return (bool)$this->getStoreConfig('tnwsforce_customer/general/sync_groups', $websiteId);
     }
 
     /**
@@ -63,7 +48,7 @@ class Config extends \TNW\Salesforce\Model\Config
     public function getCustomerSyncGroups($websiteId = null)
     {
 
-        $value = $this->getStoreConfig('tnwsforce_customer/general/customer_group');
+        $value = $this->getStoreConfig('tnwsforce_customer/general/customer_group', $websiteId);
 
         $result = [];
         $value = trim($value);
@@ -83,9 +68,7 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function defaultOwner($websiteId = null)
     {
-        $value = $this->getStoreConfig('tnwsforce_customer/general/default_owner');
-
-        return $value;
+        return $this->getStoreConfig('tnwsforce_customer/general/default_owner', $websiteId);
     }
 
     /**
@@ -95,25 +78,22 @@ class Config extends \TNW\Salesforce\Model\Config
      * a new Contact to whomever owns the Account. Otherwise Magento will fall back to 'Default Owner' value set above.
      *
      * @param null $websiteId
-     * @return string
+     * @return int
      */
     public function contactAssignee($websiteId = null)
     {
-
-        $value = $this->getStoreConfig('tnwsforce_customer/general/contact_assignee');
-
-        return $value;
+        return (int)$this->getStoreConfig('tnwsforce_customer/general/contact_assignee', $websiteId);
     }
 
     /**
      * Get is customer accounts shared between Websites or accounts defined per every website
      *
+     * @param int|null $websiteId
+     *
      * @return int 0 - Global, 1 - Per Website
      */
-    public function accountShareScope()
+    public function accountShareScope($websiteId = null)
     {
-        return (int)$this->getStoreConfig(
-            'customer/account_share/scope'
-        );
+        return (int)$this->getStoreConfig('customer/account_share/scope', $websiteId);
     }
 }
