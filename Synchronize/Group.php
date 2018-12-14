@@ -182,11 +182,11 @@ class Group
         /** switch level */
         switch (strtolower(substr($name, 7))) {
             case 'error':
+                $this->errorMessages[] = $message;
                 $this->systemLogger->error($message);
                 break;
 
             case 'success':
-                $this->errorMessages[] = $message;
                 $this->systemLogger->info($message);
                 break;
 

@@ -13,29 +13,11 @@ class Sforceid extends Column
     protected $client;
 
     /**
-     * @var \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool
-     */
-    private $dividerPool;
-
-    /**
-     * @var string
-     */
-    private $groupName;
-
-    /**
-     * @var string
-     */
-    private $entityIdName;
-
-    /**
      * Constructor
      *
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
      * @param \TNW\Salesforce\Client\Salesforce $client
-     * @param \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool $dividerPool
-     * @param string $groupName
-     * @param string $entityIdName
      * @param array $components
      * @param array $data
      */
@@ -43,18 +25,12 @@ class Sforceid extends Column
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
         \TNW\Salesforce\Client\Salesforce $client,
-        \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool $dividerPool,
-        $groupName,
-        $entityIdName,
         array $components = [],
         array $data = []
     ) {
         parent::__construct($context, $uiComponentFactory, $components, $data);
 
         $this->client = $client;
-        $this->dividerPool = $dividerPool;
-        $this->groupName = $groupName;
-        $this->entityIdName = $entityIdName;
     }
 
     /**
@@ -71,37 +47,29 @@ class Sforceid extends Column
             return $dataSource;
         }
 
-        $entityGroup = $this->dividerPool
-            ->getDividerByGroupCode($this->groupName)
-            ->process(array_map([$this, 'entityId'], $dataSource['data']['items']));
-
         $fieldName = $this->getData('name');
         foreach ($dataSource['data']['items'] as &$item) {
             if (empty($item[$fieldName])) {
                 continue;
             }
 
-            foreach ($entityGroup as $websiteId => $entities) {
-                if (!isset($entities[$this->entityId($item)])) {
-                    continue;
-                }
-
-                $item["{$fieldName}_html"] = $this->generateLinkToSalesforce($item[$fieldName], $websiteId);
-                continue 2;
-            }
+            $item["{$fieldName}_html"] = $this->generateLinkToSalesforce(
+                $item[$fieldName],
+                $this->websiteIdByItem($item)
+            );
         }
 
         return $dataSource;
     }
 
     /**
-     * @param array $items
+     * @param array $item
      *
-     * @return mixed
+     * @return int
      */
-    private function entityId(array &$items)
+    public function websiteIdByItem(array $item)
     {
-        return $items[$this->entityIdName];
+        return isset($item['sf_website_id']) ? (int)$item['sf_website_id'] : 0;
     }
 
     /**
@@ -144,5 +112,28 @@ class Sforceid extends Column
 
 
         return implode('<br>', $result);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function applySorting()
+    {
+        $dataProdider = $this->getContext()->getDataProvider();
+        if(!$dataProdider instanceof \Magento\Ui\DataProvider\AbstractDataProvider) {
+            parent::applySorting();
+            return;
+        }
+
+        $sorting = $this->getContext()->getRequestParam('sorting');
+        $isSortable = $this->getData('config/sortable');
+        if ($isSortable !== false
+            && !empty($sorting['field'])
+            && !empty($sorting['direction'])
+            && $sorting['field'] === $this->getName()
+        ) {
+            $dataProdider->getCollection()->getSelect()
+                ->order(new \Zend_Db_Expr($this->getName() . ' ' . strtoupper($sorting['direction'])));
+        }
     }
 }

@@ -15,17 +15,24 @@ class WebsiteEmulator
     /** @var WebsiteDetector */
     protected $websiteDetector;
 
+    /** @var \Magento\Framework\App\State */
+    protected $appState;
+
     /**
      * WebsiteEmulator constructor.
      * @param WebsiteDetector $websiteDetector
      * @param \Magento\Store\Model\App\Emulation $storeEmulator
+     * @param \Magento\Framework\App\State $appState
      */
     public function __construct(
         WebsiteDetector $websiteDetector,
-        \Magento\Store\Model\App\Emulation $storeEmulator
-    ) {
+        \Magento\Store\Model\App\Emulation $storeEmulator,
+        \Magento\Framework\App\State $appState
+    )
+    {
         $this->websiteDetector = $websiteDetector;
         $this->storeEmulator = $storeEmulator;
+        $this->appState = $appState;
     }
 
     /**
@@ -66,14 +73,32 @@ class WebsiteEmulator
      * @return mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function wrapEmulationWebsite($callback, $websiteId = null)
+    public function execInWebsite($callback, $websiteId = null)
     {
         $this->startEnvironmentEmulation($websiteId);
 
         try {
-            return $callback($websiteId);
+            $result = $callback($websiteId);
         } finally {
             $this->stopEnvironmentEmulation();
         }
+
+        return $result;
+    }
+
+    /**
+     * @param $callback
+     * @param null $websiteId
+     * @return mixed
+     * @throws \Exception
+     */
+    public function wrapEmulationWebsite($callback, $websiteId = null)
+    {
+        return $this->appState
+            ->emulateAreaCode(
+                \Magento\Framework\App\Area::AREA_FRONTEND,
+                [$this, "execInWebsite"],
+                [$callback, $websiteId]
+            );
     }
 }
