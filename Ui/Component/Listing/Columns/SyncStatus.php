@@ -74,4 +74,27 @@ class SyncStatus extends Column
 
         return $dataSource;
     }
+
+    /**
+     * @inheritdoc
+     */
+    protected function applySorting()
+    {
+        $dataProdider = $this->getContext()->getDataProvider();
+        if(!$dataProdider instanceof \Magento\Ui\DataProvider\AbstractDataProvider) {
+            parent::applySorting();
+            return;
+        }
+
+        $sorting = $this->getContext()->getRequestParam('sorting');
+        $isSortable = $this->getData('config/sortable');
+        if ($isSortable !== false
+            && !empty($sorting['field'])
+            && !empty($sorting['direction'])
+            && $sorting['field'] === $this->getName()
+        ) {
+            $dataProdider->getCollection()->getSelect()
+                ->order(new \Zend_Db_Expr($this->getName() . ' ' . strtoupper($sorting['direction'])));
+        }
+    }
 }
