@@ -23,7 +23,7 @@ class Load extends Synchronize\Unit\LoadAbstract
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
-     * @param \TNW\Salesforce\Model\Entity\Object $entityObject
+     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
      */
@@ -33,7 +33,7 @@ class Load extends Synchronize\Unit\LoadAbstract
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        \TNW\Salesforce\Model\Entity\Object $entityObject,
+        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
     ) {
