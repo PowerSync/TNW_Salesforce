@@ -247,20 +247,22 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
                 continue;
             }
 
-            if (
-                $fieldProperty->getType() == 'datetime' ||
-                $fieldProperty->getType() == 'date'
-            ) {
+            if (in_array($fieldProperty->getType(), ['datetime', 'date'])) {
                 try {
-
                     if (!$object[$fieldName] instanceof \DateTime) {
                         $object[$fieldName] = new \DateTime($value);
                     }
-                    if ($fieldProperty->getType() == 'date') {
-                        $date = $object[$fieldName]->setTimezone(new \DateTimeZone($this->localeDate->getConfigTimezone()));
+
+                    if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
+                        $object[$fieldName]->setTimezone(new \DateTimeZone($this->localeDate->getConfigTimezone()));
+                    }
+
+                    if ($object[$fieldName]->getTimestamp() <= 0) {
+                        $this->group()->messageDebug('Date field "%s" is empty', $fieldName);
+                        unset($object[$fieldName]);
                     }
                 } catch (\Exception $e) {
-                    $this->group()->messageDebug('Field %s incorrect datetime format: %s', $fieldName, $value);
+                    $this->group()->messageDebug('Field "%s" incorrect datetime format: %s', $fieldName, $value);
                     unset($object[$fieldName]);
                 }
             } elseif (
