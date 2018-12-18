@@ -5,11 +5,13 @@ namespace TNW\Salesforce\Client;
 use Magento\Framework\App\Cache\State;
 use Magento\Framework\App\Cache\Type\Collection;
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
 use Tnw\SoapClient\Client;
 use Tnw\SoapClient\Result\LoginResult;
 use TNW\Salesforce\Lib\Tnw\SoapClient\ClientBuilder;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteDetector;
+
 /**
  * Class Salesforce
  *
@@ -122,10 +124,16 @@ class Salesforce extends DataObject
      * @param $username
      * @param $password
      * @param $token
+     *
      * @return Client
+     * @throws LocalizedException
      */
     public function buildClient($wsdl, $username, $password, $token)
     {
+        if (!\file_exists($wsdl)) {
+            throw new LocalizedException(__('WSDL file is missing'));
+        }
+
         $builder = new ClientBuilder($wsdl, $username, $password, $token);
         if ($this->salesforceConfig->getLogDebug()) {
             $builder->withLog($this->logger->getLogger());
