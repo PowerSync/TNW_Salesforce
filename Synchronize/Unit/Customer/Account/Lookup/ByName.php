@@ -10,9 +10,9 @@ use TNW\Salesforce\Model;
 class ByName extends Synchronize\Unit\LookupAbstract
 {
     /**
-     * @var Model\Mapper|bool
+     * @var Model\ResourceModel\Mapper\CollectionFactory
      */
-    private $mapperName;
+    private $mapperCollectionFactory;
 
     public function __construct(
         $name,
@@ -26,15 +26,41 @@ class ByName extends Synchronize\Unit\LookupAbstract
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
         array $dependents = []
     ) {
-        parent::__construct($name, $load, $units, $group, $identification, $inputFactory, $outputFactory, $process, $dependents);
+        parent::__construct(
+            $name,
+            $load,
+            $units,
+            $group,
+            $identification,
+            $inputFactory,
+            $outputFactory,
+            $process,
+            $dependents
+        );
 
-        $this->mapperName = $mapperCollectionFactory->create()
-            ->addObjectToFilter('Account')
-            ->addFieldToFilter('salesforce_attribute_name', 'Name')
-            ->fetchItem();
+        $this->mapperCollectionFactory = $mapperCollectionFactory;
     }
 
     /**
+     * @param int $websiteId
+     * @return bool|\Magento\Framework\DataObject|\Magento\Framework\Model\AbstractModel|Model\Mapper
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
+     */
+    public function mapperName($websiteId)
+    {
+        return $this->mapperCollectionFactory->create()
+                ->addObjectToFilter('Account')
+                ->addFieldToFilter('salesforce_attribute_name', 'Name')
+                ->applyUniquenessByWebsite($websiteId)
+                ->fetchItem();
+    }
+
+    /**
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
      */
     public function processInput()
     {
@@ -52,11 +78,15 @@ class ByName extends Synchronize\Unit\LookupAbstract
     /**
      * @param $entity
      * @return mixed|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
      */
     private function valueCompany($entity)
     {
-        return $this->mapperName instanceof Model\Mapper && null !== $this->mapperName->getId()
-            ? $this->unit('customerAccountMapping')->value($entity, $this->mapperName)
+        $mapperName = $this->mapperName($this->load()->get('websiteIds/%s', $entity));
+        return $mapperName instanceof Model\Mapper && null !== $mapperName->getId()
+            ? $this->unit('customerAccountMapping')->value($entity, $mapperName)
             : Synchronize\Unit\Customer\Account\Mapping::companyByCustomer($entity);
     }
 
@@ -79,6 +109,9 @@ class ByName extends Synchronize\Unit\LookupAbstract
      * @param array $searchIndex
      * @param \Magento\Customer\Model\Customer $entity
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
      */
     public function searchPriorityOrder(array $searchIndex, $entity)
     {

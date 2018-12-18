@@ -2,10 +2,10 @@
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Model;
 
 abstract class LoadByAbstract extends Synchronize\Unit\UnitAbstract
 {
-
     /**
      * @var Synchronize\Units
      */
@@ -28,7 +28,7 @@ abstract class LoadByAbstract extends Synchronize\Unit\UnitAbstract
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         array $dependents = [],
-        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject = null
+        Model\Entity\SalesforceIdStorage $entityObject = null
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
         $this->load = $load;
@@ -83,6 +83,7 @@ abstract class LoadByAbstract extends Synchronize\Unit\UnitAbstract
                 }
 
                 $index[$hash] = $this->cache['entities'][$entity] = $entity;
+                $this->cache['websiteIds'][$entity] = $this->websiteId($entity);
                 $this->cache['parents'][$entity] = $parentEntity;
 
                 $this->linked($parentEntity, $entity);
@@ -94,6 +95,16 @@ abstract class LoadByAbstract extends Synchronize\Unit\UnitAbstract
         } else {
             $this->group()->messageDebug('Nothing loaded');
         }
+    }
+
+    /**
+     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @return int
+     */
+    public function websiteId($entity)
+    {
+        //TODO:
+        return 0;
     }
 
     /**

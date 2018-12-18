@@ -5,7 +5,6 @@ use TNW\Salesforce\Synchronize;
 
 abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
 {
-
     /**
      * @var string
      */
@@ -60,6 +59,14 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * @return LoadAbstract|LoadByAbstract
+     */
+    public function load()
+    {
+        return $this->unit($this->load);
+    }
+
+    /**
      * @return Synchronize\Transport\Calls\Query\Input
      */
     public function input()
@@ -83,7 +90,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     {
         $this->processInput();
         if ($this->input->count() === 0) {
-            $this->group()->messageDebug("Lookup skipped");
+            $this->group()->messageDebug('Lookup skipped');
             return;
         }
 
