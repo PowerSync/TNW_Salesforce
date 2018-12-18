@@ -2,6 +2,7 @@
 
 namespace TNW\Salesforce\Synchronize\Transport\Soap;
 
+use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Lib\Tnw\SoapClient\ClientBuilder;
 
@@ -54,8 +55,13 @@ class ClientFactory
     {
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
 
+        $wsdl = $this->salesforceConfig->getSalesforceWsdl($websiteId);
+        if (!\file_exists($wsdl)) {
+            throw new LocalizedException(__('WSDL file is missing'));
+        }
+
         $builder = new ClientBuilder(
-            $this->salesforceConfig->getSalesforceWsdl($websiteId),
+            $wsdl,
             $this->salesforceConfig->getSalesforceUsername($websiteId),
             $this->salesforceConfig->getSalesforcePassword($websiteId),
             $this->salesforceConfig->getSalesforceToken($websiteId)
