@@ -130,8 +130,7 @@ class Upsert extends Synchronize\Unit\Upsert
      */
     protected function prepareObject($entity, array $object)
     {
-
-        if (!empty($object['Id']) && !$this->customerConfig->canRenameAccount($entity->getWebsiteId())) {
+        if (!empty($object['Id']) && !$this->customerConfig->canRenameAccount()) {
             unset($object['Name']);
         }
 
