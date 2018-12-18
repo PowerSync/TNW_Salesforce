@@ -156,7 +156,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
         foreach ($mappers as $mapper) {
             $value = $this->value($entity, $mapper);
             if (null === $value) {
-                continue;
+//                continue;
             }
 
             $object[$mapper->getSalesforceAttributeName()] = $value;
