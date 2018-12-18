@@ -229,7 +229,7 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
         $objectDescription = $this->getObjectDescription();
         foreach ($objectDescription->getFields() as $fieldProperty) {
             $fieldName = (string)$fieldProperty->getName();
-            if (!array_key_exists($fieldName, $object) || $fieldName == 'Id') {
+            if (!isset($object[$fieldName]) || $fieldName == 'Id') {
                 continue;
             }
 
