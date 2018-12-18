@@ -16,7 +16,10 @@ class WebsiteDetector
     protected $storeManager;
 
     /** @var array  */
-    protected $websiteStores = [];
+    protected $websiteDefaultStores = [];
+
+    /** @var array  */
+    protected $websiteStoreIds = [];
 
     /**
      * Request object
@@ -107,9 +110,7 @@ class WebsiteDetector
         if ($websiteId === null) {
             if ($this->isAdminArea()) {
                 $websiteId = $this->getWebsiteFromRequest();
-            }
-
-            if ($websiteId === null) {
+            } elseif ($websiteId === null) {
                 $websiteId = $this->getCurrentStoreWebsite()->getId();
             }
         }
@@ -121,20 +122,43 @@ class WebsiteDetector
      * @param null $websiteId
      * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
+     *
+     * Returns default store of website
      */
     public function getStroreIdByWebsite($websiteId = null)
     {
         $websiteId = $this->detectCurrentWebsite($websiteId);
 
-        if (!$this->websiteStores) {
+        if (!$this->websiteDefaultStores) {
 
             $website = $this->websiteFactory->create();
 
-            $this->websiteStores = $website->getDefaultStoresSelect(true);
+            $this->websiteDefaultStores = $website->getDefaultStoresSelect(true);
 
-            $this->websiteStores =  $this->resourceConnection->getConnection()->fetchPairs($website->getDefaultStoresSelect(true));
+            $this->websiteDefaultStores =  $this->resourceConnection->getConnection()->fetchPairs($website->getDefaultStoresSelect(true));
         }
 
-        return $this->websiteStores[$websiteId];
+        return $this->websiteDefaultStores[$websiteId];
+    }
+
+    /**
+     * @param null $websiteId
+     * @return integer[]
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getStroreIdsByWebsite($websiteId = null)
+    {
+        $websiteId = $this->detectCurrentWebsite($websiteId);
+
+        if (empty($this->websiteStoreIds[$websiteId])) {
+
+            /** @var \Magento\Store\Model\Store[] $stores */
+            $stores = $this->storeManager->getWebsite($websiteId)->getStores();
+            foreach ($stores as $store) {
+                $this->websiteStoreIds[$websiteId][] = $store->getId();
+            }
+        }
+
+        return $this->websiteStoreIds[$websiteId];
     }
 }
