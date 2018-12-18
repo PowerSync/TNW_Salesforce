@@ -362,4 +362,12 @@
             </argument>
         </arguments>
     </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\LoadAbstract">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\LoadAbstract" />
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\LoadByAbstract">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\LoadByAbstract" />
+    </type>
 </config>

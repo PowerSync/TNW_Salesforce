@@ -221,7 +221,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     public function mappers($entity)
     {
         return $this->mapperCollectionFactory->create()
-            ->addObjectToFilter($this->objectType);
+            ->addObjectToFilter($this->objectType)
+            ->applyUniquenessByWebsite($this->load()->get('websiteIds/%s', $entity));
     }
 
     /**
@@ -266,6 +267,12 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
         }
 
         if (is_array($value)) {
+            foreach ($value as $v) {
+                if (is_array($v)) {
+                    $this->group()->messageError('Incorrect value for mapping: scalar values supported only. Attribute code: "%s". Mapping class: "%s"', $attributeCode, get_class($this));
+                    return;
+                }
+            }
             $value = implode('\n', $value);
         }
 
