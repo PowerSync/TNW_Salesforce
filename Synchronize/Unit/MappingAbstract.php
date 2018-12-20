@@ -266,6 +266,12 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
         }
 
         if (is_array($value)) {
+            foreach ($value as $v) {
+                if (is_array($v)) {
+                    $this->group()->messageError('Incorrect value for mapping: scalar values supported only. Actual value: "%s"', var_export($value, true));
+                    return;
+                }
+            }
             $value = implode('\n', $value);
         }
 
