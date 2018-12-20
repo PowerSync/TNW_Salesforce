@@ -132,9 +132,9 @@ class Objects extends AbstractDb
     {
         return $this->getConnection()->fetchOne($this->selectObjectId, [
             'magento_type' => $magentoType,
-            'entity_id' => $entityId,
-            'entity_website_id' => $websiteId,
-            'base_website_id' => $this->baseWebsiteId($websiteId),
+            'entity_id' => (int)$entityId,
+            'entity_website_id' => (int)$websiteId,
+            'base_website_id' => (int)$this->baseWebsiteId($websiteId),
         ]);
     }
 
