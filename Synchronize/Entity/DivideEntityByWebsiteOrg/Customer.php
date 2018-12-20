@@ -43,6 +43,6 @@ class Customer extends DivideEntityByWebsiteOrg
      */
     public function getEntityWebsiteIds($entity)
     {
-        return [$entity->getWebsiteId()];
+        return [(int)$entity->getWebsiteId()];
     }
 }
