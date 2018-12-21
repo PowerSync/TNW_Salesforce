@@ -18,6 +18,9 @@ class Entity
      */
     protected $websiteEmulator;
 
+    /** @var \TNW\Salesforce\Model\Config */
+    protected $salesforceConfig;
+    
     /**
      * Entity constructor.
      * @param Group $synchronizeGroup
@@ -27,11 +30,13 @@ class Entity
     public function __construct(
         Group $synchronizeGroup,
         Entity\DivideEntityByWebsiteOrg\Pool $dividerPool,
-        \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
+        \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator,
+        \TNW\Salesforce\Model\Config $salesforceConfig
     ) {
         $this->synchronizeGroup = $synchronizeGroup;
         $this->dividerPool = $dividerPool;
         $this->websiteEmulator = $websiteEmulator;
+        $this->salesforceConfig = $salesforceConfig;
     }
 
     /**
@@ -60,6 +65,14 @@ class Entity
                     $this->synchronizeGroup->code(),
                     $websiteId
                 );
+
+                if (!$this->salesforceConfig->getSalesforceStatus()) {
+                    $this->synchronizeGroup->messageNotice(
+                        'Sync is disabled in the website #"%s" config',
+                        $websiteId
+                    );
+                    return;
+                }
 
                 try {
                     $this->synchronizeGroup->synchronize($entityIds);
