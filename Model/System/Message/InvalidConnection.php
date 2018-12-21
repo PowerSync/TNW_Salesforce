@@ -70,7 +70,7 @@ class InvalidConnection implements MessageInterface
         $token = $this->config->getSalesforceToken($websiteId);
 
         try {
-            if (!$this->config->isSalesForceIntegrationActive()
+            if (!$this->config->getSalesforceStatus($websiteId)
                 || (file_exists($wsdl) && $this->client->checkConnection($wsdl, $username, $password, $token))
             ) {
                 $result = false;
