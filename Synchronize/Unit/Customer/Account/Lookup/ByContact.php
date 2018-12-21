@@ -42,7 +42,7 @@ class ByContact extends Synchronize\Unit\LookupAbstract
         $searchIndex = [];
         foreach ($this->output as $key => $record) {
             if (!empty($record['Id'])) {
-                $searchIndex['contactId'][$key] = strtolower($record['Id']);
+                $searchIndex['contactId'][$key] = $record['Id'];
             }
         }
 
@@ -60,7 +60,7 @@ class ByContact extends Synchronize\Unit\LookupAbstract
 
         // Priority 1
         if (!empty($searchIndex['contactId'])) {
-            $recordsIds[10] = array_keys($searchIndex['contactId'], strtolower($entity->getData('sforce_id')));
+            $recordsIds[10] = array_keys($searchIndex['contactId'], $entity->getData('sforce_id'));
         }
 
         return $recordsIds;
