@@ -112,7 +112,7 @@ class Collection extends AbstractCollection
      */
     public function generateUniquenessByWebsiteSelect($baseSelect)
     {
-        $doubleSelect = $this->_conn->select()
+        $uniqueIdSelect = $this->_conn->select()
             ->from($this->getMainTable(), ['map_id'])
             ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
             ->group([
@@ -121,11 +121,11 @@ class Collection extends AbstractCollection
                 'object_type',
                 'magento_entity_type'
             ])
-            ->having('COUNT(website_id) > ?', 1);
+            ->having('COUNT(website_id) = ?', 1);
 
         $firstSelect = (clone $baseSelect)
             ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
-            ->where('map_id NOT IN(?)', $doubleSelect);
+            ->where('map_id IN(?)', $uniqueIdSelect);
 
         $secondSelect = (clone $baseSelect)
             ->where('website_id = ?', $this->uniquenessWebsite);
