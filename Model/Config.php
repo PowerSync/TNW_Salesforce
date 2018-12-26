@@ -21,6 +21,9 @@ class Config extends DataObject
     const SFORCE_MAGENTO_ID = 'Magento_ID__c';
     const BASE_DAY = 7;
 
+    /** @comment Base batch limit for simple sync */
+    const REALTIME_MAX_SYNC = 30;
+
     /** @var ScopeConfigInterface  */
     protected $scopeConfig;
 
@@ -94,6 +97,15 @@ class Config extends DataObject
         $this->websiteDetector = $websiteDetector;
 
         parent::__construct();
+    }
+
+    /**
+     * Base batch limit for simple sync
+     * @return int
+     */
+    public function getBaseUpdateLimit()
+    {
+        return self::SFORCE_BASE_UPDATE_LIMIT;
     }
 
     /**
