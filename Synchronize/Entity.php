@@ -54,6 +54,16 @@ class Entity
      */
     public function synchronize(array $entities)
     {
+
+        if (count($entities) > $this->salesforceConfig::REALTIME_MAX_SYNC) {
+            $this->synchronizeGroup->messageNotice(
+                'Too much (%s) entities for Realtime sync, first %s entities synced.',
+                count($entities),
+                $this->salesforceConfig::REALTIME_MAX_SYNC
+            );
+            $entities = array_slice($entities, 0, $this->salesforceConfig::REALTIME_MAX_SYNC);
+        }
+
         $entitiesByWebsite = $this->dividerPool
             ->getDividerByGroupCode($this->synchronizeGroup->code())
             ->process($entities);
