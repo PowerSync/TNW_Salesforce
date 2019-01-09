@@ -78,7 +78,12 @@ class WebsiteEmulator
         $this->startEnvironmentEmulation($websiteId);
 
         try {
-            $result = $callback($websiteId);
+            $result = $this->appState
+                ->emulateAreaCode(
+                    \Magento\Framework\App\Area::AREA_FRONTEND,
+                    $callback,
+                    [$websiteId]
+                );
         } finally {
             $this->stopEnvironmentEmulation();
         }
@@ -94,11 +99,6 @@ class WebsiteEmulator
      */
     public function wrapEmulationWebsite($callback, $websiteId = null)
     {
-        return $this->appState
-            ->emulateAreaCode(
-                \Magento\Framework\App\Area::AREA_FRONTEND,
-                [$this, "execInWebsite"],
-                [$callback, $websiteId]
-            );
+        return $this->execInWebsite($callback, $websiteId);
     }
 }

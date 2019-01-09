@@ -223,12 +223,20 @@ class Config extends DataObject
     }
 
     /**
+     * @return \Magento\Store\Api\Data\WebsiteInterface[]
+     */
+    public function getWebsites()
+    {
+        return $this->websiteRepository->getList();
+    }
+
+    /**
      * @return array
      */
     public function getWebsitesGrouppedByOrg()
     {
         if (empty($this->websitesGrouppedByOrg)) {
-            $websites = $this->websiteRepository->getList();
+            $websites = $this->getWebsites();
             foreach ($websites as $website) {
                 foreach ($websites as $websiteToCompare) {
 
