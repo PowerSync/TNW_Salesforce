@@ -4,6 +4,10 @@ namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls;
 
 use TNW\Salesforce\Synchronize\Transport;
 
+/**
+ * Class Upsert
+ * @deprecated
+ */
 class Upsert implements Transport\Calls\UpsertInterface
 {
 

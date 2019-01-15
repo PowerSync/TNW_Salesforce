@@ -3,6 +3,7 @@ namespace TNW\Salesforce\Synchronize\Transport\Calls;
 
 /**
  * Unit interface
+ * @deprecated
  */
 interface UpsertInterface
 {

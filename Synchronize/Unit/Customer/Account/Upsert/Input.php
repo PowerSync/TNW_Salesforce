@@ -1,43 +1,27 @@
 <?php
 
-namespace TNW\Salesforce\Synchronize\Unit\Customer\Account;
+namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert;
 
 use TNW\Salesforce\Synchronize;
-use TNW\Salesforce\Synchronize\Unit\Customer;
 use TNW\Salesforce\Model;
 
-/**
- * @deprecated
- */
-class Upsert extends Synchronize\Unit\Upsert
+class Input extends Synchronize\Unit\Upsert\Input
 {
     /**
      * @var Model\Customer\Config
      */
     private $customerConfig;
 
-    /**
-     * @var string
-     */
-    private $salesforceType;
-
-    /**
-     * @var array
-     */
-    private $upsertEntities;
-
     public function __construct(
         $name,
         $load,
         $mapping,
         $salesforceType,
-        $fieldSalesforceId,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Upsert\InputFactory $inputFactory,
-        Synchronize\Transport\Calls\Upsert\OutputFactory $outputFactory,
-        Synchronize\Transport\Calls\UpsertInterface $process,
+        Synchronize\Transport\Calls\Upsert\InputInterface $process,
         Model\Customer\Config $customerConfig,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
@@ -47,49 +31,49 @@ class Upsert extends Synchronize\Unit\Upsert
             $load,
             $mapping,
             $salesforceType,
-            $fieldSalesforceId,
             $units,
             $group,
             $identification,
             $inputFactory,
-            $outputFactory,
             $process,
             $factory,
             $localeDate
         );
 
         $this->customerConfig = $customerConfig;
-        $this->salesforceType = $salesforceType;
     }
 
     /**
      *
      */
-    protected function processInput()
+    protected function processInput(Synchronize\Transport\Calls\Upsert\Input $input)
     {
-        parent::processInput();
+        parent::processInput($input);
 
         // deDuplicate
         $index = [];
         $duplicates = [];
-        for ($this->input->rewind(); $this->input->valid(); $this->input->next()) {
-            $entity = $this->input->current();
+        for ($input->rewind(); $input->valid(); $input->next()) {
+            $entity = $input->current();
 
-            $hash = $this->hashObject($this->input->getInfo());
+            $hash = $this->hashObject($input->getInfo());
             if (empty($index[$hash])) {
                 $index[$hash] = $entity;
                 continue;
             }
 
-            $this->upsertEntities[spl_object_hash($entity)] = $index[$hash];
+            $upsertEntities[spl_object_hash($entity)] = $index[$hash];
             $duplicates[] = $entity;
         }
+
+        //TODO: Save
+        $upsertEntities;
 
         /**
          * remove duplicated entities
          */
         foreach ($duplicates as $duplicate) {
-            $this->input->offsetUnset($duplicate);
+            $input->offsetUnset($duplicate);
         }
     }
 
@@ -104,32 +88,11 @@ class Upsert extends Synchronize\Unit\Upsert
     }
 
     /**
-     * @throws \InvalidArgumentException
-     * @throws \OutOfBoundsException
-     */
-    protected function processOutput()
-    {
-        // restore deDuplicate
-        foreach ($this->entities() as $entity) {
-            $upsertEntity = isset($this->upsertEntities[spl_object_hash($entity)])
-                ? $this->upsertEntities[spl_object_hash($entity)] : $entity;
-
-            if (empty($this->output[$upsertEntity]['success'])) {
-                $this->group()->messageError('Upsert object "%s". Entity: %s. Message: "%s".',
-                    $this->salesforceType, $this->identification->printEntity($entity), $this->output[$upsertEntity]['message']);
-            }
-
-            $this->cache[$entity] = $this->output[$upsertEntity];
-            $this->prepare($entity);
-        }
-    }
-
-    /**
      * @param \Magento\Customer\Model\Customer $entity
      * @param array $object
      * @return array
      */
-    protected function prepareObject($entity, array $object)
+    public function prepareObject($entity, array $object)
     {
         if (!empty($object['Id']) && !$this->customerConfig->canRenameAccount()) {
             unset($object['Name']);
