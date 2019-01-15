@@ -1,23 +1,10 @@
 <?php
-namespace TNW\Salesforce\Synchronize\Unit;
+namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
 use TNW\Salesforce\Synchronize;
 
-/**
- * @deprecated
- */
-class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\CheckInterface
+class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\CheckInterface
 {
-    /**
-     * @var Synchronize\Transport\Calls\Upsert\Input
-     */
-    protected $input;
-
-    /**
-     * @var Synchronize\Transport\Calls\Upsert\Output
-     */
-    protected $output;
-
     /**
      * @var Synchronize\Unit\IdentificationInterface
      */
@@ -57,9 +44,9 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     protected $localeDate;
 
     /**
-     * @var
+     * @var Synchronize\Transport\Calls\Upsert\InputFactory
      */
-    private $fieldSalesforceId;
+    private $inputFactory;
 
     /**
      * Upsert constructor.
@@ -68,13 +55,11 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
      * @param string $load
      * @param string $mapping
      * @param string $salesforceType
-     * @param string $fieldSalesforceId
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param IdentificationInterface $identification
+     * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Transport\Calls\Upsert\InputFactory $inputFactory
-     * @param Synchronize\Transport\Calls\Upsert\OutputFactory $outputFactory
-     * @param Synchronize\Transport\Calls\UpsertInterface $process
+     * @param Synchronize\Transport\Calls\Upsert\InputInterface $process
      * @param Synchronize\Transport\Soap\ClientFactory $factory
      * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
      */
@@ -83,25 +68,21 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
         $load,
         $mapping,
         $salesforceType,
-        $fieldSalesforceId,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Upsert\InputFactory $inputFactory,
-        Synchronize\Transport\Calls\Upsert\OutputFactory $outputFactory,
-        Synchronize\Transport\Calls\UpsertInterface $process,
+        Synchronize\Transport\Calls\Upsert\InputInterface $process,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
     ) {
         parent::__construct($name, $units, $group, [$load, $mapping]);
-        $this->input = $inputFactory->create(['type' => $salesforceType]);
-        $this->output = $outputFactory->create(['type' => $salesforceType]);
         $this->process = $process;
         $this->load = $load;
         $this->mapping = $mapping;
         $this->salesforceType = $salesforceType;
-        $this->fieldSalesforceId = $fieldSalesforceId;
         $this->identification = $identification;
+        $this->inputFactory = $inputFactory;
 
         $this->factory = $factory;
         $this->localeDate = $localeDate;
@@ -110,6 +91,7 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     /**
      * @param $websiteId
      * @return \TNW\Salesforce\Lib\Tnw\SoapClient\Client
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function getClient($websiteId = null)
     {
@@ -122,56 +104,6 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     public function description()
     {
         return __('Upserting "%1" entity', $this->salesforceType);
-    }
-
-    /**
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
-     * @throws \OutOfBoundsException
-     */
-    public function process()
-    {
-        $this->processInput();
-        if ($this->input->count() === 0) {
-            $this->group()->messageDebug('Upsert SKIPPED, input is empty');
-            return;
-        }
-
-        $this->group()->messageDebug(implode("\n", array_map(function($entity) {
-            return __("Entity %1 request data:\n%2",
-                $this->identification->printEntity($entity),
-                print_r($this->input->offsetGet($entity), true));
-        }, $this->entities())));
-
-        $this->process->process($this->input, $this->output);
-
-        $this->group()->messageDebug(implode("\n", array_map(function($entity) {
-            return __("Entity %1 response data:\n%2",
-                $this->identification->printEntity($entity),
-                print_r($this->output->offsetGet($entity), true));
-        }, $this->entities())));
-
-        $this->processOutput();
-    }
-
-    /**
-     * @throws \InvalidArgumentException
-     * @throws \OutOfBoundsException
-     */
-    protected function processInput()
-    {
-        foreach ($this->entities() as $entity) {
-            $this->input->offsetSet($entity, $this->prepareObject($entity, $this->unit($this->mapping)->get('%s', $entity)));
-        }
-    }
-
-    /**
-     * @return array
-     * @throws \OutOfBoundsException
-     */
-    public function entities()
-    {
-        return array_filter($this->load()->get('entities'), [$this, 'filter']);
     }
 
     /**
@@ -191,11 +123,51 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
-     * @return string
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     * @throws \OutOfBoundsException
      */
-    public function fieldSalesforceId()
+    public function process()
     {
-        return $this->fieldSalesforceId;
+        $input = $this->inputFactory->create(['type' => $this->salesforceType()]);
+
+        $this->processInput($input);
+
+        if ($input->count() === 0) {
+            $this->group()->messageDebug('Upsert SKIPPED, input is empty');
+            return;
+        }
+
+        $this->group()->messageDebug(implode("\n", array_map(function($entity) use($input) {
+            return __(
+                "Entity %1 request data:\n%2",
+                $this->identification->printEntity($entity),
+                print_r($input->offsetGet($entity), true)
+            );
+        }, $this->entities())));
+
+        $this->process->process($input);
+    }
+
+    /**
+     * @param Synchronize\Transport\Calls\Upsert\Input $input
+     * @throws \InvalidArgumentException
+     * @throws \OutOfBoundsException
+     */
+    protected function processInput(Synchronize\Transport\Calls\Upsert\Input $input)
+    {
+        foreach ($this->entities() as $entity) {
+            $input->offsetSet($entity, $this->prepareObject($entity, $this->unit($this->mapping)->get('%s', $entity)));
+        }
+    }
+
+    /**
+     * @return array
+     * @throws \OutOfBoundsException
+     */
+    public function entities()
+    {
+        return array_filter($this->load()->get('entities'), [$this, 'filter']);
     }
 
     /**
@@ -212,7 +184,6 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
      */
     protected function getObjectDescription()
     {
-
         if (empty($this->objectDescription[$this->salesforceType])) {
             $resultObjects = $this->getClient()->describeSObjects([$this->salesforceType]);
             $this->objectDescription[$this->salesforceType] = $resultObjects[0];
@@ -227,7 +198,7 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
      * @param array $object
      * @return array
      */
-    protected function prepareObject($entity, array $object)
+    public function prepareObject($entity, array $object)
     {
         $objectDescription = $this->getObjectDescription();
         foreach ($objectDescription->getFields() as $fieldProperty) {
@@ -276,40 +247,10 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
                 $this->group()->messageNotice('Salesforce field "%s" value truncated.', $fieldName);
                 $limit = $fieldProperty->getLength();
                 $object[$fieldName] = mb_substr($value, 0, $limit - 3) . '...';
-
             }
-
         }
+
         return $object;
-    }
-
-    /**
-     * @throws \InvalidArgumentException
-     * @throws \OutOfBoundsException
-     */
-    protected function processOutput()
-    {
-        foreach ($this->entities() as $entity) {
-            if (empty($this->output[$entity]['success'])) {
-                $this->group()->messageError('Upsert object "%s". Entity: %s. Message: "%s".',
-                    $this->salesforceType, $this->identification->printEntity($entity), $this->output[$entity]['message']);
-            }
-
-            $this->cache[$entity] = $this->output[$entity];
-            $this->prepare($entity);
-        }
-    }
-
-    /**
-     * @param \Magento\Framework\DataObject $entity
-     */
-    public function prepare($entity)
-    {
-        if (empty($this->cache[$entity]['success'])) {
-            return;
-        }
-
-        $entity->setData($this->fieldSalesforceId, $this->cache[$entity]['salesforce']);
     }
 
     /**
@@ -318,6 +259,6 @@ class Upsert extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
      */
     public function skipped($entity)
     {
-        return empty($this->cache[$entity]['success']);
+        return false;
     }
 }
