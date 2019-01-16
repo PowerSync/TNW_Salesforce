@@ -60,6 +60,7 @@ class Config extends DataObject
 
     /** @var array  */
     private $credentialsConfigPaths = [
+        /** Org credentials */
         'tnwsforce_general/salesforce/active',
         'tnwsforce_general/salesforce/username',
         'tnwsforce_general/salesforce/password',
