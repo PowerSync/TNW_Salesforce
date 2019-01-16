@@ -129,8 +129,7 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
      */
     public function process()
     {
-        $input = $this->inputFactory->create(['type' => $this->salesforceType()]);
-
+        $input = $this->createTransport();
         $this->processInput($input);
 
         if ($input->count() === 0) {
@@ -147,6 +146,14 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
         }, $this->entities())));
 
         $this->process->process($input);
+    }
+
+    /**
+     * @return Synchronize\Transport\Calls\Upsert\Input
+     */
+    public function createTransport()
+    {
+        return $this->inputFactory->create(['type' => $this->salesforceType()]);
     }
 
     /**

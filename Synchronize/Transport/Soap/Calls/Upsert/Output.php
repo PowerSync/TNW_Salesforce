@@ -5,21 +5,27 @@ use TNW\Salesforce\Synchronize\Transport;
 
 class Output implements Transport\Calls\Upsert\OutputInterface
 {
-    const BATCH_LIMIT = 200;
-
     /**
      * @var \Magento\Framework\Event\Manager
      */
     private $eventManager;
 
     /**
+     * @var Storage
+     */
+    private $storage;
+
+    /**
      * Soap constructor.
      * @param \Magento\Framework\Event\Manager $eventManager
+     * @param Storage $storage
      */
     public function __construct(
-        \Magento\Framework\Event\Manager $eventManager
+        \Magento\Framework\Event\Manager $eventManager,
+        Transport\Soap\Calls\Upsert\Storage $storage
     ) {
         $this->eventManager = $eventManager;
+        $this->storage = $storage;
     }
 
     /**
@@ -29,26 +35,25 @@ class Output implements Transport\Calls\Upsert\OutputInterface
      */
     public function process(Transport\Calls\Upsert\Output $output)
     {
-        $this->eventManager->dispatch('tnw_salesforce_call_upsert_output_before', ['output' => $output]);
-
-        //TODO: get
-        $entities = [];
-        $results = [];
-
-        foreach ($entities as $key => $entity) {
-            if (empty($results[$key])) {
+        for ($output->rewind(); $output->valid(); $output->next()) {
+            $result = $this->storage->searchResult($output->current());
+            if (null === $result) {
                 continue;
             }
 
-            $output[$entity] = [
-                'salesforce' => $results[$key]->getId(),
-                'success' => $results[$key]->isSuccess(),
-                'created' => $results[$key]->isCreated(),
-                'message' => implode("\n", array_filter(array_map([$this, 'message'], (array)$results[$key]->getErrors())))
-            ];
+            $output->setInfo([
+                'salesforce' => $result->getId(),
+                'success' => $result->isSuccess(),
+                'created' => $result->isCreated(),
+                'message' => implode("\n", array_filter(array_map(
+                    [$this, 'message'],
+                    (array)$result->getErrors()
+                )))
+            ]);
         }
 
-        $this->eventManager->dispatch('tnw_salesforce_call_upsert_output_after', ['output' => $output]);
+        $this->storage->clear();
+        $this->eventManager->dispatch('tnw_salesforce_call_upsert_after', ['output' => $output]);
     }
 
     /**

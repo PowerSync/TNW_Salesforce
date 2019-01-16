@@ -9,11 +9,6 @@ class Input extends \SplObjectStorage
     private $info = [];
 
     /**
-     * @var int
-     */
-    private $infoIndex = 0;
-
-    /**
      * @var string
      */
     protected $externalIdFieldName = '';
@@ -57,7 +52,7 @@ class Input extends \SplObjectStorage
      */
     public function offsetSet($object, $data = null)
     {
-        $index = $this->infoIndex++;
+        $index = \spl_object_hash($object);
         parent::offsetSet($object, $index);
         $this->info[$index] = $data;
     }
@@ -88,7 +83,7 @@ class Input extends \SplObjectStorage
      */
     public function setInfo($data)
     {
-        $index = $this->infoIndex++;
+        $index = \spl_object_hash($this->current());
         parent::setInfo($index);
         $this->info[$index] = $data;
     }
