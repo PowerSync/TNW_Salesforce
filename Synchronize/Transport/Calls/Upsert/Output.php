@@ -37,7 +37,7 @@ class Output extends \SplObjectStorage
      */
     public function offsetSet($object, $data = null)
     {
-        $index = \count($this->info);
+        $index = \spl_object_hash($object);
         parent::offsetSet($object, $index);
         $this->info[$index] = $data;
     }
@@ -68,8 +68,17 @@ class Output extends \SplObjectStorage
      */
     public function setInfo($data)
     {
-        $index = \count($this->info);
+        $index = \spl_object_hash($this->current());
         parent::setInfo($index);
         $this->info[$index] = $data;
+    }
+
+    /**
+     * @param object $object
+     */
+    public function offsetUnset($object)
+    {
+        unset($this->info[parent::offsetGet($object)]);
+        parent::offsetUnset($object);
     }
 }

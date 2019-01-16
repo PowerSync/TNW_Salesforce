@@ -110,8 +110,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
      */
     public function process()
     {
-        $output = $this->outputFactory->create(['type' => $this->salesforceType()]);
-
+        $output = $this->createTransport();
         $this->process->process($output);
 
         $this->group()->messageDebug(implode("\n", array_map(function($entity) use($output) {
@@ -123,6 +122,19 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
         }, $this->entities())));
 
         $this->processOutput($output);
+    }
+
+    /**
+     * @return Synchronize\Transport\Calls\Upsert\Output
+     */
+    public function createTransport()
+    {
+        $output = $this->outputFactory->create(['type' => $this->salesforceType()]);
+        foreach ($this->entities() as $entity) {
+            $output->offsetSet($entity, []);
+        }
+
+        return $output;
     }
 
     /**

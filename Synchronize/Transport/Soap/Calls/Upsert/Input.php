@@ -13,21 +13,21 @@ class Input implements Transport\Calls\Upsert\InputInterface
     private $eventManager;
 
     /**
-     * @var Transport\Soap\ClientFactory
+     * @var Storage
      */
-    private $factory;
+    private $storage;
 
     /**
      * Soap constructor.
      * @param \Magento\Framework\Event\Manager $eventManager
-     * @param Transport\Soap\ClientFactory $factory
+     * @param Storage $storage
      */
     public function __construct(
         \Magento\Framework\Event\Manager $eventManager,
-        Transport\Soap\ClientFactory $factory
+        Transport\Soap\Calls\Upsert\Storage $storage
     ) {
         $this->eventManager = $eventManager;
-        $this->factory = $factory;
+        $this->storage = $storage;
     }
 
     /**
@@ -38,7 +38,7 @@ class Input implements Transport\Calls\Upsert\InputInterface
      */
     public function process(Transport\Calls\Upsert\Input $input)
     {
-        $this->eventManager->dispatch('tnw_salesforce_call_upsert_input_before', ['input' => $input]);
+        $this->eventManager->dispatch('tnw_salesforce_call_upsert_before', ['input' => $input]);
 
         $maxPage = ceil($input->count() / self::BATCH_LIMIT);
         for ($input->rewind(), $i = 1; $i <= $maxPage; $i++) {
@@ -48,19 +48,7 @@ class Input implements Transport\Calls\Upsert\InputInterface
                 $entities[] = $input->current();
             }
 
-            /** @var \Tnw\SoapClient\Result\UpsertResult[] $results */
-            $results = $this->factory->client()
-                ->upsert($input->externalIdFieldName(), $batch, $input->type());
-
-            foreach ($entities as $key => $entity) {
-                if (empty($results[$key])) {
-                    continue;
-                }
-
-                //TODO: save
-            }
+            $this->storage->setBatchByEntities($batch, $entities, $input->externalIdFieldName(), $input->type());
         }
-
-        $this->eventManager->dispatch('tnw_salesforce_call_upsert_input_after', ['input' => $input]);
     }
 }
