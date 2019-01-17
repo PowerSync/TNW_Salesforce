@@ -20,7 +20,7 @@ class Entity
 
     /** @var \TNW\Salesforce\Model\Config */
     protected $salesforceConfig;
-    
+
     /**
      * Entity constructor.
      * @param Group $synchronizeGroup

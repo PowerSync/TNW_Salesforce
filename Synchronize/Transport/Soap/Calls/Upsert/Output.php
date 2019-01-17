@@ -52,7 +52,6 @@ class Output implements Transport\Calls\Upsert\OutputInterface
             ]);
         }
 
-        $this->storage->clear();
         $this->eventManager->dispatch('tnw_salesforce_call_upsert_after', ['output' => $output]);
     }
 

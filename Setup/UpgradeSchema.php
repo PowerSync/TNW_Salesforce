@@ -291,4 +291,75 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 Table::ACTION_CASCADE
             );
     }
+
+    /**
+     * @param ModuleContextInterface $context
+     * @param SchemaSetupInterface $setup
+     * @throws \Zend_Db_Exception
+     */
+    protected function version_2_4_16(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.4.16') >= 0) {
+            return;
+        }
+
+        $table = $setup->getConnection()
+            ->newTable($setup->getTable('tnw_salesforce_queue'))
+            ->addColumn('queue_id', Table::TYPE_INTEGER, null, [
+                'identity' => true,
+                'unsigned' => true,
+                'nullable' => false,
+                'primary' => true
+            ], 'Queue Id')
+            ->addColumn('parent_id', Table::TYPE_INTEGER, null, [
+                'unsigned' => true,
+                'nullable' => true,
+            ], 'Parent Id')
+            ->addColumn('entity_id', Table::TYPE_INTEGER, null, [
+                'nullable' => false,
+            ], 'Entity Id')
+            ->addColumn('entity_load', Table::TYPE_TEXT, 255, [
+                'nullable' => false,
+            ], 'Entity Load')
+            ->addColumn('entity_type', Table::TYPE_TEXT, 255, [
+                'nullable' => false
+            ], 'Entity Type')
+            ->addColumn('object_type', Table::TYPE_TEXT, 255, [
+                'nullable' => false
+            ], 'Object Type')
+            ->addColumn('sync_type', Table::TYPE_TEXT, 255, [
+                'nullable' => false
+            ], 'Sync Type')
+            ->addColumn('sync_attempt', Table::TYPE_INTEGER, null, [
+                'unsigned' => true,
+                'nullable' => false,
+                'default' => 0
+            ], 'Sync Attempt')
+            ->addColumn('status', Table::TYPE_TEXT, 255, [
+                'nullable' => false,
+                'default' => 'new'
+            ], 'Status')
+            ->addColumn('message', Table::TYPE_TEXT, 1024, [
+                'nullable' => true
+            ], 'Message')
+            ->addColumn('website_id', Table::TYPE_INTEGER, null, [
+                'unsigned' => true,
+                'nullable' => false
+            ], 'Website Id')
+            ->addColumn('transaction_uid', Table::TYPE_TEXT, 32, [
+                'nullable' => true,
+                'default' => null
+            ], 'Transaction Uid')
+            ->addColumn('additional_data', Table::TYPE_TEXT, 1024, [
+                'nullable' => true
+            ], 'Additional Data')
+            ->addColumn('created_at', Table::TYPE_DATETIME, null, [
+                'nullable' => false,
+                'default' => new \Zend_Db_Expr('CURRENT_TIMESTAMP')
+            ], 'When create')
+        ;
+
+        $setup->getConnection()
+            ->createTable($table);
+    }
 }

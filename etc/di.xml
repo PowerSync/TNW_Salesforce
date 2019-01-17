@@ -179,6 +179,21 @@
         </arguments>
     </virtualType>
 
+    <virtualType name="TNW\Soap\Synchronize\Customer\Account" type="TNW\Salesforce\Synchronize\Group">
+        <arguments>
+            <argument name="groupCode" xsi:type="string">customer_account</argument>
+            <argument name="units" xsi:type="array">
+                <item name="lookupByContact" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup\ByContact</item>
+                <item name="lookupByName" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup\ByName</item>
+                <item name="lookup" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup</item>
+                <item name="mapping" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping</item>
+                <item name="upsertSending" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert\Input</item>
+                <item name="upsertCheck" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert\Output</item>
+                <item name="save" xsi:type="string">TNW\Customer\Account\Save</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
     <virtualType name="TNW\Soap\Synchronize\Customer" type="TNW\Salesforce\Synchronize\Group">
         <arguments>
             <argument name="groupCode" xsi:type="string">customer</argument>

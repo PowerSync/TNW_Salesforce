@@ -11,42 +11,12 @@ class Storage
     private $results = [];
 
     /**
-     * @var Transport\Soap\ClientFactory
-     */
-    private $factory;
-
-    public function __construct(
-        Transport\Soap\ClientFactory $factory
-    ) {
-        $this->factory = $factory;
-    }
-
-    /**
      * @param object $entity
      * @param \Tnw\SoapClient\Result\UpsertResult $result
      */
-    private function saveResult($entity, $result)
+    public function saveResult($entity, $result)
     {
         $this->results[\spl_object_hash($entity)] = $result;
-    }
-
-    /**
-     * @param array $batch
-     * @param array $entities
-     * @param string $externalIdFieldName
-     * @param string $type
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function setBatchByEntities($batch, $entities, $externalIdFieldName, $type)
-    {
-        $results = $this->factory->client()->upsert($externalIdFieldName, $batch, $type);
-        foreach ($entities as $key => $entity) {
-            if (empty($results[$key])) {
-                continue;
-            }
-
-            $this->saveResult($entity, $results[$key]);
-        }
     }
 
     /**
@@ -61,13 +31,5 @@ class Storage
         }
 
         return $this->results[$hash];
-    }
-
-    /**
-     * Clear
-     */
-    public function clear()
-    {
-        $this->results = [];
     }
 }
