@@ -13,21 +13,29 @@ class Input implements Transport\Calls\Upsert\InputInterface
     private $eventManager;
 
     /**
-     * @var Storage
+     * @var Transport\Soap\Calls\Upsert\Storage
      */
     private $storage;
 
     /**
+     * @var Transport\Soap\ClientFactory
+     */
+    private $factory;
+
+    /**
      * Soap constructor.
      * @param \Magento\Framework\Event\Manager $eventManager
-     * @param Storage $storage
+     * @param Transport\Soap\Calls\Upsert\Storage $storage
+     * @param Transport\Soap\ClientFactory $factory
      */
     public function __construct(
         \Magento\Framework\Event\Manager $eventManager,
-        Transport\Soap\Calls\Upsert\Storage $storage
+        Transport\Soap\Calls\Upsert\Storage $storage,
+        Transport\Soap\ClientFactory $factory
     ) {
         $this->eventManager = $eventManager;
         $this->storage = $storage;
+        $this->factory = $factory;
     }
 
     /**
@@ -48,7 +56,14 @@ class Input implements Transport\Calls\Upsert\InputInterface
                 $entities[] = $input->current();
             }
 
-            $this->storage->setBatchByEntities($batch, $entities, $input->externalIdFieldName(), $input->type());
+            $results = $this->factory->client()->upsert($input->externalIdFieldName(), $batch, $input->type());
+            foreach ($entities as $key => $entity) {
+                if (empty($results[$key])) {
+                    continue;
+                }
+
+                $this->storage->saveResult($entity, $results[$key]);
+            }
         }
     }
 }

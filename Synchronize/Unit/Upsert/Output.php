@@ -131,7 +131,10 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     {
         $output = $this->outputFactory->create(['type' => $this->salesforceType()]);
         foreach ($this->entities() as $entity) {
-            $output->offsetSet($entity, []);
+            $output->offsetSet($entity, [
+                'waiting' => true,
+                'message' => __('Waiting response')
+            ]);
         }
 
         return $output;
