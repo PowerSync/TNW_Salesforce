@@ -311,10 +311,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'nullable' => false,
                 'primary' => true
             ], 'Queue Id')
-            ->addColumn('parent_id', Table::TYPE_INTEGER, null, [
-                'unsigned' => true,
-                'nullable' => true,
-            ], 'Parent Id')
             ->addColumn('entity_id', Table::TYPE_INTEGER, null, [
                 'nullable' => false,
             ], 'Entity Id')
@@ -357,6 +353,60 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'nullable' => false,
                 'default' => new \Zend_Db_Expr('CURRENT_TIMESTAMP')
             ], 'When create')
+            ->addIndex(
+                $setup->getIdxName(
+                    'tnw_salesforce_queue',
+                    ['entity_type', 'object_type'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_INDEX
+                ),
+                ['entity_type', 'object_type'],
+                ['type' => \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_INDEX]
+            )
+            ->addForeignKey(
+                $setup->getFkName('tnw_salesforce_queue', 'website_id', 'store_website', 'website_id'),
+                'website_id',
+                $setup->getTable('store_website'),
+                'website_id',
+                Table::ACTION_CASCADE
+            )
+        ;
+
+        $setup->getConnection()
+            ->createTable($table);
+
+        $table = $setup->getConnection()
+            ->newTable($setup->getTable('tnw_salesforce_queue_relation'))
+            ->addColumn('queue_id', Table::TYPE_INTEGER, null, [
+                'unsigned' => true,
+                'nullable' => false,
+            ], 'Queue Id')
+            ->addColumn('parent_id', Table::TYPE_INTEGER, null, [
+                'unsigned' => true,
+                'nullable' => false,
+            ], 'Parent Id')
+            ->addIndex(
+                $setup->getIdxName(
+                    'tnw_salesforce_queue_relation',
+                    ['queue_id', 'parent_id'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                ),
+                ['queue_id', 'parent_id'],
+                ['type' => \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE]
+            )
+            ->addForeignKey(
+                $setup->getFkName('tnw_salesforce_queue_relation', 'queue_id', 'tnw_salesforce_queue', 'queue_id'),
+                'queue_id',
+                $setup->getTable('tnw_salesforce_queue'),
+                'queue_id',
+                Table::ACTION_CASCADE
+            )
+            ->addForeignKey(
+                $setup->getFkName('tnw_salesforce_queue_relation', 'parent_id', 'tnw_salesforce_queue', 'queue_id'),
+                'parent_id',
+                $setup->getTable('tnw_salesforce_queue'),
+                'queue_id',
+                Table::ACTION_CASCADE
+            )
         ;
 
         $setup->getConnection()
