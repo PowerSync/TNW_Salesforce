@@ -10,35 +10,50 @@ class Queue extends \Magento\Framework\Model\AbstractModel
         $this->_init(ResourceModel\Queue::class);
     }
 
-    public function getMagentoType()
+    public function getEntityType()
     {
-        return $this->_getData('magento_type');
+        return $this->_getData('entity_type');
     }
 
-    public function getMagentoId()
+    public function getEntityId()
     {
-        return $this->_getData('magento_id');
+        return $this->_getData('entity_id');
     }
 
-    public function getMagentoLoad()
+    public function getEntityLoad()
     {
-        return $this->_getData('magento_load');
-    }
-
-    /**
-     * @return Queue|null
-     */
-    public function getParent()
-    {
-        //TODO: get Parent
+        return $this->_getData('entity_load');
     }
 
     /**
-     * @param Queue $queue
-     * @return Queue
+     * @param Queue[] $parents
      */
-    public function setParent($queue)
+    public function setParents(array $parents)
     {
-        return $this->setData('parent_id', $queue->getId());
+
+    }
+
+    /**
+     * @return Queue[]
+     */
+    public function getParents()
+    {
+
+    }
+
+    /**
+     * @param Queue[] $children
+     */
+    public function setChildren(array $children)
+    {
+
+    }
+
+    /**
+     * @return Queue[]
+     */
+    public function getChildren()
+    {
+
     }
 }
