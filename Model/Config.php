@@ -263,6 +263,28 @@ class Config extends DataObject
     }
 
     /**
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getCurrentOrgWebsites()
+    {
+        $websitesGrouppedByOrg = $this->getWebsitesGrouppedByOrg();
+
+        $currentWebsite = $this->storeManager->getWebsite()->getId();
+        $currentOrgWebsites = [];
+
+        $baseOrgWebsite = $websitesGrouppedByOrg[$currentWebsite];
+
+        foreach ($websitesGrouppedByOrg as $websiteId => $baseWebsite) {
+            if ($baseOrgWebsite == $baseWebsite) {
+                $currentOrgWebsites[] = $websiteId;
+            }
+        }
+
+        return $currentOrgWebsites;
+    }
+
+    /**
      * @param int $websiteId
      *
      * @return mixed

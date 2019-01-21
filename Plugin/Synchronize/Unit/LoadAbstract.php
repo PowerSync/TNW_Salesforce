@@ -12,14 +12,19 @@ class LoadAbstract
     /** @var Pool  */
     protected $dividerPool;
 
+    /** @var \TNW\Salesforce\Model\Config  */
+    protected $config;
     /**
      * LoadByAbstract constructor.
      * @param Pool $pool
      */
-    public function __construct(Pool $pool)
+    public function __construct(
+        Pool $pool,
+        \TNW\Salesforce\Model\Config $config
+    )
     {
         $this->dividerPool = $pool;
-
+        $this->config = $config;
     }
 
     /**
@@ -43,9 +48,11 @@ class LoadAbstract
     {
         $divider = $this->getDivider($subject->group()->code());
 
-        $websiteIds = $divider->getEntityWebsiteIds($entity);
+        $entityWebsiteIds = $divider->getEntityWebsiteIds($entity);
 
-        $entity->setConfigWebsite(current($websiteIds));
+        $entityOrgWebsites = array_intersect($entityWebsiteIds, $this->config->getCurrentOrgWebsites());
+
+        $entity->setConfigWebsite(current($entityOrgWebsites));
 
         return $entity;
     }
