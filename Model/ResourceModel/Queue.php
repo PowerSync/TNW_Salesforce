@@ -7,18 +7,47 @@ class Queue extends AbstractDb
 {
     public function _construct()
     {
-        $this->_init('tnw_salesforce_queue', 'queue_id');
+        $this->_init('tnw_salesforce_entity_queue', 'queue_id');
     }
 
-    protected function _beforeSave(\Magento\Framework\Model\AbstractModel $object)
-    {
-        //TODO: Save parents
-        return parent::_beforeSave($object);
-    }
-
+    /**
+     * @param \TNW\Salesforce\Model\Queue $object
+     * @return AbstractDb
+     */
     protected function _afterSave(\Magento\Framework\Model\AbstractModel $object)
     {
-        //TODO: Save children
+        $this->saveDependence($object->getId(), array_map([$this, 'objectId'], $object->getDependence()));
         return parent::_afterSave($object);
+    }
+
+    /**
+     * @param \Magento\Framework\Model\AbstractModel $object
+     * @return mixed
+     */
+    private function objectId(\Magento\Framework\Model\AbstractModel $object)
+    {
+        return $object->getId();
+    }
+
+    /**
+     * @param $queueId
+     * @param array $dependenceIds
+     */
+    public function saveDependence($queueId, array $dependenceIds)
+    {
+        $data = [];
+        foreach ($dependenceIds as $dependenceId) {
+            if (empty($dependenceId)) {
+                continue;
+            }
+
+            $data[] = [
+                'queue_id' => $queueId,
+                'parent_id' => $dependenceId
+            ];
+        }
+
+        $this->getConnection()
+            ->insertOnDuplicate($this->getTable('tnw_salesforce_entity_queue_relation'), $data);
     }
 }

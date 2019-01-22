@@ -1,7 +1,7 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Queue;
 
-interface GeneratorInterface
+interface CreateInterface
 {
     /**
      * @param int $entityId
