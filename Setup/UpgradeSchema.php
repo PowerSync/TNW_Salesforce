@@ -152,6 +152,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->version_2_4_9($context, $setup);
 
+        $this->version_2_4_16($context, $setup);
+
         $setup->endSetup();
     }
 
@@ -304,7 +306,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         }
 
         $table = $setup->getConnection()
-            ->newTable($setup->getTable('tnw_salesforce_queue'))
+            ->newTable($setup->getTable('tnw_salesforce_entity_queue'))
             ->addColumn('queue_id', Table::TYPE_INTEGER, null, [
                 'identity' => true,
                 'unsigned' => true,
@@ -338,7 +340,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ->addColumn('message', Table::TYPE_TEXT, 1024, [
                 'nullable' => true
             ], 'Message')
-            ->addColumn('website_id', Table::TYPE_INTEGER, null, [
+            ->addColumn('website_id', Table::TYPE_SMALLINT, null, [
                 'unsigned' => true,
                 'nullable' => false
             ], 'Website Id')
@@ -354,16 +356,11 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'default' => new \Zend_Db_Expr('CURRENT_TIMESTAMP')
             ], 'When create')
             ->addIndex(
-                $setup->getIdxName(
-                    'tnw_salesforce_queue',
-                    ['entity_type', 'object_type'],
-                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_INDEX
-                ),
-                ['entity_type', 'object_type'],
-                ['type' => \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_INDEX]
+                $setup->getIdxName('tnw_salesforce_entity_queue', ['entity_type', 'object_type']),
+                ['entity_type', 'object_type']
             )
             ->addForeignKey(
-                $setup->getFkName('tnw_salesforce_queue', 'website_id', 'store_website', 'website_id'),
+                $setup->getFkName('tnw_salesforce_entity_queue', 'website_id', 'store_website', 'website_id'),
                 'website_id',
                 $setup->getTable('store_website'),
                 'website_id',
@@ -375,7 +372,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ->createTable($table);
 
         $table = $setup->getConnection()
-            ->newTable($setup->getTable('tnw_salesforce_queue_relation'))
+            ->newTable($setup->getTable('tnw_salesforce_entity_queue_relation'))
             ->addColumn('queue_id', Table::TYPE_INTEGER, null, [
                 'unsigned' => true,
                 'nullable' => false,
@@ -386,7 +383,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ], 'Parent Id')
             ->addIndex(
                 $setup->getIdxName(
-                    'tnw_salesforce_queue_relation',
+                    'tnw_salesforce_entity_queue_relation',
                     ['queue_id', 'parent_id'],
                     \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
                 ),
@@ -394,16 +391,16 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ['type' => \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE]
             )
             ->addForeignKey(
-                $setup->getFkName('tnw_salesforce_queue_relation', 'queue_id', 'tnw_salesforce_queue', 'queue_id'),
+                $setup->getFkName('tnw_salesforce_entity_queue_relation', 'queue_id', 'tnw_salesforce_entity_queue', 'queue_id'),
                 'queue_id',
-                $setup->getTable('tnw_salesforce_queue'),
+                $setup->getTable('tnw_salesforce_entity_queue'),
                 'queue_id',
                 Table::ACTION_CASCADE
             )
             ->addForeignKey(
-                $setup->getFkName('tnw_salesforce_queue_relation', 'parent_id', 'tnw_salesforce_queue', 'queue_id'),
+                $setup->getFkName('tnw_salesforce_entity_queue_relation', 'parent_id', 'tnw_salesforce_entity_queue', 'queue_id'),
                 'parent_id',
-                $setup->getTable('tnw_salesforce_queue'),
+                $setup->getTable('tnw_salesforce_entity_queue'),
                 'queue_id',
                 Table::ACTION_CASCADE
             )

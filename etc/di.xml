@@ -410,45 +410,52 @@
         </arguments>
     </type>
 
-    <type name="TNW\Salesforce\Synchronize\Queue">
-        <arguments>
-            <argument name="managers" xsi:type="array">
-                <item name="customerAccount" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Account\Manager</item>
-                <item name="customerContact" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Contact\Manager</item>
-                <item name="websiteWebsite" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\Website\Manager</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer\Account\Manager" type="TNW\Salesforce\Synchronize\Queue\Manager">
+    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer\Account\Resolve" type="TNW\Salesforce\Synchronize\Queue\Resolve">
         <arguments>
             <argument name="entityType" xsi:type="string">customer</argument>
             <argument name="objectType" xsi:type="string">Account</argument>
             <argument name="generators" xsi:type="array">
-                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Generator</item>
+                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\CreateByCustomer</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer\Contact\Manager" type="TNW\Salesforce\Synchronize\Queue\Manager">
+    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer\Contact\Resolve" type="TNW\Salesforce\Synchronize\Queue\Resolve">
         <arguments>
             <argument name="entityType" xsi:type="string">customer</argument>
             <argument name="objectType" xsi:type="string">Contact</argument>
             <argument name="generators" xsi:type="array">
-                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Generator</item>
+                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\CreateByCustomer</item>
             </argument>
             <argument name="parents" xsi:type="array">
-                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\Website\Manager</item>
+                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\Website\Resolve</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TNW\Salesforce\Synchronize\Queue\Website\Website\Manager" type="TNW\Salesforce\Synchronize\Queue\Manager">
+    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer" type="TNW\Salesforce\Synchronize\Queue\Entity">
+        <arguments>
+            <argument name="resolves" xsi:type="array">
+                <item name="account" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Account\Resolve</item>
+                <item name="contact" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Contact\Resolve</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="TNW\Salesforce\Synchronize\Queue\Website\Website\Resolve" type="TNW\Salesforce\Synchronize\Queue\Resolve">
         <arguments>
             <argument name="entityType" xsi:type="string">website</argument>
             <argument name="objectType" xsi:type="string">tnw_mage_basic__Magento_Website__c</argument>
             <argument name="generators" xsi:type="array">
-                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\Generator</item>
+                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\CreateByWebsite</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="TNW\Salesforce\Synchronize\Queue\Website" type="TNW\Salesforce\Synchronize\Queue\Entity">
+        <arguments>
+            <argument name="resolves" xsi:type="array">
+                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\Website\Resolve</item>
             </argument>
         </arguments>
     </virtualType>

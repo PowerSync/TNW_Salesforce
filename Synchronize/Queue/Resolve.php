@@ -3,7 +3,7 @@ namespace TNW\Salesforce\Synchronize\Queue;
 
 use Magento\Framework\Exception\LocalizedException;
 
-class Manager
+class Resolve
 {
     /**
      * @var string
@@ -16,7 +16,7 @@ class Manager
     private $objectType;
 
     /**
-     * @var GeneratorInterface[]
+     * @var CreateInterface[]
      */
     private $generators;
 
@@ -31,14 +31,19 @@ class Manager
     private $resourceQueue;
 
     /**
-     * @var Manager[]
+     * @var Resolve[]
      */
     private $children;
 
     /**
-     * @var Manager[]
+     * @var Resolve[]
      */
     private $parents;
+
+    /**
+     * @var array
+     */
+    private $skipRules;
 
     /**
      * Queue constructor.
@@ -47,8 +52,9 @@ class Manager
      * @param array $generators
      * @param \TNW\Salesforce\Model\QueueFactory $queueFactory
      * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
-     * @param Manager[] $parents
-     * @param Manager[] $children
+     * @param SkipInterface[] $skipRules
+     * @param Resolve[] $parents
+     * @param Resolve[] $children
      */
     public function __construct(
         $entityType,
@@ -56,6 +62,7 @@ class Manager
         array $generators,
         \TNW\Salesforce\Model\QueueFactory $queueFactory,
         \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
+        array $skipRules = [],
         array $parents = [],
         array $children = []
     ) {
@@ -64,8 +71,9 @@ class Manager
         $this->generators = $generators;
         $this->queueFactory = $queueFactory;
         $this->resourceQueue = $resourceQueue;
-        $this->children = $children;
+        $this->skipRules = $skipRules;
         $this->parents = $parents;
+        $this->children = $children;
     }
 
     /**
@@ -80,11 +88,17 @@ class Manager
      * @param string $loadBy
      * @param int $entityId
      * @param int $websiteId
+     * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
     public function generate($loadBy, $entityId, $websiteId)
     {
-        foreach ($this->generator($loadBy)->process($entityId, [$this, 'create']) as $queue) {
+        if ($this->skip($websiteId)) {
+            return [];
+        }
+
+        $queues = $this->generator($loadBy)->process($entityId, [$this, 'create']);
+        foreach ($queues as $queue) {
             $queue->setData('website_id', $websiteId);
 
             // Generate Parents
@@ -92,18 +106,37 @@ class Manager
             foreach ($this->parents as $dependency) {
                 $parents += $dependency->parentGenerate($loadBy, $entityId, $websiteId);
             }
-            $queue->setParents($parents);
+            $queue->setDependence($parents);
+            $this->resourceQueue->save($queue);
 
             // Generate Children
             $children = [];
             foreach ($this->children as $child) {
                 $children += $child->childrenGenerate($loadBy, $entityId, $websiteId);
             }
-            $queue->setChildren($children);
 
-            // Save queue
-            $this->resourceQueue->save($queue);
+            foreach ($children as $child) {
+                $child->addDependence($queue);
+                $this->resourceQueue->save($child);
+            }
         }
+
+        return $queues;
+    }
+
+    /**
+     * @param int $websiteId
+     * @return bool
+     */
+    private function skip($websiteId)
+    {
+        foreach ($this->skipRules as $rule) {
+            if ($rule->apply($this, $websiteId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -115,15 +148,16 @@ class Manager
      */
     private function parentGenerate($loadBy, $entityId, $websiteId)
     {
-        $queues = [];
-        foreach ($this->generator($loadBy)->process($entityId, [$this, 'create']) as $queue) {
+        $queues = $this->generator($loadBy)->process($entityId, [$this, 'create']);
+        foreach ($queues as $queue) {
             $queue->setData('website_id', $websiteId);
 
             $parents = [];
             foreach ($this->parents as $dependency) {
                 $parents += $dependency->parentGenerate($loadBy, $entityId, $websiteId);
             }
-            $queue->setParents($parents);
+            $queue->setDependence($parents);
+            $this->resourceQueue->save($queue);
         }
 
         return $queues;
@@ -138,15 +172,19 @@ class Manager
      */
     private function childrenGenerate($loadBy, $entityId, $websiteId)
     {
-        $queues = [];
-        foreach ($this->generator($loadBy)->process($entityId, [$this, 'create']) as $queue) {
+        $queues = $this->generator($loadBy)->process($entityId, [$this, 'create']);
+        foreach ($queues as $queue) {
             $queue->setData('website_id', $websiteId);
 
             $children = [];
             foreach ($this->children as $child) {
                 $children += $child->childrenGenerate($loadBy, $entityId, $websiteId);
             }
-            $queue->setChildren($children);
+
+            foreach ($children as $child) {
+                $child->addDependence($queue);
+                $this->resourceQueue->save($child);
+            }
         }
 
         return $queues;
@@ -169,7 +207,7 @@ class Manager
 
     /**
      * @param $type
-     * @return GeneratorInterface
+     * @return CreateInterface
      * @throws LocalizedException
      */
     private function generator($type)

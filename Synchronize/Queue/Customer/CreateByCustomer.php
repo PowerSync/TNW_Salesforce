@@ -1,7 +1,7 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Queue\Customer;
 
-class Generator implements \TNW\Salesforce\Synchronize\Queue\GeneratorInterface
+class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterface
 {
     /**
      * @param int $entityId
