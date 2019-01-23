@@ -24,8 +24,8 @@ abstract class DivideEntityByWebsiteOrg
     abstract public function getEntityWebsiteIds($entity);
 
     /**
-     * @param $ids
-     * @return mixed
+     * @param int[] $ids
+     * @return object[]
      */
     abstract public function loadEntities($ids);
 
@@ -36,10 +36,12 @@ abstract class DivideEntityByWebsiteOrg
     public function process(array $entities)
     {
         $entitiesByWebsites = [];
-        foreach ($this->loadEntities($entities) as $entity) {
-            foreach ($this->getEntityWebsiteIds($entity) as $entityWebsiteId) {
-                $uniqueWebsiteId = $this->config->uniqueWebsiteIdLogin($entityWebsiteId);
-                $entitiesByWebsites[$uniqueWebsiteId][$entity->getId()] = $entity->getId();
+        foreach (array_chunk($entities, \TNW\Salesforce\Client\Salesforce::SFORCE_UPSERT_CHUNK_SIZE) as $entitiesChunk) {
+            foreach ($this->loadEntities($entitiesChunk) as $entity) {
+                foreach ($this->getEntityWebsiteIds($entity) as $entityWebsiteId) {
+                    $uniqueWebsiteId = $this->config->uniqueWebsiteIdLogin($entityWebsiteId);
+                    $entitiesByWebsites[$uniqueWebsiteId][$entity->getId()] = $entity->getId();
+                }
             }
         }
 

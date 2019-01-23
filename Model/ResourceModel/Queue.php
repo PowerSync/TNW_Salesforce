@@ -16,8 +16,59 @@ class Queue extends AbstractDb
      */
     protected function _afterSave(\Magento\Framework\Model\AbstractModel $object)
     {
-        $this->saveDependence($object->getId(), array_map([$this, 'objectId'], $object->getDependence()));
+        $this->saveDependence($object);
         return parent::_afterSave($object);
+    }
+
+    /**
+     * @param \TNW\Salesforce\Model\Queue $queue
+     * @return $this
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function merge(\TNW\Salesforce\Model\Queue $queue)
+    {
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($this->getMainTable())
+            ->where('entity_type = ?', $queue->getEntityType())
+            ->where('object_type = ?', $queue->getObjectType())
+            ->where('entity_id = ?', $queue->getEntityId())
+            ->where('entity_load = ?', $queue->getEntityLoad())
+            ->where('website_id = ?', $queue->getWebsiteId())
+            ->where('status = ?', 'new')
+        ;
+
+        $data = $connection->fetchRow($select);
+        if (!empty($data)) {
+            $queue->setData($data);
+        }
+
+        return $this->save($queue);
+    }
+
+    /**
+     * @param \TNW\Salesforce\Model\Queue $object
+     */
+    public function saveDependence($object)
+    {
+        $data = [];
+        foreach (array_map([$this, 'objectId'], $object->getDependence()) as $dependenceId) {
+            if (empty($dependenceId)) {
+                continue;
+            }
+
+            $data[] = [
+                'queue_id' => $object->getId(),
+                'parent_id' => $dependenceId
+            ];
+        }
+
+        if (empty($data)) {
+            return;
+        }
+
+        $this->getConnection()
+            ->insertOnDuplicate($this->getTable('tnw_salesforce_entity_queue_relation'), $data);
     }
 
     /**
@@ -27,27 +78,5 @@ class Queue extends AbstractDb
     private function objectId(\Magento\Framework\Model\AbstractModel $object)
     {
         return $object->getId();
-    }
-
-    /**
-     * @param $queueId
-     * @param array $dependenceIds
-     */
-    public function saveDependence($queueId, array $dependenceIds)
-    {
-        $data = [];
-        foreach ($dependenceIds as $dependenceId) {
-            if (empty($dependenceId)) {
-                continue;
-            }
-
-            $data[] = [
-                'queue_id' => $queueId,
-                'parent_id' => $dependenceId
-            ];
-        }
-
-        $this->getConnection()
-            ->insertOnDuplicate($this->getTable('tnw_salesforce_entity_queue_relation'), $data);
     }
 }
