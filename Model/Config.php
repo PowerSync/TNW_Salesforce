@@ -228,7 +228,14 @@ class Config extends DataObject
      */
     public function getWebsites()
     {
-        return $this->websiteRepository->getList();
+        $result = $this->websiteRepository->getList();
+        $adminWebsite = ['admin' => $result['admin']];
+        unset($result['admin']);
+
+        $result = $adminWebsite + $result;
+
+        return $result;
+
     }
 
     /**
@@ -260,6 +267,25 @@ class Config extends DataObject
         }
 
         return $this->websitesGrouppedByOrg;
+    }
+
+    /**
+     * @return array
+     * Collect list of websites for the active orgs
+     */
+    public function getOrgsWebsites()
+    {
+        $websitesByOrg = $this->getWebsitesGrouppedByOrg();
+        $orgsWebsites = [];
+
+        foreach ($websitesByOrg as $websiteId => $baseWebsite) {
+            if (!$this->getSalesforceStatus($websiteId)) {
+                continue;
+            }
+            $orgsWebsites[] = $websiteId;
+        }
+
+        return $orgsWebsites;
     }
 
     /**
