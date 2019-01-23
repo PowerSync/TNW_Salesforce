@@ -19,36 +19,54 @@ class Entity
     private $storeManager;
 
     /**
+     * @var \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool
+     */
+    private $dividerPool;
+
+    /**
      * Entity constructor.
      * @param string $entityType
      * @param Resolve[] $resolves
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool $dividerPool
      */
     public function __construct(
         $entityType,
         array $resolves,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool $dividerPool
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
         $this->storeManager = $storeManager;
+        $this->dividerPool = $dividerPool;
     }
 
     /**
-     * @param $entityId
-     * @param $website
-     * @return \TNW\Salesforce\Model\Queue[]
+     * @param int[] $entityIds
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function addToQueue($entityId, $website = null)
+    public function addToQueue(array $entityIds)
+    {
+        $entitiesByWebsite = $this->dividerPool
+            ->getDividerByGroupCode($this->entityType)
+            ->process($entityIds);
+
+        array_walk($entitiesByWebsite, [$this, 'addToQueueByWebsite']);
+    }
+
+    /**
+     * @param int[] $entityIds
+     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function addToQueueByWebsite(array $entityIds, $website = null)
     {
         $website = $this->storeManager->getWebsite($website);
-
-        $queues = [];
-        foreach ($this->resolves as $resolve) {
-            $queues += $resolve->generate($this->entityType, $entityId, $website->getId());
+        foreach ($entityIds as $entityId) {
+            foreach ($this->resolves as $resolve) {
+                $resolve->generate($this->entityType, $entityId, $website->getId());
+            }
         }
-
-        return $queues;
     }
 }

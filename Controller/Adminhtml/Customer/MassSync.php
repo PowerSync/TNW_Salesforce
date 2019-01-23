@@ -8,9 +8,8 @@ namespace TNW\Salesforce\Controller\Adminhtml\Customer;
  */
 class MassSync extends \Magento\Backend\App\Action
 {
-
     /**
-     * @var \TNW\Salesforce\Synchronize\Entity
+     * @var \TNW\Salesforce\Synchronize\Queue\Entity
      */
     private $entityCustomer;
 
@@ -27,11 +26,13 @@ class MassSync extends \Magento\Backend\App\Action
     /**
      * MassSync constructor.
      * @param \Magento\Backend\App\Action\Context $context
-     * @param \TNW\Salesforce\Synchronize\Entity $entityCustomer
+     * @param \TNW\Salesforce\Synchronize\Queue\Entity $entityCustomer
+     * @param \Magento\Ui\Component\MassAction\Filter $massActionFilter
+     * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collectionFactory
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
-        \TNW\Salesforce\Synchronize\Entity $entityCustomer,
+        \TNW\Salesforce\Synchronize\Queue\Entity $entityCustomer,
         \Magento\Ui\Component\MassAction\Filter $massActionFilter,
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collectionFactory
     ) {
@@ -44,16 +45,19 @@ class MassSync extends \Magento\Backend\App\Action
     /**
      * Dispatch request
      *
-     * @return \Magento\Framework\Controller\ResultInterface|\Magento\Framework\App\ResponseInterface
-     * @throws \Magento\Framework\Exception\NotFoundException
+     * @return \Magento\Framework\Controller\Result\Redirect
      */
     public function execute()
     {
-        $entityIds = $this->massActionFilter
-            ->getCollection($this->collectionFactory->create())
-            ->getAllIds();
+        try {
+            $entityIds = $this->massActionFilter
+                ->getCollection($this->collectionFactory->create())
+                ->getAllIds();
 
-        $this->entityCustomer->synchronize($entityIds);
+            $this->entityCustomer->addToQueue($entityIds);
+        } catch (\Exception $e) {
+            $this->messageManager->addExceptionMessage($e);
+        }
 
         return $this->resultRedirectFactory->create()
             ->setPath('customer/index');

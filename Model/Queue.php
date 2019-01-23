@@ -27,6 +27,14 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
+     * @return string
+     */
+    public function getObjectType()
+    {
+        return $this->_getData('object_type');
+    }
+
+    /**
      * @return int
      */
     public function getEntityId()
@@ -43,11 +51,20 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
+     * @return string
+     */
+    public function getWebsiteId()
+    {
+        return $this->_getData('website_id');
+    }
+
+    /**
      * @param Queue[] $queues
      * @return Queue
      */
     public function setDependence(array $queues)
     {
+        $this->_hasDataChanges = true;
         $this->dependence = $queues;
         return $this;
     }
@@ -58,6 +75,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      */
     public function addDependence($queue)
     {
+        $this->_hasDataChanges = true;
         $this->dependence[] = $queue;
         return $this;
     }

@@ -314,12 +314,12 @@
     </virtualType>
     <type name="TNW\Salesforce\Controller\Adminhtml\Customer\SyncCustomer">
         <arguments>
-            <argument name="entityCustomer" xsi:type="object">TNW\Salesforce\Synchronize\Entity\Customer</argument>
+            <argument name="entityCustomer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer</argument>
         </arguments>
     </type>
     <type name="TNW\Salesforce\Controller\Adminhtml\Customer\MassSync">
         <arguments>
-            <argument name="entityCustomer" xsi:type="object">TNW\Salesforce\Synchronize\Entity\Customer</argument>
+            <argument name="entityCustomer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer</argument>
         </arguments>
     </type>
     <virtualType name="TNW\Salesforce\Observer\Entities\Customer" type="TNW\Salesforce\Observer\Entities" />
@@ -417,6 +417,9 @@
             <argument name="generators" xsi:type="array">
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\CreateByCustomer</item>
             </argument>
+            <argument name="children" xsi:type="array">
+                <item name="contact" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Contact\Resolve</item>
+            </argument>
         </arguments>
     </virtualType>
 
@@ -435,9 +438,9 @@
 
     <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer" type="TNW\Salesforce\Synchronize\Queue\Entity">
         <arguments>
+            <argument name="entityType" xsi:type="string">customer</argument>
             <argument name="resolves" xsi:type="array">
-                <item name="account" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Account\Resolve</item>
-                <item name="contact" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Contact\Resolve</item>
+                <item name="businessAccount" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Account\Resolve</item>
             </argument>
         </arguments>
     </virtualType>
@@ -448,12 +451,14 @@
             <argument name="objectType" xsi:type="string">tnw_mage_basic__Magento_Website__c</argument>
             <argument name="generators" xsi:type="array">
                 <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\CreateByWebsite</item>
+                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\CreateByCustomer</item>
             </argument>
         </arguments>
     </virtualType>
 
     <virtualType name="TNW\Salesforce\Synchronize\Queue\Website" type="TNW\Salesforce\Synchronize\Queue\Entity">
         <arguments>
+            <argument name="entityType" xsi:type="string">website</argument>
             <argument name="resolves" xsi:type="array">
                 <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\Website\Resolve</item>
             </argument>

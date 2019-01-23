@@ -356,8 +356,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'default' => new \Zend_Db_Expr('CURRENT_TIMESTAMP')
             ], 'When create')
             ->addIndex(
-                $setup->getIdxName('tnw_salesforce_entity_queue', ['entity_type', 'object_type']),
-                ['entity_type', 'object_type']
+                $setup->getIdxName('tnw_salesforce_entity_queue', ['entity_type', 'object_type', 'entity_id', 'entity_load']),
+                ['entity_type', 'object_type', 'entity_id', 'entity_load']
             )
             ->addForeignKey(
                 $setup->getFkName('tnw_salesforce_entity_queue', 'website_id', 'store_website', 'website_id'),

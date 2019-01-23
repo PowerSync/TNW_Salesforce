@@ -104,20 +104,20 @@ class Resolve
             // Generate Parents
             $parents = [];
             foreach ($this->parents as $dependency) {
-                $parents += $dependency->parentGenerate($loadBy, $entityId, $websiteId);
+                $parents += $dependency->generate($loadBy, $entityId, $websiteId);
             }
             $queue->setDependence($parents);
-            $this->resourceQueue->save($queue);
+            $this->resourceQueue->merge($queue);
 
             // Generate Children
             $children = [];
             foreach ($this->children as $child) {
-                $children += $child->childrenGenerate($loadBy, $entityId, $websiteId);
+                $children += $child->generate($loadBy, $entityId, $websiteId);
             }
 
             foreach ($children as $child) {
                 $child->addDependence($queue);
-                $this->resourceQueue->save($child);
+                $this->resourceQueue->merge($child);
             }
         }
 
@@ -137,57 +137,6 @@ class Resolve
         }
 
         return false;
-    }
-
-    /**
-     * @param string $loadBy
-     * @param int $entityId
-     * @param int $websiteId
-     * @return \TNW\Salesforce\Model\Queue[]
-     * @throws LocalizedException
-     */
-    private function parentGenerate($loadBy, $entityId, $websiteId)
-    {
-        $queues = $this->generator($loadBy)->process($entityId, [$this, 'create']);
-        foreach ($queues as $queue) {
-            $queue->setData('website_id', $websiteId);
-
-            $parents = [];
-            foreach ($this->parents as $dependency) {
-                $parents += $dependency->parentGenerate($loadBy, $entityId, $websiteId);
-            }
-            $queue->setDependence($parents);
-            $this->resourceQueue->save($queue);
-        }
-
-        return $queues;
-    }
-
-    /**
-     * @param string $loadBy
-     * @param int $entityId
-     * @param int $websiteId
-     * @return \TNW\Salesforce\Model\Queue[]
-     * @throws LocalizedException
-     */
-    private function childrenGenerate($loadBy, $entityId, $websiteId)
-    {
-        $queues = $this->generator($loadBy)->process($entityId, [$this, 'create']);
-        foreach ($queues as $queue) {
-            $queue->setData('website_id', $websiteId);
-
-            $children = [];
-            foreach ($this->children as $child) {
-                $children += $child->childrenGenerate($loadBy, $entityId, $websiteId);
-            }
-
-            foreach ($children as $child) {
-                $child->addDependence($queue);
-                $this->resourceQueue->save($child);
-            }
-        }
-
-        return $queues;
     }
 
     /**
