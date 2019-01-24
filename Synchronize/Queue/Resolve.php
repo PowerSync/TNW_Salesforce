@@ -8,6 +8,16 @@ class Resolve
     /**
      * @var string
      */
+    private $code;
+
+    /**
+     * @var string
+     */
+    private $description;
+
+    /**
+     * @var string
+     */
     private $entityType;
 
     /**
@@ -31,12 +41,17 @@ class Resolve
     private $resourceQueue;
 
     /**
-     * @var Resolve[]
+     * @var \Magento\Framework\ObjectManagerInterface
+     */
+    private $objectManager;
+
+    /**
+     * @var string[]
      */
     private $children;
 
     /**
-     * @var Resolve[]
+     * @var string[]
      */
     private $parents;
 
@@ -47,33 +62,50 @@ class Resolve
 
     /**
      * Queue constructor.
+     * @param string $code
+     * @param string $description
      * @param string $entityType
      * @param string $objectType
      * @param array $generators
      * @param \TNW\Salesforce\Model\QueueFactory $queueFactory
      * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
+     * @param \Magento\Framework\ObjectManagerInterface $objectManager
      * @param SkipInterface[] $skipRules
-     * @param Resolve[] $parents
-     * @param Resolve[] $children
+     * @param string[] $parents
+     * @param string[] $children
      */
     public function __construct(
+        $code,
+        $description,
         $entityType,
         $objectType,
         array $generators,
         \TNW\Salesforce\Model\QueueFactory $queueFactory,
         \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
+        \Magento\Framework\ObjectManagerInterface $objectManager,
         array $skipRules = [],
         array $parents = [],
         array $children = []
     ) {
+        $this->code = $code;
         $this->entityType = $entityType;
         $this->objectType = $objectType;
+        $this->description = $description;
         $this->generators = $generators;
         $this->queueFactory = $queueFactory;
         $this->resourceQueue = $resourceQueue;
+        $this->objectManager = $objectManager;
         $this->skipRules = $skipRules;
         $this->parents = $parents;
         $this->children = $children;
+    }
+
+    /**
+     * @return string
+     */
+    public function code()
+    {
+        return $this->code;
     }
 
     /**
@@ -85,13 +117,30 @@ class Resolve
     }
 
     /**
+     * @return Resolve[]
+     */
+    public function parents()
+    {
+        return array_map([$this->objectManager, 'get'], $this->parents);
+    }
+
+    /**
+     * @return Resolve[]
+     */
+    public function children()
+    {
+        return array_map([$this->objectManager, 'get'], $this->children);
+    }
+
+    /**
      * @param string $loadBy
      * @param int $entityId
      * @param int $websiteId
+     * @param Resolve|null $parent
      * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
-    public function generate($loadBy, $entityId, $websiteId)
+    public function generate($loadBy, $entityId, $websiteId, Resolve $parent = null)
     {
         if ($this->skip($websiteId)) {
             return [];
@@ -101,18 +150,29 @@ class Resolve
         foreach ($queues as $queue) {
             $queue->setData('website_id', $websiteId);
 
+            $loadBy = $queue->getEntityLoad();
+            $entityId = $queue->getEntityId();
+
             // Generate Parents
             $parents = [];
-            foreach ($this->parents as $dependency) {
-                $parents += $dependency->generate($loadBy, $entityId, $websiteId);
+            foreach ($this->parents() as $dependency) {
+                if ($parent && strcasecmp($parent->code, $dependency->code) === 0) {
+                    continue;
+                }
+
+                $parents += $dependency->generate($loadBy, $entityId, $websiteId, $this);
             }
             $queue->setDependence($parents);
             $this->resourceQueue->merge($queue);
 
             // Generate Children
             $children = [];
-            foreach ($this->children as $child) {
-                $children += $child->generate($loadBy, $entityId, $websiteId);
+            foreach ($this->children() as $child) {
+                if ($parent && strcasecmp($this->code, $child->code) === 0) {
+                    continue;
+                }
+
+                $children += $child->generate($loadBy, $entityId, $websiteId, $this);
             }
 
             foreach ($children as $child) {
@@ -142,15 +202,20 @@ class Resolve
     /**
      * @param string $loadBy
      * @param int $entityId
+     * @param array $additionalLoad
      * @return \TNW\Salesforce\Model\Queue
      */
-    public function create($loadBy, $entityId)
+    public function create($loadBy, $entityId, array $additionalLoad = [])
     {
         return $this->queueFactory->create(['data' => [
+            'code' => $this->code,
+            'description' => $this->description,
             'entity_type' => $this->entityType,
             'entity_id' => $entityId,
             'entity_load' => $loadBy,
+            'entity_load_additional' => $additionalLoad,
             'object_type' => $this->objectType,
+            'status' => 'new'
         ]]);
     }
 
@@ -161,10 +226,14 @@ class Resolve
      */
     private function generator($type)
     {
-        if (empty($this->generators[$type])) {
-            throw new LocalizedException(__('Undefined type %1', $type));
+        foreach ($this->generators as $generator) {
+            if (strcasecmp($generator->createBy(), $type) !== 0) {
+                continue;
+            }
+
+            return $generator;
         }
 
-        return $this->generators[$type];
+        throw new LocalizedException(__('Undefined type %1', $type));
     }
 }

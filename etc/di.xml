@@ -410,57 +410,66 @@
         </arguments>
     </type>
 
-    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer\Account\Resolve" type="TNW\Salesforce\Synchronize\Queue\Resolve">
+    <!-- Customer -->
+    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer" type="TNW\Salesforce\Synchronize\Queue\Entity">
         <arguments>
+            <argument name="entityType" xsi:type="string">customer</argument>
+            <argument name="resolves" xsi:type="array">
+                <item name="businessAccount" xsi:type="object">TS\Queue\Resolve\Customer\BusinessAccount</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="TS\Queue\Resolve\Customer\BusinessAccount" type="TNW\Salesforce\Synchronize\Queue\Resolve">
+        <arguments>
+            <argument name="code" xsi:type="string">customerBusinessAccount</argument>
+            <argument name="description" xsi:type="string" translatable="true">Customer synchronization as an Salesforce Business Account</argument>
             <argument name="entityType" xsi:type="string">customer</argument>
             <argument name="objectType" xsi:type="string">Account</argument>
             <argument name="generators" xsi:type="array">
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\CreateByCustomer</item>
             </argument>
             <argument name="children" xsi:type="array">
-                <item name="contact" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Contact\Resolve</item>
+                <item name="contact" xsi:type="string">TS\Queue\Resolve\Customer\Contact</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer\Contact\Resolve" type="TNW\Salesforce\Synchronize\Queue\Resolve">
+    <virtualType name="TS\Queue\Resolve\Customer\Contact" type="TNW\Salesforce\Synchronize\Queue\Resolve">
         <arguments>
+            <argument name="code" xsi:type="string">customerContact</argument>
+            <argument name="description" xsi:type="string" translatable="true">Customer synchronization as an Salesforce Contact</argument>
             <argument name="entityType" xsi:type="string">customer</argument>
             <argument name="objectType" xsi:type="string">Contact</argument>
             <argument name="generators" xsi:type="array">
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\CreateByCustomer</item>
             </argument>
             <argument name="parents" xsi:type="array">
-                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\Website\Resolve</item>
+                <item name="businessAccount" xsi:type="string">TS\Queue\Resolve\Customer\BusinessAccount</item>
+                <item name="website" xsi:type="string">TS\Queue\Resolve\Website\Website</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer" type="TNW\Salesforce\Synchronize\Queue\Entity">
+    <!-- Website -->
+    <virtualType name="TNW\Salesforce\Synchronize\Queue\Website" type="TNW\Salesforce\Synchronize\Queue\Entity">
         <arguments>
-            <argument name="entityType" xsi:type="string">customer</argument>
+            <argument name="entityType" xsi:type="string">website</argument>
             <argument name="resolves" xsi:type="array">
-                <item name="businessAccount" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\Account\Resolve</item>
+                <item name="website" xsi:type="object">TS\Queue\Resolve\Website\Website</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TNW\Salesforce\Synchronize\Queue\Website\Website\Resolve" type="TNW\Salesforce\Synchronize\Queue\Resolve">
+    <virtualType name="TS\Queue\Resolve\Website\Website" type="TNW\Salesforce\Synchronize\Queue\Resolve">
         <arguments>
+            <argument name="code" xsi:type="string">websiteWebsite</argument>
+            <argument name="description" xsi:type="string" translatable="true">Customer synchronization as an Salesforce Website</argument>
             <argument name="entityType" xsi:type="string">website</argument>
             <argument name="objectType" xsi:type="string">tnw_mage_basic__Magento_Website__c</argument>
             <argument name="generators" xsi:type="array">
                 <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\CreateByWebsite</item>
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\CreateByCustomer</item>
-            </argument>
-        </arguments>
-    </virtualType>
-
-    <virtualType name="TNW\Salesforce\Synchronize\Queue\Website" type="TNW\Salesforce\Synchronize\Queue\Entity">
-        <arguments>
-            <argument name="entityType" xsi:type="string">website</argument>
-            <argument name="resolves" xsi:type="array">
-                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website\Website\Resolve</item>
             </argument>
         </arguments>
     </virtualType>

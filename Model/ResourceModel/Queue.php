@@ -1,10 +1,19 @@
 <?php
 namespace TNW\Salesforce\Model\ResourceModel;
 
+use Magento\Framework\DataObject;
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 class Queue extends AbstractDb
 {
+    /**
+     * @var array
+     */
+    protected $_serializableFields = [
+        'entity_load_additional' => [[], []],
+        'additional_data' => [[], []],
+    ];
+
     public function _construct()
     {
         $this->_init('tnw_salesforce_entity_queue', 'queue_id');
@@ -30,17 +39,18 @@ class Queue extends AbstractDb
         $connection = $this->getConnection();
         $select = $connection->select()
             ->from($this->getMainTable())
-            ->where('entity_type = ?', $queue->getEntityType())
-            ->where('object_type = ?', $queue->getObjectType())
+            ->where('code = ?', $queue->getCode())
             ->where('entity_id = ?', $queue->getEntityId())
             ->where('entity_load = ?', $queue->getEntityLoad())
+            ->where('entity_load_additional = ?', $this->getSerializer()->serialize($queue->getEntityLoadAdditional()))
             ->where('website_id = ?', $queue->getWebsiteId())
             ->where('status = ?', 'new')
         ;
 
         $data = $connection->fetchRow($select);
         if (!empty($data)) {
-            $queue->setData($data);
+            $queue->setData(array_merge($data, $queue->getData()));
+            $this->unserializeFields($queue);
         }
 
         return $this->save($queue);

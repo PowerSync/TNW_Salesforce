@@ -4,6 +4,11 @@ namespace TNW\Salesforce\Synchronize\Queue;
 interface CreateInterface
 {
     /**
+     * @return string
+     */
+    public function createBy();
+
+    /**
      * @param int $entityId
      * @param callable $create
      * @return \TNW\Salesforce\Model\Queue[]
