@@ -319,6 +319,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ->addColumn('entity_load', Table::TYPE_TEXT, 255, [
                 'nullable' => false,
             ], 'Entity Load')
+            ->addColumn('entity_load_additional', Table::TYPE_TEXT, 1024, [
+                'nullable' => true,
+            ], 'Entity Load')
             ->addColumn('entity_type', Table::TYPE_TEXT, 255, [
                 'nullable' => false
             ], 'Entity Type')
@@ -333,6 +336,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'nullable' => false,
                 'default' => 0
             ], 'Sync Attempt')
+            ->addColumn('sync_at', Table::TYPE_DATETIME, null, [
+                'nullable' => true
+            ], 'When synced')
             ->addColumn('status', Table::TYPE_TEXT, 255, [
                 'nullable' => false,
                 'default' => 'new'
@@ -340,6 +346,12 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ->addColumn('message', Table::TYPE_TEXT, 1024, [
                 'nullable' => true
             ], 'Message')
+            ->addColumn('code', Table::TYPE_TEXT, 255, [
+                'nullable' => false,
+            ], 'Code')
+            ->addColumn('description', Table::TYPE_TEXT, 255, [
+                'nullable' => false,
+            ], 'Description')
             ->addColumn('website_id', Table::TYPE_SMALLINT, null, [
                 'unsigned' => true,
                 'nullable' => false
@@ -356,8 +368,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'default' => new \Zend_Db_Expr('CURRENT_TIMESTAMP')
             ], 'When create')
             ->addIndex(
-                $setup->getIdxName('tnw_salesforce_entity_queue', ['entity_type', 'object_type', 'entity_id', 'entity_load']),
-                ['entity_type', 'object_type', 'entity_id', 'entity_load']
+                $setup->getIdxName('tnw_salesforce_entity_queue', ['code', 'entity_id', 'entity_load']),
+                ['code', 'entity_id', 'entity_load']
             )
             ->addForeignKey(
                 $setup->getFkName('tnw_salesforce_entity_queue', 'website_id', 'store_website', 'website_id'),

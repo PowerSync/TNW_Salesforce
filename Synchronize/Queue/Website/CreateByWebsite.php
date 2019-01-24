@@ -5,6 +5,8 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterface
 {
+    const CREATE_BY = 'website';
+
     /**
      * @var \Magento\Store\Model\WebsiteRepository
      */
@@ -33,5 +35,13 @@ class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterfa
         } catch (NoSuchEntityException $e) {
             return [];
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function createBy()
+    {
+        return self::CREATE_BY;
     }
 }

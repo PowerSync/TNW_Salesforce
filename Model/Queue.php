@@ -21,6 +21,14 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     /**
      * @return string
      */
+    public function getCode()
+    {
+        return $this->_getData('code');
+    }
+
+    /**
+     * @return string
+     */
     public function getEntityType()
     {
         return $this->_getData('entity_type');
@@ -48,6 +56,14 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     public function getEntityLoad()
     {
         return $this->_getData('entity_load');
+    }
+
+    /**
+     * @return string
+     */
+    public function getEntityLoadAdditional()
+    {
+        return $this->_getData('entity_load_additional');
     }
 
     /**

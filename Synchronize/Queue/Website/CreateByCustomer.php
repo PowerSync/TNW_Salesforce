@@ -3,6 +3,8 @@ namespace TNW\Salesforce\Synchronize\Queue\Website;
 
 class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterface
 {
+    const CREATE_BY = 'customer';
+
     /**
      * @var \Magento\Customer\Model\ResourceModel\Customer
      */
@@ -31,5 +33,13 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
         }
 
         return [$create('website', $websiteId)];
+    }
+
+    /**
+     * @return string
+     */
+    public function createBy()
+    {
+        return self::CREATE_BY;
     }
 }
