@@ -60,6 +60,7 @@ class Config extends DataObject
 
     /** @var array  */
     private $credentialsConfigPaths = [
+        /** Org credentials */
         'tnwsforce_general/salesforce/active',
         'tnwsforce_general/salesforce/username',
         'tnwsforce_general/salesforce/password',
@@ -227,7 +228,14 @@ class Config extends DataObject
      */
     public function getWebsites()
     {
-        return $this->websiteRepository->getList();
+        $result = $this->websiteRepository->getList();
+        $adminWebsite = ['admin' => $result['admin']];
+        unset($result['admin']);
+
+        $result = $adminWebsite + $result;
+
+        return $result;
+
     }
 
     /**
@@ -259,6 +267,47 @@ class Config extends DataObject
         }
 
         return $this->websitesGrouppedByOrg;
+    }
+
+    /**
+     * @return array
+     * Collect list of websites for the active orgs
+     */
+    public function getOrgsWebsites()
+    {
+        $websitesByOrg = $this->getWebsitesGrouppedByOrg();
+        $orgsWebsites = [];
+
+        foreach ($websitesByOrg as $websiteId => $baseWebsite) {
+            if (!$this->getSalesforceStatus($websiteId)) {
+                continue;
+            }
+            $orgsWebsites[] = $websiteId;
+        }
+
+        return $orgsWebsites;
+    }
+
+    /**
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getCurrentOrgWebsites()
+    {
+        $websitesGrouppedByOrg = $this->getWebsitesGrouppedByOrg();
+
+        $currentWebsite = $this->storeManager->getWebsite()->getId();
+        $currentOrgWebsites = [];
+
+        $baseOrgWebsite = $websitesGrouppedByOrg[$currentWebsite];
+
+        foreach ($websitesGrouppedByOrg as $websiteId => $baseWebsite) {
+            if ($baseOrgWebsite == $baseWebsite) {
+                $currentOrgWebsites[] = $websiteId;
+            }
+        }
+
+        return $currentOrgWebsites;
     }
 
     /**

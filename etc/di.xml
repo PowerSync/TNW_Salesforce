@@ -362,4 +362,13 @@
             </argument>
         </arguments>
     </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\LoadByAbstract">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\LoadByAbstract" sortOrder="10" />
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\LoadAbstract">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\LoadAbstract" sortOrder="10" />
+    </type>
+
 </config>

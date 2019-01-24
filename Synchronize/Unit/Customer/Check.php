@@ -64,7 +64,7 @@ class Check extends Synchronize\Unit\Check
             }
 
             $entity->setData('sforce_sync_status', !empty($this->cache[$entity]['success']));
-            $this->entityObject->saveStatus($entity, !empty($this->cache[$entity]['success']));
+            $this->entityObject->saveStatus($entity, !empty($this->cache[$entity]['success']), $entity->getConfigWebsite());
 
             $checkSuccess[$entity->getId()] = $entity->getData('sforce_sync_status');
         }
