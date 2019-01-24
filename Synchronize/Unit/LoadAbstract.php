@@ -60,7 +60,7 @@ abstract class LoadAbstract extends Synchronize\Unit\UnitAbstract
             $entity = $this->loadEntity($entity);
 
             if (null !== $this->entityObject && null !== $entity->getId()) {
-                $this->entityObject->load($entity);
+                $this->entityObject->load($entity, $entity->getConfigWebsite());
             }
 
             $this->cache['entities'][$entity] = $entity;

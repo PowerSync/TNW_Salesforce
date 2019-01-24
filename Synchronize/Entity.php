@@ -76,7 +76,7 @@ class Entity
                     $websiteId
                 );
 
-                if (!$this->salesforceConfig->getSalesforceStatus()) {
+                if (!$this->salesforceConfig->getSalesforceStatus($websiteId)) {
                     $this->synchronizeGroup->messageNotice(
                         'Sync is disabled in the website #"%s" config',
                         $websiteId
