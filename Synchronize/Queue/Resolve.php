@@ -136,19 +136,22 @@ class Resolve
      * @param string $loadBy
      * @param int $entityId
      * @param int $websiteId
-     * @param Resolve|null $parent
+     * @param Resolve[] $resolves
      * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
-    public function generate($loadBy, $entityId, $websiteId, Resolve $parent = null)
+    public function generate($loadBy, $entityId, $websiteId, array $resolves = [])
     {
-        if ($this->skip($websiteId)) {
-            return [];
-        }
+        // Add parent
+        $resolves[] = $this;
 
-        $queues = $this->generator($loadBy)->process($entityId, [$this, 'create']);
+        $queues = $this->generator($loadBy)->process($entityId, [$this, 'create'], $websiteId);
         foreach ($queues as $queue) {
             $queue->setData('website_id', $websiteId);
+
+            if ($this->skip($queue)) {
+                return [];
+            }
 
             $loadBy = $queue->getEntityLoad();
             $entityId = $queue->getEntityId();
@@ -156,11 +159,11 @@ class Resolve
             // Generate Parents
             $parents = [];
             foreach ($this->parents() as $dependency) {
-                if ($parent && strcasecmp($parent->code, $dependency->code) === 0) {
+                if ($this->isUsed($dependency->code, $resolves)) {
                     continue;
                 }
 
-                $parents += $dependency->generate($loadBy, $entityId, $websiteId, $this);
+                $parents += $dependency->generate($loadBy, $entityId, $websiteId, $resolves);
             }
             $queue->setDependence($parents);
             $this->resourceQueue->merge($queue);
@@ -168,11 +171,11 @@ class Resolve
             // Generate Children
             $children = [];
             foreach ($this->children() as $child) {
-                if ($parent && strcasecmp($this->code, $child->code) === 0) {
+                if ($this->isUsed($child->code, $resolves)) {
                     continue;
                 }
 
-                $children += $child->generate($loadBy, $entityId, $websiteId, $this);
+                $children += $child->generate($loadBy, $entityId, $websiteId, $resolves);
             }
 
             foreach ($children as $child) {
@@ -185,13 +188,29 @@ class Resolve
     }
 
     /**
-     * @param int $websiteId
+     * @param $code
+     * @param array $resolves
      * @return bool
      */
-    private function skip($websiteId)
+    private function isUsed($code, array $resolves)
+    {
+        foreach ($resolves as $resolve) {
+            if (strcasecmp($resolve->code, $code) === 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param \TNW\Salesforce\Model\Queue $queue
+     * @return bool
+     */
+    private function skip($queue)
     {
         foreach ($this->skipRules as $rule) {
-            if ($rule->apply($this, $websiteId)) {
+            if ($rule->apply($queue)) {
                 return true;
             }
         }
@@ -234,6 +253,6 @@ class Resolve
             return $generator;
         }
 
-        throw new LocalizedException(__('Undefined type %1', $type));
+        throw new LocalizedException(__('Unknown %3 generating method for %1 entity. Resolver code %2', $this->entityType, $this->code, $type));
     }
 }

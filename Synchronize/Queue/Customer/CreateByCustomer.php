@@ -6,31 +6,13 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
     const CREATE_BY = 'customer';
 
     /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer
-     */
-    private $resourceCustomer;
-
-    /**
-     * CreateByCustomer constructor.
-     * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
-     */
-    public function __construct(
-        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
-    ) {
-        $this->resourceCustomer = $resourceCustomer;
-    }
-
-    /**
      * @param int $entityId
      * @param callable $create
-     * @return mixed
+     * @param int $websiteId
+     * @return \TNW\Salesforce\Model\Queue[]
      */
-    public function process($entityId, callable $create)
+    public function process($entityId, callable $create, $websiteId)
     {
-        if (!$this->resourceCustomer->checkCustomerId($entityId)) {
-            return [];
-        }
-
         return [$create('customer', $entityId)];
     }
 

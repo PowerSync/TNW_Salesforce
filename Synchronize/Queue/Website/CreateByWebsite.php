@@ -1,40 +1,19 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Queue\Website;
 
-use Magento\Framework\Exception\NoSuchEntityException;
-
 class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterface
 {
     const CREATE_BY = 'website';
 
     /**
-     * @var \Magento\Store\Model\WebsiteRepository
-     */
-    private $websiteRepository;
-
-    /**
-     * CreateByWebsite constructor.
-     * @param \Magento\Store\Model\WebsiteRepository $websiteRepository
-     */
-    public function __construct(
-        \Magento\Store\Model\WebsiteRepository $websiteRepository
-    ) {
-        $this->websiteRepository = $websiteRepository;
-    }
-
-    /**
      * @param int $entityId
      * @param callable $create
+     * @param int $websiteId
      * @return mixed
      */
-    public function process($entityId, callable $create)
+    public function process($entityId, callable $create, $websiteId)
     {
-        try {
-            $this->websiteRepository->getById($entityId);
-            return [$create('website', $entityId)];
-        } catch (NoSuchEntityException $e) {
-            return [];
-        }
+        return [$create('website', $entityId)];
     }
 
     /**

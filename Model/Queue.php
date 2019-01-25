@@ -59,7 +59,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function getEntityLoadAdditional()
     {

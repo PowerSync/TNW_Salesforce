@@ -23,16 +23,17 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
     /**
      * @param int $entityId
      * @param callable $create
+     * @param int $websiteId
      * @return mixed
      */
-    public function process($entityId, callable $create)
+    public function process($entityId, callable $create, $websiteId)
     {
-        $websiteId = $this->resourceCustomer->getWebsiteId($entityId);
-        if (empty($websiteId)) {
+        $customerWebsiteId = $this->resourceCustomer->getWebsiteId($entityId);
+        if (empty($customerWebsiteId)) {
             return [];
         }
 
-        return [$create('website', $websiteId)];
+        return [$create('website', $customerWebsiteId)];
     }
 
     /**
