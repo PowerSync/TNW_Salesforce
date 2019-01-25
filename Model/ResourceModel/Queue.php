@@ -49,7 +49,7 @@ class Queue extends AbstractDb
 
         $data = $connection->fetchRow($select);
         if (!empty($data)) {
-            $queue->setData(array_merge($data, $queue->getData()));
+            $queue->setData($data);
             $this->unserializeFields($queue);
         }
 

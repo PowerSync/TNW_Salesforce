@@ -11,7 +11,8 @@ interface CreateInterface
     /**
      * @param int $entityId
      * @param callable $create
+     * @param int $websiteId
      * @return \TNW\Salesforce\Model\Queue[]
      */
-    public function process($entityId, callable $create);
+    public function process($entityId, callable $create, $websiteId);
 }
