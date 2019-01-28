@@ -371,4 +371,8 @@
         <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\LoadAbstract" sortOrder="10" />
     </type>
 
+    <type name="Magento\Store\Model\StoreManager">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Store\StoreManager" sortOrder="10" />
+    </type>
+
 </config>

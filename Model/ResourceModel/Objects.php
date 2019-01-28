@@ -147,12 +147,14 @@ class Objects extends AbstractDb
      */
     public function loadPriceBookId($productId, $storeId, $websiteId)
     {
-        return $this->getConnection()->fetchOne($this->selectPriceBookId, [
+        $condition = [
             'entity_id' => $productId,
             'store_id' => $storeId,
             'entity_website_id' => $websiteId,
             'base_website_id' => $this->baseWebsiteId($websiteId),
-        ]);
+        ];
+
+        return $this->getConnection()->fetchOne($this->selectPriceBookId, $condition);
     }
 
     /**
