@@ -328,8 +328,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ->addColumn('object_type', Table::TYPE_TEXT, 255, [
                 'nullable' => false
             ], 'Object Type')
-            ->addColumn('sync_type', Table::TYPE_TEXT, 255, [
-                'nullable' => false
+            ->addColumn('sync_type', Table::TYPE_INTEGER, null, [
+                'unsigned' => true,
+                'nullable' => false,
+                'default' => 0
             ], 'Sync Type')
             ->addColumn('sync_attempt', Table::TYPE_INTEGER, null, [
                 'unsigned' => true,

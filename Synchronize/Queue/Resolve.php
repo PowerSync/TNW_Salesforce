@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Queue;
 
 use Magento\Framework\Exception\LocalizedException;
 
+/**
+ * Class Resolve
+ */
 class Resolve
 {
     /**
@@ -101,6 +104,8 @@ class Resolve
     }
 
     /**
+     * Get code
+     *
      * @return string
      */
     public function code()
@@ -109,6 +114,8 @@ class Resolve
     }
 
     /**
+     * Get entity type
+     *
      * @return string
      */
     public function entityType()
@@ -117,6 +124,8 @@ class Resolve
     }
 
     /**
+     * Get parents
+     *
      * @return Resolve[]
      */
     public function parents()
@@ -125,6 +134,8 @@ class Resolve
     }
 
     /**
+     * Get children
+     *
      * @return Resolve[]
      */
     public function children()
@@ -133,14 +144,17 @@ class Resolve
     }
 
     /**
+     * Generate
+     *
      * @param string $loadBy
      * @param int $entityId
      * @param int $websiteId
+     * @param string $syncType
      * @param Resolve[] $resolves
      * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
-    public function generate($loadBy, $entityId, $websiteId, array $resolves = [])
+    public function generate($loadBy, $entityId, $websiteId, $syncType, array $resolves = [])
     {
         // Add parent
         $resolves[] = $this;
@@ -148,6 +162,7 @@ class Resolve
         $queues = $this->generator($loadBy)->process($entityId, [$this, 'create'], $websiteId);
         foreach ($queues as $queue) {
             $queue->setData('website_id', $websiteId);
+            $queue->setData('sync_type', $syncType);
 
             if ($this->skip($queue)) {
                 return [];
@@ -163,7 +178,7 @@ class Resolve
                     continue;
                 }
 
-                $parents += $dependency->generate($loadBy, $entityId, $websiteId, $resolves);
+                $parents += $dependency->generate($loadBy, $entityId, $websiteId, $syncType, $resolves);
             }
             $queue->setDependence($parents);
             $this->resourceQueue->merge($queue);
@@ -175,7 +190,7 @@ class Resolve
                     continue;
                 }
 
-                $children += $child->generate($loadBy, $entityId, $websiteId, $resolves);
+                $children += $child->generate($loadBy, $entityId, $websiteId, $syncType, $resolves);
             }
 
             foreach ($children as $child) {
@@ -188,7 +203,9 @@ class Resolve
     }
 
     /**
-     * @param $code
+     * Is used
+     *
+     * @param string $code
      * @param array $resolves
      * @return bool
      */
@@ -204,6 +221,8 @@ class Resolve
     }
 
     /**
+     * Skip
+     *
      * @param \TNW\Salesforce\Model\Queue $queue
      * @return bool
      */
@@ -219,6 +238,8 @@ class Resolve
     }
 
     /**
+     * Create
+     *
      * @param string $loadBy
      * @param int $entityId
      * @param array $additionalLoad
@@ -239,7 +260,9 @@ class Resolve
     }
 
     /**
-     * @param $type
+     * Get generator
+     *
+     * @param string $type
      * @return CreateInterface
      * @throws LocalizedException
      */
@@ -253,6 +276,11 @@ class Resolve
             return $generator;
         }
 
-        throw new LocalizedException(__('Unknown %3 generating method for %1 entity. Resolver code %2', $this->entityType, $this->code, $type));
+        throw new LocalizedException(__(
+            'Unknown %3 generating method for %1 entity. Resolver code %2',
+            $this->entityType,
+            $this->code,
+            $type
+        ));
     }
 }

@@ -307,11 +307,6 @@
         </arguments>
     </virtualType>
 
-    <virtualType name="TNW\Salesforce\Synchronize\Entity\Customer" type="TNW\Salesforce\Synchronize\Entity">
-        <arguments>
-            <argument name="synchronizeGroup" xsi:type="object">TNW\Soap\Synchronize\Customer</argument>
-        </arguments>
-    </virtualType>
     <type name="TNW\Salesforce\Controller\Adminhtml\Customer\SyncCustomer">
         <arguments>
             <argument name="entityCustomer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer</argument>
@@ -326,7 +321,7 @@
     <virtualType name="TNW\Salesforce\Observer\CustomerEntitiesSync" type="TNW\Salesforce\Observer\EntitiesSync">
         <arguments>
             <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Customer</argument>
-            <argument name="entitySynchronize" xsi:type="object">TNW\Salesforce\Synchronize\Entity\Customer</argument>
+            <argument name="entitySynchronize" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer</argument>
         </arguments>
     </virtualType>
     <type name="TNW\Salesforce\Observer\CustomerSaveCommitAfter">
@@ -340,21 +335,16 @@
         </arguments>
     </type>
 
-    <virtualType name="TNW\Salesforce\Synchronize\Entity\Website" type="TNW\Salesforce\Synchronize\Entity">
-        <arguments>
-            <argument name="synchronizeGroup" xsi:type="object">TNW\Soap\Synchronize\Website</argument>
-        </arguments>
-    </virtualType>
     <type name="TNW\Salesforce\Controller\Adminhtml\System\Store\SyncAll">
         <arguments>
-            <argument name="entityWebsite" xsi:type="object">TNW\Salesforce\Synchronize\Entity\Website</argument>
+            <argument name="entityWebsite" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website</argument>
         </arguments>
     </type>
     <virtualType name="TNW\Salesforce\Observer\Entities\Website" type="TNW\Salesforce\Observer\Entities" />
     <virtualType name="TNW\Salesforce\Observer\WebsiteEntitiesSync" type="TNW\Salesforce\Observer\EntitiesSync">
         <arguments>
             <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Website</argument>
-            <argument name="entitySynchronize" xsi:type="object">TNW\Salesforce\Synchronize\Entity\Website</argument>
+            <argument name="entitySynchronize" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website</argument>
         </arguments>
     </virtualType>
     <type name="TNW\Salesforce\Observer\WebsiteSaveCommitAfter">

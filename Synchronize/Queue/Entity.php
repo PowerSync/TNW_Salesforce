@@ -1,6 +1,9 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Queue;
 
+/**
+ * Class Entity
+ */
 class Entity
 {
     /**
@@ -43,6 +46,8 @@ class Entity
     }
 
     /**
+     * Add To Queue
+     *
      * @param int[] $entityIds
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -56,6 +61,8 @@ class Entity
     }
 
     /**
+     * Add To Queue By Website
+     *
      * @param int[] $entityIds
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -65,7 +72,7 @@ class Entity
         $website = $this->storeManager->getWebsite($website);
         foreach ($entityIds as $entityId) {
             foreach ($this->resolves as $resolve) {
-                $resolve->generate($this->entityType, $entityId, $website->getId());
+                $resolve->generate($this->entityType, $entityId, $website->getId(), 0);
             }
         }
     }
