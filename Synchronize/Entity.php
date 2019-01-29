@@ -1,6 +1,11 @@
 <?php
 namespace TNW\Salesforce\Synchronize;
 
+/**
+ * Class Entity
+ * @deprecated
+ * TODO: Remove
+ */
 class Entity
 {
     /**

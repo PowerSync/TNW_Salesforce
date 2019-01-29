@@ -4,9 +4,14 @@ namespace TNW\Salesforce\Model\ResourceModel;
 use Magento\Framework\DataObject;
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
+/**
+ * Class Queue
+ */
 class Queue extends AbstractDb
 {
     /**
+     * Serializable Fields
+     *
      * @var array
      */
     protected $_serializableFields = [
@@ -14,12 +19,17 @@ class Queue extends AbstractDb
         'additional_data' => [[], []],
     ];
 
+    /**
+     * Construct
+     */
     public function _construct()
     {
         $this->_init('tnw_salesforce_entity_queue', 'queue_id');
     }
 
     /**
+     * After Save
+     *
      * @param \TNW\Salesforce\Model\Queue $object
      * @return AbstractDb
      */
@@ -30,6 +40,8 @@ class Queue extends AbstractDb
     }
 
     /**
+     * Merge
+     *
      * @param \TNW\Salesforce\Model\Queue $queue
      * @return $this
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -43,6 +55,7 @@ class Queue extends AbstractDb
             ->where('entity_id = ?', $queue->getEntityId())
             ->where('entity_load = ?', $queue->getEntityLoad())
             ->where('entity_load_additional = ?', $this->getSerializer()->serialize($queue->getEntityLoadAdditional()))
+            ->where('sync_type = ?', $queue->getSyncType())
             ->where('website_id = ?', $queue->getWebsiteId())
             ->where('status = ?', 'new')
         ;
@@ -57,6 +70,8 @@ class Queue extends AbstractDb
     }
 
     /**
+     * Save Dependence
+     *
      * @param \TNW\Salesforce\Model\Queue $object
      */
     public function saveDependence($object)
@@ -82,6 +97,8 @@ class Queue extends AbstractDb
     }
 
     /**
+     * Object Id
+     *
      * @param \Magento\Framework\Model\AbstractModel $object
      * @return mixed
      */
