@@ -4,9 +4,9 @@ namespace TNW\Salesforce\Synchronize\Queue;
 use Magento\Framework\Exception\LocalizedException;
 
 /**
- * Class Resolve
+ * Sync Unit
  */
-class Resolve
+class Unit
 {
     /**
      * @var string
@@ -126,7 +126,7 @@ class Resolve
     /**
      * Get parents
      *
-     * @return Resolve[]
+     * @return Unit[]
      */
     public function parents()
     {
@@ -136,7 +136,7 @@ class Resolve
     /**
      * Get children
      *
-     * @return Resolve[]
+     * @return Unit[]
      */
     public function children()
     {
@@ -144,17 +144,17 @@ class Resolve
     }
 
     /**
-     * Generate
+     * Create Queue
      *
      * @param string $loadBy
      * @param int $entityId
      * @param int $websiteId
      * @param string $syncType
-     * @param Resolve[] $resolves
+     * @param Unit[] $resolves
      * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
-    public function generate($loadBy, $entityId, $websiteId, $syncType, array $resolves = [])
+    public function createQueue($loadBy, $entityId, $websiteId, $syncType, array $resolves = [])
     {
         // Add parent
         $resolves[] = $this;
@@ -178,7 +178,7 @@ class Resolve
                     continue;
                 }
 
-                $parents += $dependency->generate($loadBy, $entityId, $websiteId, $syncType, $resolves);
+                $parents += $dependency->createQueue($loadBy, $entityId, $websiteId, $syncType, $resolves);
             }
             $queue->setDependence($parents);
             $this->resourceQueue->merge($queue);
@@ -190,7 +190,7 @@ class Resolve
                     continue;
                 }
 
-                $children += $child->generate($loadBy, $entityId, $websiteId, $syncType, $resolves);
+                $children += $child->createQueue($loadBy, $entityId, $websiteId, $syncType, $resolves);
             }
 
             foreach ($children as $child) {

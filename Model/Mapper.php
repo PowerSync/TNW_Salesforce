@@ -19,7 +19,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
      */
     protected function _construct()
     {
-        $this->_init('TNW\Salesforce\Model\ResourceModel\Mapper');
+        $this->_init(\TNW\Salesforce\Model\ResourceModel\Mapper::class);
     }
 
     /**
@@ -27,7 +27,8 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
      *
      * @return array
      */
-    public function getIdentities() {
+    public function getIdentities()
+    {
         return [$this->cache_tag . '_' .$this->getId()];
     }
 
@@ -110,6 +111,4 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     {
         return $this->map_object;
     }
-
-
 }

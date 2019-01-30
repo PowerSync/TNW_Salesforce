@@ -2,6 +2,12 @@
 
 namespace  TNW\Salesforce\Model\Customer;
 
+/**
+ * Class Map
+ *
+ * @deprecated
+ * TODO: Remove
+ */
 class Map
 {
     /**
@@ -341,7 +347,7 @@ class Map
     protected function addAddressDataToTransferObject(
         $address,
         array $mapArrayAddress,
-        \stdClass &$transferObject
+        \stdClass $transferObject
     ) {
         $addressArray = $this->getAddressDataAsArray($address);
         foreach ($mapArrayAddress as $sfAttr => $mAttr) {

@@ -12,7 +12,7 @@ class Entity
     private $entityType;
 
     /**
-     * @var Resolve[]
+     * @var Unit[]
      */
     private $resolves;
 
@@ -29,7 +29,7 @@ class Entity
     /**
      * Entity constructor.
      * @param string $entityType
-     * @param Resolve[] $resolves
+     * @param Unit[] $resolves
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool $dividerPool
      */
@@ -72,7 +72,7 @@ class Entity
         $website = $this->storeManager->getWebsite($website);
         foreach ($entityIds as $entityId) {
             foreach ($this->resolves as $resolve) {
-                $resolve->generate($this->entityType, $entityId, $website->getId(), 0);
+                $resolve->createQueue($this->entityType, $entityId, $website->getId(), 0);
             }
         }
     }

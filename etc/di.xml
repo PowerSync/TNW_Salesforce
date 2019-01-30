@@ -405,12 +405,12 @@
         <arguments>
             <argument name="entityType" xsi:type="string">customer</argument>
             <argument name="resolves" xsi:type="array">
-                <item name="businessAccount" xsi:type="object">TS\Queue\Resolve\Customer\BusinessAccount</item>
+                <item name="businessAccount" xsi:type="object">TS\Queue\Unit\Customer\BusinessAccount</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TS\Queue\Resolve\Customer\BusinessAccount" type="TNW\Salesforce\Synchronize\Queue\Resolve">
+    <virtualType name="TS\Queue\Unit\Customer\BusinessAccount" type="TNW\Salesforce\Synchronize\Queue\Unit">
         <arguments>
             <argument name="code" xsi:type="string">customerBusinessAccount</argument>
             <argument name="description" xsi:type="string" translatable="true">Customer synchronization as an Salesforce Business Account</argument>
@@ -420,12 +420,12 @@
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\CreateByCustomer</item>
             </argument>
             <argument name="children" xsi:type="array">
-                <item name="contact" xsi:type="string">TS\Queue\Resolve\Customer\Contact</item>
+                <item name="contact" xsi:type="string">TS\Queue\Unit\Customer\Contact</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TS\Queue\Resolve\Customer\Contact" type="TNW\Salesforce\Synchronize\Queue\Resolve">
+    <virtualType name="TS\Queue\Unit\Customer\Contact" type="TNW\Salesforce\Synchronize\Queue\Unit">
         <arguments>
             <argument name="code" xsi:type="string">customerContact</argument>
             <argument name="description" xsi:type="string" translatable="true">Customer synchronization as an Salesforce Contact</argument>
@@ -435,8 +435,8 @@
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\CreateByCustomer</item>
             </argument>
             <argument name="parents" xsi:type="array">
-                <item name="businessAccount" xsi:type="string">TS\Queue\Resolve\Customer\BusinessAccount</item>
-                <item name="website" xsi:type="string">TS\Queue\Resolve\Website\Website</item>
+                <item name="businessAccount" xsi:type="string">TS\Queue\Unit\Customer\BusinessAccount</item>
+                <item name="website" xsi:type="string">TS\Queue\Unit\Website\Website</item>
             </argument>
         </arguments>
     </virtualType>
@@ -446,12 +446,12 @@
         <arguments>
             <argument name="entityType" xsi:type="string">website</argument>
             <argument name="resolves" xsi:type="array">
-                <item name="website" xsi:type="object">TS\Queue\Resolve\Website\Website</item>
+                <item name="website" xsi:type="object">TS\Queue\Unit\Website\Website</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TS\Queue\Resolve\Website\Website" type="TNW\Salesforce\Synchronize\Queue\Resolve">
+    <virtualType name="TS\Queue\Unit\Website\Website" type="TNW\Salesforce\Synchronize\Queue\Unit">
         <arguments>
             <argument name="code" xsi:type="string">websiteWebsite</argument>
             <argument name="description" xsi:type="string" translatable="true">Customer synchronization as an Salesforce Website</argument>

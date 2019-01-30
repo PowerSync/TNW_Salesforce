@@ -2,7 +2,10 @@
 
 namespace  TNW\Salesforce\Model\ResourceModel\Customer\Mapper;
 
-
+/**
+ * @deprecated
+ * TODO: Remove
+ */
 class Repository
 {
     protected $cachedCollection;
@@ -14,7 +17,7 @@ class Repository
     }
 
     /**
-     * @return Collection
+     * @return \TNW\Salesforce\Model\ResourceModel\Mapper\Collection
      */
     public function getResultCollection($type = \TNW\Salesforce\Model\Customer\Mapper::OBJECT_TYPE_CONTACT)
     {
@@ -23,7 +26,7 @@ class Repository
         }
 
         //TODO: validate is it is correct way to do
-        $collection = $this->objectManager->create('TNW\Salesforce\Model\ResourceModel\Customer\Mapper\Collection');
+        $collection = $this->objectManager->create(\TNW\Salesforce\Model\ResourceModel\Mapper\Collection::class);
         $collection->addFieldToFilter('object_type', ['eq' => $type]);
         $this->cachedCollection[$type] = $collection;
 
