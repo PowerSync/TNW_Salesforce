@@ -152,7 +152,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->version_2_4_9($context, $setup);
 
-        $this->version_2_4_16($context, $setup);
+        $this->addEntityQueue($context, $setup);
 
         $setup->endSetup();
     }
@@ -295,13 +295,15 @@ class UpgradeSchema implements UpgradeSchemaInterface
     }
 
     /**
+     * Add Entity Queue
+     *
      * @param ModuleContextInterface $context
      * @param SchemaSetupInterface $setup
      * @throws \Zend_Db_Exception
      */
-    protected function version_2_4_16(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    protected function addEntityQueue(ModuleContextInterface $context, SchemaSetupInterface $setup)
     {
-        if (version_compare($context->getVersion(), '2.4.16') >= 0) {
+        if (version_compare($context->getVersion(), '2.5.0') >= 0) {
             return;
         }
 
@@ -367,7 +369,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ], 'Additional Data')
             ->addColumn('created_at', Table::TYPE_DATETIME, null, [
                 'nullable' => false,
-                'default' => new \Zend_Db_Expr('CURRENT_TIMESTAMP')
+                'default' => Table::TIMESTAMP_INIT
             ], 'When create')
             ->addIndex(
                 $setup->getIdxName('tnw_salesforce_entity_queue', ['code', 'entity_id', 'entity_load']),
@@ -405,14 +407,24 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ['type' => \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE]
             )
             ->addForeignKey(
-                $setup->getFkName('tnw_salesforce_entity_queue_relation', 'queue_id', 'tnw_salesforce_entity_queue', 'queue_id'),
+                $setup->getFkName(
+                    'tnw_salesforce_entity_queue_relation',
+                    'queue_id',
+                    'tnw_salesforce_entity_queue',
+                    'queue_id'
+                ),
                 'queue_id',
                 $setup->getTable('tnw_salesforce_entity_queue'),
                 'queue_id',
                 Table::ACTION_CASCADE
             )
             ->addForeignKey(
-                $setup->getFkName('tnw_salesforce_entity_queue_relation', 'parent_id', 'tnw_salesforce_entity_queue', 'queue_id'),
+                $setup->getFkName(
+                    'tnw_salesforce_entity_queue_relation',
+                    'parent_id',
+                    'tnw_salesforce_entity_queue',
+                    'queue_id'
+                ),
                 'parent_id',
                 $setup->getTable('tnw_salesforce_entity_queue'),
                 'queue_id',
