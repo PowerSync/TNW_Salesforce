@@ -78,7 +78,7 @@ class Save extends Synchronize\Unit\UnitAbstract
             $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
 
             // Save Salesforce Id
-            $this->entityObject->saveByAttribute($entity, $attributeName);
+            $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getConfigWebsite());
 
             $message[] = __(
                 "Updating %1 attribute:\n\t\"%2\": %3",
@@ -89,7 +89,7 @@ class Save extends Synchronize\Unit\UnitAbstract
 
             // Save Salesforce Id from duplicates
             foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
-                $this->entityObject->saveValueByAttribute($duplicate, $salesforceId, $attributeName);
+                $this->entityObject->saveValueByAttribute($duplicate, $salesforceId, $attributeName, $entity->getConfigWebsite());
 
                 $message[] = __(
                     "Updating %1 attribute:\n\t\"%2\": %3",
