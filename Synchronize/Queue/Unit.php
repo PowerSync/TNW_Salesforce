@@ -173,13 +173,19 @@ class Unit
 
             // Generate Parents
             $parents = [];
-            foreach ($this->parents() as $dependency) {
-                if ($this->isUsed($dependency->code, $resolves)) {
+            foreach ($this->parents() as $parent) {
+                if ($this->isUsed($parent->code, $resolves)) {
                     continue;
                 }
 
-                $parents += $dependency->createQueue($loadBy, $entityId, $websiteId, $syncType, $resolves);
+                $parentQueues = $parent->createQueue($loadBy, $entityId, $websiteId, $syncType, $resolves);
+                if (empty($parentQueues)) {
+                    continue;
+                }
+
+                array_push($parents, ...$parentQueues);
             }
+
             $queue->setDependence($parents);
             $this->resourceQueue->merge($queue);
 
@@ -190,7 +196,12 @@ class Unit
                     continue;
                 }
 
-                $children += $child->createQueue($loadBy, $entityId, $websiteId, $syncType, $resolves);
+                $childQueues = $child->createQueue($loadBy, $entityId, $websiteId, $syncType, $resolves);
+                if (empty($childQueues)) {
+                    continue;
+                }
+
+                array_push($children, ...$childQueues);
             }
 
             foreach ($children as $child) {
