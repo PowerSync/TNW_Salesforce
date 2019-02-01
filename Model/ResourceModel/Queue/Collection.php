@@ -17,4 +17,26 @@ class Collection extends AbstractCollection
     {
         $this->_init(\TNW\Salesforce\Model\Queue::class, \TNW\Salesforce\Model\ResourceModel\Queue::class);
     }
+
+    /**
+     * Add Filter To Code
+     *
+     * @param string $code
+     * @return Collection
+     */
+    public function addFilterToCode($code)
+    {
+        return $this->addFieldToFilter('code', $code);
+    }
+
+    /**
+     * Add Filter To WebsiteId
+     *
+     * @param string $code
+     * @return Collection
+     */
+    public function addFilterToWebsiteId($code)
+    {
+        return $this->addFieldToFilter('website_id', $code);
+    }
 }

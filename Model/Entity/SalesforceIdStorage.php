@@ -186,6 +186,6 @@ class SalesforceIdStorage
     private function prepareWebsiteId($website)
     {
         $websiteId = $this->storeManager->getWebsite($website)->getId();
-        return $this->config->uniqueWebsiteIdLogin($websiteId);
+        return $this->config->baseWebsiteIdLogin($websiteId);
     }
 }

@@ -2,8 +2,7 @@
 namespace TNW\Salesforce\Synchronize;
 
 /**
- * Class Group
- * @package TNW\Salesforce\Synchronize
+ * Group
  *
  * @method messageError($format, $args = null, $_ = null)
  * @method messageSuccess($format, $args = null, $_ = null)
@@ -66,6 +65,8 @@ class Group
     }
 
     /**
+     * Code
+     *
      * @return string
      */
     public function code()
@@ -74,13 +75,15 @@ class Group
     }
 
     /**
-     * @param array $entities
+     * Synchronize
+     *
+     * @param array $queues
      * @return Units
      * @throws \RuntimeException
      */
-    public function synchronize(array $entities)
+    public function synchronize(array $queues)
     {
-        $units = $this->createUnits($entities)->sort();
+        $units = $this->createUnits($queues)->sort();
         /** @var Unit\UnitInterface $unit */
         foreach ($units as $unit) {
             foreach ($unit->dependents() as $dependent) {
@@ -102,17 +105,19 @@ class Group
     }
 
     /**
-     * @param array $entities
+     * Create Units
+     *
+     * @param array $queues
      * @return Units
      */
-    protected function createUnits(array $entities)
+    protected function createUnits(array $queues)
     {
         /** @var Units $units */
         $units = $this->unitsFactory->create();
         foreach ($this->units as $instanceName) {
             $units->add($this->objectManager->create($instanceName, [
                 'group' => $this,
-                'entities' => $entities,
+                'queues' => $queues,
                 'units' => $units
             ]));
         }
@@ -128,7 +133,7 @@ class Group
      */
     public function __call($name, $arguments)
     {
-        if (stripos($name, 'message') !== 0){
+        if (stripos($name, 'message') !== 0) {
             throw new \BadMethodCallException('Unknown method');
         }
 
@@ -151,7 +156,7 @@ class Group
             }
 
             if ($argument instanceof \SplObjectStorage) {
-                $argument = array_map(function ($entity) use($argument) {
+                $argument = array_map(function ($entity) use ($argument) {
                     return $argument[$entity];
                 }, iterator_to_array($argument));
             }
