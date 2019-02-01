@@ -150,23 +150,27 @@ class Unit
      * @param int $entityId
      * @param int $websiteId
      * @param string $syncType
-     * @param Unit[] $resolves
+     * @param array $cacheQueue
      * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
-    public function createQueue($loadBy, $entityId, $websiteId, $syncType, array $resolves = [])
+    public function createQueue($loadBy, $entityId, $websiteId, $syncType, array $cacheQueue = [])
     {
-        // Add parent
-        $resolves[] = $this;
+        $key = sprintf('%s/%s/%s', $loadBy, $entityId, $this->code);
+        if (isset($cacheQueue[$key])) {
+            return $cacheQueue[$key];
+        }
 
-        $queues = $this->generator($loadBy)->process($entityId, [$this, 'create'], $websiteId);
-        foreach ($queues as $queue) {
+        $queues = [];
+        foreach ($this->generator($loadBy)->process($entityId, [$this, 'create'], $websiteId) as $queue) {
             $queue->setData('website_id', $websiteId);
             $queue->setData('sync_type', $syncType);
 
             if ($this->skip($queue)) {
-                return [];
+                continue;
             }
+
+            $cacheQueue[$key][] = $queue;
 
             $loadBy = $queue->getEntityLoad();
             $entityId = $queue->getEntityId();
@@ -174,11 +178,7 @@ class Unit
             // Generate Parents
             $parents = [];
             foreach ($this->parents() as $parent) {
-                if ($this->isUsed($parent->code, $resolves)) {
-                    continue;
-                }
-
-                $parentQueues = $parent->createQueue($loadBy, $entityId, $websiteId, $syncType, $resolves);
+                $parentQueues = $parent->createQueue($loadBy, $entityId, $websiteId, $syncType, $cacheQueue);
                 if (empty($parentQueues)) {
                     continue;
                 }
@@ -192,11 +192,7 @@ class Unit
             // Generate Children
             $children = [];
             foreach ($this->children() as $child) {
-                if ($this->isUsed($child->code, $resolves)) {
-                    continue;
-                }
-
-                $childQueues = $child->createQueue($loadBy, $entityId, $websiteId, $syncType, $resolves);
+                $childQueues = $child->createQueue($loadBy, $entityId, $websiteId, $syncType, $cacheQueue);
                 if (empty($childQueues)) {
                     continue;
                 }
@@ -208,27 +204,11 @@ class Unit
                 $child->addDependence($queue);
                 $this->resourceQueue->merge($child);
             }
+
+            $queues[] = $queue;
         }
 
         return $queues;
-    }
-
-    /**
-     * Is used
-     *
-     * @param string $code
-     * @param array $resolves
-     * @return bool
-     */
-    private function isUsed($code, array $resolves)
-    {
-        foreach ($resolves as $resolve) {
-            if (strcasecmp($resolve->code, $code) === 0) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
