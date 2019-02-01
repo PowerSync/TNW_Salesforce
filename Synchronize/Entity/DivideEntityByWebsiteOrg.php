@@ -1,10 +1,16 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Entity;
 
+use TNW\Salesforce\Client\Salesforce;
+
+/**
+ * DivideEntityByWebsiteOrg
+ */
 abstract class DivideEntityByWebsiteOrg
 {
-
-    /** @var \TNW\Salesforce\Model\Config  */
+    /**
+     * @var \TNW\Salesforce\Model\Config
+     */
     protected $config;
 
     /**
@@ -18,29 +24,39 @@ abstract class DivideEntityByWebsiteOrg
     }
 
     /**
-     * @param $entity
-     * @return mixed
+     * Entity Website Ids
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @return int[]
      */
     abstract public function getEntityWebsiteIds($entity);
 
     /**
+     * Load Entities
+     *
      * @param int[] $ids
-     * @return object[]
+     * @return \Magento\Framework\Model\AbstractModel[]
      */
     abstract public function loadEntities($ids);
 
     /**
+     * Process
+     *
      * @param array $entities
      * @return array
      */
     public function process(array $entities)
     {
         $entitiesByWebsites = [];
-        foreach (array_chunk($entities, \TNW\Salesforce\Client\Salesforce::SFORCE_UPSERT_CHUNK_SIZE) as $entitiesChunk) {
+        foreach (array_chunk($entities, Salesforce::SFORCE_UPSERT_CHUNK_SIZE) as $entitiesChunk) {
             foreach ($this->loadEntities($entitiesChunk) as $entity) {
                 foreach ($this->getEntityWebsiteIds($entity) as $entityWebsiteId) {
-                    $uniqueWebsiteId = $this->config->uniqueWebsiteIdLogin($entityWebsiteId);
-                    $entitiesByWebsites[$uniqueWebsiteId][$entity->getId()] = $entity->getId();
+                    $baseWebsiteId = $this->config->baseWebsiteIdLogin($entityWebsiteId);
+                    $websiteId = in_array($entityWebsiteId, $this->config->getOrgWebsites($baseWebsiteId))
+                        ? $entityWebsiteId
+                        : $baseWebsiteId;
+
+                    $entitiesByWebsites[$websiteId][$entity->getId()] = $entity->getId();
                 }
             }
         }

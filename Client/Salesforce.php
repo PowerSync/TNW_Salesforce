@@ -81,7 +81,7 @@ class Salesforce extends DataObject
     public function getClient($websiteId = null)
     {
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
-        $cacheKey = $this->salesforceConfig->uniqueWebsiteIdLogin($websiteId);
+        $cacheKey = $this->salesforceConfig->baseWebsiteIdLogin($websiteId);
 
         if (empty($this->client[$cacheKey])) {
             try {
@@ -295,7 +295,7 @@ class Salesforce extends DataObject
     public function getSalesForceUrl($websiteId = null)
     {
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
-        $cacheKey = $this->salesforceConfig->uniqueWebsiteIdLogin($websiteId);
+        $cacheKey = $this->salesforceConfig->baseWebsiteIdLogin($websiteId);
 
         $active = $this->salesforceConfig->getSalesforceStatus($websiteId);
         if (!$active) {

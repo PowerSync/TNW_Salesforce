@@ -270,8 +270,9 @@ class Config extends DataObject
     }
 
     /**
-     * @return array
      * Collect list of websites for the active orgs
+     *
+     * @return array
      */
     public function getOrgsWebsites()
     {
@@ -289,20 +290,22 @@ class Config extends DataObject
     }
 
     /**
+     * Collect list of websites for the current org
+     *
+     * @param int $currentWebsiteId
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getCurrentOrgWebsites()
+    public function getOrgWebsites($currentWebsiteId)
     {
-        $websitesGrouppedByOrg = $this->getWebsitesGrouppedByOrg();
+        $websitesByOrg = $this->getWebsitesGrouppedByOrg();
 
-        $currentWebsite = $this->storeManager->getWebsite()->getId();
         $currentOrgWebsites = [];
+        foreach ($websitesByOrg as $websiteId => $baseWebsite) {
+            if (!$this->getSalesforceStatus($websiteId)) {
+                continue;
+            }
 
-        $baseOrgWebsite = $websitesGrouppedByOrg[$currentWebsite];
-
-        foreach ($websitesGrouppedByOrg as $websiteId => $baseWebsite) {
-            if ($baseOrgWebsite == $baseWebsite) {
+            if ($websitesByOrg[$currentWebsiteId] === $baseWebsite) {
                 $currentOrgWebsites[] = $websiteId;
             }
         }
@@ -311,11 +314,24 @@ class Config extends DataObject
     }
 
     /**
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @deprecated
+     * @see getOrgWebsites
+     */
+    public function getCurrentOrgWebsites()
+    {
+        return $this->getOrgWebsites($this->storeManager->getWebsite()->getId());
+    }
+
+    /**
+     * Base Website Id Login
+     *
      * @param int $websiteId
      *
      * @return mixed
      */
-    public function uniqueWebsiteIdLogin($websiteId)
+    public function baseWebsiteIdLogin($websiteId)
     {
         $grouped = $this->getWebsitesGrouppedByOrg();
         if (isset($grouped[$websiteId])) {
