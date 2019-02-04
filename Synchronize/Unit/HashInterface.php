@@ -1,13 +1,13 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
-interface IdentificationInterface
+interface HashInterface
 {
     /**
-     * Print Entity
+     * Calculate
      *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @return string
      */
-    public function printEntity($entity);
+    public function calculateEntity($entity);
 }

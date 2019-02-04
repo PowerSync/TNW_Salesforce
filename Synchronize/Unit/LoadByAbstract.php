@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
 
+/**
+ * @deprecated
+ */
 abstract class LoadByAbstract extends Synchronize\Unit\UnitAbstract
 {
 
