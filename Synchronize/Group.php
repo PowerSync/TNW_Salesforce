@@ -77,7 +77,7 @@ class Group
     /**
      * Synchronize
      *
-     * @param array $queues
+     * @param \TNW\Salesforce\Model\Queue[] $queues
      * @return Units
      * @throws \RuntimeException
      */
@@ -107,7 +107,7 @@ class Group
     /**
      * Create Units
      *
-     * @param array $queues
+     * @param \TNW\Salesforce\Model\Queue[] $queues
      * @return Units
      */
     protected function createUnits(array $queues)

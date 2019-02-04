@@ -17,13 +17,21 @@ class Queue
     private $groups;
 
     /**
+     * @var \TNW\Salesforce\Model\ResourceModel\Queue
+     */
+    private $resourceQueue;
+
+    /**
      * Queue constructor.
      * @param Group[] $groups
+     * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
      */
     public function __construct(
-        array $groups
+        array $groups,
+        \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
     ) {
         $this->groups = $groups;
+        $this->resourceQueue = $resourceQueue;
     }
 
     /**
@@ -71,10 +79,20 @@ class Queue
      * @param Group $a
      * @param Group $b
      * @return int
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function sortGroup($a, $b)
     {
-        // TODO: Implement
+        $dependenceA = $this->resourceQueue->getDependenceByCode($a->code());
+        if (in_array($b->code(), $dependenceA, true)) {
+            return -1;
+        }
+
+        $dependenceB = $this->resourceQueue->getDependenceByCode($b->code());
+        if (in_array($a->code(), $dependenceB, true)) {
+            return 1;
+        }
+
         return 0;
     }
 }

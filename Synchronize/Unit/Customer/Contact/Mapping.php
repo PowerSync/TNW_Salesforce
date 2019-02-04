@@ -96,10 +96,6 @@ class Mapping extends Synchronize\Unit\MappingAbstract
             return $this->units()->get('customerContactLookup')->get('%s/record/Id', $entity);
         }
 
-        if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'sforce_account_id') === 0) {
-            return $this->units()->get('customerAccountUpsert')->get('%s/salesforce', $entity);
-        }
-
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'website_id') === 0) {
             return $this->resourceObjects
                 ->loadObjectId(

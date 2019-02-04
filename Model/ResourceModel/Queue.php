@@ -20,6 +20,11 @@ class Queue extends AbstractDb
     ];
 
     /**
+     * @var string[][]
+     */
+    private $dependenceByCode = [];
+
+    /**
      * Construct
      */
     public function _construct()
@@ -105,5 +110,36 @@ class Queue extends AbstractDb
     private function objectId(\Magento\Framework\Model\AbstractModel $object)
     {
         return $object->getId();
+    }
+
+    /**
+     * Get Dependence By Code
+     *
+     * @param string $code
+     * @return string[]
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getDependenceByCode($code)
+    {
+        if (!isset($this->dependenceByCode[$code])) {
+            $selectQueue = $this->getConnection()->select()
+                ->from(['relation' => $this->getMainTable()], ['queue_id'])
+                ->where('code = ?', $code);
+
+            $select = $this->getConnection()->select()
+                ->from(['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')], [])
+                ->joinInner(
+                    ['parentQueue' => $this->getMainTable()],
+                    'relation.parent_id = parentQueue.queue_id',
+                    ['code']
+                )
+                ->where('relation.queue_id IN(?)', $selectQueue)
+                ->distinct()
+            ;
+
+            $this->dependenceByCode[$code] = $this->getConnection()->fetchCol($select);
+        }
+
+        return $this->dependenceByCode[$code];
     }
 }
