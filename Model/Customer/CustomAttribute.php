@@ -13,6 +13,8 @@ class CustomAttribute
 
     const ATTRIBUTR_CODE_SYNC_STATUS = 'sforce_sync_status';
 
+    const GROUP_LABEL = 'group_label';
+
     /** @var \Magento\Customer\Model\ResourceModel\Customer */
     protected $resourceCustomer;
 
@@ -36,7 +38,8 @@ class CustomAttribute
         return [
             self::ATTRIBUTE_CODE_SF_ID,
             self::ATTRIBUTE_CODE_SF_ACCOUNT_ID,
-            self::ATTRIBUTR_CODE_SYNC_STATUS
+            self::ATTRIBUTR_CODE_SYNC_STATUS,
+            self::GROUP_LABEL
         ];
     }
 
