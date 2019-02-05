@@ -11,8 +11,20 @@ class Group
      */
     protected $groupRepository;
 
-    public function __construct(\Magento\Customer\Api\GroupRepositoryInterface $groupRepository) {
+    /** @var \TNW\Salesforce\Model\Logger  */
+    protected $logger;
+
+    /**
+     * Group constructor.
+     * @param \Magento\Customer\Api\GroupRepositoryInterface $groupRepository
+     * @param \TNW\Salesforce\Model\Logger $logger
+     */
+    public function __construct(
+        \Magento\Customer\Api\GroupRepositoryInterface $groupRepository,
+        \TNW\Salesforce\Model\Logger $logger
+    ) {
         $this->groupRepository = $groupRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -29,7 +41,14 @@ class Group
         $attributeCode) {
 
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'group_label') === 0) {
-            return $this->groupRepository->getById($entity->getGroupId())->getCode();
+            $groupCode = '';
+            try {
+                $groupCode = $this->groupRepository->getById($entity->getGroupId())->getCode();
+            } catch (\Exception $e) {
+                $this->logger->messageError('Order customer group load error: %s', $e->getMessage());
+            }
+
+            return $groupCode;
         }
 
         return $proceed($entity, $attributeCode);
