@@ -220,7 +220,7 @@ class Unit
     private function skip($queue)
     {
         foreach ($this->skipRules as $rule) {
-            if ($rule->apply($queue)) {
+            if ($rule->apply($queue) !== false) {
                 return true;
             }
         }

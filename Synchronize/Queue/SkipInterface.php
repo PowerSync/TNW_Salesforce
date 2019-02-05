@@ -7,7 +7,7 @@ interface SkipInterface
      * Apply
      *
      * @param \TNW\Salesforce\Model\Queue $queue
-     * @return bool
+     * @return bool|string|\Magento\Framework\Phrase
      */
     public function apply(\TNW\Salesforce\Model\Queue $queue);
 }
