@@ -19,6 +19,17 @@ class Collection extends AbstractCollection
     }
 
     /**
+     * Add Filter To Sync Type
+     *
+     * @param int $syncType
+     * @return Collection
+     */
+    public function addFilterToSyncType($syncType)
+    {
+        return $this->addFieldToFilter('sync_type', $syncType);
+    }
+
+    /**
      * Add Filter To Code
      *
      * @param string $code
@@ -38,5 +49,23 @@ class Collection extends AbstractCollection
     public function addFilterToWebsiteId($code)
     {
         return $this->addFieldToFilter('website_id', $code);
+    }
+
+    /**
+     * Website Ids
+     *
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function websiteIds()
+    {
+        $collection = clone $this;
+        $collection
+            ->removeAllFieldsFromSelect()
+            ->removeFieldFromSelect($collection->getResource()->getIdFieldName())
+            ->addFieldToSelect('website_id');
+
+        $collection->getSelect()->group('website_id');
+        return array_column($collection->getData(), 'website_id');
     }
 }
