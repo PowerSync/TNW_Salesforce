@@ -22,54 +22,67 @@ class Queue
     private $resourceQueue;
 
     /**
+     * @var \TNW\Salesforce\Model\Config\WebsiteEmulator
+     */
+    private $websiteEmulator;
+
+    /**
      * Queue constructor.
      * @param Group[] $groups
      * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
+     * @param \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
      */
     public function __construct(
         array $groups,
-        \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
+        \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
+        \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
     ) {
         $this->groups = $groups;
         $this->resourceQueue = $resourceQueue;
+        $this->websiteEmulator = $websiteEmulator;
     }
 
     /**
      * Synchronize
      *
      * @param \TNW\Salesforce\Model\ResourceModel\Queue\Collection $collection
-     * @param int $websiteId
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Exception
      */
-    public function synchronize($collection, $websiteId)
+    public function synchronize($collection)
     {
         if ($collection->isLoaded()) {
             $collection->clear();
         }
 
         usort($this->groups, [$this, 'sortGroup']);
-        foreach ($this->groups as $group) {
-            $groupCollection = clone $collection;
-            $groupCollection->addFilterToCode($group->code());
-            $groupCollection->addFilterToWebsiteId($websiteId);
+        foreach ($collection->websiteIds() as $websiteId) {
+            $this->websiteEmulator->wrapEmulationWebsite(function ($websiteId) use ($collection) {
+                foreach ($this->groups as $group) {
+                    $groupCollection = clone $collection;
+                    $groupCollection->addFilterToCode($group->code());
+                    $groupCollection->addFilterToWebsiteId($websiteId);
 
-            $size = $groupCollection->getSize();
-            if ($size === 0) {
-                continue;
-            }
+                    $size = $groupCollection->getSize();
+                    if ($size === 0) {
+                        continue;
+                    }
 
-            $groupCollection->setPageSize(self::PAGE_SIZE);
-            $lastPageNumber = $groupCollection->getLastPageNumber();
+                    $groupCollection->setPageSize(self::PAGE_SIZE);
+                    $lastPageNumber = $groupCollection->getLastPageNumber();
 
-            $group->messageDebug('Start entity "%s" synchronize for website %s', $group->code(), $websiteId);
+                    $group->messageDebug('Start entity "%s" synchronize for website %s', $group->code(), $websiteId);
 
-            for ($i = 1; $i <= $lastPageNumber; $i++) {
-                $groupCollection->setPageSize($i);
-                $groupCollection->clear();
+                    for ($i = 1; $i <= $lastPageNumber; $i++) {
+                        $groupCollection->setPageSize($i);
+                        $groupCollection->clear();
 
-                $group->synchronize($groupCollection->getItems());
-            }
+                        $group->synchronize($groupCollection->getItems());
+                    }
 
-            $group->messageDebug('Stop entity "%s" synchronize for website %s', $group->code(), $websiteId);
+                    $group->messageDebug('Stop entity "%s" synchronize for website %s', $group->code(), $websiteId);
+                }
+            }, $websiteId);
         }
     }
 
