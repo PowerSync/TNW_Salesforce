@@ -1,6 +1,8 @@
 <?php
 namespace TNW\Salesforce\Synchronize;
 
+use Magento\Framework\Exception\LocalizedException;
+
 /**
  * Group
  *
@@ -79,11 +81,12 @@ class Group
      *
      * @param \TNW\Salesforce\Model\Queue[] $queues
      * @return Units
-     * @throws \RuntimeException
+     * @throws LocalizedException
      */
     public function synchronize(array $queues)
     {
         $units = $this->createUnits($queues)->sort();
+        return $units;
         /** @var Unit\UnitInterface $unit */
         foreach ($units as $unit) {
             foreach ($unit->dependents() as $dependent) {
@@ -91,7 +94,7 @@ class Group
                     continue;
                 }
 
-                throw new \RuntimeException(sprintf('Unit (%s) process not complete', $units->get($dependent)->name()));
+                throw new LocalizedException(__('Unit (%1) process not complete', $units->get($dependent)->name()));
             }
 
             $this->messageDebug('----------------------------------------------------');

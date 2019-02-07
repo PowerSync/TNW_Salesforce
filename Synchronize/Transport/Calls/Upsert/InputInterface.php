@@ -8,7 +8,8 @@ interface InputInterface
 {
     /**
      * Do Unit syncronization to Salesforce object
-     * @param Input $input
+     *
+     * @param Transport\Input $input
      */
-    public function process(Input $input);
+    public function process(Transport\Input $input);
 }

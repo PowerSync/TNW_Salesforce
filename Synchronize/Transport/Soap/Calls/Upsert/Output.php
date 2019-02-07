@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert;
 
 use TNW\Salesforce\Synchronize\Transport;
 
+/**
+ * Upsert Output
+ */
 class Output implements Transport\Calls\Upsert\OutputInterface
 {
     /**
@@ -31,9 +34,9 @@ class Output implements Transport\Calls\Upsert\OutputInterface
     /**
      * Do Unit syncronization to Salesforce object
      *
-     * @param Transport\Calls\Upsert\Output $output
+     * @param Transport\Calls\Upsert\Transport\Output $output
      */
-    public function process(Transport\Calls\Upsert\Output $output)
+    public function process(Transport\Calls\Upsert\Transport\Output $output)
     {
         for ($output->rewind(); $output->valid(); $output->next()) {
             $result = $this->storage->searchResult($output->current());
@@ -56,6 +59,8 @@ class Output implements Transport\Calls\Upsert\OutputInterface
     }
 
     /**
+     * Message
+     *
      * @param \Tnw\SoapClient\Result\Error $error
      * @return string
      */

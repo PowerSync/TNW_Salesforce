@@ -8,7 +8,8 @@ interface OutputInterface
 {
     /**
      * Do Unit syncronization to Salesforce object
-     * @param Output $output
+     *
+     * @param Transport\Output $output
      */
-    public function process(Output $output);
+    public function process(Transport\Output $output);
 }

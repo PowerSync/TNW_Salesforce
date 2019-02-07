@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
 use TNW\Salesforce\Synchronize;
 
+/**
+ * Upsert Input
+ */
 class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\CheckInterface
 {
     /**
@@ -11,7 +14,7 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     protected $identification;
 
     /**
-     * @var Synchronize\Transport\Calls\UpsertInterface
+     * @var Synchronize\Transport\Calls\Upsert\InputInterface
      */
     private $process;
 
@@ -44,7 +47,7 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     protected $localeDate;
 
     /**
-     * @var Synchronize\Transport\Calls\Upsert\InputFactory
+     * @var Synchronize\Transport\Calls\Upsert\Transport\InputFactory
      */
     private $inputFactory;
 
@@ -58,7 +61,7 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
-     * @param Synchronize\Transport\Calls\Upsert\InputFactory $inputFactory
+     * @param Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory
      * @param Synchronize\Transport\Calls\Upsert\InputInterface $process
      * @param Synchronize\Transport\Soap\ClientFactory $factory
      * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
@@ -71,7 +74,7 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        Synchronize\Transport\Calls\Upsert\InputFactory $inputFactory,
+        Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
@@ -89,7 +92,9 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
-     * @param $websiteId
+     * Client
+     *
+     * @param int|null $websiteId
      * @return \TNW\Salesforce\Lib\Tnw\SoapClient\Client
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -99,7 +104,7 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function description()
     {
@@ -115,6 +120,8 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
+     * Salesforce Type
+     *
      * @return string
      */
     public function salesforceType()
@@ -123,6 +130,8 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
+     * Process
+     *
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      * @throws \OutOfBoundsException
@@ -149,7 +158,9 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
-     * @return Synchronize\Transport\Calls\Upsert\Input
+     * Create Transport
+     *
+     * @return Synchronize\Transport\Calls\Upsert\Transport\Input
      */
     public function createTransport()
     {
@@ -157,11 +168,13 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
-     * @param Synchronize\Transport\Calls\Upsert\Input $input
+     * Process Input
+     *
+     * @param Synchronize\Transport\Calls\Upsert\Transport\Input $input
      * @throws \InvalidArgumentException
      * @throws \OutOfBoundsException
      */
-    protected function processInput(Synchronize\Transport\Calls\Upsert\Input $input)
+    protected function processInput(Synchronize\Transport\Calls\Upsert\Transport\Input $input)
     {
         foreach ($this->entities() as $entity) {
             $input->offsetSet($entity, $this->prepareObject($entity, $this->unit($this->mapping)->get('%s', $entity)));
@@ -187,14 +200,13 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
-     *
+     * Object Description
      */
     protected function getObjectDescription()
     {
         if (empty($this->objectDescription[$this->salesforceType])) {
             $resultObjects = $this->getClient()->describeSObjects([$this->salesforceType]);
             $this->objectDescription[$this->salesforceType] = $resultObjects[0];
-
         }
 
         return $this->objectDescription[$this->salesforceType];

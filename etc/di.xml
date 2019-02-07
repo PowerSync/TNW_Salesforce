@@ -313,7 +313,7 @@
     <virtualType name="TNW\Salesforce\Observer\CustomerEntitiesSync" type="TNW\Salesforce\Observer\EntitiesSync">
         <arguments>
             <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Customer</argument>
-            <argument name="entitySynchronize" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer</argument>
+            <argument name="entityQueue" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer</argument>
         </arguments>
     </virtualType>
     <type name="TNW\Salesforce\Observer\CustomerSaveCommitAfter">
@@ -336,7 +336,7 @@
     <virtualType name="TNW\Salesforce\Observer\WebsiteEntitiesSync" type="TNW\Salesforce\Observer\EntitiesSync">
         <arguments>
             <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Website</argument>
-            <argument name="entitySynchronize" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website</argument>
+            <argument name="entityQueue" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website</argument>
         </arguments>
     </virtualType>
     <type name="TNW\Salesforce\Observer\WebsiteSaveCommitAfter">
@@ -398,6 +398,12 @@
 
     <type name="Magento\Store\Model\StoreManager">
         <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Store\StoreManager" sortOrder="10" />
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Queue\Entity">
+        <arguments>
+            <argument name="synchronizeQueue" xsi:type="object">TNW\Soap\Synchronize\Queue</argument>
+        </arguments>
     </type>
 
     <virtualType name="TNW\Soap\Synchronize\Queue" type="TNW\Salesforce\Synchronize\Queue">

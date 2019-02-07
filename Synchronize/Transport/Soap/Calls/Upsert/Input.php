@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert;
 
 use TNW\Salesforce\Synchronize\Transport;
 
+/**
+ * Upsert Input
+ */
 class Input implements Transport\Calls\Upsert\InputInterface
 {
     const BATCH_LIMIT = 200;
@@ -41,10 +44,10 @@ class Input implements Transport\Calls\Upsert\InputInterface
     /**
      * Do Unit syncronization to Salesforce object
      *
-     * @param Transport\Calls\Upsert\Input $input
+     * @param Transport\Calls\Upsert\Transport\Input $input
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function process(Transport\Calls\Upsert\Input $input)
+    public function process(Transport\Calls\Upsert\Transport\Input $input)
     {
         $this->eventManager->dispatch('tnw_salesforce_call_upsert_before', ['input' => $input]);
 

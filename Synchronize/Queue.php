@@ -22,90 +22,85 @@ class Queue
     private $resourceQueue;
 
     /**
-     * @var \TNW\Salesforce\Model\Config\WebsiteEmulator
-     */
-    private $websiteEmulator;
-
-    /**
      * Queue constructor.
      * @param Group[] $groups
      * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
-     * @param \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
      */
     public function __construct(
         array $groups,
-        \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
-        \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
+        \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
     ) {
         $this->groups = $groups;
         $this->resourceQueue = $resourceQueue;
-        $this->websiteEmulator = $websiteEmulator;
     }
 
     /**
      * Synchronize
      *
      * @param \TNW\Salesforce\Model\ResourceModel\Queue\Collection $collection
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Exception
+     * @param int $websiteId
      */
-    public function synchronize($collection)
+    public function synchronize($collection, $websiteId)
     {
         if ($collection->isLoaded()) {
             $collection->clear();
         }
 
-        usort($this->groups, [$this, 'sortGroup']);
-        foreach ($collection->websiteIds() as $websiteId) {
-            $this->websiteEmulator->wrapEmulationWebsite(function ($websiteId) use ($collection) {
-                foreach ($this->groups as $group) {
-                    $groupCollection = clone $collection;
-                    $groupCollection->addFilterToCode($group->code());
-                    $groupCollection->addFilterToWebsiteId($websiteId);
+        foreach ($this->sortGroup() as $group) {
+            $groupCollection = clone $collection;
+            $groupCollection->addFilterToCode($group->code());
+            $groupCollection->addFilterToWebsiteId($websiteId);
+            $groupCollection->addFilterDependent();
 
-                    $size = $groupCollection->getSize();
-                    if ($size === 0) {
-                        continue;
-                    }
+            $size = $groupCollection->getSize();
+            if ($size === 0) {
+                continue;
+            }
 
-                    $groupCollection->setPageSize(self::PAGE_SIZE);
-                    $lastPageNumber = $groupCollection->getLastPageNumber();
+            $groupCollection->setPageSize(self::PAGE_SIZE);
+            $lastPageNumber = $groupCollection->getLastPageNumber();
 
-                    $group->messageDebug('Start entity "%s" synchronize for website %s', $group->code(), $websiteId);
+            $group->messageDebug('Start entity "%s" synchronize for website %s', $group->code(), $websiteId);
 
-                    for ($i = 1; $i <= $lastPageNumber; $i++) {
-                        $groupCollection->setPageSize($i);
-                        $groupCollection->clear();
+            for ($i = 1; $i <= $lastPageNumber; $i++) {
+                $groupCollection->setPageSize($i);
+                $groupCollection->clear();
 
-                        $group->synchronize($groupCollection->getItems());
-                    }
+                $group->synchronize($groupCollection->getItems());
+            }
 
-                    $group->messageDebug('Stop entity "%s" synchronize for website %s', $group->code(), $websiteId);
-                }
-            }, $websiteId);
+            $group->messageDebug('Stop entity "%s" synchronize for website %s', $group->code(), $websiteId);
         }
     }
 
     /**
      * Sort Group
      *
-     * @param Group $a
-     * @param Group $b
-     * @return int
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return array
      */
-    public function sortGroup($a, $b)
+    public function sortGroup()
     {
-        $dependenceA = $this->resourceQueue->getDependenceByCode($a->code());
-        if (in_array($b->code(), $dependenceA, true)) {
-            return -1;
+        $addGroup = function (array &$sortGroups, Group $group) use (&$addGroup) {
+            foreach ($this->resourceQueue->getDependenceByCode($group->code()) as $dependent) {
+                if (empty($this->groups[$dependent])) {
+                    continue;
+                }
+
+                if (isset($sortGroups[$dependent])) {
+                    continue;
+                }
+
+                $addGroup($sortGroups, $this->groups[$dependent]);
+            }
+
+            $sortGroups[$group->code()] = $group;
+        };
+
+        $sortGroups = [];
+        foreach ($this->groups as $unit) {
+            $addGroup($sortGroups, $unit);
         }
 
-        $dependenceB = $this->resourceQueue->getDependenceByCode($b->code());
-        if (in_array($a->code(), $dependenceB, true)) {
-            return 1;
-        }
-
-        return 0;
+        return $sortGroups;
     }
 }

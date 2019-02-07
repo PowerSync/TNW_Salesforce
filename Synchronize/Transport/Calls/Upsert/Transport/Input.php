@@ -1,6 +1,9 @@
 <?php
-namespace TNW\Salesforce\Synchronize\Transport\Calls\Upsert;
+namespace TNW\Salesforce\Synchronize\Transport\Calls\Upsert\Transport;
 
+/**
+ * Upsert Transport Input
+ */
 class Input extends \SplObjectStorage
 {
     /**
@@ -31,6 +34,8 @@ class Input extends \SplObjectStorage
     }
 
     /**
+     * External Id Field Name
+     *
      * @return string
      */
     public function externalIdFieldName()
@@ -39,6 +44,8 @@ class Input extends \SplObjectStorage
     }
 
     /**
+     * Type
+     *
      * @return string
      */
     public function type()
@@ -47,6 +54,8 @@ class Input extends \SplObjectStorage
     }
 
     /**
+     * Offset Set
+     *
      * @param object $object
      * @param array $data
      */
@@ -58,12 +67,14 @@ class Input extends \SplObjectStorage
     }
 
     /**
+     * Offset Get
+     *
      * @param object $object
      * @return array
      */
     public function &offsetGet($object)
     {
-        if(!$this->contains($object)) {
+        if (!$this->contains($object)) {
             $this->offsetSet($object, []);
         }
 
@@ -71,6 +82,8 @@ class Input extends \SplObjectStorage
     }
 
     /**
+     * Get Info
+     *
      * @return array
      */
     public function getInfo()
@@ -79,6 +92,8 @@ class Input extends \SplObjectStorage
     }
 
     /**
+     * Set Info
+     *
      * @param array $data
      */
     public function setInfo($data)
@@ -89,6 +104,8 @@ class Input extends \SplObjectStorage
     }
 
     /**
+     * Offset Unset
+     *
      * @param object $object
      */
     public function offsetUnset($object)
