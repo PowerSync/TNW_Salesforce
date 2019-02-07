@@ -26,7 +26,7 @@ class Collection extends AbstractCollection
      */
     public function addFilterToSyncType($syncType)
     {
-        return $this->addFieldToFilter('sync_type', $syncType);
+        return $this->addFieldToFilter('main_table.sync_type', $syncType);
     }
 
     /**
@@ -37,7 +37,56 @@ class Collection extends AbstractCollection
      */
     public function addFilterToCode($code)
     {
-        return $this->addFieldToFilter('code', $code);
+        return $this->addFieldToFilter('main_table.code', $code);
+    }
+
+    /**
+     * Add Filter Dependent
+     *
+     * @return $this
+     */
+    public function addFilterDependent()
+    {
+        return $this
+            ->joinLeft(
+                ['relation' => 'tnw_salesforce_entity_queue_relation'],
+                'main_table.queue_id = relation.queue_id',
+                []
+            )
+            ->joinLeft(
+                ['dependent' => 'tnw_salesforce_entity_queue'],
+                'relation.parent_id = dependent.queue_id',
+                []
+            )
+            ->addFieldToFilter('dependent.status', [['null' => true], ['in' => ['complete']]]);
+    }
+
+    /**
+     * Join table to collection select
+     *
+     * @param string|array $table
+     * @param string $cond
+     * @param string|array $cols
+     * @return $this
+     */
+    public function joinLeft($table, $cond, $cols = '*')
+    {
+        if (is_array($table)) {
+            foreach ($table as $k => $v) {
+                $alias = $k;
+                $table = $v;
+                break;
+            }
+        } else {
+            $alias = $table;
+        }
+
+        if (!isset($this->_joinedTables[$alias])) {
+            $this->getSelect()->joinLeft([$alias => $this->getTable($table)], $cond, $cols);
+            $this->_joinedTables[$alias] = true;
+        }
+
+        return $this;
     }
 
     /**
@@ -48,7 +97,7 @@ class Collection extends AbstractCollection
      */
     public function addFilterToWebsiteId($code)
     {
-        return $this->addFieldToFilter('website_id', $code);
+        return $this->addFieldToFilter('main_table.website_id', $code);
     }
 
     /**

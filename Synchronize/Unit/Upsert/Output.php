@@ -3,10 +3,13 @@ namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
 use TNW\Salesforce\Synchronize;
 
+/**
+ * Upsert Output
+ */
 class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\CheckInterface
 {
     /**
-     * @var Synchronize\Transport\Calls\Upsert\OutputFactory
+     * @var Synchronize\Transport\Calls\Upsert\Transport\OutputFactory
      */
     private $outputFactory;
 
@@ -45,7 +48,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
-     * @param Synchronize\Transport\Calls\Upsert\OutputFactory $outputFactory
+     * @param Synchronize\Transport\Calls\Upsert\Transport\OutputFactory $outputFactory
      * @param Synchronize\Transport\Calls\Upsert\OutputInterface $process
      * @param array $dependents
      */
@@ -57,7 +60,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        Synchronize\Transport\Calls\Upsert\OutputFactory $outputFactory,
+        Synchronize\Transport\Calls\Upsert\Transport\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\Upsert\OutputInterface $process,
         array $dependents = []
     ) {
@@ -72,7 +75,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function description()
     {
@@ -88,6 +91,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
+     * Salesforce Type
+     *
      * @return string
      */
     public function salesforceType()
@@ -96,6 +101,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
+     * Field Salesforce Id
+     *
      * @return string
      */
     public function fieldSalesforceId()
@@ -104,6 +111,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
+     * Process
+     *
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      * @throws \OutOfBoundsException
@@ -125,7 +134,9 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
-     * @return Synchronize\Transport\Calls\Upsert\Output
+     * Create Transport
+     *
+     * @return Synchronize\Transport\Calls\Upsert\Transport\Output
      */
     public function createTransport()
     {
@@ -141,6 +152,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
+     * Entities
+     *
      * @return array
      * @throws \OutOfBoundsException
      */
@@ -150,6 +163,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
+     * Filter
+     *
      * @param $entity
      * @return bool
      */
@@ -161,16 +176,22 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
-     * @param Synchronize\Transport\Calls\Upsert\Output $output
+     * Process Output
+     *
+     * @param Synchronize\Transport\Calls\Upsert\Transport\Output $output
      * @throws \InvalidArgumentException
      * @throws \OutOfBoundsException
      */
-    protected function processOutput(Synchronize\Transport\Calls\Upsert\Output $output)
+    protected function processOutput(Synchronize\Transport\Calls\Upsert\Transport\Output $output)
     {
         foreach ($this->entities() as $entity) {
             if (empty($output[$entity]['success'])) {
-                $this->group()->messageError('Upsert object "%s". Entity: %s. Message: "%s".',
-                    $this->salesforceType, $this->identification->printEntity($entity), $output[$entity]['message']);
+                $this->group()->messageError(
+                    'Upsert object "%s". Entity: %s. Message: "%s".',
+                    $this->salesforceType,
+                    $this->identification->printEntity($entity),
+                    $output[$entity]['message']
+                );
             }
 
             $this->cache[$entity] = $output[$entity];
@@ -179,6 +200,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
+     * Prepare
+     *
      * @param \Magento\Framework\DataObject $entity
      */
     public function prepare($entity)
@@ -191,6 +214,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     }
 
     /**
+     * Skipped
+     *
      * @param $entity
      * @return bool
      */

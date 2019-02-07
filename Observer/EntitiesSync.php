@@ -15,19 +15,9 @@ class EntitiesSync implements \Magento\Framework\Event\ObserverInterface
     private $entities;
 
     /**
-     * @var \TNW\Salesforce\Synchronize\Queue
-     */
-    private $synchronizeQueue;
-
-    /**
      * @var \TNW\Salesforce\Synchronize\Queue\Entity
      */
-    private $entitySynchronize;
-
-    /**
-     * @var CollectionFactory
-     */
-    private $collectionQueueFactory;
+    private $entityQueue;
 
     /**
      * @var \Magento\Framework\Message\ManagerInterface
@@ -36,23 +26,17 @@ class EntitiesSync implements \Magento\Framework\Event\ObserverInterface
 
     /**
      * EntitiesSync constructor.
-     * @param Entities $entities
-     * @param \TNW\Salesforce\Synchronize\Queue $synchronizeQueue
-     * @param \TNW\Salesforce\Synchronize\Queue\Entity $entitySynchronize
-     * @param CollectionFactory $collectionQueueFactory
+     * @param \TNW\Salesforce\Observer\Entities $entities
+     * @param \TNW\Salesforce\Synchronize\Queue\Entity $entityQueue
      * @param \Magento\Framework\Message\ManagerInterface $messageManager
      */
     public function __construct(
         \TNW\Salesforce\Observer\Entities $entities,
-        \TNW\Salesforce\Synchronize\Queue $synchronizeQueue,
-        \TNW\Salesforce\Synchronize\Queue\Entity $entitySynchronize,
-        \TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory $collectionQueueFactory,
+        \TNW\Salesforce\Synchronize\Queue\Entity $entityQueue,
         \Magento\Framework\Message\ManagerInterface $messageManager
     ) {
         $this->entities = $entities;
-        $this->synchronizeQueue = $synchronizeQueue;
-        $this->entitySynchronize = $entitySynchronize;
-        $this->collectionQueueFactory = $collectionQueueFactory;
+        $this->entityQueue = $entityQueue;
         $this->messageManager = $messageManager;
     }
 
@@ -69,12 +53,7 @@ class EntitiesSync implements \Magento\Framework\Event\ObserverInterface
         }
 
         try {
-            $this->entitySynchronize->addToQueue($this->entities->entityIds());
-
-            $collection = $this->collectionQueueFactory->create()
-                ->addFilterToSyncType(0);
-
-            $this->synchronizeQueue->synchronize($collection);
+            $this->entityQueue->addToQueue($this->entities->entityIds());
         } catch (\Exception $e) {
             $this->messageManager->addExceptionMessage($e);
         }

@@ -5,6 +5,9 @@ namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
 
+/**
+ * Upsert Input
+ */
 class Input extends Synchronize\Unit\Upsert\Input
 {
     /**
@@ -12,6 +15,21 @@ class Input extends Synchronize\Unit\Upsert\Input
      */
     private $customerConfig;
 
+    /**
+     * Input constructor.
+     * @param string $name
+     * @param string $load
+     * @param string $mapping
+     * @param string $salesforceType
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param Synchronize\Unit\IdentificationInterface $identification
+     * @param Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory
+     * @param Synchronize\Transport\Calls\Upsert\InputInterface $process
+     * @param Model\Customer\Config $customerConfig
+     * @param Synchronize\Transport\Soap\ClientFactory $factory
+     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
+     */
     public function __construct(
         $name,
         $load,
@@ -20,7 +38,7 @@ class Input extends Synchronize\Unit\Upsert\Input
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        Synchronize\Transport\Calls\Upsert\InputFactory $inputFactory,
+        Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         Model\Customer\Config $customerConfig,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
@@ -44,9 +62,11 @@ class Input extends Synchronize\Unit\Upsert\Input
     }
 
     /**
+     * Process Input
      *
+     * @param Synchronize\Transport\Calls\Upsert\Transport\Input $input
      */
-    protected function processInput(Synchronize\Transport\Calls\Upsert\Input $input)
+    protected function processInput(Synchronize\Transport\Calls\Upsert\Transport\Input $input)
     {
         parent::processInput($input);
 

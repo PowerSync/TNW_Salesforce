@@ -121,23 +121,27 @@ class Queue extends AbstractDb
      */
     public function getDependenceByCode($code)
     {
-        if (!isset($this->dependenceByCode[$code])) {
-            $selectQueue = $this->getConnection()->select()
-                ->from(['relation' => $this->getMainTable()], ['queue_id'])
-                ->where('code = ?', $code);
-
+        if (empty($this->dependenceByCode)) {
             $select = $this->getConnection()->select()
-                ->from(['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')], [])
+                ->from(['childQueue' => $this->getMainTable()], ['childCode' => 'code'])
+                ->joinInner(
+                    ['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')],
+                    'childQueue.queue_id = relation.queue_id'
+                )
                 ->joinInner(
                     ['parentQueue' => $this->getMainTable()],
                     'relation.parent_id = parentQueue.queue_id',
-                    ['code']
+                    ['parentCode' => 'code']
                 )
-                ->where('relation.queue_id IN(?)', $selectQueue)
-                ->distinct()
             ;
 
-            $this->dependenceByCode[$code] = $this->getConnection()->fetchCol($select);
+            foreach ($this->getConnection()->fetchAll($select) as $row) {
+                $this->dependenceByCode[$row['childCode']][] = $row['parentCode'];
+            }
+        }
+
+        if (!isset($this->dependenceByCode[$code])) {
+            return [];
         }
 
         return $this->dependenceByCode[$code];

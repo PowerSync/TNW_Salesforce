@@ -1,11 +1,13 @@
 <?php
 namespace TNW\Salesforce\Observer;
 
+/**
+ * Customer Save Commit After
+ */
 class CustomerSaveCommitAfter implements \Magento\Framework\Event\ObserverInterface
 {
-
     /**
-     * @var Entities
+     * @var \TNW\Salesforce\Observer\Entities
      */
     private $entities;
 
@@ -16,6 +18,7 @@ class CustomerSaveCommitAfter implements \Magento\Framework\Event\ObserverInterf
 
     /**
      * AfterSaveCommitObserver constructor.
+     * @param \TNW\Salesforce\Observer\Entities $entities
      * @param \TNW\Salesforce\Model\Customer\Config $customerConfig
      */
     public function __construct(
@@ -27,6 +30,8 @@ class CustomerSaveCommitAfter implements \Magento\Framework\Event\ObserverInterf
     }
 
     /**
+     * Execute
+     *
      * @param \Magento\Framework\Event\Observer $observer
      * @return void
      */
@@ -34,7 +39,6 @@ class CustomerSaveCommitAfter implements \Magento\Framework\Event\ObserverInterf
     {
         /** @var \Magento\Customer\Model\Customer $website */
         $customer = $observer->getEvent()->getData('data_object');
-
         if (!$this->customerConfig->getSalesforceStatus($customer->getWebsiteId())) {
             return;
         }
@@ -43,9 +47,9 @@ class CustomerSaveCommitAfter implements \Magento\Framework\Event\ObserverInterf
             return;
         }
 
-        if (
-            !$this->customerConfig->getCustomerAllGroups($customer->getWebsiteId()) &&
-            !in_array((int)$customer->getGroupId(), $this->customerConfig->getCustomerSyncGroups($customer->getWebsiteId()))
+        $customerSyncGroups = $this->customerConfig->getCustomerSyncGroups($customer->getWebsiteId());
+        if (!$this->customerConfig->getCustomerAllGroups($customer->getWebsiteId()) &&
+            !in_array((int)$customer->getGroupId(), $customerSyncGroups)
         ) {
             return;
         }
