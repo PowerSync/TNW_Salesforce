@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
 
+/**
+ * Unit Save
+ */
 class Save extends Synchronize\Unit\UnitAbstract
 {
     /**
@@ -55,7 +58,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function description()
     {
@@ -63,6 +66,8 @@ class Save extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Process
+     *
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function process()
@@ -89,7 +94,12 @@ class Save extends Synchronize\Unit\UnitAbstract
 
             // Save Salesforce Id from duplicates
             foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
-                $this->entityObject->saveValueByAttribute($duplicate, $salesforceId, $attributeName, $entity->getConfigWebsite());
+                $this->entityObject->saveValueByAttribute(
+                    $duplicate,
+                    $salesforceId,
+                    $attributeName,
+                    $entity->getData('config_website')
+                );
 
                 $message[] = __(
                     "Updating %1 attribute:\n\t\"%2\": %3",
@@ -108,7 +118,9 @@ class Save extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @return LoadAbstract|LoadByAbstract
+     * Unit Load
+     *
+     * @return Load|UnitInterface
      */
     public function load()
     {
@@ -116,7 +128,9 @@ class Save extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @return Upsert
+     * Unit Upsert
+     *
+     * @return Upsert\Output|UnitInterface
      */
     public function upsert()
     {
@@ -124,6 +138,8 @@ class Save extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Entities
+     *
      * @return \Magento\Catalog\Model\Product[]
      * @throws \OutOfBoundsException
      */
@@ -133,6 +149,8 @@ class Save extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Filter
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @return bool
      */

@@ -62,11 +62,15 @@ class Queue
 
             $group->messageDebug('Start entity "%s" synchronize for website %s', $group->code(), $websiteId);
 
-            for ($i = 1; $i <= $lastPageNumber; $i++) {
-                $groupCollection->setPageSize($i);
-                $groupCollection->clear();
+            try {
+                for ($i = 1; $i <= $lastPageNumber; $i++) {
+                    $groupCollection->setPageSize($i);
+                    $groupCollection->clear();
 
-                $group->synchronize($groupCollection->getItems());
+                    $group->synchronize($groupCollection->getItems());
+                }
+            } catch (\Exception $e) {
+                $group->messageError($e);
             }
 
             $group->messageDebug('Stop entity "%s" synchronize for website %s', $group->code(), $websiteId);

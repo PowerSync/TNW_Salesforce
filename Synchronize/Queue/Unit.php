@@ -148,21 +148,36 @@ class Unit
      *
      * @param string $loadBy
      * @param int $entityId
+     * @param array $loadAdditional
      * @param int $websiteId
      * @param string $syncType
      * @param array $cacheQueue
      * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
-    public function createQueue($loadBy, $entityId, $websiteId, $syncType, array $cacheQueue = [])
-    {
+    public function createQueue(
+        $loadBy,
+        $entityId,
+        array $loadAdditional,
+        $websiteId,
+        $syncType,
+        array $cacheQueue = []
+    ) {
         $key = sprintf('%s/%s/%s', $loadBy, $entityId, $this->code);
         if (isset($cacheQueue[$key])) {
             return $cacheQueue[$key];
         }
 
         $queues = [];
-        foreach ($this->generator($loadBy)->process($entityId, [$this, 'create'], $websiteId) as $queue) {
+        $generateQueues = $this->generator($loadBy)
+            ->process(
+                $entityId,
+                $loadAdditional,
+                [$this, 'create'],
+                $websiteId
+            );
+
+        foreach ($generateQueues as $queue) {
             $queue->setData('website_id', $websiteId);
             $queue->setData('sync_type', $syncType);
 
@@ -174,11 +189,20 @@ class Unit
 
             $loadBy = $queue->getEntityLoad();
             $entityId = $queue->getEntityId();
+            $loadAdditional = $queue->getEntityLoadAdditional();
 
             // Generate Parents
             $parents = [];
             foreach ($this->parents() as $parent) {
-                $parentQueues = $parent->createQueue($loadBy, $entityId, $websiteId, $syncType, $cacheQueue);
+                $parentQueues = $parent->createQueue(
+                    $loadBy,
+                    $entityId,
+                    $loadAdditional,
+                    $websiteId,
+                    $syncType,
+                    $cacheQueue
+                );
+
                 if (empty($parentQueues)) {
                     continue;
                 }
@@ -192,7 +216,15 @@ class Unit
             // Generate Children
             $children = [];
             foreach ($this->children() as $child) {
-                $childQueues = $child->createQueue($loadBy, $entityId, $websiteId, $syncType, $cacheQueue);
+                $childQueues = $child->createQueue(
+                    $loadBy,
+                    $entityId,
+                    $loadAdditional,
+                    $websiteId,
+                    $syncType,
+                    $cacheQueue
+                );
+
                 if (empty($childQueues)) {
                     continue;
                 }
@@ -268,7 +300,7 @@ class Unit
         }
 
         throw new LocalizedException(__(
-            'Unknown %3 generating method for %1 entity. Resolver code %2',
+            'Unknown %3 generating method for %1 entity. Queue code %2',
             $this->entityType,
             $this->code,
             $type
