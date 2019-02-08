@@ -97,7 +97,7 @@ class Entity
         $website = $this->storeManager->getWebsite($website);
         foreach ($entityIds as $entityId) {
             foreach ($this->resolves as $resolve) {
-                $resolve->createQueue($this->entityType, $entityId, $website->getId(), 0);
+                $resolve->createQueue($this->entityType, $entityId, [], $website->getId(), 0);
             }
         }
 
@@ -116,6 +116,12 @@ class Entity
             ->addFilterToSyncType(0)
             ->addFilterToWebsiteId($websiteId);
 
-        $this->synchronizeQueue->synchronize($collection, $websiteId);
+        try {
+            //$this->synchronizeQueue->synchronize($collection, $websiteId);
+        } finally {
+            foreach ($collection as $queue) {
+                //$collection->getResource()->delete($queue);
+            }
+        }
     }
 }

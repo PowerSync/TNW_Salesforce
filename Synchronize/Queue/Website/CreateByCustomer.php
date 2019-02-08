@@ -1,6 +1,9 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Queue\Website;
 
+/**
+ * Create By Customer
+ */
 class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterface
 {
     const CREATE_BY = 'customer';
@@ -21,12 +24,15 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
     }
 
     /**
+     * Process
+     *
      * @param int $entityId
+     * @param array $additional
      * @param callable $create
      * @param int $websiteId
      * @return mixed
      */
-    public function process($entityId, callable $create, $websiteId)
+    public function process($entityId, array $additional, callable $create, $websiteId)
     {
         $customerWebsiteId = $this->resourceCustomer->getWebsiteId($entityId);
         if (empty($customerWebsiteId)) {
@@ -37,6 +43,8 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
     }
 
     /**
+     * Create By
+     *
      * @return string
      */
     public function createBy()
