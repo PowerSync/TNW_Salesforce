@@ -11,7 +11,6 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 
 /**
  * Class Config
- * @package TNW\Salesforce\Model
  */
 class Config extends DataObject
 {
@@ -20,6 +19,16 @@ class Config extends DataObject
     const SFORCE_WEBSITE_ID = 'Magento_Website__c';
     const SFORCE_MAGENTO_ID = 'Magento_ID__c';
     const BASE_DAY = 7;
+
+    /**
+     * Base batch limit for simple sync
+     */
+    const SFORCE_BASE_UPDATE_LIMIT = 200;
+
+    /**
+     * Cron queue types
+     */
+    const DIRECT_SYNC_TYPE_REALTIME = 3;
 
     /** @comment Base batch limit for simple sync */
     const REALTIME_MAX_SYNC = 30;
@@ -102,6 +111,7 @@ class Config extends DataObject
 
     /**
      * Base batch limit for simple sync
+     *
      * @return int
      */
     public function getBaseUpdateLimit()
@@ -111,6 +121,7 @@ class Config extends DataObject
 
     /**
      * Get magento product Id field name in Salesforce database
+     *
      * @return string
      */
     public static function getMagentoIdField()
@@ -120,6 +131,7 @@ class Config extends DataObject
 
     /**
      * Get magento product Id field name in Salesforce database
+     *
      * @return string
      */
     public function getWebsiteIdField()
@@ -214,7 +226,6 @@ class Config extends DataObject
     public function isDefaultOrg()
     {
         foreach ($this->credentialsConfigPaths as $configPath) {
-
             if ($this->getStoreConfig($configPath) != $this->scopeConfig->getValue($configPath)) {
                 return false;
             }

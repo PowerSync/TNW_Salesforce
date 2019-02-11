@@ -117,4 +117,15 @@ class Collection extends AbstractCollection
         $collection->getSelect()->group('website_id');
         return array_column($collection->getData(), 'website_id');
     }
+
+    /**
+     * Clear
+     *
+     * @return AbstractCollection
+     */
+    public function clear()
+    {
+        $this->_totalRecords = null;
+        return parent::clear();
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
+use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -146,7 +147,7 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
             return;
         }
 
-        $this->group()->messageDebug(implode("\n", array_map(function($entity) use($input) {
+        $this->group()->messageDebug(implode("\n", array_map(function ($entity) use ($input) {
             return __(
                 "Entity %1 request data:\n%2",
                 $this->identification->printEntity($entity),
@@ -155,6 +156,11 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
         }, $this->entities())));
 
         $this->process->process($input);
+
+        // Set status upsert waiting
+        foreach ($this->entities() as $entity) {
+            $this->load()->get('%s/queue', $entity)->setData('status', Queue::STATUS_UPSERT_WAITING);
+        }
     }
 
     /**
@@ -182,6 +188,8 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
+     * Entities
+     *
      * @return array
      * @throws \OutOfBoundsException
      */
@@ -191,7 +199,9 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
-     * @param $entity
+     * Filter
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @return bool
      */
     public function filter($entity)
@@ -213,7 +223,9 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
-     * @param $entity
+     * Prepare Object
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @param array $object
      * @return array
      */
@@ -222,20 +234,22 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
         $objectDescription = $this->getObjectDescription();
         foreach ($objectDescription->getFields() as $fieldProperty) {
             $fieldName = (string)$fieldProperty->getName();
-            if (!isset($object[$fieldName]) || $fieldName == 'Id') {
+            if ($fieldName === 'Id' || !isset($object[$fieldName])) {
                 continue;
             }
 
             $value = $object[$fieldName];
 
-            if (!$fieldProperty->isCreateable() && empty($object['Id'])) {
-                $this->group()->messageNotice('Salesforce field "%s" is not creatable, value sync skipped.', $fieldName);
+            if (empty($object['Id']) && !$fieldProperty->isCreateable()) {
+                $this->group()
+                    ->messageNotice('Salesforce field "%s" is not creatable, value sync skipped.', $fieldName);
                 unset($object[$fieldName]);
                 continue;
             }
 
-            if (!$fieldProperty->isUpdateable() && !empty($object['Id'])) {
-                $this->group()->messageNotice('Salesforce field "%s" is not updateable, value sync skipped.', $fieldName);
+            if (!empty($object['Id']) && !$fieldProperty->isUpdateable()) {
+                $this->group()
+                    ->messageNotice('Salesforce field "%s" is not updateable, value sync skipped.', $fieldName);
                 unset($object[$fieldName]);
                 continue;
             }
@@ -273,7 +287,9 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
     }
 
     /**
-     * @param $entity
+     * Skipped
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @return bool
      */
     public function skipped($entity)

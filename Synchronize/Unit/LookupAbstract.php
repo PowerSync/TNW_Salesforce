@@ -3,9 +3,11 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
 
+/**
+ * Lookup Abstract
+ */
 abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
 {
-
     /**
      * @var string
      */
@@ -31,6 +33,18 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      */
     protected $identification;
 
+    /**
+     * LookupAbstract constructor.
+     * @param string $name
+     * @param string $load
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param IdentificationInterface $identification
+     * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
+     * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
+     * @param Synchronize\Transport\Calls\QueryInterface $process
+     * @param array $dependents
+     */
     public function __construct(
         $name,
         $load,
@@ -52,7 +66,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function description()
     {
@@ -60,6 +74,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Input
+     *
      * @return Synchronize\Transport\Calls\Query\Input
      */
     public function input()
@@ -68,6 +84,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Output
+     *
      * @return Synchronize\Transport\Calls\Query\Output
      */
     public function output()
@@ -76,6 +94,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Process
+     *
      * @throws \InvalidArgumentException
      * @throws \OutOfBoundsException
      */
@@ -83,7 +103,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     {
         $this->processInput();
         if ($this->input->count() === 0) {
-            $this->group()->messageDebug("Lookup skipped");
+            $this->group()->messageDebug('Lookup skipped');
             return;
         }
 
@@ -94,11 +114,13 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     *
+     * Process Input
      */
     abstract public function processInput();
 
     /**
+     * Process Output
+     *
      * @throws \InvalidArgumentException
      * @throws \OutOfBoundsException
      */
@@ -126,8 +148,11 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
             }
 
             $this->cache[$entity]['record'] = $this->prepareRecord($record);
-            $message[] = __("Found %1 entity and the following data:\n%2",
-                $this->identification->printEntity($entity), print_r($record, true));
+            $message[] = __(
+                "Found %1 entity and the following data:\n%2",
+                $this->identification->printEntity($entity),
+                print_r($record, true)
+            );
         }
 
         $this->cache['allRecords'] = iterator_to_array($this->output);
@@ -137,6 +162,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Prepare Record
+     *
      * @param array $record
      * @return array
      */
@@ -146,6 +173,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Entities
+     *
      * @return \Magento\Framework\Model\AbstractModel[]
      */
     public function entities()
@@ -154,32 +183,40 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @param $entity
+     * Filter
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @return bool
      * @throws \OutOfBoundsException
      */
     public function filter($entity)
     {
-        return !in_array(true, array_map(function ($unit) use($entity) {
+        return !in_array(true, array_map(function ($unit) use ($entity) {
             return $this->unit($unit)->skipped($entity);
         }, $this->dependents()), true);
     }
 
     /**
+     * Collect Index
+     *
      * @return array
      */
     abstract public function collectIndex();
 
     /**
+     * Search PriorityOrder
+     *
      * @param array $searchIndex
-     * @param $entity
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @return array
      */
     abstract public function searchPriorityOrder(array $searchIndex, $entity);
 
     /**
+     * Filter By Priority
+     *
      * @param array $recordsPriority
-     * @param $entity
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @return array
      */
     public function filterByPriority(array $recordsPriority, $entity)
@@ -200,6 +237,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Skipped
+     *
      * @param object $entity
      * @return bool
      */

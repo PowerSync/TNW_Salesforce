@@ -5,9 +5,11 @@ namespace TNW\Salesforce\Synchronize\Unit;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
 
+/**
+ * Mapping Abstract
+ */
 abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
 {
-
     const PARENT_ENTITY = '__parent_entity';
 
     /**
@@ -58,8 +60,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
         Synchronize\Unit\IdentificationInterface $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
         array $dependents = []
-    )
-    {
+    ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $lookup]));
         $this->load = $load;
         $this->objectType = $objectType;
@@ -69,7 +70,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function description()
     {
@@ -81,7 +82,9 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @return UnitInterface
+     * Lookup
+     *
+     * @return LookupAbstract|UnitInterface
      */
     public function lookup()
     {
@@ -89,7 +92,9 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @return UnitInterface
+     * Load
+     *
+     * @return Load|UnitInterface
      */
     public function load()
     {
@@ -97,6 +102,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Object Type
+     *
      * @return string
      */
     public function objectType()
@@ -105,6 +112,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Process
+     *
      * @throws \OutOfBoundsException
      * @throws \InvalidArgumentException
      */
@@ -115,8 +124,10 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
             $mappers = $this->mappers($entity);
 
             $count = 0;
-            $message[] = __("Entity %1 mapping:\n%2",
-                $this->identification->printEntity($entity), implode("\n", $mappers->walk(function (Model\Mapper $mapper) use(&$count) {
+            $message[] = __(
+                "Entity %1 mapping:\n%2",
+                $this->identification->printEntity($entity),
+                implode("\n", $mappers->walk(function (Model\Mapper $mapper) use (&$count) {
                     $count++;
 
                     $message = "{$count}) ";
@@ -129,7 +140,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
                     }
 
                     return $message;
-                })));
+                }))
+            );
 
             $this->cache[$entity] = $this->generateObject($entity, $mappers);
         }
@@ -144,6 +156,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Generate Object
+     *
      * @param $entity
      * @param Model\ResourceModel\Mapper\Collection $mappers
      * @return array
@@ -171,6 +185,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Value
+     *
      * @param $entity
      * @param Model\Mapper $mapper
      * @return mixed|null
@@ -186,8 +202,11 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
             default:
                 $subEntity = $this->objectByEntityType($entity, $mapper->getMagentoEntityType());
                 if (!$subEntity instanceof \Magento\Framework\DataObject) {
-                    $this->group()->messageDebug('Object type "%s" not found. Entity: %s.',
-                        $mapper->getMagentoEntityType(), $this->identification->printEntity($entity));
+                    $this->group()->messageDebug(
+                        'Object type "%s" not found. Entity: %s.',
+                        $mapper->getMagentoEntityType(),
+                        $this->identification->printEntity($entity)
+                    );
 
                     break;
                 }
@@ -205,6 +224,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Find Salesforce
+     *
      * @param $entity
      * @return mixed
      * @throws \OutOfBoundsException
@@ -215,6 +236,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Mappers
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @return Model\ResourceModel\Mapper\Collection
      */
@@ -225,6 +248,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Entities
+     *
      * @return \Magento\Framework\Model\AbstractModel[]
      * @throws \OutOfBoundsException
      */
@@ -234,6 +259,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Filter
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @return bool
      * @throws \OutOfBoundsException
@@ -246,6 +273,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Object By Entity Type
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $magentoEntityType
      * @return mixed
@@ -253,6 +282,8 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     abstract protected function objectByEntityType($entity, $magentoEntityType);
 
     /**
+     * Prepare Value
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $attributeCode
      * @return mixed
@@ -265,20 +296,34 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
             $value = $entity->{$method}();
         }
 
-        if (is_array($value)) {
-            foreach ($value as $v) {
-                if (is_array($v)) {
-                    $this->group()->messageError('Incorrect value for mapping: scalar values supported only. Attribute code: "%s". Mapping class: "%s"', $attributeCode, get_class($this));
-                    return;
+        switch (true) {
+            case is_scalar($value) || $value === null:
+                return $value;
+
+            case is_array($value):
+                foreach ($value as $v) {
+                    if (is_scalar($v) || $v === null) {
+                        continue;
+                    }
+
+                    break 2;
                 }
-            }
-            $value = implode('\n', $value);
+
+                return implode('\n', $value);
         }
 
-        return $value;
+        $this->group()->messageError(
+            'Incorrect value for mapping: scalar values supported only. Attribute code: "%s". Mapping class: "%s"',
+            $attributeCode,
+            get_class($this)
+        );
+
+        return null;
     }
 
     /**
+     * Default Value
+     *
      * @param $entity
      * @param Model\Mapper $mapper
      * @return mixed

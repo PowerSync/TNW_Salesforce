@@ -16,7 +16,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * @var string
      */
-    private $upsert;
+    private $upsertOutput;
 
     /**
      * @var IdentificationInterface
@@ -33,7 +33,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      *
      * @param string $name
      * @param string $load
-     * @param string $upsert
+     * @param string $upsertOutput
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param IdentificationInterface $identification
@@ -43,16 +43,16 @@ class Save extends Synchronize\Unit\UnitAbstract
     public function __construct(
         $name,
         $load,
-        $upsert,
+        $upsertOutput,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject,
         array $dependents = []
     ) {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsert]));
+        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsertOutput]));
         $this->load = $load;
-        $this->upsert = $upsert;
+        $this->upsertOutput = $upsertOutput;
         $this->identification = $identification;
         $this->entityObject = $entityObject;
     }
@@ -72,7 +72,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function process()
     {
-        $attributeName = $this->upsert()->fieldSalesforceId();
+        $attributeName = $this->upsertOutput()->fieldSalesforceId();
         $message = [];
 
         foreach ($this->entities() as $entity) {
@@ -83,7 +83,7 @@ class Save extends Synchronize\Unit\UnitAbstract
             $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
 
             // Save Salesforce Id
-            $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getConfigWebsite());
+            $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
 
             $message[] = __(
                 "Updating %1 attribute:\n\t\"%2\": %3",
@@ -132,9 +132,9 @@ class Save extends Synchronize\Unit\UnitAbstract
      *
      * @return Upsert\Output|UnitInterface
      */
-    public function upsert()
+    public function upsertOutput()
     {
-        return $this->unit($this->upsert);
+        return $this->unit($this->upsertOutput);
     }
 
     /**
@@ -156,6 +156,6 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function filter($entity)
     {
-        return $this->upsert()->get('%s/success', $entity);
+        return $this->upsertOutput()->get('%s/success', $entity);
     }
 }
