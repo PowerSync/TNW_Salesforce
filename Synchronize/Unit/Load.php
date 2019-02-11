@@ -111,6 +111,7 @@ class Load extends Synchronize\Unit\UnitAbstract
             }
 
             $this->cache['entities'][$entity] = $entity;
+            $this->cache[$entity]['queue'] = $queue;
             $message[] = __('Entity %1 loaded', $this->identification->printEntity($entity));
         }
 
@@ -149,7 +150,7 @@ class Load extends Synchronize\Unit\UnitAbstract
             return $loader;
         }
 
-        throw new LocalizedException(__(''));
+        throw new LocalizedException(__('Unknown loader'));
     }
 
     /**

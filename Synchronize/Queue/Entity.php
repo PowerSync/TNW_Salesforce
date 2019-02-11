@@ -1,6 +1,8 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Queue;
 
+use TNW\Salesforce\Model\Config;
+
 /**
  * Class Entity
  */
@@ -94,14 +96,28 @@ class Entity
      */
     public function addToQueueByWebsite(array $entityIds, $website = null)
     {
-        $website = $this->storeManager->getWebsite($website);
+        $websiteId = $this->storeManager->getWebsite($website)->getId();
+        $syncType = $this->syncType(count($entityIds), $websiteId);
+
         foreach ($entityIds as $entityId) {
             foreach ($this->resolves as $resolve) {
-                $resolve->createQueue($this->entityType, $entityId, [], $website->getId(), 0);
+                $resolve->createQueue($this->entityType, $entityId, [], $websiteId, $syncType);
             }
         }
 
-        $this->websiteEmulator->wrapEmulationWebsite([$this, 'realtimeSynchronize'], $website->getId());
+        $this->websiteEmulator->wrapEmulationWebsite([$this, 'realtimeSynchronize'], $websiteId);
+    }
+
+    /**
+     * Sync Type
+     *
+     * @param int $count
+     * @param int $websiteId
+     * @return int
+     */
+    public function syncType($count, $websiteId)
+    {
+        return Config::DIRECT_SYNC_TYPE_REALTIME;
     }
 
     /**
@@ -113,11 +129,15 @@ class Entity
     public function realtimeSynchronize($websiteId)
     {
         $collection = $this->collectionQueueFactory->create()
-            ->addFilterToSyncType(0)
+            ->addFilterToSyncType(Config::DIRECT_SYNC_TYPE_REALTIME)
             ->addFilterToWebsiteId($websiteId);
 
+        if ($collection->getSize() === 0) {
+            return;
+        }
+
         try {
-            //$this->synchronizeQueue->synchronize($collection, $websiteId);
+            $this->synchronizeQueue->synchronize($collection, $websiteId);
         } finally {
             foreach ($collection as $queue) {
                 //$collection->getResource()->delete($queue);

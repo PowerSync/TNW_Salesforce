@@ -1,6 +1,7 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
+use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -31,6 +32,11 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     /**
      * @var string
      */
+    private $upsertInput;
+
+    /**
+     * @var string
+     */
     private $salesforceType;
 
     /**
@@ -43,6 +49,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
      *
      * @param string $name
      * @param string $load
+     * @param string $upsertInput
      * @param string $salesforceType
      * @param string $fieldSalesforceId
      * @param Synchronize\Units $units
@@ -55,6 +62,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     public function __construct(
         $name,
         $load,
+        $upsertInput,
         $salesforceType,
         $fieldSalesforceId,
         Synchronize\Units $units,
@@ -64,7 +72,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
         Synchronize\Transport\Calls\Upsert\OutputInterface $process,
         array $dependents = []
     ) {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
+        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsertInput]));
 
         $this->load = $load;
         $this->salesforceType = $salesforceType;
@@ -72,6 +80,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
         $this->identification = $identification;
         $this->outputFactory = $outputFactory;
         $this->process = $process;
+        $this->upsertInput = $upsertInput;
     }
 
     /**
@@ -88,6 +97,16 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     public function load()
     {
         return $this->unit($this->load);
+    }
+
+    /**
+     * Upsert Input
+     *
+     * @return Synchronize\Unit\UnitInterface
+     */
+    public function upsertInput()
+    {
+        return $this->unit($this->upsertInput);
     }
 
     /**
@@ -120,9 +139,15 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     public function process()
     {
         $output = $this->createTransport();
+
+        // Set status upsert output
+        foreach ($this->entities() as $entity) {
+            $this->load()->get('%s/queue', $entity)->setData('status', Queue::STATUS_UPSERT_OUTPUT);
+        }
+
         $this->process->process($output);
 
-        $this->group()->messageDebug(implode("\n", array_map(function($entity) use($output) {
+        $this->group()->messageDebug(implode("\n", array_map(function ($entity) use ($output) {
             return __(
                 "Entity %1 response data:\n%2",
                 $this->identification->printEntity($entity),
@@ -165,12 +190,12 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     /**
      * Filter
      *
-     * @param $entity
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @return bool
      */
     public function filter($entity)
     {
-        return !in_array(true, array_map(function ($unit) use($entity) {
+        return !in_array(true, array_map(function ($unit) use ($entity) {
             return $this->unit($unit)->skipped($entity);
         }, $this->dependents()), true);
     }
@@ -216,7 +241,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     /**
      * Skipped
      *
-     * @param $entity
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @return bool
      */
     public function skipped($entity)

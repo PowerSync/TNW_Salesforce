@@ -8,6 +8,18 @@ use TNW\Salesforce\Model\ResourceModel;
  */
 class Queue extends \Magento\Framework\Model\AbstractModel
 {
+    const STATUS_NEW = 'new';
+    const STATUS_RUNNING = 'running';
+    const STATUS_ERROR = 'error';
+    const STATUS_COMPLETE = 'complete';
+    const STATUS_SKIPPED = 'skipped';
+    const STATUS_UPSERT_INPUT = 'upsert_input';
+    const STATUS_UPSERT_WAITING = 'upsert_waiting';
+    const STATUS_UPSERT_OUTPUT = 'upsert_output';
+    const STATUS_LOOKUP_INPUT = 'lookup_input';
+    const STATUS_LOOKUP_WAITING = 'lookup_waiting';
+    const STATUS_LOOKUP_OUTPUT = 'lookup_output';
+
     /**
      * @var Queue[]
      */
@@ -78,7 +90,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      */
     public function getEntityLoadAdditional()
     {
-        return $this->_getData('entity_load_additional');
+        return (array)$this->_getData('entity_load_additional');
     }
 
     /**
@@ -99,6 +111,46 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     public function getWebsiteId()
     {
         return $this->_getData('website_id');
+    }
+
+    /**
+     * Status
+     *
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->_getData('status');
+    }
+
+    /**
+     * Id Upsert Input
+     *
+     * @return bool
+     */
+    public function isUpsertInput()
+    {
+        return strcasecmp($this->_getData('status'), self::STATUS_UPSERT_INPUT) === 0;
+    }
+
+    /**
+     * Is Upsert Waiting
+     *
+     * @return bool
+     */
+    public function isUpsertWaiting()
+    {
+        return strcasecmp($this->_getData('status'), self::STATUS_UPSERT_WAITING) === 0;
+    }
+
+    /**
+     * Is Upsert Output
+     *
+     * @return bool
+     */
+    public function isUpsertOutput()
+    {
+        return strcasecmp($this->_getData('status'), self::STATUS_UPSERT_OUTPUT) === 0;
     }
 
     /**

@@ -42,9 +42,8 @@ class Queue
      */
     public function synchronize($collection, $websiteId)
     {
-        if ($collection->isLoaded()) {
-            $collection->clear();
-        }
+        // Collection Clear
+        $collection->clear();
 
         foreach ($this->sortGroup() as $group) {
             $groupCollection = clone $collection;
@@ -52,8 +51,7 @@ class Queue
             $groupCollection->addFilterToWebsiteId($websiteId);
             $groupCollection->addFilterDependent();
 
-            $size = $groupCollection->getSize();
-            if ($size === 0) {
+            if (0 === $groupCollection->getSize()) {
                 continue;
             }
 
@@ -80,7 +78,7 @@ class Queue
     /**
      * Sort Group
      *
-     * @return array
+     * @return Group[]
      */
     public function sortGroup()
     {

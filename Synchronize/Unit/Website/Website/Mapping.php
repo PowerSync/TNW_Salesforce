@@ -4,11 +4,15 @@ namespace TNW\Salesforce\Synchronize\Unit\Website\Website;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
 
+/**
+ * Mapping
+ */
 class Mapping extends Synchronize\Unit\MappingAbstract
 {
-
     /**
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * Object By Entity Type
+     *
+     * @param \Magento\Store\Model\Website $entity
      * @param string $magentoEntityType
      * @return mixed
      */
@@ -23,6 +27,13 @@ class Mapping extends Synchronize\Unit\MappingAbstract
         }
     }
 
+    /**
+     * Prepare Value
+     *
+     * @param \Magento\Store\Model\Website $entity
+     * @param string $attributeCode
+     * @return mixed
+     */
     public function prepareValue($entity, $attributeCode)
     {
         if ($entity instanceof \Magento\Store\Model\Website && strcasecmp($attributeCode, 'sforce_id') === 0) {
@@ -33,7 +44,9 @@ class Mapping extends Synchronize\Unit\MappingAbstract
     }
 
     /**
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * Mappers
+     *
+     * @param \Magento\Store\Model\Website $entity
      * @return Model\ResourceModel\Mapper\Collection
      * @throws \Exception
      */
