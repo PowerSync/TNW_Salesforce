@@ -5,6 +5,8 @@ namespace TNW\Salesforce\Synchronize\Unit\Customer\Contact;
 use TNW\Salesforce\Synchronize;
 
 /**
+ * Contact Lookup
+ *
  * @method \Magento\Customer\Model\Customer[] entities()
  */
 class Lookup extends Synchronize\Unit\LookupAbstract
@@ -72,6 +74,8 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Process Input
+     *
      * @return bool
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -113,6 +117,8 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Collect Index
+     *
      * @return array
      */
     public function collectIndex()
@@ -122,7 +128,6 @@ class Lookup extends Synchronize\Unit\LookupAbstract
 
         $searchIndex = [];
         foreach ($this->output as $key => $record) {
-
             $websiteId = '';
             if (!empty($record[$magentoWebsiteField]) && $this->customerConfigShare->isWebsiteScope()) {
                 $websiteId = $record[$magentoWebsiteField];
@@ -141,20 +146,20 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Search Priority Order
+     *
      * @param array $searchIndex
      * @param \Magento\Customer\Model\Customer $entity
      * @return array
      */
     public function searchPriorityOrder(array $searchIndex, $entity)
     {
-        $recordsIds = array();
-
+        $recordsIds = [];
         if (!empty($searchIndex['magentoId'])) {
             $recordsIds[10] = array_keys($searchIndex['magentoId'], strtolower($entity->getId()));
         }
 
         if (!empty($searchIndex['eaw'])) {
-
             if ($this->customerConfigShare->isWebsiteScope()) {
                 try {
                     $websiteId = $this->resourceObjects

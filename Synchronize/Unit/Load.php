@@ -99,6 +99,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->cache['entities'] = $index = [];
         foreach ($this->queues as $queue) {
             $entity = $this->loadEntity($queue);
+            $this->cache[$entity]['queue'] = $queue;
 
             if (null !== $this->entityObject && null !== $entity->getId()) {
                 $this->entityObject->load($entity, $entity->getData('config_website'));
@@ -111,7 +112,6 @@ class Load extends Synchronize\Unit\UnitAbstract
             }
 
             $this->cache['entities'][$entity] = $entity;
-            $this->cache[$entity]['queue'] = $queue;
             $message[] = __('Entity %1 loaded', $this->identification->printEntity($entity));
         }
 

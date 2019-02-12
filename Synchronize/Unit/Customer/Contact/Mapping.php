@@ -1,9 +1,13 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Contact;
 
+use TNW\Salesforce\Model\Config\Source\Customer\ContactAssignee;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
 
+/**
+ * Customer Contact Mapping
+ */
 class Mapping extends Synchronize\Unit\MappingAbstract
 {
     /**
@@ -69,6 +73,8 @@ class Mapping extends Synchronize\Unit\MappingAbstract
     }
 
     /**
+     * Object By Entity Type
+     *
      * @param \Magento\Customer\Model\Customer $entity
      * @param string $magentoEntityType
      * @return mixed
@@ -90,6 +96,14 @@ class Mapping extends Synchronize\Unit\MappingAbstract
         }
     }
 
+    /**
+     * Prepare Value
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param string $attributeCode
+     * @return mixed|string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function prepareValue($entity, $attributeCode)
     {
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'sforce_id') === 0) {
@@ -98,32 +112,31 @@ class Mapping extends Synchronize\Unit\MappingAbstract
 
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'website_id') === 0) {
             return $this->resourceObjects
-                ->loadObjectId(
-                    $entity->getWebsiteId(),
-                    'Website',
-                    $this->storeManager->getWebsite()->getId()
-                );
+                ->loadObjectId($entity->getWebsiteId(), 'Website', $this->storeManager->getWebsite()->getId());
         }
 
         return parent::prepareValue($entity, $attributeCode);
     }
 
     /**
-     * @param $entity
+     * Default Value
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @param Model\Mapper $mapper
      * @return mixed
      */
     protected function defaultValue($entity, $mapper)
     {
-        if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0) {
-            if (
-                $this->customerConfig->contactAssignee($entity->getConfigWebsite()) === Model\Config\Source\Customer\ContactAssignee::DEFAULT_OWNER ||
-                !$this->unit('customerAccountLookup')->get('%s/record/OwnerId', $entity)
+        if ($entity instanceof \Magento\Customer\Model\Customer &&
+            strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0
+        ) {
+            if ($this->customerConfig->contactAssignee($entity->getData('config_website')) === ContactAssignee::DEFAULT_OWNER ||
+                !$this->unit('customerBusinessAccountLookup')->get('%s/record/OwnerId', $entity)
             ) {
-                return $this->customerConfig->defaultOwner($entity->getConfigWebsite());
+                return $this->customerConfig->defaultOwner($entity->getData('config_website'));
             }
 
-            return $this->unit('customerAccountLookup')->get('%s/record/OwnerId', $entity);
+            return $this->unit('customerBusinessAccountLookup')->get('%s/record/OwnerId', $entity);
         }
 
         return parent::defaultValue($entity, $mapper);

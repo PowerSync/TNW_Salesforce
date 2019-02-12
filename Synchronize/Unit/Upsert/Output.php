@@ -139,12 +139,6 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     public function process()
     {
         $output = $this->createTransport();
-
-        // Set status upsert output
-        foreach ($this->entities() as $entity) {
-            $this->load()->get('%s/queue', $entity)->setData('status', Queue::STATUS_UPSERT_OUTPUT);
-        }
-
         $this->process->process($output);
 
         $this->group()->messageDebug(implode("\n", array_map(function ($entity) use ($output) {
@@ -210,13 +204,33 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
     protected function processOutput(Synchronize\Transport\Calls\Upsert\Transport\Output $output)
     {
         foreach ($this->entities() as $entity) {
-            if (empty($output[$entity]['success'])) {
-                $this->group()->messageError(
-                    'Upsert object "%s". Entity: %s. Message: "%s".',
-                    $this->salesforceType,
-                    $this->identification->printEntity($entity),
-                    $output[$entity]['message']
-                );
+            switch (true) {
+                case isset($output[$entity]['waiting']) && $output[$entity]['waiting'] === true:
+                    $this->load()->get('%s/queue', $entity)->setData('status', Queue::STATUS_WAITING_UPSERT);
+
+                    // Set Status from duplicates
+                    foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
+                        $this->load()->get('%s/queue', $duplicate)->setData('status', Queue::STATUS_WAITING_UPSERT);
+                    }
+                    break;
+
+                case isset($output[$entity]['success']) && $output[$entity]['success'] === true:
+                    $this->load()->get('%s/queue', $entity)->setData('status', Queue::STATUS_PROCESS_OUTPUT_UPSERT);
+
+                    // Set Status from duplicates
+                    foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
+                        $this->load()->get('%s/queue', $duplicate)
+                            ->setData('status', Queue::STATUS_PROCESS_OUTPUT_UPSERT);
+                    }
+                    break;
+
+                default:
+                    $this->group()->messageError(
+                        'Upsert object "%s". Entity: %s. Message: "%s".',
+                        $this->salesforceType,
+                        $this->identification->printEntity($entity),
+                        $output[$entity]['message']
+                    );
             }
 
             $this->cache[$entity] = $output[$entity];

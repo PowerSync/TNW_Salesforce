@@ -1,6 +1,7 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -84,6 +85,7 @@ class Save extends Synchronize\Unit\UnitAbstract
 
             // Save Salesforce Id
             $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
+            $this->load()->get('%s/queue', $entity)->setData('status', Queue::STATUS_COMPLETE);
 
             $message[] = __(
                 "Updating %1 attribute:\n\t\"%2\": %3",
@@ -100,6 +102,9 @@ class Save extends Synchronize\Unit\UnitAbstract
                     $attributeName,
                     $entity->getData('config_website')
                 );
+
+                $this->load()->get('%s/queue', $duplicate)
+                    ->setData('status', Queue::STATUS_COMPLETE);
 
                 $message[] = __(
                     "Updating %1 attribute:\n\t\"%2\": %3",
