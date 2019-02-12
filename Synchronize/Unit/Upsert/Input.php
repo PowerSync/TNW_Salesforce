@@ -156,11 +156,6 @@ class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\Ch
         }, $this->entities())));
 
         $this->process->process($input);
-
-        // Set status upsert waiting
-        foreach ($this->entities() as $entity) {
-            $this->load()->get('%s/queue', $entity)->setData('status', Queue::STATUS_UPSERT_WAITING);
-        }
     }
 
     /**

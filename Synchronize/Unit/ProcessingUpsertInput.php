@@ -7,6 +7,14 @@ namespace TNW\Salesforce\Synchronize\Unit;
 class ProcessingUpsertInput extends ProcessingAbstract
 {
     /**
+     * @inheritdoc
+     */
+    public function description()
+    {
+        return __('Upsert Input Phase');
+    }
+
+    /**
      * Analize
      *
      * @param \Magento\Framework\Model\AbstractModel $entity
@@ -16,7 +24,7 @@ class ProcessingUpsertInput extends ProcessingAbstract
     {
         /** @var \TNW\Salesforce\Model\Queue $queue */
         $queue = $this->load()->get('%s/queue', $entity);
-        if ($queue->isUpsertInput()) {
+        if ($queue->isProcessInputUpsert()) {
             return true;
         }
 

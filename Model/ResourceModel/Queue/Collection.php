@@ -41,6 +41,17 @@ class Collection extends AbstractCollection
     }
 
     /**
+     * Add Filter To Code
+     *
+     * @param string $code
+     * @return Collection
+     */
+    public function addFilterToStatus($code)
+    {
+        return $this->addFieldToFilter('main_table.status', $code);
+    }
+
+    /**
      * Add Filter Dependent
      *
      * @return $this
@@ -121,11 +132,57 @@ class Collection extends AbstractCollection
     /**
      * Clear
      *
-     * @return AbstractCollection
+     * @return Collection|AbstractCollection
      */
     public function clear()
     {
         $this->_totalRecords = null;
         return parent::clear();
+    }
+
+    /**
+     * Set All Status
+     *
+     * @param string $status
+     * @return Collection
+     * @throws \Exception
+     */
+    public function updateAllStatus($status)
+    {
+        $this->_conn->beginTransaction();
+        try {
+            $this->_select->forUpdate();
+            $queueIds = $this->walk('getId');
+            $this->_select->forUpdate(false);
+
+            if (!empty($queueIds)) {
+                $this->_conn->update(
+                    $this->getMainTable(),
+                    ['status' => $status],
+                    $this->_conn->prepareSqlCondition('queue_id', ['in' => $queueIds])
+                );
+
+                $this->each('setStatus', [$status]);
+            }
+
+            $this->_conn->commit();
+        } catch (\Exception $e) {
+            $this->_conn->rollBack();
+            throw $e;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Before Add Loaded Item
+     *
+     * @param \Magento\Framework\DataObject $item
+     * @return \Magento\Framework\DataObject
+     */
+    protected function beforeAddLoadedItem(\Magento\Framework\DataObject $item)
+    {
+        $this->getResource()->unserializeFields($item);
+        return parent::beforeAddLoadedItem($item);
     }
 }

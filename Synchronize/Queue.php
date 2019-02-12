@@ -1,6 +1,8 @@
 <?php
 namespace TNW\Salesforce\Synchronize;
 
+use TNW\Salesforce\Model;
+
 /**
  * Queue
  */
@@ -17,20 +19,28 @@ class Queue
     private $groups;
 
     /**
-     * @var \TNW\Salesforce\Model\ResourceModel\Queue
+     * @var string[]
+     */
+    private $phases;
+
+    /**
+     * @var Model\ResourceModel\Queue
      */
     private $resourceQueue;
 
     /**
      * Queue constructor.
      * @param Group[] $groups
-     * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
+     * @param array $phases
+     * @param Model\ResourceModel\Queue $resourceQueue
      */
     public function __construct(
         array $groups,
-        \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
+        array $phases,
+        Model\ResourceModel\Queue $resourceQueue
     ) {
         $this->groups = $groups;
+        $this->phases = $phases;
         $this->resourceQueue = $resourceQueue;
     }
 
@@ -39,39 +49,60 @@ class Queue
      *
      * @param \TNW\Salesforce\Model\ResourceModel\Queue\Collection $collection
      * @param int $websiteId
+     * @throws \Exception
      */
     public function synchronize($collection, $websiteId)
     {
         // Collection Clear
         $collection->clear();
 
+        ksort($this->phases);
+
         foreach ($this->sortGroup() as $group) {
-            $groupCollection = clone $collection;
-            $groupCollection->addFilterToCode($group->code());
-            $groupCollection->addFilterToWebsiteId($websiteId);
-            $groupCollection->addFilterDependent();
+            foreach ($this->phases as $phase) {
+                $groupCollection = clone $collection;
+                $groupCollection->addFilterToCode($group->code());
+                $groupCollection->addFilterToWebsiteId($websiteId);
+                $groupCollection->addFilterToStatus($phase['startStatus']);
+                $groupCollection->addFilterDependent();
 
-            if (0 === $groupCollection->getSize()) {
-                continue;
-            }
+                $groupCollection->setPageSize(self::PAGE_SIZE);
 
-            $groupCollection->setPageSize(self::PAGE_SIZE);
-            $lastPageNumber = $groupCollection->getLastPageNumber();
-
-            $group->messageDebug('Start entity "%s" synchronize for website %s', $group->code(), $websiteId);
-
-            try {
-                for ($i = 1; $i <= $lastPageNumber; $i++) {
+                for ($i = 1; true; $i++) {
                     $groupCollection->setPageSize($i);
                     $groupCollection->clear();
 
-                    $group->synchronize($groupCollection->getItems());
-                }
-            } catch (\Exception $e) {
-                $group->messageError($e);
-            }
+                    $groupCollection->updateAllStatus($phase['processStatus']);
+                    if (0 === $groupCollection->count()) {
+                        break;
+                    }
 
-            $group->messageDebug('Stop entity "%s" synchronize for website %s', $group->code(), $websiteId);
+                    $group->messageDebug(
+                        'Start entity "%s" synchronize for website %s',
+                        $group->code(),
+                        $websiteId
+                    );
+
+                    try {
+                        $group->synchronize($groupCollection->getItems());
+                    } catch (\Exception $e) {
+                        $group->messageError($e);
+                    }
+
+                    $group->messageDebug(
+                        'Stop entity "%s" synchronize for website %s',
+                        $group->code(),
+                        $websiteId
+                    );
+
+                    // Save change status
+                    foreach ($groupCollection as $queue) {
+                        $groupCollection->getResource()->save($queue);
+                    }
+
+                    gc_collect_cycles();
+                }
+            }
         }
     }
 

@@ -9,16 +9,15 @@ use TNW\Salesforce\Model\ResourceModel;
 class Queue extends \Magento\Framework\Model\AbstractModel
 {
     const STATUS_NEW = 'new';
-    const STATUS_RUNNING = 'running';
     const STATUS_ERROR = 'error';
     const STATUS_COMPLETE = 'complete';
     const STATUS_SKIPPED = 'skipped';
-    const STATUS_UPSERT_INPUT = 'upsert_input';
-    const STATUS_UPSERT_WAITING = 'upsert_waiting';
-    const STATUS_UPSERT_OUTPUT = 'upsert_output';
-    const STATUS_LOOKUP_INPUT = 'lookup_input';
-    const STATUS_LOOKUP_WAITING = 'lookup_waiting';
-    const STATUS_LOOKUP_OUTPUT = 'lookup_output';
+    const STATUS_WAITING_UPSERT = 'waiting_upsert';
+    const STATUS_WAITING_LOOKUP = 'waiting_lookup';
+    const STATUS_PROCESS_INPUT_UPSERT = 'process_upsert_input';
+    const STATUS_PROCESS_INPUT_LOOKUP = 'process_lookup_input';
+    const STATUS_PROCESS_OUTPUT_UPSERT = 'process_output_upsert';
+    const STATUS_PROCESS_OUTPUT_LOOKUP = 'process_output_lookup';
 
     /**
      * @var Queue[]
@@ -124,23 +123,23 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
-     * Id Upsert Input
-     *
-     * @return bool
-     */
-    public function isUpsertInput()
-    {
-        return strcasecmp($this->_getData('status'), self::STATUS_UPSERT_INPUT) === 0;
-    }
-
-    /**
      * Is Upsert Waiting
      *
      * @return bool
      */
-    public function isUpsertWaiting()
+    public function isWaitingUpsert()
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_UPSERT_WAITING) === 0;
+        return strcasecmp($this->_getData('status'), self::STATUS_WAITING_UPSERT) === 0;
+    }
+
+    /**
+     * Id Upsert Input
+     *
+     * @return bool
+     */
+    public function isProcessInputUpsert()
+    {
+        return strcasecmp($this->_getData('status'), self::STATUS_PROCESS_INPUT_UPSERT) === 0;
     }
 
     /**
@@ -148,9 +147,9 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      *
      * @return bool
      */
-    public function isUpsertOutput()
+    public function isProcessOutputUpsert()
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_UPSERT_OUTPUT) === 0;
+        return strcasecmp($this->_getData('status'), self::STATUS_PROCESS_OUTPUT_UPSERT) === 0;
     }
 
     /**

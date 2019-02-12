@@ -5,6 +5,8 @@ use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
 
 /**
+ * Account Lookup By Name
+ *
  * @method \Magento\Customer\Model\Customer[] entities()
  */
 class ByName extends Synchronize\Unit\LookupAbstract
@@ -14,6 +16,19 @@ class ByName extends Synchronize\Unit\LookupAbstract
      */
     private $mapperName;
 
+    /**
+     * ByName constructor.
+     * @param string $name
+     * @param string $load
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param Synchronize\Unit\IdentificationInterface $identification
+     * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
+     * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
+     * @param Synchronize\Transport\Calls\QueryInterface $process
+     * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
+     * @param array $dependents
+     */
     public function __construct(
         $name,
         $load,
@@ -26,7 +41,17 @@ class ByName extends Synchronize\Unit\LookupAbstract
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
         array $dependents = []
     ) {
-        parent::__construct($name, $load, $units, $group, $identification, $inputFactory, $outputFactory, $process, $dependents);
+        parent::__construct(
+            $name,
+            $load,
+            $units,
+            $group,
+            $identification,
+            $inputFactory,
+            $outputFactory,
+            $process,
+            $dependents
+        );
 
         $this->mapperName = $mapperCollectionFactory->create()
             ->addObjectToFilter('Account')
@@ -35,6 +60,7 @@ class ByName extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Process Input
      */
     public function processInput()
     {
@@ -50,6 +76,8 @@ class ByName extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Value Company
+     *
      * @param $entity
      * @return mixed|null
      */
@@ -61,6 +89,8 @@ class ByName extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Collect Index
+     *
      * @return array
      */
     public function collectIndex()
@@ -76,14 +106,15 @@ class ByName extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Search Priority Order
+     *
      * @param array $searchIndex
      * @param \Magento\Customer\Model\Customer $entity
      * @return array
      */
     public function searchPriorityOrder(array $searchIndex, $entity)
     {
-        $recordsIds = array();
-
+        $recordsIds = [];
         if (!empty($searchIndex['name'])) {
             $recordsIds[10] = array_keys($searchIndex['name'], strtolower($this->valueCompany($entity)));
         }

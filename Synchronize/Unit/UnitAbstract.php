@@ -35,6 +35,13 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      */
     private $status = self::PENDING;
 
+    /**
+     * UnitAbstract constructor.
+     * @param string $name
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param array $dependents
+     */
     public function __construct(
         $name,
         Synchronize\Units $units,
