@@ -66,7 +66,20 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
      */
     public function entities()
     {
-        return $this->load()->get('entities');
+        return array_filter($this->load()->get('entities'), [$this, 'filter']);
+    }
+
+    /**
+     * Filter
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @return bool
+     */
+    protected function filter($entity)
+    {
+        return !in_array(true, array_map(function ($unit) use ($entity) {
+            return $this->unit($unit)->skipped($entity);
+        }, $this->dependents()), true);
     }
 
     /**

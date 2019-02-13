@@ -132,7 +132,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
 
                     $message = "{$count}) ";
                     $message .= strcasecmp($mapper->getAttributeType(), 'custom') !== 0
-                        ? "{$mapper->getMagentoEntityType()}::" : "custom::";
+                        ? "{$mapper->getMagentoEntityType()}::" : 'custom::';
                     $message .= "{$mapper->getMagentoAttributeName()} -> {$mapper->getSalesforceAttributeName()}";
 
                     if (!is_numeric($mapper->getId())) {
@@ -146,7 +146,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
             $this->cache[$entity] = $this->generateObject($entity, $mappers);
         }
 
-        if ($this->cache->count() == 0) {
+        if ($this->cache->count() === 0) {
             $this->group()->messageDebug('Mapping SKIPPED ...');
         }
 
@@ -158,7 +158,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Generate Object
      *
-     * @param $entity
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @param Model\ResourceModel\Mapper\Collection $mappers
      * @return array
      * @throws \OutOfBoundsException
@@ -187,7 +187,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Value
      *
-     * @param $entity
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @param Model\Mapper $mapper
      * @return mixed|null
      */
@@ -226,7 +226,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Find Salesforce
      *
-     * @param $entity
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @return mixed
      * @throws \OutOfBoundsException
      */
@@ -324,7 +324,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Default Value
      *
-     * @param $entity
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @param Model\Mapper $mapper
      * @return mixed
      */

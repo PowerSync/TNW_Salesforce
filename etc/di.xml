@@ -48,8 +48,8 @@
     <virtualType name="TNW\Unit\Customer\BusinessAccount\ProcessingUpsertInput" type="TNW\Salesforce\Synchronize\Unit\ProcessingUpsertInput">
         <arguments>
             <argument name="name" xsi:type="string">customerBusinessAccountProcessingUpsertInput</argument>
-            <argument name="load" xsi:type="string">websiteLoad</argument>
-            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
         </arguments>
     </virtualType>
 
@@ -85,7 +85,7 @@
         </arguments>
     </virtualType>
 
-    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping">
+    <virtualType name="TNW\Unit\Customer\BusinessAccount\Mapping" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping">
         <arguments>
             <argument name="name" xsi:type="string">customerAccountMapping</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
@@ -96,7 +96,7 @@
                 <item name="upsertInput" xsi:type="string">customerBusinessAccountProcessingUpsertInput</item>
             </argument>
         </arguments>
-    </type>
+    </virtualType>
 
     <virtualType name="TNW\Unit\Customer\BusinessAccount\UpsertInput" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert\Input">
         <arguments>
@@ -111,8 +111,8 @@
     <virtualType name="TNW\Unit\Customer\BusinessAccount\ProcessingUpsertOutput" type="TNW\Salesforce\Synchronize\Unit\ProcessingUpsertOutput">
         <arguments>
             <argument name="name" xsi:type="string">customerBusinessAccountProcessingUpsertOutput</argument>
-            <argument name="load" xsi:type="string">websiteLoad</argument>
-            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
         </arguments>
     </virtualType>
 
@@ -132,9 +132,9 @@
 
     <virtualType name="TNW\Customer\BusinessAccount\Save" type="TNW\Salesforce\Synchronize\Unit\Save">
         <arguments>
-            <argument name="name" xsi:type="string">customerAccountSave</argument>
+            <argument name="name" xsi:type="string">customerBusinessAccountSave</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
-            <argument name="upsertOutput" xsi:type="string">customerAccountUpsertOutput</argument>
+            <argument name="upsertOutput" xsi:type="string">customerBusinessAccountUpsertOutput</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
         </arguments>
@@ -143,12 +143,12 @@
     <virtualType name="TNW\Unit\Customer\Contact\ProcessingUpsertInput" type="TNW\Salesforce\Synchronize\Unit\ProcessingUpsertInput">
         <arguments>
             <argument name="name" xsi:type="string">customerContactProcessingUpsertInput</argument>
-            <argument name="load" xsi:type="string">websiteLoad</argument>
-            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
         </arguments>
     </virtualType>
 
-    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup">
+    <virtualType name="TNW\Unit\Customer\Contact\Lookup" type="TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup">
         <arguments>
             <argument name="name" xsi:type="string">customerContactLookup</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
@@ -157,9 +157,9 @@
                 <item name="processUpsertInput" xsi:type="string">customerContactProcessingUpsertInput</item>
             </argument>
         </arguments>
-    </type>
+    </virtualType>
 
-    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Contact\Mapping">
+    <virtualType name="TNW\Unit\Customer\Contact\Mapping" type="TNW\Salesforce\Synchronize\Unit\Customer\Contact\Mapping">
         <arguments>
             <argument name="name" xsi:type="string">customerContactMapping</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
@@ -170,7 +170,7 @@
                 <item name="processUpsertInput" xsi:type="string">customerContactProcessingUpsertInput</item>
             </argument>
         </arguments>
-    </type>
+    </virtualType>
 
     <virtualType name="TNW\Unit\Customer\Contact\UpsertInput" type="TNW\Salesforce\Synchronize\Unit\Upsert\Input">
         <arguments>
@@ -184,9 +184,9 @@
 
     <virtualType name="TNW\Unit\Customer\Contact\ProcessingUpsertOutput" type="TNW\Salesforce\Synchronize\Unit\ProcessingUpsertOutput">
         <arguments>
-            <argument name="name" xsi:type="string">customerContactProcessingUpsertInput</argument>
-            <argument name="load" xsi:type="string">websiteLoad</argument>
-            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
+            <argument name="name" xsi:type="string">customerContactProcessingUpsertOutput</argument>
+            <argument name="load" xsi:type="string">customerLoad</argument>
+            <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
         </arguments>
     </virtualType>
 
@@ -223,7 +223,7 @@
                 <item name="lookupByContact" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup\ByContact</item>
                 <item name="lookupByName" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup\ByName</item>
                 <item name="lookup" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup</item>
-                <item name="mapping" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping</item>
+                <item name="mapping" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Mapping</item>
                 <item name="upsertInput" xsi:type="string">TNW\Unit\Customer\BusinessAccount\UpsertInput</item>
                 <item name="processingUpsertOutput" xsi:type="string">TNW\Unit\Customer\BusinessAccount\ProcessingUpsertOutput</item>
                 <item name="upsertOutput" xsi:type="string">TNW\Unit\Customer\BusinessAccount\UpsertOutput</item>
@@ -237,9 +237,11 @@
             <argument name="groupCode" xsi:type="string">customerContact</argument>
             <argument name="units" xsi:type="array">
                 <item name="load" xsi:type="string">TNW\Unit\Customer\Load</item>
-                <item name="lookup" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup</item>
-                <item name="mapping" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Contact\Mapping</item>
+                <item name="processingUpsertInput" xsi:type="string">TNW\Unit\Customer\Contact\ProcessingUpsertInput</item>
+                <item name="lookup" xsi:type="string">TNW\Unit\Customer\Contact\Lookup</item>
+                <item name="mapping" xsi:type="string">TNW\Unit\Customer\Contact\Mapping</item>
                 <item name="upsertInput" xsi:type="string">TNW\Unit\Customer\Contact\UpsertInput</item>
+                <item name="processingUpsertOutput" xsi:type="string">TNW\Unit\Customer\Contact\ProcessingUpsertOutput</item>
                 <item name="upsertOutput" xsi:type="string">TNW\Unit\Customer\Contact\UpsertOutput</item>
                 <item name="save" xsi:type="string">TNW\Customer\Contact\Save</item>
             </argument>
@@ -276,7 +278,7 @@
         </arguments>
     </virtualType>
 
-    <type name="TNW\Salesforce\Synchronize\Unit\Website\Website\Lookup">
+    <virtualType name="TNW\Unit\Website\Website\Lookup" type="TNW\Salesforce\Synchronize\Unit\Website\Website\Lookup">
         <arguments>
             <argument name="name" xsi:type="string">websiteWebsiteLookup</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
@@ -285,7 +287,7 @@
                 <item name="upsertInput" xsi:type="string">websiteWebsiteProcessingUpsertInput</item>
             </argument>
         </arguments>
-    </type>
+    </virtualType>
 
     <type name="TNW\Salesforce\Synchronize\Unit\Website\Website\Mapping">
         <arguments>
@@ -348,7 +350,7 @@
             <argument name="units" xsi:type="array">
                 <item name="load" xsi:type="string">TNW\Unit\Website\Load</item>
                 <item name="processingUpsertInput" xsi:type="string">TNW\Unit\Website\Website\ProcessingUpsertInput</item>
-                <item name="lookup" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Website\Lookup</item>
+                <item name="lookup" xsi:type="string">TNW\Unit\Website\Website\Lookup</item>
                 <item name="mapping" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Website\Mapping</item>
                 <item name="upsertInput" xsi:type="string">TNW\Unit\Website\Website\UpsertInput</item>
                 <item name="processingUpsertOutput" xsi:type="string">TNW\Unit\Website\Website\ProcessingUpsertOutput</item>

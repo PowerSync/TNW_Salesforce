@@ -1,10 +1,17 @@
 <?php
 namespace TNW\Salesforce\Model\Logger\Processor;
 
+/**
+ * UidProcessor
+ */
 class UidProcessor
 {
     private $uid;
 
+    /**
+     * UidProcessor constructor.
+     * @param int $length
+     */
     public function __construct($length = 7)
     {
         if (!is_int($length) || $length > 32 || $length < 1) {
@@ -14,6 +21,12 @@ class UidProcessor
         $this->uid = substr(hash('md5', uniqid('', true)), 0, $length);
     }
 
+    /**
+     * Invoke
+     *
+     * @param array $record
+     * @return array
+     */
     public function __invoke(array $record)
     {
         $record['extra']['uid'] = $this->uid;
@@ -21,6 +34,11 @@ class UidProcessor
         return $record;
     }
 
+    /**
+     * Uid
+     *
+     * @return bool|string
+     */
     public function uid()
     {
         return $this->uid;

@@ -33,11 +33,13 @@ class Queue
      * @param Group[] $groups
      * @param array $phases
      * @param Model\ResourceModel\Queue $resourceQueue
+     * @param Model\Logger\Processor\UidProcessor $uidProcessor
      */
     public function __construct(
         array $groups,
         array $phases,
-        Model\ResourceModel\Queue $resourceQueue
+        Model\ResourceModel\Queue $resourceQueue,
+        Model\Logger\Processor\UidProcessor $uidProcessor
     ) {
         $this->groups = $groups;
         $this->phases = $phases;
@@ -64,6 +66,7 @@ class Queue
                 $groupCollection->addFilterToCode($group->code());
                 $groupCollection->addFilterToWebsiteId($websiteId);
                 $groupCollection->addFilterToStatus($phase['startStatus']);
+                $groupCollection->addFilterToCurrentUid();
                 $groupCollection->addFilterDependent();
 
                 $groupCollection->setPageSize(self::PAGE_SIZE);
@@ -86,6 +89,13 @@ class Queue
                     try {
                         $group->synchronize($groupCollection->getItems());
                     } catch (\Exception $e) {
+                        foreach ($groupCollection as $queue) {
+                            $queue->addData([
+                                'status' => Model\Queue::STATUS_ERROR,
+                                'message' => $e->getMessage()
+                            ]);
+                        }
+
                         $group->messageError($e);
                     }
 

@@ -44,6 +44,11 @@ class Entity
     private $websiteEmulator;
 
     /**
+     * @var \Magento\Framework\Message\ManagerInterface
+     */
+    private $messageManager;
+
+    /**
      * Entity constructor.
      * @param string $entityType
      * @param Unit[] $resolves
@@ -52,6 +57,7 @@ class Entity
      * @param \TNW\Salesforce\Synchronize\Queue $synchronizeQueue
      * @param \TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory $collectionQueueFactory
      * @param \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
+     * @param \Magento\Framework\Message\ManagerInterface $messageManager
      */
     public function __construct(
         $entityType,
@@ -60,7 +66,8 @@ class Entity
         \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool $dividerPool,
         \TNW\Salesforce\Synchronize\Queue $synchronizeQueue,
         \TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory $collectionQueueFactory,
-        \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
+        \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator,
+        \Magento\Framework\Message\ManagerInterface $messageManager
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -69,6 +76,7 @@ class Entity
         $this->synchronizeQueue = $synchronizeQueue;
         $this->collectionQueueFactory = $collectionQueueFactory;
         $this->websiteEmulator = $websiteEmulator;
+        $this->messageManager = $messageManager;
     }
 
     /**
@@ -139,6 +147,11 @@ class Entity
         try {
             $this->synchronizeQueue->synchronize($collection, $websiteId);
         } finally {
+            if (!in_array(true, $collection->walk('isError'), true)) {
+                $this->messageManager->addSuccessMessage('Synchronize entity Success');
+            }
+
+            /** @var \TNW\Salesforce\Model\Queue $queue */
             foreach ($collection as $queue) {
                 //$collection->getResource()->delete($queue);
             }
