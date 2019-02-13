@@ -9,6 +9,34 @@ use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 class Collection extends AbstractCollection
 {
     /**
+     * @var \TNW\Salesforce\Model\Logger\Processor\UidProcessor
+     */
+    private $uidProcessor;
+
+    /**
+     * Collection constructor.
+     * @param \Magento\Framework\Data\Collection\EntityFactoryInterface $entityFactory
+     * @param \Psr\Log\LoggerInterface $logger
+     * @param \Magento\Framework\Data\Collection\Db\FetchStrategyInterface $fetchStrategy
+     * @param \Magento\Framework\Event\ManagerInterface $eventManager
+     * @param \TNW\Salesforce\Model\Logger\Processor\UidProcessor $uidProcessor
+     * @param \Magento\Framework\DB\Adapter\AdapterInterface|null $connection
+     * @param \Magento\Framework\Model\ResourceModel\Db\AbstractDb|null $resource
+     */
+    public function __construct(
+        \Magento\Framework\Data\Collection\EntityFactoryInterface $entityFactory,
+        \Psr\Log\LoggerInterface $logger,
+        \Magento\Framework\Data\Collection\Db\FetchStrategyInterface $fetchStrategy,
+        \Magento\Framework\Event\ManagerInterface $eventManager,
+        \TNW\Salesforce\Model\Logger\Processor\UidProcessor $uidProcessor,
+        \Magento\Framework\DB\Adapter\AdapterInterface $connection = null,
+        \Magento\Framework\Model\ResourceModel\Db\AbstractDb $resource = null
+    ) {
+        parent::__construct($entityFactory, $logger, $fetchStrategy, $eventManager, $connection, $resource);
+        $this->uidProcessor = $uidProcessor;
+    }
+
+    /**
      * Resource initialization
      *
      * @return void
@@ -49,6 +77,22 @@ class Collection extends AbstractCollection
     public function addFilterToStatus($code)
     {
         return $this->addFieldToFilter('main_table.status', $code);
+    }
+
+    /**
+     * Add Filter To Current Uid
+     *
+     * @return Collection
+     */
+    public function addFilterToCurrentUid()
+    {
+        return $this->addFieldToFilter([
+            'main_table.transaction_uid',
+            'main_table.transaction_uid',
+        ], [
+            ['neq' => $this->uidProcessor->uid()],
+            ['null' => true],
+        ]);
     }
 
     /**
@@ -158,11 +202,22 @@ class Collection extends AbstractCollection
             if (!empty($queueIds)) {
                 $this->_conn->update(
                     $this->getMainTable(),
-                    ['status' => $status],
+                    [
+                        'status' => $status,
+                        'sync_attempt' => new \Zend_Db_Expr('sync_attempt + 1'),
+                        'transaction_uid' => $this->uidProcessor->uid()
+                    ],
                     $this->_conn->prepareSqlCondition('queue_id', ['in' => $queueIds])
                 );
 
-                $this->each('setStatus', [$status]);
+                /** @var \TNW\Salesforce\Model\Queue $queue */
+                foreach ($this as $queue) {
+                    $queue->addData([
+                        'status' => $status,
+                        'sync_attempt' => $queue->getSyncAttempt() + 1,
+                        'transaction_uid' => $this->uidProcessor->uid()
+                    ]);
+                }
             }
 
             $this->_conn->commit();

@@ -3,8 +3,7 @@
 namespace TNW\Salesforce\Controller\Adminhtml\Customer;
 
 /**
- * Class MassSync
- * @package Magento\Customer\Controller\Adminhtml\Index
+ * MassSync
  */
 class MassSync extends \Magento\Backend\App\Action
 {

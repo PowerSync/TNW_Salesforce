@@ -163,7 +163,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\C
         foreach ($this->entities() as $entity) {
             $output->offsetSet($entity, [
                 'waiting' => true,
-                'message' => __('Waiting response')
+                'message' => __('Waiting response')->render()
             ]);
         }
 

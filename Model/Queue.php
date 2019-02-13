@@ -123,6 +123,26 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
+     * Sync Attempt
+     *
+     * @return int
+     */
+    public function getSyncAttempt()
+    {
+        return (int)$this->_getData('sync_attempt');
+    }
+
+    /**
+     * Is Error
+     *
+     * @return bool
+     */
+    public function isError()
+    {
+        return strcasecmp($this->_getData('status'), self::STATUS_ERROR) === 0;
+    }
+
+    /**
      * Is Upsert Waiting
      *
      * @return bool
