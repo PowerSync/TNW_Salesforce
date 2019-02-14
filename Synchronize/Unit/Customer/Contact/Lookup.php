@@ -159,11 +159,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
             if ($this->customerConfigShare->isWebsiteScope()) {
                 try {
                     $websiteId = $this->resourceObjects
-                        ->loadObjectId(
-                            $entity->getWebsiteId(),
-                            'Website',
-                            $this->storeManager->getWebsite()->getId()
-                        );
+                        ->loadObjectId($entity->getWebsiteId(), 'Website', $this->storeManager->getWebsite()->getId());
                 } catch (\Exception $e) {
                     $this->group()->messageError($e);
                     $websiteId = '';
