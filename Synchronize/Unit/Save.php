@@ -1,7 +1,6 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
-use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -17,7 +16,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * @var string
      */
-    private $upsertOutput;
+    private $fieldModifier;
 
     /**
      * @var IdentificationInterface
@@ -34,7 +33,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      *
      * @param string $name
      * @param string $load
-     * @param string $upsertOutput
+     * @param string $fieldModifier
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param IdentificationInterface $identification
@@ -44,16 +43,16 @@ class Save extends Synchronize\Unit\UnitAbstract
     public function __construct(
         $name,
         $load,
-        $upsertOutput,
+        $fieldModifier,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject,
         array $dependents = []
     ) {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsertOutput]));
+        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $fieldModifier]));
         $this->load = $load;
-        $this->upsertOutput = $upsertOutput;
+        $this->fieldModifier = $fieldModifier;
         $this->identification = $identification;
         $this->entityObject = $entityObject;
     }
@@ -73,7 +72,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function process()
     {
-        $attributeName = $this->upsertOutput()->fieldSalesforceId();
+        $attributeName = $this->fieldModifier()->fieldSalesforceId();
         $message = [];
 
         foreach ($this->entities() as $entity) {
@@ -85,7 +84,6 @@ class Save extends Synchronize\Unit\UnitAbstract
 
             // Save Salesforce Id
             $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
-            $this->load()->get('%s/queue', $entity)->setData('status', Queue::STATUS_COMPLETE);
 
             $message[] = __(
                 "Updating %1 attribute:\n\t\"%2\": %3",
@@ -102,9 +100,6 @@ class Save extends Synchronize\Unit\UnitAbstract
                     $attributeName,
                     $entity->getData('config_website')
                 );
-
-                $this->load()->get('%s/queue', $duplicate)
-                    ->setData('status', Queue::STATUS_COMPLETE);
 
                 $message[] = __(
                     "Updating %1 attribute:\n\t\"%2\": %3",
@@ -135,11 +130,11 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * Unit Upsert
      *
-     * @return Upsert\Output|UnitInterface
+     * @return FieldModifierInterface|UnitInterface
      */
-    public function upsertOutput()
+    public function fieldModifier()
     {
-        return $this->unit($this->upsertOutput);
+        return $this->unit($this->fieldModifier);
     }
 
     /**
@@ -161,6 +156,6 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function filter($entity)
     {
-        return $this->upsertOutput()->get('%s/success', $entity);
+        return $this->fieldModifier()->get('%s/success', $entity);
     }
 }

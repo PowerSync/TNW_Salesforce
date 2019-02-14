@@ -146,4 +146,80 @@ class Queue extends AbstractDb
 
         return $this->dependenceByCode[$code];
     }
+
+    /**
+     * Load By Child
+     *
+     * @param \Magento\Framework\Model\AbstractModel $object
+     * @param string $code
+     * @param int $childId
+     * @return Queue
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function loadByChild(\Magento\Framework\Model\AbstractModel $object, $code, $childId)
+    {
+        return $this->load($object, $this->dependenceIdByCode($childId, $code), $this->getIdFieldName());
+    }
+
+    /**
+     * Dependence Id By Code
+     *
+     * @param int $queueId
+     * @param string $code
+     * @return int
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function dependenceIdByCode($queueId, $code)
+    {
+        $select = $this->getConnection()->select()
+            ->from(['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')], [])
+            ->joinInner(
+                ['queue' => $this->getMainTable()],
+                'relation.parent_id = queue.queue_id',
+                ['queue_id']
+            )
+            ->where('relation.queue_id = ?', $queueId)
+            ->where('queue.code = ?', $code)
+        ;
+
+        return $this->getConnection()->fetchOne($select);
+    }
+
+    /**
+     * Load By Parent
+     *
+     * @param \Magento\Framework\Model\AbstractModel $object
+     * @param string $code
+     * @param int $parentId
+     * @return Queue
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function loadByParent(\Magento\Framework\Model\AbstractModel $object, $code, $parentId)
+    {
+        return $this->load($object, $this->childIdByCode($parentId, $code), $this->getIdFieldName());
+    }
+
+    /**
+     * Child Id By Code
+     *
+     * @param int $queueId
+     * @param string $code
+     * @return int
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function childIdByCode($queueId, $code)
+    {
+        $select = $this->getConnection()->select()
+            ->from(['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')], [])
+            ->joinInner(
+                ['queue' => $this->getMainTable()],
+                'relation.queue_id = queue.queue_id',
+                ['queue_id']
+            )
+            ->where('relation.parent_id = ?', $queueId)
+            ->where('queue.code = ?', $code)
+        ;
+
+        return $this->getConnection()->fetchOne($select);
+    }
 }

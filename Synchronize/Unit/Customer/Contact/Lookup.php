@@ -97,11 +97,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
             $this->input[$entity]['AND']['EaW']['AND']['Email']['='] = strtolower($entity->getEmail());
             if ($this->customerConfigShare->isWebsiteScope()) {
                 $salesforceId = $this->resourceObjects
-                    ->loadObjectId(
-                        $entity->getWebsiteId(),
-                        'Website',
-                        $this->storeManager->getWebsite()->getId()
-                    );
+                    ->loadObjectId($entity->getWebsiteId(), 'Website', $this->storeManager->getWebsite()->getId());
 
                 $this->input[$entity]['AND']['EaW']['AND'][$magentoWebsiteField]['IN'] = ['', $salesforceId];
             }
