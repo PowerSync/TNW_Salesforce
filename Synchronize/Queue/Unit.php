@@ -64,6 +64,11 @@ class Unit
     private $skipRules;
 
     /**
+     * @var bool
+     */
+    private $ignoreFindGeneratorException;
+
+    /**
      * Queue constructor.
      * @param string $code
      * @param string $description
@@ -76,6 +81,7 @@ class Unit
      * @param SkipInterface[] $skipRules
      * @param string[] $parents
      * @param string[] $children
+     * @param bool $ignoreFindGeneratorException
      */
     public function __construct(
         $code,
@@ -88,7 +94,8 @@ class Unit
         \Magento\Framework\ObjectManagerInterface $objectManager,
         array $skipRules = [],
         array $parents = [],
-        array $children = []
+        array $children = [],
+        $ignoreFindGeneratorException = false
     ) {
         $this->code = $code;
         $this->entityType = $entityType;
@@ -101,6 +108,7 @@ class Unit
         $this->skipRules = $skipRules;
         $this->parents = $parents;
         $this->children = $children;
+        $this->ignoreFindGeneratorException = $ignoreFindGeneratorException;
     }
 
     /**
@@ -163,21 +171,13 @@ class Unit
         $syncType,
         array $cacheQueue = []
     ) {
-        $key = sprintf('%s/%s/%s', $loadBy, $entityId, $this->code);
+        $key = sprintf('%s/%s/%s/%s', $loadBy, $entityId, $this->code, serialize($loadAdditional));
         if (isset($cacheQueue[$key])) {
             return $cacheQueue[$key];
         }
 
         $queues = [];
-        $generateQueues = $this->generator($loadBy)
-            ->process(
-                $entityId,
-                $loadAdditional,
-                [$this, 'create'],
-                $websiteId
-            );
-
-        foreach ($generateQueues as $queue) {
+        foreach ($this->generateQueues($loadBy, $entityId, $loadAdditional, [$this, 'create'], $websiteId) as $queue) {
             $queue->setData('website_id', $websiteId);
             $queue->setData('sync_type', $syncType);
 
@@ -285,11 +285,40 @@ class Unit
     /**
      * Get generator
      *
-     * @param string $type
-     * @return CreateInterface
+     * @param string $loadBy
+     * @param int $entityId
+     * @param array $additional
+     * @param callable $create
+     * @param int $websiteId
+     * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
-    private function generator($type)
+    public function generateQueues($loadBy, $entityId, array $additional, callable $create, $websiteId)
+    {
+        $generator = $this->findGenerator($loadBy);
+        if ($generator instanceof CreateInterface) {
+            return $generator->process($entityId, $additional, $create, $websiteId);
+        }
+
+        if ($this->ignoreFindGeneratorException) {
+            return [];
+        }
+
+        throw new LocalizedException(__(
+            'Unknown %3 generating method for %1 entity. Queue code %2',
+            $this->entityType,
+            $this->code,
+            $loadBy
+        ));
+    }
+
+    /**
+     * Find Generate
+     *
+     * @param string $type
+     * @return CreateInterface|null
+     */
+    public function findGenerator($type)
     {
         foreach ($this->generators as $generator) {
             if (strcasecmp($generator->createBy(), $type) !== 0) {
@@ -299,11 +328,6 @@ class Unit
             return $generator;
         }
 
-        throw new LocalizedException(__(
-            'Unknown %3 generating method for %1 entity. Queue code %2',
-            $this->entityType,
-            $this->code,
-            $type
-        ));
+        return null;
     }
 }

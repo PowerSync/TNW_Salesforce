@@ -5,6 +5,8 @@ use TNW\Salesforce\Model\ResourceModel;
 
 /**
  * Class Queue
+ *
+ * @method \TNW\Salesforce\Model\ResourceModel\Queue _getResource()
  */
 class Queue extends \Magento\Framework\Model\AbstractModel
 {
@@ -143,6 +145,26 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
+     * Is Error
+     *
+     * @return bool
+     */
+    public function isSkipped()
+    {
+        return strcasecmp($this->_getData('status'), self::STATUS_SKIPPED) === 0;
+    }
+
+    /**
+     * Is Error
+     *
+     * @return bool
+     */
+    public function isComplete()
+    {
+        return strcasecmp($this->_getData('status'), self::STATUS_COMPLETE) === 0;
+    }
+
+    /**
      * Is Upsert Waiting
      *
      * @return bool
@@ -206,5 +228,34 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     public function getDependence()
     {
         return $this->dependence;
+    }
+
+    /**
+     * Dependence By Code
+     *
+     * @param string $code
+     * @return Queue
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function dependenceByCode($code)
+    {
+        $dependent = clone $this;
+        $dependent->dependence = [];
+        $dependent->_data = [];
+
+        $this->_getResource()->loadByChild($dependent, $code, $this->getId());
+        return $dependent;
+    }
+
+    /**
+     * Exists Child By Code
+     *
+     * @param string $code
+     * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function existsChildByCode($code)
+    {
+        return (bool)$this->_getResource()->childIdByCode($this->getId(), $code);
     }
 }
