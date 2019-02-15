@@ -1,5 +1,4 @@
 <?php
-
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert;
 
 use TNW\Salesforce\Synchronize;
@@ -62,52 +61,8 @@ class Input extends Synchronize\Unit\Upsert\Input
     }
 
     /**
-     * Process Input
+     * Prepare Object
      *
-     * @param Synchronize\Transport\Calls\Upsert\Transport\Input $input
-     */
-    protected function processInput(Synchronize\Transport\Calls\Upsert\Transport\Input $input)
-    {
-        parent::processInput($input);
-
-        // deDuplicate
-        $index = [];
-        $duplicates = [];
-        for ($input->rewind(); $input->valid(); $input->next()) {
-            $entity = $input->current();
-
-            $hash = $this->hashObject($input->getInfo());
-            if (empty($index[$hash])) {
-                $index[$hash] = $entity;
-                continue;
-            }
-
-            $upsertEntities[spl_object_hash($entity)] = $index[$hash];
-            $duplicates[] = $entity;
-        }
-
-        //TODO: Save
-        $upsertEntities;
-
-        /**
-         * remove duplicated entities
-         */
-        foreach ($duplicates as $duplicate) {
-            $input->offsetUnset($duplicate);
-        }
-    }
-
-    /**
-     * @param array $object
-     * @return string
-     */
-    public function hashObject($object)
-    {
-        return empty($object['Id'])
-            ? $object['Name'] : $object['Id'];
-    }
-
-    /**
      * @param \Magento\Customer\Model\Customer $entity
      * @param array $object
      * @return array

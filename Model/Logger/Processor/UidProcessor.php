@@ -6,7 +6,15 @@ namespace TNW\Salesforce\Model\Logger\Processor;
  */
 class UidProcessor
 {
+    /**
+     * @var string
+     */
     private $uid;
+
+    /**
+     * @var int
+     */
+    private $length;
 
     /**
      * UidProcessor constructor.
@@ -14,11 +22,8 @@ class UidProcessor
      */
     public function __construct($length = 7)
     {
-        if (!is_int($length) || $length > 32 || $length < 1) {
-            throw new \InvalidArgumentException('The uid length must be an integer between 1 and 32');
-        }
-
-        $this->uid = substr(hash('md5', uniqid('', true)), 0, $length);
+        $this->length = $length;
+        $this->uid = static::generate($length);
     }
 
     /**
@@ -37,10 +42,33 @@ class UidProcessor
     /**
      * Uid
      *
-     * @return bool|string
+     * @return string
      */
     public function uid()
     {
         return $this->uid;
+    }
+
+    /**
+     * Refresh
+     */
+    public function refresh()
+    {
+        $this->uid = static::generate($this->length);
+    }
+
+    /**
+     * Generate
+     *
+     * @param int $length
+     * @return bool|string
+     */
+    public static function generate($length)
+    {
+        if (!is_int($length) || $length > 32 || $length < 1) {
+            throw new \InvalidArgumentException('The uid length must be an integer between 1 and 32');
+        }
+
+        return substr(hash('md5', uniqid('', true)), 0, $length);
     }
 }

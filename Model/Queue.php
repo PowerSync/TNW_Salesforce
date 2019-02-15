@@ -95,6 +95,32 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
+     * Get Additional By Code
+     *
+     * @param string $code
+     * @return mixed
+     */
+    public function getAdditionalByCode($code)
+    {
+        return $this->getDataByPath("additional_data/$code");
+    }
+
+    /**
+     * Set Additional By Code
+     *
+     * @param string $code
+     * @param mixed $value
+     * @return Queue
+     */
+    public function setAdditionalByCode($code, $value)
+    {
+        $data = $this->_getData('additional_data');
+        $data[$code] = $value;
+
+        return $this->setData('additional_data', $data);
+    }
+
+    /**
      * Sync Type
      *
      * @return mixed
@@ -132,6 +158,17 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     public function getSyncAttempt()
     {
         return (int)$this->_getData('sync_attempt');
+    }
+
+    /**
+     * Increment Sync Attempt
+     *
+     * @return Queue
+     */
+    public function incSyncAttempt()
+    {
+        $this->setData('sync_attempt', $this->getSyncAttempt() + 1);
+        return $this;
     }
 
     /**

@@ -148,7 +148,7 @@ class Entity
             $this->synchronizeQueue->synchronize($collection, $websiteId);
         } finally {
             if (!in_array(true, $collection->walk('isError'), true)) {
-                $this->messageManager->addSuccessMessage('Synchronize entity Success');
+                $this->messageManager->addSuccessMessage('All records were added to the synchronization queue');
             }
 
             /** @var \TNW\Salesforce\Model\Queue $queue */
