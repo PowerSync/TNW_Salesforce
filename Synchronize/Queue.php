@@ -29,6 +29,11 @@ class Queue
     private $resourceQueue;
 
     /**
+     * @var Model\Logger\Processor\UidProcessor
+     */
+    private $uidProcessor;
+
+    /**
      * Queue constructor.
      * @param Group[] $groups
      * @param array $phases
@@ -44,6 +49,7 @@ class Queue
         $this->groups = $groups;
         $this->phases = $phases;
         $this->resourceQueue = $resourceQueue;
+        $this->uidProcessor = $uidProcessor;
     }
 
     /**
@@ -61,54 +67,66 @@ class Queue
         ksort($this->phases);
 
         foreach ($this->sortGroup() as $group) {
+            // refresh uid
+            $this->uidProcessor->refresh();
+
             foreach ($this->phases as $phase) {
+                $lockCollection = clone $collection;
+                $lockCollection->addFilterToCode($group->code());
+                $lockCollection->addFilterToWebsiteId($websiteId);
+                $lockCollection->addFilterToStatus($phase['startStatus']);
+                $lockCollection->addFilterToNotTransactionUid($this->uidProcessor->uid());
+                $lockCollection->addFilterDependent();
+
+                // Mark work
+                $countUpdate = $lockCollection->updateLock([
+                    'status' => $phase['processStatus'],
+                    'transaction_uid' => $this->uidProcessor->uid()
+                ]);
+
+                if (0 === $countUpdate) {
+                    continue;
+                }
+
                 $groupCollection = clone $collection;
-                $groupCollection->addFilterToCode($group->code());
-                $groupCollection->addFilterToWebsiteId($websiteId);
-                $groupCollection->addFilterToStatus($phase['startStatus']);
-                $groupCollection->addFilterToCurrentUid();
-                $groupCollection->addFilterDependent();
+                $groupCollection->addFilterToStatus($phase['processStatus']);
+                $groupCollection->addFilterToTransactionUid($this->uidProcessor->uid());
 
                 $groupCollection->setPageSize(self::PAGE_SIZE);
 
-                for ($i = 1; true; $i++) {
-                    $groupCollection->setPageSize($i);
+                $lastPageNumber = $groupCollection->getLastPageNumber();
+                for ($i = 1; $i <= $lastPageNumber; $i++) {
                     $groupCollection->clear();
-
-                    $groupCollection->updateAllStatus($phase['processStatus']);
-                    if (0 === $groupCollection->count()) {
-                        break;
-                    }
+                    $groupCollection->setCurPage($i);
 
                     $group->messageDebug(
-                        'Start entity "%s" synchronize for website %s',
+                        'Start job "%s", phase "%s" for website %s',
                         $group->code(),
+                        $phase['phaseName'],
                         $websiteId
                     );
 
                     try {
+                        $groupCollection->each('incSyncAttempt');
                         $group->synchronize($groupCollection->getItems());
                     } catch (\Exception $e) {
-                        foreach ($groupCollection as $queue) {
-                            $queue->addData([
-                                'status' => Model\Queue::STATUS_ERROR,
-                                'message' => $e->getMessage()
-                            ]);
-                        }
+                        $groupCollection->each('addData', [[
+                            'status' => Model\Queue::STATUS_ERROR,
+                            'message' => $e->getMessage()
+                        ]]);
 
                         $group->messageError($e);
                     }
 
                     $group->messageDebug(
-                        'Stop entity "%s" synchronize for website %s',
+                        'Stop job "%s", phase "%s" for website %s',
                         $group->code(),
+                        $phase['phaseName'],
                         $websiteId
                     );
 
                     // Save change status
-                    foreach ($groupCollection as $queue) {
-                        $groupCollection->getResource()->save($queue);
-                    }
+                    $groupCollection->each([$groupCollection->getResource(), 'save']);
 
                     gc_collect_cycles();
                 }

@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert;
 
 use TNW\Salesforce\Synchronize\Transport;
 
+/**
+ * Soap Upsert Storage
+ */
 class Storage
 {
     /**
@@ -11,6 +14,8 @@ class Storage
     private $results = [];
 
     /**
+     * Save Result
+     *
      * @param object $entity
      * @param \Tnw\SoapClient\Result\UpsertResult $result
      */
@@ -20,6 +25,8 @@ class Storage
     }
 
     /**
+     * Search Result
+     *
      * @param object $entity
      * @return \Tnw\SoapClient\Result\UpsertResult
      */

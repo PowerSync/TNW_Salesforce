@@ -9,34 +9,6 @@ use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 class Collection extends AbstractCollection
 {
     /**
-     * @var \TNW\Salesforce\Model\Logger\Processor\UidProcessor
-     */
-    private $uidProcessor;
-
-    /**
-     * Collection constructor.
-     * @param \Magento\Framework\Data\Collection\EntityFactoryInterface $entityFactory
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Framework\Data\Collection\Db\FetchStrategyInterface $fetchStrategy
-     * @param \Magento\Framework\Event\ManagerInterface $eventManager
-     * @param \TNW\Salesforce\Model\Logger\Processor\UidProcessor $uidProcessor
-     * @param \Magento\Framework\DB\Adapter\AdapterInterface|null $connection
-     * @param \Magento\Framework\Model\ResourceModel\Db\AbstractDb|null $resource
-     */
-    public function __construct(
-        \Magento\Framework\Data\Collection\EntityFactoryInterface $entityFactory,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\Data\Collection\Db\FetchStrategyInterface $fetchStrategy,
-        \Magento\Framework\Event\ManagerInterface $eventManager,
-        \TNW\Salesforce\Model\Logger\Processor\UidProcessor $uidProcessor,
-        \Magento\Framework\DB\Adapter\AdapterInterface $connection = null,
-        \Magento\Framework\Model\ResourceModel\Db\AbstractDb $resource = null
-    ) {
-        parent::__construct($entityFactory, $logger, $fetchStrategy, $eventManager, $connection, $resource);
-        $this->uidProcessor = $uidProcessor;
-    }
-
-    /**
      * Resource initialization
      *
      * @return void
@@ -80,17 +52,29 @@ class Collection extends AbstractCollection
     }
 
     /**
-     * Add Filter To Current Uid
+     * Add Filter To Transaction Uid
      *
+     * @param string $uid
      * @return Collection
      */
-    public function addFilterToCurrentUid()
+    public function addFilterToTransactionUid($uid)
+    {
+        return $this->addFieldToFilter('main_table.transaction_uid', $uid);
+    }
+
+    /**
+     * Add Filter To Not Transaction Uid
+     *
+     * @param string $uid
+     * @return Collection
+     */
+    public function addFilterToNotTransactionUid($uid)
     {
         return $this->addFieldToFilter([
             'main_table.transaction_uid',
             'main_table.transaction_uid',
         ], [
-            ['neq' => $this->uidProcessor->uid()],
+            ['neq' => $uid],
             ['null' => true],
         ]);
     }
@@ -185,38 +169,30 @@ class Collection extends AbstractCollection
     }
 
     /**
-     * Set All Status
+     * Update Lock
      *
-     * @param string $status
-     * @return Collection
+     * @param array $data
+     * @return int
      * @throws \Exception
      */
-    public function updateAllStatus($status)
+    public function updateLock(array $data)
     {
         $this->_conn->beginTransaction();
         try {
             $this->_select->forUpdate();
-            $queueIds = $this->walk('getId');
+            $queueIds = $this->getAllIds();
             $this->_select->forUpdate(false);
 
             if (!empty($queueIds)) {
                 $this->_conn->update(
                     $this->getMainTable(),
-                    [
-                        'status' => $status,
-                        'sync_attempt' => new \Zend_Db_Expr('sync_attempt + 1'),
-                        'transaction_uid' => $this->uidProcessor->uid()
-                    ],
+                    $data,
                     $this->_conn->prepareSqlCondition('queue_id', ['in' => $queueIds])
                 );
 
                 /** @var \TNW\Salesforce\Model\Queue $queue */
                 foreach ($this as $queue) {
-                    $queue->addData([
-                        'status' => $status,
-                        'sync_attempt' => $queue->getSyncAttempt() + 1,
-                        'transaction_uid' => $this->uidProcessor->uid()
-                    ]);
+                    $queue->addData($data);
                 }
             }
 
@@ -226,7 +202,7 @@ class Collection extends AbstractCollection
             throw $e;
         }
 
-        return $this;
+        return count($queueIds);
     }
 
     /**

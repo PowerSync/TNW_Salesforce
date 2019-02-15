@@ -375,6 +375,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 $setup->getIdxName('tnw_salesforce_entity_queue', ['code', 'entity_id', 'entity_load']),
                 ['code', 'entity_id', 'entity_load']
             )
+            ->addIndex(
+                $setup->getIdxName('tnw_salesforce_entity_queue', ['transaction_uid', 'code', 'status', 'website_id']),
+                ['transaction_uid', 'code', 'status', 'website_id']
+            )
             ->addForeignKey(
                 $setup->getFkName('tnw_salesforce_entity_queue', 'website_id', 'store_website', 'website_id'),
                 'website_id',
