@@ -265,14 +265,15 @@ class Unit
      *
      * @param string $loadBy
      * @param int $entityId
+     * @param array $identifiers
      * @param array $additionalLoad
      * @return \TNW\Salesforce\Model\Queue
      */
-    public function create($loadBy, $entityId, array $additionalLoad = [])
+    public function create($loadBy, $entityId, array $identifiers, array $additionalLoad = [])
     {
         return $this->queueFactory->create(['data' => [
             'code' => $this->code,
-            'description' => $this->description,
+            'description' => $this->description($identifiers),
             'entity_type' => $this->entityType,
             'entity_id' => $entityId,
             'entity_load' => $loadBy,
@@ -280,6 +281,23 @@ class Unit
             'object_type' => $this->objectType,
             'status' => 'new'
         ]]);
+    }
+
+    /**
+     * Prepare Description
+     *
+     * @param array $identifiers
+     * @return string
+     */
+    public function description(array $identifiers)
+    {
+        $search = $replace = [];
+        foreach ($identifiers as $key => $identifier) {
+            $search[] = "{{identifier|$key}}";
+            $replace[] = $identifier;
+        }
+
+        return str_replace($search, $replace, $this->description);
     }
 
     /**
