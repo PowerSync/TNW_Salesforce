@@ -16,8 +16,12 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     const STATUS_SKIPPED = 'skipped';
     const STATUS_WAITING_UPSERT = 'waiting_upsert';
     const STATUS_WAITING_LOOKUP = 'waiting_lookup';
+    const STATUS_ERROR_INPUT_UPSERT = 'error_upsert_input';
+    const STATUS_ERROR_INPUT_LOOKUP = 'error_lookup_input';
     const STATUS_PROCESS_INPUT_UPSERT = 'process_upsert_input';
     const STATUS_PROCESS_INPUT_LOOKUP = 'process_lookup_input';
+    const STATUS_ERROR_OUTPUT_UPSERT = 'error_output_upsert';
+    const STATUS_ERROR_OUTPUT_LOOKUP = 'error_output_lookup';
     const STATUS_PROCESS_OUTPUT_UPSERT = 'process_output_upsert';
     const STATUS_PROCESS_OUTPUT_LOOKUP = 'process_output_lookup';
 
@@ -178,7 +182,13 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      */
     public function isError()
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_ERROR) === 0;
+        return in_array($this->_getData('status'), [
+            self::STATUS_ERROR,
+            self::STATUS_ERROR_INPUT_UPSERT,
+            self::STATUS_ERROR_INPUT_LOOKUP,
+            self::STATUS_ERROR_OUTPUT_UPSERT,
+            self::STATUS_ERROR_OUTPUT_LOOKUP,
+        ], true);
     }
 
     /**

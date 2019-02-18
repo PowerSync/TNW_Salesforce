@@ -9,6 +9,31 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
     const CREATE_BY = 'customer';
 
     /**
+     * @var \Magento\Customer\Model\ResourceModel\Customer
+     */
+    private $resourceCustomer;
+
+    /**
+     * CreateByCustomer constructor.
+     * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+     */
+    public function __construct(
+        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+    ) {
+        $this->resourceCustomer = $resourceCustomer;
+    }
+
+    /**
+     * Create By
+     *
+     * @return string
+     */
+    public function createBy()
+    {
+        return self::CREATE_BY;
+    }
+
+    /**
      * Process
      *
      * @param int $entityId
@@ -19,14 +44,30 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
      */
     public function process($entityId, array $additional, callable $create, $websiteId)
     {
-        return [$create('customer', $entityId)];
+        $queues = [];
+        foreach ($this->entities($entityId) as $entity) {
+            $queues[] = $create('customer', $entity['entity_id'], ['customer' => $entity['email']]);
+        }
+
+        return $queues;
     }
 
     /**
-     * @return string
+     * Entities
+     *
+     * @param int $entityId
+     * @return array
      */
-    public function createBy()
+    public function entities($entityId)
     {
-        return self::CREATE_BY;
+        $connection = $this->resourceCustomer->getConnection();
+        $select = $connection->select()
+            ->from($this->resourceCustomer->getEntityTable(), [
+                'entity_id' => $this->resourceCustomer->getEntityIdField(),
+                'email'
+            ])
+            ->where("{$this->resourceCustomer->getEntityIdField()} = ?", $entityId);
+
+        return $connection->fetchAll($select);
     }
 }

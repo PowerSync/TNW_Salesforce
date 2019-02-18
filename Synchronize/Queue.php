@@ -111,7 +111,7 @@ class Queue
                         $group->synchronize($groupCollection->getItems());
                     } catch (\Exception $e) {
                         $groupCollection->each('addData', [[
-                            'status' => Model\Queue::STATUS_ERROR,
+                            'status' => $phase['errorStatus'],
                             'message' => $e->getMessage()
                         ]]);
 

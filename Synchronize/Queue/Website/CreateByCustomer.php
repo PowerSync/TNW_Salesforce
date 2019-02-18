@@ -24,6 +24,16 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
     }
 
     /**
+     * Create By
+     *
+     * @return string
+     */
+    public function createBy()
+    {
+        return self::CREATE_BY;
+    }
+
+    /**
      * Process
      *
      * @param int $entityId
@@ -34,21 +44,27 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
      */
     public function process($entityId, array $additional, callable $create, $websiteId)
     {
-        $customerWebsiteId = $this->resourceCustomer->getWebsiteId($entityId);
-        if (empty($customerWebsiteId)) {
-            return [];
+        $queues = [];
+        foreach ($this->entities($entityId) as $entity) {
+            $queues[] = $create('website', $entity['website_id'], ['website' => $entity['email']]);
         }
 
-        return [$create('website', $customerWebsiteId)];
+        return $queues;
     }
 
     /**
-     * Create By
+     * Entities
      *
-     * @return string
+     * @param int $entityId
+     * @return array
      */
-    public function createBy()
+    public function entities($entityId)
     {
-        return self::CREATE_BY;
+        $connection = $this->resourceCustomer->getConnection();
+        $select = $connection->select()
+            ->from($this->resourceCustomer->getEntityTable(), ['website_id', 'email'])
+            ->where("{$this->resourceCustomer->getEntityIdField()} = ?", $entityId);
+
+        return $connection->fetchAll($select);
     }
 }
