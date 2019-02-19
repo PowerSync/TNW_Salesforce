@@ -36,15 +36,14 @@ class Check extends Synchronize\Unit\Check
     public function __construct(
         $name,
         $load,
-        array $upsert,
+        array $process,
         Synchronize\Units $units,
         Synchronize\Group $group,
         \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject,
         \Magento\Framework\Indexer\IndexerRegistry $indexerRegistry,
-        array $process = [],
         array $dependents = []
     ) {
-        parent::__construct($name, $upsert, $units, $group, $process, $dependents);
+        parent::__construct($name, $process, $units, $group, $dependents);
         $this->indexerRegistry = $indexerRegistry;
         $this->load = $load;
         $this->entityObject = $entityObject;
