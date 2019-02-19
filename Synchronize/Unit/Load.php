@@ -130,7 +130,8 @@ class Load extends Synchronize\Unit\UnitAbstract
     public function loadEntity($queue)
     {
         return $this->loaderBy($queue->getEntityLoad())
-            ->load($queue->getEntityId(), $queue->getEntityLoadAdditional());
+            ->load($queue->getEntityId(), $queue->getEntityLoadAdditional())
+            ->setData('config_website', $queue->getWebsiteId());
     }
 
     /**

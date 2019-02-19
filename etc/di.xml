@@ -32,17 +32,11 @@
         </arguments>
     </virtualType>
 
-    <virtualType name="TNW\Hash\Customer\BusinessAccount" type="TNW\Salesforce\Synchronize\Unit\Customer\Hash">
-        <arguments>
-            <argument name="fieldSalesforceId" xsi:type="string">sforce_account_id</argument>
-        </arguments>
-    </virtualType>
-
     <virtualType name="TNW\Unit\Customer\BusinessAccount\Load" type="TNW\Salesforce\Synchronize\Unit\Load">
         <arguments>
             <argument name="name" xsi:type="string">customerLoad</argument>
             <argument name="magentoType" xsi:type="string">customer</argument>
-            <argument name="hash" xsi:type="object">TNW\Hash\Customer\BusinessAccount</argument>
+            <argument name="hash" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Hash</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
             <argument name="loaders" xsi:type="array">
@@ -173,17 +167,11 @@
         </arguments>
     </virtualType>
 
-    <virtualType name="TNW\Hash\Customer\Contact" type="TNW\Salesforce\Synchronize\Unit\Customer\Hash">
-        <arguments>
-            <argument name="fieldSalesforceId" xsi:type="string">sforce_id</argument>
-        </arguments>
-    </virtualType>
-
     <virtualType name="TNW\Unit\Customer\Contact\Load" type="TNW\Salesforce\Synchronize\Unit\Load">
         <arguments>
             <argument name="name" xsi:type="string">customerLoad</argument>
             <argument name="magentoType" xsi:type="string">customer</argument>
-            <argument name="hash" xsi:type="object">TNW\Hash\Customer\Contact</argument>
+            <argument name="hash" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Hash</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
             <argument name="loaders" xsi:type="array">

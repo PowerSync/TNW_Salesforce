@@ -67,9 +67,9 @@ class Input implements Transport\Calls\Upsert\InputInterface
                     }
 
                     $upsertIds[spl_object_hash($entity)] = $data['Id'];
-                    $duplicates[spl_object_hash($entity)] = [];
                 }
 
+                $duplicates[spl_object_hash($entity)] = [];
                 $batch[] = (object)$data;
                 $entities[] = $entity;
             }

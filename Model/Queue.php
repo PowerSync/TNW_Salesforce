@@ -192,6 +192,19 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
+     * Is Success
+     *
+     * @return bool
+     */
+    public function isSuccess()
+    {
+        return in_array($this->_getData('status'), [
+            self::STATUS_SKIPPED,
+            self::STATUS_COMPLETE
+        ], true);
+    }
+
+    /**
      * Is Error
      *
      * @return bool
