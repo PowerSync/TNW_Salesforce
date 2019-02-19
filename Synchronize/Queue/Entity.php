@@ -147,7 +147,7 @@ class Entity
         try {
             $this->synchronizeQueue->synchronize($collection, $websiteId);
         } finally {
-            if (!in_array(true, $collection->walk('isError'), true)) {
+            if (!in_array(false, $collection->walk('isSuccess'), true)) {
                 $this->messageManager->addSuccessMessage('All records were added to the synchronization queue');
             }
 
