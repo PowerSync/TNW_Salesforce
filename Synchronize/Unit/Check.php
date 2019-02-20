@@ -5,10 +5,6 @@ use TNW\Salesforce\Synchronize;
 
 class Check extends Synchronize\Unit\UnitAbstract
 {
-    /**
-     * @var array
-     */
-    private $upsert;
 
     /**
      * @var array
@@ -17,14 +13,12 @@ class Check extends Synchronize\Unit\UnitAbstract
 
     public function __construct(
         $name,
-        array $upsert,
+        array $process,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        array $process = [],
         array $dependents = []
     ) {
-        parent::__construct($name, $units, $group, array_merge($upsert, $dependents));
-        $this->upsert = array_filter($upsert);
+        parent::__construct($name, $units, $group, array_merge($process, $dependents));
         $this->process = array_filter($process);
     }
 
@@ -41,31 +35,8 @@ class Check extends Synchronize\Unit\UnitAbstract
      */
     public function process()
     {
-        foreach ($this->upsert as $upsertName) {
-            $upsert = $this->unit($upsertName);
-            if (!$upsert instanceof Synchronize\Unit\CheckInterface) {
-                continue;
-            }
-
-            if (!$upsert->isComplete()) {
-                throw new \RuntimeException(__('Unit "%1" not complete', $this->name()));
-            }
-
-            foreach ($upsert->load()->get('entities') as $entity) {
-                $parentEntity = $this->findParentEntity($upsert->load(), $entity);
-                if (empty($parentEntity)) {
-                    continue;
-                }
-
-                $this->cache[$parentEntity]['message'][] = $upsert->get('%s/message', $entity);
-            }
-        }
-
         foreach ($this->process as $processName) {
             $process = $this->unit($processName);
-            if (!$process instanceof Synchronize\Unit\ProcessingAbstract) {
-                continue;
-            }
 
             if (!$process->isComplete()) {
                 throw new \RuntimeException(__('Unit "%1" not complete', $this->name()));
@@ -77,11 +48,11 @@ class Check extends Synchronize\Unit\UnitAbstract
                     continue;
                 }
 
-                if (!$process->skipped($parentEntity)) {
-                    continue;
+                if ($process->skipped($parentEntity)) {
+                    $this->cache[$parentEntity]['skipped'] = $process->get('message/%s', $parentEntity);
+                } else {
+                    $this->cache[$parentEntity]['message'][] = $process->get('%s/message', $entity);
                 }
-
-                $this->cache[$parentEntity]['skipped'] = $process->get('message/%s', $parentEntity);
             }
         }
 
