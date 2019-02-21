@@ -22,6 +22,23 @@
     <preference for="TNW\Salesforce\Synchronize\Transport\Calls\Upsert\InputInterface" type="TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert\Input" />
     <preference for="TNW\Salesforce\Synchronize\Transport\Calls\Upsert\OutputInterface" type="TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert\Output" />
 
+    <!-- Salesforce Id Storage -->
+    <virtualType name="TNW\Salesforce\Model\Entity\Object\Website" type="TNW\Salesforce\Model\Entity\SalesforceIdStorage">
+        <arguments>
+            <argument name="magentoType" xsi:type="string">Website</argument>
+            <argument name="mappingAttribute" xsi:type="array">
+                <item name="salesforce_id" xsi:type="string">tnw_mage_basic__Magento_Website__c</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Mapping Loader -->
+    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website">
+        <arguments>
+            <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Website</argument>
+        </arguments>
+    </type>
+
     <virtualType name="TNW\Salesforce\Model\Entity\Object\Customer" type="TNW\Salesforce\Model\Entity\SalesforceIdStorage">
         <arguments>
             <argument name="magentoType" xsi:type="string">Customer</argument>
@@ -40,7 +57,7 @@
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
             <argument name="loaders" xsi:type="array">
-                <item name="byCustomer" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Loader\ByCustomer</item>
+                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader\Customer</item>
             </argument>
         </arguments>
     </virtualType>
@@ -175,7 +192,7 @@
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
             <argument name="loaders" xsi:type="array">
-                <item name="byCustomer" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Loader\ByCustomer</item>
+                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader\Customer</item>
             </argument>
         </arguments>
     </virtualType>
@@ -206,6 +223,9 @@
             <argument name="lookup" xsi:type="string">customerContactLookup</argument>
             <argument name="objectType" xsi:type="string">Contact</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
+            <argument name="entityLoaders" xsi:type="array">
+                <item name="website" xsi:type="object" shared="false">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website</item>
+            </argument>
             <argument name="dependents" xsi:type="array">
                 <item name="processUpsertInput" xsi:type="string">customerContactProcessingUpsertInput</item>
             </argument>
@@ -275,15 +295,6 @@
                 <item name="upsertOutput" xsi:type="string">TNW\Unit\Customer\Contact\UpsertOutput</item>
                 <item name="save" xsi:type="string">TNW\Customer\Contact\Save</item>
                 <item name="status" xsi:type="string">TNW\Unit\Customer\Contact\Status</item>
-            </argument>
-        </arguments>
-    </virtualType>
-
-    <virtualType name="TNW\Salesforce\Model\Entity\Object\Website" type="TNW\Salesforce\Model\Entity\SalesforceIdStorage">
-        <arguments>
-            <argument name="magentoType" xsi:type="string">Website</argument>
-            <argument name="mappingAttribute" xsi:type="array">
-                <item name="salesforce_id" xsi:type="string">tnw_mage_basic__Magento_Website__c</item>
             </argument>
         </arguments>
     </virtualType>

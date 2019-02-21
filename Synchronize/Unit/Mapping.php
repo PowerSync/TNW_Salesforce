@@ -1,5 +1,4 @@
 <?php
-
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
@@ -8,7 +7,7 @@ use TNW\Salesforce\Model;
 /**
  * Mapping Abstract
  */
-abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
+class Mapping extends Synchronize\Unit\UnitAbstract
 {
     const PARENT_ENTITY = '__parent_entity';
 
@@ -38,6 +37,11 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
     protected $identification;
 
     /**
+     * @var MappingLoaderAbstract[]
+     */
+    private $entityTypeLoaders;
+
+    /**
      * MappingAbstract constructor.
      *
      * @param string $name
@@ -49,6 +53,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
      * @param IdentificationInterface $identification
      * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
      * @param array $dependents
+     * @param MappingLoaderAbstract[] $entityLoaders
      */
     public function __construct(
         $name,
@@ -59,11 +64,13 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
-        array $dependents = []
+        array $dependents = [],
+        array $entityLoaders = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $lookup]));
         $this->load = $load;
         $this->objectType = $objectType;
+        $this->entityTypeLoaders = $entityLoaders;
         $this->identification = $identification;
         $this->mapperCollectionFactory = $mapperCollectionFactory;
         $this->lookup = $lookup;
@@ -116,6 +123,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
      *
      * @throws \OutOfBoundsException
      * @throws \InvalidArgumentException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function process()
     {
@@ -162,6 +170,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
      * @param Model\ResourceModel\Mapper\Collection $mappers
      * @return array
      * @throws \OutOfBoundsException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function generateObject($entity, Model\ResourceModel\Mapper\Collection $mappers)
     {
@@ -190,6 +199,7 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param Model\Mapper $mapper
      * @return mixed|null
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function value($entity, $mapper)
     {
@@ -277,9 +287,18 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
      *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $magentoEntityType
-     * @return mixed
+     * @return \Magento\Framework\Model\AbstractModel
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    abstract protected function objectByEntityType($entity, $magentoEntityType);
+    protected function objectByEntityType($entity, $magentoEntityType)
+    {
+        if (empty($this->entityTypeLoaders[$magentoEntityType])) {
+            $this->group()->messageDebug('Undefined magento entity type %s', $magentoEntityType);
+            return null;
+        }
+
+        return $this->entityTypeLoaders[$magentoEntityType]->get($entity);
+    }
 
     /**
      * Prepare Value
@@ -308,7 +327,6 @@ abstract class MappingAbstract extends Synchronize\Unit\UnitAbstract
 
                     break 2;
                 }
-
                 return implode('\n', $value);
         }
 

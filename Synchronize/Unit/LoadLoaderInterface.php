@@ -1,7 +1,7 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
-interface LoaderInterface
+interface LoadLoaderInterface
 {
     /**
      * Load Type
