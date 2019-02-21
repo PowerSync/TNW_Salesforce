@@ -7,7 +7,7 @@ use TNW\Salesforce\Model;
 /**
  * Mapping
  */
-class Mapping extends Synchronize\Unit\MappingAbstract
+class Mapping extends Synchronize\Unit\Mapping
 {
     /**
      * Object By Entity Type
@@ -15,16 +15,15 @@ class Mapping extends Synchronize\Unit\MappingAbstract
      * @param \Magento\Store\Model\Website $entity
      * @param string $magentoEntityType
      * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function objectByEntityType($entity, $magentoEntityType)
     {
-        switch ($magentoEntityType) {
-            case 'website':
-                return $entity;
-
-            default:
-                return null;
+        if ($magentoEntityType === 'website') {
+            return $entity;
         }
+
+        return parent::objectByEntityType($entity, $magentoEntityType);
     }
 
     /**
@@ -37,7 +36,7 @@ class Mapping extends Synchronize\Unit\MappingAbstract
     public function prepareValue($entity, $attributeCode)
     {
         if ($entity instanceof \Magento\Store\Model\Website && strcasecmp($attributeCode, 'sforce_id') === 0) {
-            return $this->unit('websiteWebsiteLookup')->get('%s/record/Id', $entity);
+            return $this->lookup()->get('%s/record/Id', $entity);
         }
 
         return parent::prepareValue($entity, $attributeCode);

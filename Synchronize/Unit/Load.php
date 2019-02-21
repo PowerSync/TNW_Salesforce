@@ -20,7 +20,7 @@ class Load extends Synchronize\Unit\UnitAbstract
     protected $queues;
 
     /**
-     * @var LoaderInterface[]
+     * @var LoadLoaderInterface[]
      */
     private $loaders;
 
@@ -44,7 +44,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @param string $name
      * @param string $magentoType
      * @param \TNW\Salesforce\Model\Queue[] $queues
-     * @param LoaderInterface[] $loaders
+     * @param LoadLoaderInterface[] $loaders
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
@@ -138,7 +138,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * Loader By
      *
      * @param string $type
-     * @return LoaderInterface
+     * @return LoadLoaderInterface
      * @throws LocalizedException
      */
     public function loaderBy($type)

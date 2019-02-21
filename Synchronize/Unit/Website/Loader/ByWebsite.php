@@ -6,7 +6,7 @@ use Magento\Store;
 /**
  * Load By Website
  */
-class ByWebsite implements \TNW\Salesforce\Synchronize\Unit\LoaderInterface
+class ByWebsite implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
 {
     const LOAD_BY = 'website';
 

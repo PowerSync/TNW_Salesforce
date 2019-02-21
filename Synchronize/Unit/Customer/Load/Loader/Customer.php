@@ -1,17 +1,15 @@
 <?php
-namespace TNW\Salesforce\Synchronize\Unit\Customer\Loader;
-
-use Magento\Customer;
+namespace TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader;
 
 /**
  * Load By Customer
  */
-class ByCustomer implements \TNW\Salesforce\Synchronize\Unit\LoaderInterface
+class Customer implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
 {
     const LOAD_BY = 'customer';
 
     /**
-     * @var Customer\Model\CustomerFactory
+     * @var \Magento\Customer\Model\CustomerFactory
      */
     private $customerFactory;
 
@@ -22,12 +20,12 @@ class ByCustomer implements \TNW\Salesforce\Synchronize\Unit\LoaderInterface
 
     /**
      * ByCustomer constructor.
-     * @param Customer\Model\CustomerFactory $customerFactory
-     * @param Customer\Model\ResourceModel\Customer $resourceCustomer
+     * @param \Magento\Customer\Model\CustomerFactory $customerFactory
+     * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
      */
     public function __construct(
-        Customer\Model\CustomerFactory $customerFactory,
-        Customer\Model\ResourceModel\Customer $resourceCustomer
+        \Magento\Customer\Model\CustomerFactory $customerFactory,
+        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
     ) {
         $this->customerFactory = $customerFactory;
         $this->resourceCustomer = $resourceCustomer;

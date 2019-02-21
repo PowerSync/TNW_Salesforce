@@ -8,7 +8,7 @@ use TNW\Salesforce\Model;
 /**
  * Customer Account Mapping
  */
-class Mapping extends Synchronize\Unit\MappingAbstract
+class Mapping extends Synchronize\Unit\Mapping
 {
     /**
      * @var \TNW\SForceBusiness\Model\Customer\Config
@@ -62,6 +62,7 @@ class Mapping extends Synchronize\Unit\MappingAbstract
      * @param \Magento\Customer\Model\Customer $entity
      * @param string $magentoEntityType
      * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function objectByEntityType($entity, $magentoEntityType)
     {
@@ -76,7 +77,7 @@ class Mapping extends Synchronize\Unit\MappingAbstract
                 return $entity->getDefaultBillingAddress();
 
             default:
-                return null;
+                return parent::objectByEntityType($entity, $magentoEntityType);
         }
     }
 

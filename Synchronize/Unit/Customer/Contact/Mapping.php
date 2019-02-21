@@ -8,22 +8,12 @@ use TNW\Salesforce\Model;
 /**
  * Customer Contact Mapping
  */
-class Mapping extends Synchronize\Unit\MappingAbstract
+class Mapping extends Synchronize\Unit\Mapping
 {
     /**
      * @var \TNW\SForceBusiness\Model\Customer\Config
      */
     private $customerConfig;
-
-    /**
-     * @var \Magento\Store\Model\StoreManager
-     */
-    private $storeManager;
-
-    /**
-     * @var Model\ResourceModel\Objects
-     */
-    private $resourceObjects;
 
     /**
      * Mapping constructor.
@@ -32,13 +22,12 @@ class Mapping extends Synchronize\Unit\MappingAbstract
      * @param string $load
      * @param string $lookup
      * @param string $objectType
+     * @param array $entityLoaders
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
      * @param Model\Customer\Config $customerConfig
-     * @param \Magento\Store\Model\StoreManager $storeManager
-     * @param Model\ResourceModel\Objects $resourceObjects
      * @param array $dependents
      */
     public function __construct(
@@ -46,13 +35,12 @@ class Mapping extends Synchronize\Unit\MappingAbstract
         $load,
         $lookup,
         $objectType,
+        array $entityLoaders,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
         Model\Customer\Config $customerConfig,
-        \Magento\Store\Model\StoreManager $storeManager,
-        Model\ResourceModel\Objects $resourceObjects,
         array $dependents = []
     ) {
         parent::__construct(
@@ -64,12 +52,11 @@ class Mapping extends Synchronize\Unit\MappingAbstract
             $group,
             $identification,
             $mapperCollectionFactory,
-            $dependents
+            $dependents,
+            $entityLoaders
         );
 
         $this->customerConfig = $customerConfig;
-        $this->storeManager = $storeManager;
-        $this->resourceObjects = $resourceObjects;
     }
 
     /**
@@ -78,6 +65,7 @@ class Mapping extends Synchronize\Unit\MappingAbstract
      * @param \Magento\Customer\Model\Customer $entity
      * @param string $magentoEntityType
      * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function objectByEntityType($entity, $magentoEntityType)
     {
@@ -92,7 +80,7 @@ class Mapping extends Synchronize\Unit\MappingAbstract
                 return $entity->getDefaultBillingAddress();
 
             default:
-                return null;
+                return parent::objectByEntityType($entity, $magentoEntityType);
         }
     }
 
@@ -107,12 +95,11 @@ class Mapping extends Synchronize\Unit\MappingAbstract
     public function prepareValue($entity, $attributeCode)
     {
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'sforce_id') === 0) {
-            return $this->units()->get('customerContactLookup')->get('%s/record/Id', $entity);
+            return $this->lookup()->get('%s/record/Id', $entity);
         }
 
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'website_id') === 0) {
-            return $this->resourceObjects
-                ->loadObjectId($entity->getWebsiteId(), 'Website', $this->storeManager->getWebsite()->getId());
+            return $this->objectByEntityType($entity, 'website')->getData('salesforce_id');
         }
 
         return parent::prepareValue($entity, $attributeCode);
