@@ -17,7 +17,7 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
 
     public function __construct(
         $name,
-        $load = '',
+        $load,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
