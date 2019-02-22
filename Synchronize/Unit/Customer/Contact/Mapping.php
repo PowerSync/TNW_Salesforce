@@ -22,7 +22,6 @@ class Mapping extends Synchronize\Unit\Mapping
      * @param string $load
      * @param string $lookup
      * @param string $objectType
-     * @param array $entityLoaders
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
@@ -35,7 +34,6 @@ class Mapping extends Synchronize\Unit\Mapping
         $load,
         $lookup,
         $objectType,
-        array $entityLoaders,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
@@ -52,8 +50,7 @@ class Mapping extends Synchronize\Unit\Mapping
             $group,
             $identification,
             $mapperCollectionFactory,
-            $dependents,
-            $entityLoaders
+            $dependents
         );
 
         $this->customerConfig = $customerConfig;

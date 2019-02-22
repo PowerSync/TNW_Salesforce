@@ -173,13 +173,23 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Load
+     *
+     * @return Load|UnitInterface
+     */
+    public function load()
+    {
+        return $this->unit($this->load);
+    }
+
+    /**
      * Entities
      *
      * @return \Magento\Framework\Model\AbstractModel[]
      */
     public function entities()
     {
-        return array_filter($this->unit($this->load)->get('entities'), [$this, 'filter']);
+        return array_filter($this->load()->get('entities'), [$this, 'filter']);
     }
 
     /**

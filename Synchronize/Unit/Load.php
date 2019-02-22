@@ -40,6 +40,11 @@ class Load extends Synchronize\Unit\UnitAbstract
     private $entityObject;
 
     /**
+     * @var EntityLoaderAbstract[]
+     */
+    private $entityLoaders;
+
+    /**
      * Load constructor.
      * @param string $name
      * @param string $magentoType
@@ -50,6 +55,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Unit\HashInterface $hash
      * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage|null $entityObject
+     * @param EntityLoaderAbstract[] $entityLoaders
      */
     public function __construct(
         $name,
@@ -60,7 +66,8 @@ class Load extends Synchronize\Unit\UnitAbstract
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Unit\HashInterface $hash,
-        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject = null
+        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject = null,
+        array $entityLoaders = []
     ) {
         parent::__construct($name, $units, $group);
         $this->magentoType = $magentoType;
@@ -69,6 +76,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->identification = $identification;
         $this->hash = $hash;
         $this->entityObject = $entityObject;
+        $this->entityLoaders = $entityLoaders;
     }
 
     /**
@@ -121,6 +129,29 @@ class Load extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Object By Entity Type
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param string $entityType
+     * @return \Magento\Framework\Model\AbstractModel|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function entityByType($entity, $entityType)
+    {
+        if (empty($this->entityLoaders[$entityType])) {
+            $this->group()->messageDebug('Undefined magento entity type %s', $entityType);
+            return null;
+        }
+
+        if (empty($this->cache[$entity]['entities'][$entityType])) {
+            $this->cache[$entity]['entities'][$entityType]
+                = $this->entityLoaders[$entityType]->get($entity);
+        }
+
+        return $this->cache[$entity]['entities'][$entityType];
+    }
+
+    /**
      * Load Entity
      *
      * @param \TNW\Salesforce\Model\Queue $queue
@@ -141,7 +172,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @return LoadLoaderInterface
      * @throws LocalizedException
      */
-    public function loaderBy($type)
+    private function loaderBy($type)
     {
         foreach ($this->loaders as $loader) {
             if (strcasecmp($loader->loadBy(), $type) !== 0) {
