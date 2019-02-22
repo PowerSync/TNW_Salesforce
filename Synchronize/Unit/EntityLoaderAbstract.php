@@ -4,13 +4,8 @@ namespace TNW\Salesforce\Synchronize\Unit;
 /**
  * Mapping Entity Loader
  */
-abstract class MappingLoaderAbstract
+abstract class EntityLoaderAbstract
 {
-    /**
-     * @var \Magento\Framework\Model\AbstractModel[]
-     */
-    private $cache = [];
-
     /**
      * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage
      */
@@ -35,17 +30,12 @@ abstract class MappingLoaderAbstract
      */
     public function get($entity)
     {
-        if (empty($this->cache[spl_object_hash($entity)])) {
-            $subEntity = $this->load($entity);
-
-            if (null !== $this->salesforceIdStorage && null !== $subEntity->getId()) {
-                $this->salesforceIdStorage->load($subEntity, $entity->getData('config_website'));
-            }
-
-            $this->cache[spl_object_hash($entity)] = $subEntity;
+        $subEntity = $this->load($entity);
+        if (null !== $this->salesforceIdStorage && null !== $subEntity->getId()) {
+            $this->salesforceIdStorage->load($subEntity, $entity->getData('config_website'));
         }
 
-        return $this->cache[spl_object_hash($entity)];
+        return $subEntity;
     }
 
     /**

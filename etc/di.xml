@@ -56,6 +56,9 @@
             <argument name="hash" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Hash</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
+            <argument name="entityLoaders" xsi:type="array">
+                <item name="website" xsi:type="object" shared="false">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website</item>
+            </argument>
             <argument name="loaders" xsi:type="array">
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader\Customer</item>
             </argument>
@@ -191,6 +194,9 @@
             <argument name="hash" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Hash</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
+            <argument name="entityLoaders" xsi:type="array">
+                <item name="website" xsi:type="object" shared="false">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website</item>
+            </argument>
             <argument name="loaders" xsi:type="array">
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader\Customer</item>
             </argument>
@@ -223,9 +229,6 @@
             <argument name="lookup" xsi:type="string">customerContactLookup</argument>
             <argument name="objectType" xsi:type="string">Contact</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
-            <argument name="entityLoaders" xsi:type="array">
-                <item name="website" xsi:type="object" shared="false">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website</item>
-            </argument>
             <argument name="dependents" xsi:type="array">
                 <item name="processUpsertInput" xsi:type="string">customerContactProcessingUpsertInput</item>
             </argument>
@@ -307,7 +310,7 @@
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Website</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
             <argument name="loaders" xsi:type="array">
-                <item name="byWebsite" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Loader\ByWebsite</item>
+                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Loader\ByWebsite</item>
             </argument>
         </arguments>
     </virtualType>

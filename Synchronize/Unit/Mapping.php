@@ -37,11 +37,6 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     protected $identification;
 
     /**
-     * @var MappingLoaderAbstract[]
-     */
-    private $entityTypeLoaders;
-
-    /**
      * MappingAbstract constructor.
      *
      * @param string $name
@@ -53,7 +48,6 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @param IdentificationInterface $identification
      * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
      * @param array $dependents
-     * @param MappingLoaderAbstract[] $entityLoaders
      */
     public function __construct(
         $name,
@@ -64,13 +58,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
-        array $dependents = [],
-        array $entityLoaders = []
+        array $dependents = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $lookup]));
         $this->load = $load;
         $this->objectType = $objectType;
-        $this->entityTypeLoaders = $entityLoaders;
         $this->identification = $identification;
         $this->mapperCollectionFactory = $mapperCollectionFactory;
         $this->lookup = $lookup;
@@ -292,12 +284,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     protected function objectByEntityType($entity, $magentoEntityType)
     {
-        if (empty($this->entityTypeLoaders[$magentoEntityType])) {
-            $this->group()->messageDebug('Undefined magento entity type %s', $magentoEntityType);
-            return null;
-        }
-
-        return $this->entityTypeLoaders[$magentoEntityType]->get($entity);
+        return $this->load()->entityByType($entity, $magentoEntityType);
     }
 
     /**

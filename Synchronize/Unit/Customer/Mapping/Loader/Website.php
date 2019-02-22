@@ -4,7 +4,7 @@ namespace TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader;
 /**
  * Mapping Loader Website
  */
-class Website extends \TNW\Salesforce\Synchronize\Unit\MappingLoaderAbstract
+class Website extends \TNW\Salesforce\Synchronize\Unit\EntityLoaderAbstract
 {
     /**
      * @var \Magento\Store\Model\StoreManager

@@ -17,16 +17,6 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     private $customerConfigShare;
 
     /**
-     * @var \Magento\Store\Model\StoreManager
-     */
-    private $storeManager;
-
-    /**
-     * @var \TNW\Salesforce\Model\ResourceModel\Objects
-     */
-    private $resourceObjects;
-
-    /**
      * Lookup constructor.
      *
      * @param string $name
@@ -38,8 +28,6 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
      * @param Synchronize\Transport\Calls\QueryInterface $process
      * @param \Magento\Customer\Model\Config\Share $customerConfigShare
-     * @param \Magento\Store\Model\StoreManager $storeManager
-     * @param \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects
      * @param array $dependents
      */
     public function __construct(
@@ -52,8 +40,6 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         Synchronize\Transport\Calls\Query\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\QueryInterface $process,
         \Magento\Customer\Model\Config\Share $customerConfigShare,
-        \Magento\Store\Model\StoreManager $storeManager,
-        \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects,
         array $dependents = []
     ) {
         parent::__construct(
@@ -69,8 +55,6 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         );
 
         $this->customerConfigShare = $customerConfigShare;
-        $this->storeManager = $storeManager;
-        $this->resourceObjects = $resourceObjects;
     }
 
     /**
@@ -96,10 +80,8 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         foreach ($this->entities() as $entity) {
             $this->input[$entity]['AND']['EaW']['AND']['Email']['='] = strtolower($entity->getEmail());
             if ($this->customerConfigShare->isWebsiteScope()) {
-                $salesforceId = $this->resourceObjects
-                    ->loadObjectId($entity->getWebsiteId(), 'Website', $this->storeManager->getWebsite()->getId());
-
-                $this->input[$entity]['AND']['EaW']['AND'][$magentoWebsiteField]['IN'] = ['', $salesforceId];
+                $this->input[$entity]['AND']['EaW']['AND'][$magentoWebsiteField]['IN']
+                    = ['', $this->load()->entityByType($entity, 'website')->getData('salesforce_id')];
             }
 
             $magentoId = $entity->getId();
@@ -147,6 +129,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      * @param array $searchIndex
      * @param \Magento\Customer\Model\Customer $entity
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function searchPriorityOrder(array $searchIndex, $entity)
     {
@@ -157,14 +140,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
 
         if (!empty($searchIndex['eaw'])) {
             if ($this->customerConfigShare->isWebsiteScope()) {
-                try {
-                    $websiteId = $this->resourceObjects
-                        ->loadObjectId($entity->getWebsiteId(), 'Website', $this->storeManager->getWebsite()->getId());
-                } catch (\Exception $e) {
-                    $this->group()->messageError($e);
-                    $websiteId = '';
-                }
-
+                $websiteId = $this->load()->entityByType($entity, 'website')->getData('salesforce_id');
                 $recordsIds[20] = array_keys($searchIndex['eaw'], strtolower("{$entity->getEmail()}:{$websiteId}"));
             }
 
