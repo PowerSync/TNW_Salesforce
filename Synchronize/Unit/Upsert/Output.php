@@ -161,8 +161,9 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
         $output = $this->outputFactory->create(['type' => $this->salesforceType()]);
         foreach ($this->entities() as $entity) {
             $output->offsetSet($entity, [
-                'waiting' => true,
-                'message' => __('Waiting response')->render()
+                'success' => false,
+                'created' => false,
+                'message' => __('Processing error')->render()
             ]);
         }
 
@@ -203,7 +204,10 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     protected function processOutput(Synchronize\Transport\Calls\Upsert\Transport\Output $output)
     {
         foreach ($this->entities() as $entity) {
-            if (empty($output[$entity]['waiting']) && empty($output[$entity]['success'])) {
+            if (empty($output[$entity]['skipped']) &&
+                empty($output[$entity]['waiting']) &&
+                empty($output[$entity]['success'])
+            ) {
                 $this->group()->messageError(
                     'Upsert object "%s". Entity: %s. Message: "%s".',
                     $this->salesforceType,

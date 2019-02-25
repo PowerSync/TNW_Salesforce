@@ -66,8 +66,8 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
                 'entity_id' => $this->resourceCustomer->getEntityIdField(),
                 'email'
             ])
-            ->where("{$this->resourceCustomer->getEntityIdField()} = ?", $entityId);
+            ->where("{$this->resourceCustomer->getEntityIdField()} = :customer_id");
 
-        return $connection->fetchAll($select);
+        return $connection->fetchAll($select, ['customer_id' => $entityId]);
     }
 }
