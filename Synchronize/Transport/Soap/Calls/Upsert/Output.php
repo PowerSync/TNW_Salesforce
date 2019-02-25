@@ -41,6 +41,13 @@ class Output implements Transport\Calls\Upsert\OutputInterface
         for ($output->rewind(); $output->valid(); $output->next()) {
             $result = $this->storage->searchResult($output->current());
             if (null === $result) {
+                $output->setInfo([
+                    'skipped' => true,
+                    'success' => false,
+                    'created' => false,
+                    'message' => __('Result not found')->render()
+                ]);
+
                 continue;
             }
 
@@ -48,10 +55,7 @@ class Output implements Transport\Calls\Upsert\OutputInterface
                 'salesforce' => $result->getId(),
                 'success' => $result->isSuccess(),
                 'created' => $result->isCreated(),
-                'message' => implode("\n", array_filter(array_map(
-                    [$this, 'message'],
-                    (array)$result->getErrors()
-                )))
+                'message' => implode("\n", array_filter(array_map([$this, 'message'], (array)$result->getErrors())))
             ]);
         }
 
