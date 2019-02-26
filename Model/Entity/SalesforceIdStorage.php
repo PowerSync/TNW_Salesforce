@@ -54,6 +54,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Load
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
      *
@@ -78,6 +80,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Save
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
      *
@@ -100,6 +104,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Save By Attribute
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $attributeName
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
@@ -113,9 +119,11 @@ class SalesforceIdStorage
     }
 
     /**
+     * Save Value By Attribute
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
-     * @param $value
-     * @param $attributeName
+     * @param string $value
+     * @param string $attributeName
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
      *
      * @throws LocalizedException
@@ -134,6 +142,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Save Status
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param bool $status
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
@@ -152,6 +162,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Value By Attribute
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $attributeName
      *
@@ -163,6 +175,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Object By Attribute
+     *
      * @param string $attributeName
      *
      * @return false|int|string
@@ -178,7 +192,9 @@ class SalesforceIdStorage
     }
 
     /**
-     * @param $website
+     * Prepare Website Id
+     *
+     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
      *
      * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
