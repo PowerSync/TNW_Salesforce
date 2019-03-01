@@ -182,7 +182,7 @@ class Load extends Synchronize\Unit\UnitAbstract
             return $loader;
         }
 
-        throw new LocalizedException(__('Unknown loader'));
+        throw new LocalizedException(__('Unknown loader %1. Unit name %2', $type, $this->name()));
     }
 
     /**
