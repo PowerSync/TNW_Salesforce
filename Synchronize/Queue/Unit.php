@@ -169,78 +169,86 @@ class Unit
         array $loadAdditional,
         $websiteId,
         $syncType,
-        array $cacheQueue = []
+        array &$cacheQueue = []
     ) {
-        $key = sprintf('%s/%s/%s/%s', $loadBy, $entityId, $this->code, serialize($loadAdditional));
-        if (isset($cacheQueue[$key])) {
-            return $cacheQueue[$key];
-        }
-
         $queues = [];
         foreach ($this->generateQueues($loadBy, $entityId, $loadAdditional, [$this, 'create'], $websiteId) as $queue) {
+            $key = sprintf(
+                '%s/%s/%s/%s',
+                $queue->getEntityLoad(),
+                $queue->getEntityId(),
+                $this->code,
+                serialize($queue->getEntityLoadAdditional())
+            );
+
             $queue->setData('website_id', $websiteId);
             $queue->setData('sync_type', $syncType);
 
-            if ($this->skip($queue)) {
-                continue;
-            }
+            switch (true) {
+                case isset($cacheQueue[$key]):
+                    $queue = $cacheQueue[$key];
+                    break;
 
-            $cacheQueue[$key][] = $queue;
+                case $this->skip($queue):
+                    $queue = $cacheQueue[$key] = null;
+                    break;
 
-            $loadBy = $queue->getEntityLoad();
-            $entityId = $queue->getEntityId();
-            $loadAdditional = $queue->getEntityLoadAdditional();
+                default:
+                    // Add cache
+                    $cacheQueue[$key] = $queue;
 
-            // Generate Parents
-            $parents = [];
-            foreach ($this->parents() as $parent) {
-                $parentQueues = $parent->createQueue(
-                    $loadBy,
-                    $entityId,
-                    $loadAdditional,
-                    $websiteId,
-                    $syncType,
-                    $cacheQueue
-                );
+                    // Generate Parents
+                    $parents = [];
+                    foreach ($this->parents() as $parent) {
+                        $parentQueues = $parent->createQueue(
+                            $queue->getEntityLoad(),
+                            $queue->getEntityId(),
+                            $queue->getEntityLoadAdditional(),
+                            $websiteId,
+                            $syncType,
+                            $cacheQueue
+                        );
 
-                if (empty($parentQueues)) {
-                    continue;
-                }
+                        if (empty($parentQueues)) {
+                            continue;
+                        }
 
-                array_push($parents, ...$parentQueues);
-            }
+                        array_push($parents, ...$parentQueues);
+                    }
 
-            $queue->setDependence($parents);
-            $this->resourceQueue->merge($queue);
+                    $queue->setDependence($parents);
+                    $this->resourceQueue->merge($queue);
 
-            // Generate Children
-            $children = [];
-            foreach ($this->children() as $child) {
-                $childQueues = $child->createQueue(
-                    $loadBy,
-                    $entityId,
-                    $loadAdditional,
-                    $websiteId,
-                    $syncType,
-                    $cacheQueue
-                );
+                    // Generate Children
+                    $children = [];
+                    foreach ($this->children() as $child) {
+                        $childQueues = $child->createQueue(
+                            $queue->getEntityLoad(),
+                            $queue->getEntityId(),
+                            $queue->getEntityLoadAdditional(),
+                            $websiteId,
+                            $syncType,
+                            $cacheQueue
+                        );
 
-                if (empty($childQueues)) {
-                    continue;
-                }
+                        if (empty($childQueues)) {
+                            continue;
+                        }
 
-                array_push($children, ...$childQueues);
-            }
+                        array_push($children, ...$childQueues);
+                    }
 
-            foreach ($children as $child) {
-                $child->addDependence($queue);
-                $this->resourceQueue->merge($child);
+                    foreach ($children as $child) {
+                        $child->addDependence($queue);
+                        $this->resourceQueue->merge($child);
+                    }
+                    break;
             }
 
             $queues[] = $queue;
         }
 
-        return $queues;
+        return array_filter($queues);
     }
 
     /**
