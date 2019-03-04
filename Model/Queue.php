@@ -99,6 +99,16 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
+     * Get Additional
+     *
+     * @return array
+     */
+    public function getAdditional()
+    {
+        return (array)$this->_getData('additional_data');
+    }
+
+    /**
      * Get Additional By Code
      *
      * @param string $code
@@ -299,12 +309,54 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      */
     public function dependenceByCode($code)
     {
-        $dependent = clone $this;
-        $dependent->dependence = [];
-        $dependent->_data = [];
+        return $this->loadById($this->_getResource()->dependenceIdByCode($this->getId(), $code));
+    }
 
-        $this->_getResource()->loadByChild($dependent, $code, $this->getId());
-        return $dependent;
+    /**
+     * Dependence By Entity Type
+     *
+     * @param string $entityType
+     * @return Queue[]
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function dependenciesByEntityType($entityType)
+    {
+        return array_map(
+            [$this, 'loadById'],
+            $this->_getResource()->dependenceIdsByEntityType($this->getId(), $entityType)
+        );
+    }
+
+    /**
+     * Dependence By Entity Type
+     *
+     * @param string $entityType
+     * @return Queue[]
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function childByEntityType($entityType)
+    {
+        return array_map(
+            [$this, 'loadById'],
+            $this->_getResource()->childIdsByEntityType($this->getId(), $entityType)
+        );
+    }
+
+    /**
+     * Load By Id
+     *
+     * @param int $queueId
+     * @return Queue
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function loadById($queueId)
+    {
+        $queue = clone $this;
+        $queue->dependence = [];
+        $queue->_data = [];
+
+        $this->_getResource()->load($queue, $queueId);
+        return $queue;
     }
 
     /**

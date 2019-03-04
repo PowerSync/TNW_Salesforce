@@ -76,14 +76,11 @@ class Save extends Synchronize\Unit\UnitAbstract
         $message = [];
 
         foreach ($this->entities() as $entity) {
-            if (null === $entity->getId()) {
-                continue;
-            }
-
             $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
 
             // Save Salesforce Id
             $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
+            $this->load()->get('%s/queue', $entity)->setAdditionalByCode($attributeName, $salesforceId);
 
             $message[] = __(
                 "Updating %1 attribute:\n\t\"%2\": %3",
@@ -100,6 +97,8 @@ class Save extends Synchronize\Unit\UnitAbstract
                     $attributeName,
                     $entity->getData('config_website')
                 );
+
+                $this->load()->get('%s/queue', $duplicate)->setAdditionalByCode($attributeName, $salesforceId);
 
                 $message[] = __(
                     "Updating %1 attribute:\n\t\"%2\": %3",
