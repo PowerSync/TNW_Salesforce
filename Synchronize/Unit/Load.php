@@ -109,6 +109,15 @@ class Load extends Synchronize\Unit\UnitAbstract
             $entity = $this->loadEntity($queue);
             $this->cache[$entity]['queue'] = $queue;
 
+            foreach ($this->entityLoaders as $entityType => $entityLoader) {
+                $subEntity = $entityLoader->get($entity);
+                foreach ($queue->dependenciesByEntityType($entityType) as $_queue) {
+                    $subEntity->addData($_queue->getAdditional());
+                }
+
+                $this->cache[$entity]['entities'][$entityType] = $subEntity;
+            }
+
             if (null !== $this->entityObject && null !== $entity->getId()) {
                 $this->entityObject->load($entity, $entity->getData('config_website'));
             }
@@ -134,18 +143,12 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $entityType
      * @return \Magento\Framework\Model\AbstractModel|null
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function entityByType($entity, $entityType)
     {
-        if (empty($this->entityLoaders[$entityType])) {
+        if (empty($this->cache[$entity]['entities'][$entityType])) {
             $this->group()->messageDebug('Undefined magento entity type %s', $entityType);
             return null;
-        }
-
-        if (empty($this->cache[$entity]['entities'][$entityType])) {
-            $this->cache[$entity]['entities'][$entityType]
-                = $this->entityLoaders[$entityType]->get($entity);
         }
 
         return $this->cache[$entity]['entities'][$entityType];

@@ -122,6 +122,7 @@ class Queue extends AbstractDb
     public function getDependenceByCode($code)
     {
         if (empty($this->dependenceByCode)) {
+            //TODO: Переделать запрос
             $select = $this->getConnection()->select()
                 ->from(['childQueue' => $this->getMainTable()], ['childCode' => 'code'])
                 ->joinInner(
@@ -178,11 +179,33 @@ class Queue extends AbstractDb
                 'relation.parent_id = queue.queue_id',
                 ['queue_id']
             )
-            ->where('relation.queue_id = ?', $queueId)
-            ->where('queue.code = ?', $code)
-        ;
+            ->where('relation.queue_id = :queue_id')
+            ->where('queue.code = :code');
 
-        return $this->getConnection()->fetchOne($select);
+        return $this->getConnection()->fetchOne($select, ['queue_id' => $queueId, 'code' => $code]);
+    }
+
+    /**
+     * Dependence Id By Entity Type
+     *
+     * @param int $queueId
+     * @param string $entityType
+     * @return int[]
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function dependenceIdsByEntityType($queueId, $entityType)
+    {
+        $select = $this->getConnection()->select()
+            ->from(['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')], [])
+            ->joinInner(
+                ['queue' => $this->getMainTable()],
+                'relation.parent_id = queue.queue_id',
+                ['queue_id']
+            )
+            ->where('relation.queue_id = :queue_id')
+            ->where('queue.entity_type = :entity_type');
+
+        return $this->getConnection()->fetchCol($select, ['queue_id' => $queueId, 'entity_type' => $entityType]);
     }
 
     /**
@@ -216,10 +239,32 @@ class Queue extends AbstractDb
                 'relation.queue_id = queue.queue_id',
                 ['queue_id']
             )
-            ->where('relation.parent_id = ?', $queueId)
-            ->where('queue.code = ?', $code)
-        ;
+            ->where('relation.parent_id = :queue_id')
+            ->where('queue.code = :code');
 
-        return $this->getConnection()->fetchOne($select);
+        return $this->getConnection()->fetchOne($select, ['queue_id' => $queueId, 'code' => $code]);
+    }
+
+    /**
+     * Child Ids By Entity Type
+     *
+     * @param int $queueId
+     * @param string $entityType
+     * @return int[]
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function childIdsByEntityType($queueId, $entityType)
+    {
+        $select = $this->getConnection()->select()
+            ->from(['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')], [])
+            ->joinInner(
+                ['queue' => $this->getMainTable()],
+                'relation.queue_id = queue.queue_id',
+                ['queue_id']
+            )
+            ->where('relation.parent_id = :queue_id')
+            ->where('queue.entity_type = :entity_type');
+
+        return $this->getConnection()->fetchCol($select, ['queue_id' => $queueId, 'entity_type' => $entityType]);
     }
 }

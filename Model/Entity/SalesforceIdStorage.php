@@ -130,6 +130,10 @@ class SalesforceIdStorage
      */
     public function saveValueByAttribute($entity, $value, $attributeName, $website = null)
     {
+        if (null === $entity->getId()) {
+            return;
+        }
+
         $records[] = [
             'magento_type' => $this->magentoType,
             'entity_id' => $entity->getId(),
