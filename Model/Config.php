@@ -65,7 +65,7 @@ class Config extends DataObject
     private $filesystem;
 
     /** @var Config\WebsiteDetector  */
-    private $websiteDetector;
+    protected $websiteDetector;
 
     /** @var array  */
     private $credentialsConfigPaths = [
