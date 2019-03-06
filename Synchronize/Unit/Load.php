@@ -45,6 +45,11 @@ class Load extends Synchronize\Unit\UnitAbstract
     private $entityLoaders;
 
     /**
+     * @var array
+     */
+    private $entityTypeMapping;
+
+    /**
      * Load constructor.
      * @param string $name
      * @param string $magentoType
@@ -56,6 +61,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Unit\HashInterface $hash
      * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage|null $entityObject
      * @param EntityLoaderAbstract[] $entityLoaders
+     * @param array $entityTypeMapping
      */
     public function __construct(
         $name,
@@ -67,7 +73,8 @@ class Load extends Synchronize\Unit\UnitAbstract
         Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Unit\HashInterface $hash,
         \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject = null,
-        array $entityLoaders = []
+        array $entityLoaders = [],
+        array $entityTypeMapping = []
     ) {
         parent::__construct($name, $units, $group);
         $this->magentoType = $magentoType;
@@ -77,6 +84,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->hash = $hash;
         $this->entityObject = $entityObject;
         $this->entityLoaders = $entityLoaders;
+        $this->entityTypeMapping = $entityTypeMapping;
     }
 
     /**
@@ -111,7 +119,7 @@ class Load extends Synchronize\Unit\UnitAbstract
 
             foreach ($this->entityLoaders as $entityType => $entityLoader) {
                 $subEntity = $entityLoader->get($entity);
-                foreach ($queue->dependenciesByEntityType($entityType) as $_queue) {
+                foreach ($queue->dependenciesByEntityType($this->entityTypeMap($entityType)) as $_queue) {
                     $subEntity->addData($_queue->getAdditional());
                 }
 
@@ -135,6 +143,21 @@ class Load extends Synchronize\Unit\UnitAbstract
         if (!empty($message)) {
             $this->group()->messageDebug(implode("\n", $message));
         }
+    }
+
+    /**
+     * Entity Type Map
+     *
+     * @param string $entityType
+     * @return mixed
+     */
+    private function entityTypeMap($entityType)
+    {
+        if (empty($this->entityTypeMapping[$entityType])) {
+            return $entityType;
+        }
+
+        return $this->entityTypeMapping[$entityType];
     }
 
     /**
