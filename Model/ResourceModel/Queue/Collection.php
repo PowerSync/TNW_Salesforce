@@ -86,18 +86,17 @@ class Collection extends AbstractCollection
      */
     public function addFilterDependent()
     {
-        return $this
-            ->joinLeft(
-                ['relation' => 'tnw_salesforce_entity_queue_relation'],
-                'main_table.queue_id = relation.queue_id',
-                []
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from(['queue' => $this->getTable('tnw_salesforce_entity_queue')], [])
+            ->joinInner(
+                ['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')],
+                'relation.parent_id = queue.queue_id',
+                ['queue_id']
             )
-            ->joinLeft(
-                ['dependent' => 'tnw_salesforce_entity_queue'],
-                'relation.parent_id = dependent.queue_id',
-                []
-            )
-            ->addFieldToFilter('dependent.status', [['null' => true], ['in' => ['complete']]]);
+            ->where('queue.status NOT IN (?)', ['complete', 'skipped']);
+
+        return $this->addFieldToFilter('queue_id', ['nin' => $select]);
     }
 
     /**

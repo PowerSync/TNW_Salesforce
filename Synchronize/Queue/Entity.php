@@ -153,7 +153,7 @@ class Entity
 
             /** @var \TNW\Salesforce\Model\Queue $queue */
             foreach ($collection as $queue) {
-                //$collection->getResource()->delete($queue);
+                $collection->getResource()->delete($queue);
             }
         }
     }
