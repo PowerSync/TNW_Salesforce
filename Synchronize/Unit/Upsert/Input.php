@@ -7,7 +7,7 @@ use TNW\Salesforce\Synchronize;
 /**
  * Upsert Input
  */
-class Input extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\CheckInterface
+class Input extends Synchronize\Unit\UnitAbstract
 {
     /**
      * @var Synchronize\Unit\IdentificationInterface

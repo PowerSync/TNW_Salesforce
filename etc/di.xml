@@ -165,6 +165,7 @@
             <argument name="name" xsi:type="string">customerBusinessAccountStatus</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="upsertOutput" xsi:type="string">customerBusinessAccountUpsertOutput</argument>
+            <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
         </arguments>
     </virtualType>
 
@@ -282,6 +283,7 @@
             <argument name="name" xsi:type="string">customerContactStatus</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="upsertOutput" xsi:type="string">customerContactUpsertOutput</argument>
+            <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
         </arguments>
     </virtualType>
 
@@ -394,6 +396,7 @@
             <argument name="name" xsi:type="string">websiteWebsiteStatus</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
             <argument name="upsertOutput" xsi:type="string">websiteWebsiteUpsertOutput</argument>
+            <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Website</argument>
         </arguments>
     </virtualType>
 
