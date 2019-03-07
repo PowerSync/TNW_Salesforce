@@ -156,6 +156,10 @@ class SalesforceIdStorage
      */
     public function saveStatus($entity, $status, $website = null)
     {
+        if (null === $entity->getId()) {
+            return;
+        }
+
         $this->resourceObjects
             ->saveStatus(
                 $entity->getId(),

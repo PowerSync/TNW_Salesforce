@@ -20,12 +20,18 @@ class Status extends Synchronize\Unit\UnitAbstract
     private $upsertOutput;
 
     /**
+     * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage|null
+     */
+    private $salesforceIdStorage;
+
+    /**
      * Status constructor.
      * @param string $name
      * @param string $load
      * @param string $upsertOutput
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
+     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage $salesforceIdStorage
      * @param array $dependents
      */
     public function __construct(
@@ -34,11 +40,13 @@ class Status extends Synchronize\Unit\UnitAbstract
         $upsertOutput,
         Synchronize\Units $units,
         Synchronize\Group $group,
+        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $salesforceIdStorage = null,
         array $dependents = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsertOutput]));
         $this->load = $load;
         $this->upsertOutput = $upsertOutput;
+        $this->salesforceIdStorage = $salesforceIdStorage;
     }
 
     /**
@@ -51,6 +59,8 @@ class Status extends Synchronize\Unit\UnitAbstract
 
     /**
      * Process
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function process()
     {
@@ -70,10 +80,18 @@ class Status extends Synchronize\Unit\UnitAbstract
                     continue 2;
 
                 case $upsertOutput->get('%s/success', $entity) === true:
+                    if (null !== $this->salesforceIdStorage) {
+                        $this->salesforceIdStorage->saveStatus($entity, 1, $entity->getData('config_website'));
+                    }
+
                     $this->cache[$entity]['status'] = Queue::STATUS_COMPLETE;
                     continue 2;
 
                 default:
+                    if (null !== $this->salesforceIdStorage) {
+                        $this->salesforceIdStorage->saveStatus($entity, 0, $entity->getData('config_website'));
+                    }
+
                     $this->cache[$entity]['status'] = Queue::STATUS_ERROR;
                     $this->cache[$entity]['message'] = $upsertOutput->get('%s/message', $entity);
                     continue 2;
