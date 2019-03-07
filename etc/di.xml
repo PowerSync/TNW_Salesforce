@@ -524,13 +524,13 @@
                     <item name="phaseName" xsi:type="string" translatable="true">Input Upsert</item>
                     <item name="startStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_NEW</item>
                     <item name="processStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_PROCESS_INPUT_UPSERT</item>
-                    <item name="errorStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_ERROR_INPUT_UPSERT</item>
+                    <item name="errorStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_ERROR</item>
                 </item>
                 <item name="1" xsi:type="array">
                     <item name="phaseName" xsi:type="string" translatable="true">Output Upsert</item>
                     <item name="startStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_WAITING_UPSERT</item>
                     <item name="processStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_PROCESS_OUTPUT_UPSERT</item>
-                    <item name="errorStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_ERROR_OUTPUT_UPSERT</item>
+                    <item name="errorStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_ERROR</item>
                 </item>
             </argument>
             <argument name="groups" xsi:type="array">
