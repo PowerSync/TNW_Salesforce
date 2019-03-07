@@ -61,7 +61,6 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      * Process Input
      *
      * @return bool
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function processInput()
     {
@@ -129,7 +128,6 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      * @param array $searchIndex
      * @param \Magento\Customer\Model\Customer $entity
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function searchPriorityOrder(array $searchIndex, $entity)
     {
