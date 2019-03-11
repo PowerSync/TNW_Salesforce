@@ -4,18 +4,18 @@ namespace TNW\Salesforce\Controller\Adminhtml\Customer;
 class SyncCustomer extends \Magento\Backend\App\Action
 {
     /**
-     * @var \TNW\Salesforce\Synchronize\Queue\Entity
+     * @var \TNW\Salesforce\Synchronize\Queue\Add
      */
     private $entityCustomer;
 
     /**
      * SyncCustomer constructor.
      * @param \Magento\Backend\App\Action\Context $context
-     * @param \TNW\Salesforce\Synchronize\Queue\Entity $entityCustomer
+     * @param \TNW\Salesforce\Synchronize\Queue\Add $entityCustomer
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
-        \TNW\Salesforce\Synchronize\Queue\Entity $entityCustomer
+        \TNW\Salesforce\Synchronize\Queue\Add $entityCustomer
     ) {
         $this->entityCustomer = $entityCustomer;
         parent::__construct($context);

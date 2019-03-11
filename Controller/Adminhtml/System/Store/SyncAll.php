@@ -12,7 +12,7 @@ class SyncAll extends \Magento\Backend\App\Action
     private $websiteRepository;
 
     /**
-     * @var \TNW\Salesforce\Synchronize\Queue\Entity
+     * @var \TNW\Salesforce\Synchronize\Queue\Add
      */
     private $entityWebsite;
 
@@ -20,12 +20,12 @@ class SyncAll extends \Magento\Backend\App\Action
      * SyncAll constructor.
      * @param \Magento\Backend\App\Action\Context $context
      * @param \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository
-     * @param \TNW\Salesforce\Synchronize\Queue\Entity $entityWebsite
+     * @param \TNW\Salesforce\Synchronize\Queue\Add $entityWebsite
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
-        \TNW\Salesforce\Synchronize\Queue\Entity $entityWebsite
+        \TNW\Salesforce\Synchronize\Queue\Add $entityWebsite
     ) {
         $this->websiteRepository = $websiteRepository;
         $this->entityWebsite = $entityWebsite;

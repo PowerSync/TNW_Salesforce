@@ -64,6 +64,14 @@ class Queue
         // Collection Clear
         $collection->clear();
 
+        // Filter To Website
+        $collection->addFilterToWebsiteId($websiteId);
+
+        // Check not empty
+        if ($collection->getSize() === 0) {
+            return;
+        }
+
         ksort($this->phases);
 
         foreach ($this->sortGroup() as $group) {
@@ -73,7 +81,6 @@ class Queue
             foreach ($this->phases as $phase) {
                 $lockCollection = clone $collection;
                 $lockCollection->addFilterToCode($group->code());
-                $lockCollection->addFilterToWebsiteId($websiteId);
                 $lockCollection->addFilterToStatus($phase['startStatus']);
                 $lockCollection->addFilterToNotTransactionUid($this->uidProcessor->uid());
                 $lockCollection->addFilterDependent();

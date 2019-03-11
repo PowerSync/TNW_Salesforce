@@ -39,11 +39,6 @@ class Unit
     private $queueFactory;
 
     /**
-     * @var \TNW\Salesforce\Model\ResourceModel\Queue
-     */
-    private $resourceQueue;
-
-    /**
      * @var \Magento\Framework\ObjectManagerInterface
      */
     private $objectManager;
@@ -76,7 +71,6 @@ class Unit
      * @param string $objectType
      * @param array $generators
      * @param \TNW\Salesforce\Model\QueueFactory $queueFactory
-     * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
      * @param SkipInterface[] $skipRules
      * @param string[] $parents
@@ -90,7 +84,6 @@ class Unit
         $objectType,
         array $generators,
         \TNW\Salesforce\Model\QueueFactory $queueFactory,
-        \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
         \Magento\Framework\ObjectManagerInterface $objectManager,
         array $skipRules = [],
         array $parents = [],
@@ -103,7 +96,6 @@ class Unit
         $this->description = $description;
         $this->generators = $generators;
         $this->queueFactory = $queueFactory;
-        $this->resourceQueue = $resourceQueue;
         $this->objectManager = $objectManager;
         $this->skipRules = $skipRules;
         $this->parents = $parents;
@@ -152,112 +144,12 @@ class Unit
     }
 
     /**
-     * Create Queue
-     *
-     * @param string $loadBy
-     * @param int $entityId
-     * @param array $loadAdditional
-     * @param int $websiteId
-     * @param string $syncType
-     * @param array $cacheQueue
-     * @return \TNW\Salesforce\Model\Queue[]
-     * @throws LocalizedException
-     */
-    public function createQueue(
-        $loadBy,
-        $entityId,
-        array $loadAdditional,
-        $websiteId,
-        $syncType,
-        array &$cacheQueue = []
-    ) {
-        $queues = [];
-        foreach ($this->generateQueues($loadBy, $entityId, $loadAdditional, [$this, 'create'], $websiteId) as $queue) {
-            $key = sprintf(
-                '%s/%s/%s/%s',
-                $queue->getEntityLoad(),
-                $queue->getEntityId(),
-                $this->code,
-                serialize($queue->getEntityLoadAdditional())
-            );
-
-            $queue->setData('website_id', $websiteId);
-            $queue->setData('sync_type', $syncType);
-
-            switch (true) {
-                case isset($cacheQueue[$key]):
-                    $queue = $cacheQueue[$key];
-                    break;
-
-                case $this->skip($queue):
-                    $queue = $cacheQueue[$key] = null;
-                    break;
-
-                default:
-                    // Add cache
-                    $cacheQueue[$key] = $queue;
-
-                    // Generate Parents
-                    $parents = [];
-                    foreach ($this->parents() as $parent) {
-                        $parentQueues = $parent->createQueue(
-                            $queue->getEntityLoad(),
-                            $queue->getEntityId(),
-                            $queue->getEntityLoadAdditional(),
-                            $websiteId,
-                            $syncType,
-                            $cacheQueue
-                        );
-
-                        if (empty($parentQueues)) {
-                            continue;
-                        }
-
-                        array_push($parents, ...$parentQueues);
-                    }
-
-                    $queue->setDependence($parents);
-                    $this->resourceQueue->merge($queue);
-
-                    // Generate Children
-                    $children = [];
-                    foreach ($this->children() as $child) {
-                        $childQueues = $child->createQueue(
-                            $queue->getEntityLoad(),
-                            $queue->getEntityId(),
-                            $queue->getEntityLoadAdditional(),
-                            $websiteId,
-                            $syncType,
-                            $cacheQueue
-                        );
-
-                        if (empty($childQueues)) {
-                            continue;
-                        }
-
-                        array_push($children, ...$childQueues);
-                    }
-
-                    foreach ($children as $child) {
-                        $child->addDependence($queue);
-                        $this->resourceQueue->merge($child);
-                    }
-                    break;
-            }
-
-            $queues[] = $queue;
-        }
-
-        return array_filter($queues);
-    }
-
-    /**
      * Skip
      *
      * @param \TNW\Salesforce\Model\Queue $queue
      * @return bool
      */
-    private function skip($queue)
+    public function skipQueue($queue)
     {
         foreach ($this->skipRules as $rule) {
             if ($rule->apply($queue) !== false) {
@@ -277,7 +169,7 @@ class Unit
      * @param array $additionalLoad
      * @return \TNW\Salesforce\Model\Queue
      */
-    public function create($loadBy, $entityId, array $identifiers, array $additionalLoad = [])
+    public function createQueue($loadBy, $entityId, array $identifiers, array $additionalLoad = [])
     {
         return $this->queueFactory->create(['data' => [
             'code' => $this->code,
@@ -314,16 +206,15 @@ class Unit
      * @param string $loadBy
      * @param int $entityId
      * @param array $additional
-     * @param callable $create
      * @param int $websiteId
      * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
-    public function generateQueues($loadBy, $entityId, array $additional, callable $create, $websiteId)
+    public function generateQueues($loadBy, $entityId, array $additional, $websiteId)
     {
         $generator = $this->findGenerator($loadBy);
         if ($generator instanceof CreateInterface) {
-            return $generator->process($entityId, $additional, $create, $websiteId);
+            return $generator->process($entityId, $additional, [$this, 'createQueue'], $websiteId);
         }
 
         if ($this->ignoreFindGeneratorException) {
