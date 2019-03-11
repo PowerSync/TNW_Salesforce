@@ -514,11 +514,18 @@
         <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Store\StoreManager" sortOrder="10" />
     </type>
 
-    <type name="TNW\Salesforce\Synchronize\Queue\Entity">
+    <type name="TNW\Salesforce\Synchronize\Queue\Add">
         <arguments>
-            <argument name="synchronizeQueue" xsi:type="object">TNW\Soap\Synchronize\Queue</argument>
+            <argument name="synchronizeEntity" xsi:type="object">TNW\Synchronize\Queue\Realtime</argument>
         </arguments>
     </type>
+
+    <virtualType name="TNW\Synchronize\Queue\Realtime" type="TNW\Salesforce\Synchronize\Queue\Synchronize">
+        <arguments>
+            <argument name="type" xsi:type="const">TNW\Salesforce\Model\Config::DIRECT_SYNC_TYPE_REALTIME</argument>
+            <argument name="synchronizeQueue" xsi:type="object">TNW\Soap\Synchronize\Queue</argument>
+        </arguments>
+    </virtualType>
 
     <virtualType name="TNW\Soap\Synchronize\Queue" type="TNW\Salesforce\Synchronize\Queue">
         <arguments>
@@ -545,7 +552,7 @@
     </virtualType>
 
     <!-- Customer -->
-    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer" type="TNW\Salesforce\Synchronize\Queue\Entity">
+    <virtualType name="TNW\Salesforce\Synchronize\Queue\Customer" type="TNW\Salesforce\Synchronize\Queue\Add">
         <arguments>
             <argument name="entityType" xsi:type="string">customer</argument>
             <argument name="resolves" xsi:type="array">
@@ -586,7 +593,7 @@
     </virtualType>
 
     <!-- Website -->
-    <virtualType name="TNW\Salesforce\Synchronize\Queue\Website" type="TNW\Salesforce\Synchronize\Queue\Entity">
+    <virtualType name="TNW\Salesforce\Synchronize\Queue\Website" type="TNW\Salesforce\Synchronize\Queue\Add">
         <arguments>
             <argument name="entityType" xsi:type="string">website</argument>
             <argument name="resolves" xsi:type="array">

@@ -8,7 +8,7 @@ namespace TNW\Salesforce\Controller\Adminhtml\Customer;
 class MassSync extends \Magento\Backend\App\Action
 {
     /**
-     * @var \TNW\Salesforce\Synchronize\Queue\Entity
+     * @var \TNW\Salesforce\Synchronize\Queue\Add
      */
     private $entityCustomer;
 
@@ -25,13 +25,13 @@ class MassSync extends \Magento\Backend\App\Action
     /**
      * MassSync constructor.
      * @param \Magento\Backend\App\Action\Context $context
-     * @param \TNW\Salesforce\Synchronize\Queue\Entity $entityCustomer
+     * @param \TNW\Salesforce\Synchronize\Queue\Add $entityCustomer
      * @param \Magento\Ui\Component\MassAction\Filter $massActionFilter
      * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collectionFactory
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
-        \TNW\Salesforce\Synchronize\Queue\Entity $entityCustomer,
+        \TNW\Salesforce\Synchronize\Queue\Add $entityCustomer,
         \Magento\Ui\Component\MassAction\Filter $massActionFilter,
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collectionFactory
     ) {

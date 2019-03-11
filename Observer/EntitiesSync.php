@@ -15,7 +15,7 @@ class EntitiesSync implements \Magento\Framework\Event\ObserverInterface
     private $entities;
 
     /**
-     * @var \TNW\Salesforce\Synchronize\Queue\Entity
+     * @var \TNW\Salesforce\Synchronize\Queue\Add
      */
     private $entityQueue;
 
@@ -27,12 +27,12 @@ class EntitiesSync implements \Magento\Framework\Event\ObserverInterface
     /**
      * EntitiesSync constructor.
      * @param \TNW\Salesforce\Observer\Entities $entities
-     * @param \TNW\Salesforce\Synchronize\Queue\Entity $entityQueue
+     * @param \TNW\Salesforce\Synchronize\Queue\Add $entityQueue
      * @param \Magento\Framework\Message\ManagerInterface $messageManager
      */
     public function __construct(
         \TNW\Salesforce\Observer\Entities $entities,
-        \TNW\Salesforce\Synchronize\Queue\Entity $entityQueue,
+        \TNW\Salesforce\Synchronize\Queue\Add $entityQueue,
         \Magento\Framework\Message\ManagerInterface $messageManager
     ) {
         $this->entities = $entities;
