@@ -93,18 +93,6 @@ class Input extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * Client
-     *
-     * @param int|null $websiteId
-     * @return \TNW\Salesforce\Lib\Tnw\SoapClient\Client
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    protected function getClient($websiteId = null)
-    {
-        return $this->factory->client($websiteId);
-    }
-
-    /**
      * @inheritdoc
      */
     public function description()
@@ -205,16 +193,20 @@ class Input extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * Object Description
+     * Find Field Property
+     *
+     * @param string $fieldName
+     * @return \Tnw\SoapClient\Result\DescribeSObjectResult\Field|false
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function getObjectDescription()
+    public function findFieldProperty($fieldName)
     {
         if (empty($this->objectDescription[$this->salesforceType])) {
-            $resultObjects = $this->getClient()->describeSObjects([$this->salesforceType]);
+            $resultObjects = $this->factory->client()->describeSObjects([$this->salesforceType]);
             $this->objectDescription[$this->salesforceType] = $resultObjects[0];
         }
 
-        return $this->objectDescription[$this->salesforceType];
+        return $this->objectDescription[$this->salesforceType]->getField($fieldName);
     }
 
     /**
@@ -223,17 +215,22 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param array $object
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function prepareObject($entity, array $object)
     {
-        $objectDescription = $this->getObjectDescription();
-        foreach ($objectDescription->getFields() as $fieldProperty) {
-            $fieldName = (string)$fieldProperty->getName();
-            if ($fieldName === 'Id' || !isset($object[$fieldName])) {
+        foreach (array_keys($object) as $fieldName) {
+            if ($fieldName === 'Id') {
                 continue;
             }
 
-            $value = $object[$fieldName];
+            $fieldProperty = $this->findFieldProperty($fieldName);
+            if (!$fieldProperty instanceof \Tnw\SoapClient\Result\DescribeSObjectResult\Field) {
+                $this->group()
+                    ->messageNotice('Salesforce field "%s" does not exist, value sync skipped.', $fieldName);
+                unset($object[$fieldName]);
+                continue;
+            }
 
             if (empty($object['Id']) && !$fieldProperty->isCreateable()) {
                 $this->group()
@@ -252,7 +249,7 @@ class Input extends Synchronize\Unit\UnitAbstract
             if (in_array($fieldProperty->getType(), ['datetime', 'date'])) {
                 try {
                     if (!$object[$fieldName] instanceof \DateTime) {
-                        $object[$fieldName] = new \DateTime($value);
+                        $object[$fieldName] = new \DateTime($object[$fieldName]);
                     }
 
                     if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
@@ -264,17 +261,21 @@ class Input extends Synchronize\Unit\UnitAbstract
                         unset($object[$fieldName]);
                     }
                 } catch (\Exception $e) {
-                    $this->group()->messageDebug('Field "%s" incorrect datetime format: %s', $fieldName, $value);
+                    $this->group()->messageDebug(
+                        'Field "%s" incorrect datetime format: %s',
+                        $fieldName,
+                        $object[$fieldName]
+                    );
                     unset($object[$fieldName]);
                 }
             } elseif (
-                is_string($value)
+                is_string($object[$fieldName])
                 && $fieldProperty->getLength()
-                && $fieldProperty->getLength() < strlen($value)
+                && $fieldProperty->getLength() < strlen($object[$fieldName])
             ) {
                 $this->group()->messageNotice('Salesforce field "%s" value truncated.', $fieldName);
                 $limit = $fieldProperty->getLength();
-                $object[$fieldName] = mb_substr($value, 0, $limit - 3) . '...';
+                $object[$fieldName] = mb_substr($object[$fieldName], 0, $limit - 3) . '...';
             }
         }
 

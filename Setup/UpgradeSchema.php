@@ -367,7 +367,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ->addColumn('additional_data', Table::TYPE_TEXT, 1024, [
                 'nullable' => true
             ], 'Additional Data')
-            ->addColumn('created_at', Table::TYPE_DATETIME, null, [
+            ->addColumn('created_at', Table::TYPE_TIMESTAMP, null, [
                 'nullable' => false,
                 'default' => Table::TIMESTAMP_INIT
             ], 'When create')
