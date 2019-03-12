@@ -45,7 +45,7 @@ class Output implements Transport\Calls\Upsert\OutputInterface
                     'skipped' => true,
                     'success' => false,
                     'created' => false,
-                    'message' => __('Result not found')->render()
+                    'message' => ''
                 ]);
 
                 continue;

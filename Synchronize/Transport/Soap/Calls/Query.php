@@ -2,8 +2,12 @@
 
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls;
 
+use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Synchronize\Transport;
 
+/**
+ * Soap Query
+ */
 class Query implements Transport\Calls\QueryInterface
 {
     const MAX_LENGTH = 20000;
@@ -17,6 +21,7 @@ class Query implements Transport\Calls\QueryInterface
      * @var \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory
      */
     private $factory;
+
     /**
      * @var \TNW\Salesforce\Synchronize\Transport\Calls\Query\Soql
      */
@@ -26,6 +31,7 @@ class Query implements Transport\Calls\QueryInterface
      * Soap constructor.
      * @param \Magento\Framework\Event\Manager $eventManager
      * @param \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory
+     * @param Transport\Calls\Query\Soql $soql
      */
     public function __construct(
         \Magento\Framework\Event\Manager $eventManager,
@@ -39,9 +45,10 @@ class Query implements Transport\Calls\QueryInterface
 
     /**
      * Do Unit syncronization to Salesforce object
+     *
      * @param Transport\Calls\Query\Input $input
      * @param Transport\Calls\Query\Output $output
-     * @throws \RuntimeException
+     * @throws LocalizedException
      */
     public function process(Transport\Calls\Query\Input $input, Transport\Calls\Query\Output $output)
     {
@@ -65,7 +72,7 @@ class Query implements Transport\Calls\QueryInterface
             }
 
             if (empty($query)) {
-                throw new \RuntimeException(sprintf('Query exceeded limit of %d characters', self::MAX_LENGTH));
+                throw new LocalizedException(__('Query exceeded limit of %1 characters', self::MAX_LENGTH));
             }
 
             $results = $this->factory->client()->query($query);
@@ -89,8 +96,7 @@ class Query implements Transport\Calls\QueryInterface
      */
     public function exec($data, $websiteId = null)
     {
-        $output = array();
-
+        $output = [];
         $query = $this->soql->build($data);
         if (empty($query)) {
             throw new \RuntimeException(sprintf('Query exceeded limit of %d characters', self::MAX_LENGTH));
@@ -105,7 +111,9 @@ class Query implements Transport\Calls\QueryInterface
     }
 
     /**
-     * @param $result
+     * Prepare Output
+     *
+     * @param object $result
      * @return array
      */
     protected function prepareOutput($result)

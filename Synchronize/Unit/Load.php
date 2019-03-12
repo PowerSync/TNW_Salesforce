@@ -115,6 +115,8 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->cache['entities'] = $index = [];
         foreach ($this->queues as $queue) {
             $entity = $this->loadEntity($queue);
+            $entity->setData('_queue', $queue);
+
             $this->cache[$entity]['queue'] = $queue;
 
             foreach ($this->entityLoaders as $entityType => $entityLoader) {

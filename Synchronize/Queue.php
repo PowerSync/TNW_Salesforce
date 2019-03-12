@@ -34,22 +34,30 @@ class Queue
     private $uidProcessor;
 
     /**
+     * @var \Magento\Framework\Stdlib\DateTime\Timezone
+     */
+    private $timezone;
+
+    /**
      * Queue constructor.
      * @param Group[] $groups
      * @param array $phases
      * @param Model\ResourceModel\Queue $resourceQueue
      * @param Model\Logger\Processor\UidProcessor $uidProcessor
+     * @param \Magento\Framework\Stdlib\DateTime\Timezone $timezone
      */
     public function __construct(
         array $groups,
         array $phases,
         Model\ResourceModel\Queue $resourceQueue,
-        Model\Logger\Processor\UidProcessor $uidProcessor
+        Model\Logger\Processor\UidProcessor $uidProcessor,
+        \Magento\Framework\Stdlib\DateTime\Timezone $timezone
     ) {
         $this->groups = $groups;
         $this->phases = $phases;
         $this->resourceQueue = $resourceQueue;
         $this->uidProcessor = $uidProcessor;
+        $this->timezone = $timezone;
     }
 
     /**
@@ -88,7 +96,8 @@ class Queue
                 // Mark work
                 $countUpdate = $lockCollection->updateLock([
                     'status' => $phase['processStatus'],
-                    'transaction_uid' => $this->uidProcessor->uid()
+                    'transaction_uid' => $this->uidProcessor->uid(),
+                    'sync_at' => $this->timezone->date()->format('c')
                 ]);
 
                 if (0 === $countUpdate) {
