@@ -1,6 +1,9 @@
 <?php
 namespace TNW\Salesforce\Observer;
 
+/**
+ * Entities Storage
+ */
 class Entities
 {
     /**
@@ -9,7 +12,9 @@ class Entities
     private $entityIds = [];
 
     /**
-     * @param $entity
+     * Add Entity
+     *
+     * @param int|\Magento\Framework\Model\AbstractModel $entity
      */
     public function addEntity($entity)
     {
@@ -21,6 +26,8 @@ class Entities
     }
 
     /**
+     * Entity Ids
+     *
      * @return array
      */
     public function entityIds()
@@ -29,6 +36,8 @@ class Entities
     }
 
     /**
+     * Is Empty
+     *
      * @return bool
      */
     public function isEmpty()
@@ -37,7 +46,7 @@ class Entities
     }
 
     /**
-     *
+     * Clean
      */
     public function clean()
     {
