@@ -71,32 +71,38 @@ class Save extends Synchronize\Unit\UnitAbstract
         $message = [];
 
         foreach ($this->entities() as $entity) {
-            if (null === $entity->getId()) {
-                continue;
-            }
+            try {
+                if (null === $entity->getId()) {
+                    continue;
+                }
 
-            $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
+                $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
 
-            // Save Salesforce Id
-            $this->entityObject->saveByAttribute($entity, $attributeName);
-
-            $message[] = __(
-                "Updating %1 attribute:\n\t\"%2\": %3",
-                $this->identification->printEntity($entity),
-                $attributeName,
-                $salesforceId
-            );
-
-            // Save Salesforce Id from duplicates
-            foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
-                $this->entityObject->saveValueByAttribute($duplicate, $salesforceId, $attributeName);
+                // Save Salesforce Id
+                $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getConfigWebsite());
 
                 $message[] = __(
                     "Updating %1 attribute:\n\t\"%2\": %3",
-                    $this->identification->printEntity($duplicate),
+                    $this->identification->printEntity($entity),
                     $attributeName,
                     $salesforceId
                 );
+
+                // Save Salesforce Id from duplicates
+                foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
+                    $this->entityObject->saveValueByAttribute($duplicate, $salesforceId, $attributeName, $entity->getConfigWebsite());
+
+                    $message[] = __(
+                        "Updating %1 attribute:\n\t\"%2\": %3",
+                        $this->identification->printEntity($duplicate),
+                        $attributeName,
+                        $salesforceId
+                    );
+                }
+
+            } catch (\Exception $e) {
+                $this->group()->messageError($e->getMessage(), $entity->getId());
+                $this->cache[$entity]['message'] = $e->getMessage();
             }
         }
 

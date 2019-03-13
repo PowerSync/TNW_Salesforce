@@ -121,10 +121,10 @@ class Mapping extends Synchronize\Unit\MappingAbstract
     {
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0) {
             if (
-                $this->customerConfig->contactAssignee() === Model\Config\Source\Customer\ContactAssignee::DEFAULT_OWNER ||
+                $this->customerConfig->contactAssignee($entity->getConfigWebsite()) === Model\Config\Source\Customer\ContactAssignee::DEFAULT_OWNER ||
                 !$this->unit('customerAccountLookup')->get('%s/record/OwnerId', $entity)
             ) {
-                return $this->customerConfig->defaultOwner();
+                return $this->customerConfig->defaultOwner($entity->getConfigWebsite());
             }
 
             return $this->unit('customerAccountLookup')->get('%s/record/OwnerId', $entity);
