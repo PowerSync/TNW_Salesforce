@@ -34,7 +34,11 @@ class EntitiesSync implements \Magento\Framework\Event\ObserverInterface
             return;
         }
 
-        $this->entitySynchronize->synchronize($this->entities->entityIds());
-        $this->entities->clean();
+        try {
+            $this->entitySynchronize->synchronize($this->entities->entityIds());
+            $this->entities->clean();
+        } catch (\Exception $e) {
+
+        }
     }
 }

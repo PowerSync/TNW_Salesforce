@@ -21,6 +21,9 @@ class Config extends DataObject
     const SFORCE_MAGENTO_ID = 'Magento_ID__c';
     const BASE_DAY = 7;
 
+    /** @comment Base batch limit for simple sync */
+    const REALTIME_MAX_SYNC = 30;
+
     /** @var ScopeConfigInterface  */
     protected $scopeConfig;
 
@@ -57,6 +60,7 @@ class Config extends DataObject
 
     /** @var array  */
     private $credentialsConfigPaths = [
+        /** Org credentials */
         'tnwsforce_general/salesforce/active',
         'tnwsforce_general/salesforce/username',
         'tnwsforce_general/salesforce/password',
@@ -94,6 +98,15 @@ class Config extends DataObject
         $this->websiteDetector = $websiteDetector;
 
         parent::__construct();
+    }
+
+    /**
+     * Base batch limit for simple sync
+     * @return int
+     */
+    public function getBaseUpdateLimit()
+    {
+        return self::SFORCE_BASE_UPDATE_LIMIT;
     }
 
     /**
@@ -211,12 +224,27 @@ class Config extends DataObject
     }
 
     /**
+     * @return \Magento\Store\Api\Data\WebsiteInterface[]
+     */
+    public function getWebsites()
+    {
+        $result = $this->websiteRepository->getList();
+        $adminWebsite = ['admin' => $result['admin']];
+        unset($result['admin']);
+
+        $result = $adminWebsite + $result;
+
+        return $result;
+
+    }
+
+    /**
      * @return array
      */
     public function getWebsitesGrouppedByOrg()
     {
         if (empty($this->websitesGrouppedByOrg)) {
-            $websites = $this->websiteRepository->getList();
+            $websites = $this->getWebsites();
             foreach ($websites as $website) {
                 foreach ($websites as $websiteToCompare) {
 
@@ -239,6 +267,47 @@ class Config extends DataObject
         }
 
         return $this->websitesGrouppedByOrg;
+    }
+
+    /**
+     * @return array
+     * Collect list of websites for the active orgs
+     */
+    public function getOrgsWebsites()
+    {
+        $websitesByOrg = $this->getWebsitesGrouppedByOrg();
+        $orgsWebsites = [];
+
+        foreach ($websitesByOrg as $websiteId => $baseWebsite) {
+            if (!$this->getSalesforceStatus($websiteId)) {
+                continue;
+            }
+            $orgsWebsites[] = $websiteId;
+        }
+
+        return $orgsWebsites;
+    }
+
+    /**
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getCurrentOrgWebsites()
+    {
+        $websitesGrouppedByOrg = $this->getWebsitesGrouppedByOrg();
+
+        $currentWebsite = $this->storeManager->getWebsite()->getId();
+        $currentOrgWebsites = [];
+
+        $baseOrgWebsite = $websitesGrouppedByOrg[$currentWebsite];
+
+        foreach ($websitesGrouppedByOrg as $websiteId => $baseWebsite) {
+            if ($baseOrgWebsite == $baseWebsite) {
+                $currentOrgWebsites[] = $websiteId;
+            }
+        }
+
+        return $currentOrgWebsites;
     }
 
     /**

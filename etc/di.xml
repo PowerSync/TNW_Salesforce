@@ -70,6 +70,11 @@
         </arguments>
     </virtualType>
 
+    <type name="TNW\Salesforce\Synchronize\Unit\MappingAbstract">
+        <plugin name="tnw_salesforce_mapping_customer_group"
+                type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\Customer\Group" />
+    </type>
+
     <type name="TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping">
         <arguments>
             <argument name="name" xsi:type="string">customerAccountMapping</argument>
@@ -148,7 +153,7 @@
             <argument name="name" xsi:type="string">customerCheck</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
-            <argument name="upsert" xsi:type="array">
+            <argument name="process" xsi:type="array">
                 <item name="accountUpsert" xsi:type="string">customerAccountUpsert</item>
                 <item name="contactUpsert" xsi:type="string">customerContactUpsert</item>
             </argument>
@@ -238,7 +243,7 @@
     <virtualType name="TNW\Salesforce\Synchronize\Unit\Website\Check" type="TNW\Salesforce\Synchronize\Unit\Check">
         <arguments>
             <argument name="name" xsi:type="string">websiteCheck</argument>
-            <argument name="upsert" xsi:type="array">
+            <argument name="process" xsi:type="array">
                 <item name="upsertWebsite" xsi:type="string">websiteWebsiteUpsert</item>
             </argument>
         </arguments>
@@ -363,11 +368,16 @@
         </arguments>
     </type>
 
-    <type name="TNW\Salesforce\Synchronize\Unit\LoadAbstract">
-        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\LoadAbstract" />
+    <type name="TNW\Salesforce\Synchronize\Unit\LoadByAbstract">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\LoadByAbstract" sortOrder="10" />
     </type>
 
-    <type name="TNW\Salesforce\Synchronize\Unit\LoadByAbstract">
-        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\LoadByAbstract" />
+    <type name="TNW\Salesforce\Synchronize\Unit\LoadAbstract">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\LoadAbstract" sortOrder="10" />
     </type>
+
+    <type name="Magento\Store\Model\StoreManager">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Store\StoreManager" sortOrder="10" />
+    </type>
+
 </config>
