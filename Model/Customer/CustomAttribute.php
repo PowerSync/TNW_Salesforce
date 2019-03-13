@@ -13,18 +13,31 @@ class CustomAttribute
 
     const ATTRIBUTR_CODE_SYNC_STATUS = 'sforce_sync_status';
 
+    const GROUP_LABEL = 'group_label';
+
     /** @var \Magento\Customer\Model\ResourceModel\Customer */
     protected $resourceCustomer;
 
     /** @var \Magento\Customer\Model\Backend\Customer */
     protected $backendCustomer;
 
+    /** @var \TNW\Salesforce\Model\ResourceModel\Objects  */
+    protected $resourceObjects;
+
+    /**
+     * CustomAttribute constructor.
+     * @param ResourceCustomer $resourceCustomer
+     * @param BackendCustomer $backendCustomer
+     * @param \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects
+     */
     public function __construct(
         ResourceCustomer $resourceCustomer,
-        BackendCustomer $backendCustomer
+        BackendCustomer $backendCustomer,
+        \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects
     ) {
         $this->resourceCustomer = $resourceCustomer;
         $this->backendCustomer = $backendCustomer;
+        $this->resourceObjects = $resourceObjects;
     }
 
     /**
@@ -70,10 +83,26 @@ class CustomAttribute
      */
     public function saveSalesforceAttributeBackend(\Magento\Customer\Model\Backend\Customer $customer)
     {
-        $attributesList = $this->getAttributesList();
-        foreach ($attributesList as $attributeCode) {
-            $this->resourceCustomer->saveAttribute($customer, $attributeCode);
-        }
+        $records = [];
+
+        $records[] = [
+            'entity_id' => $customer->getId(),
+            'object_id' => $customer->getData(self::ATTRIBUTE_CODE_SF_ID),
+            'magento_type' => 'Customer',
+            'salesforce_type' => 'Contact',
+            'status' => $customer->getData(self::ATTRIBUTR_CODE_SYNC_STATUS)
+        ];
+
+        $records[] = [
+            'entity_id' => $customer->getId(),
+            'object_id' => $customer->getData(self::ATTRIBUTE_CODE_SF_ACCOUNT_ID),
+            'magento_type' => 'Customer',
+            'salesforce_type' => 'Account',
+            'status' => $customer->getData(self::ATTRIBUTR_CODE_SYNC_STATUS)
+        ];
+
+        $this->resourceObjects->saveRecords($records);
+
         $customer->reindex();
     }
 }
