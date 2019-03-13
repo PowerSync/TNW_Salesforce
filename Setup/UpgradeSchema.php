@@ -152,6 +152,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->version_2_4_9($context, $setup);
 
+        $this->version_2_4_14($context, $setup);
+
         $this->addEntityQueue($context, $setup);
 
         $setup->endSetup();
@@ -438,5 +440,53 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->createTable($table);
+    }
+
+    protected function version_2_4_14(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.4.14') >= 0) {
+            return;
+        }
+
+        $setup->getConnection()
+            ->addColumn($setup->getTable('tnw_salesforce_mapper'), 'website_id', [
+                'type' => Table::TYPE_SMALLINT,
+                'unsigned' => true,
+                'nullable' => false,
+                'default' => 0,
+                'comment' => 'Website ID'
+            ]);
+
+        $setup->getConnection()
+            ->dropIndex(
+                $setup->getTable('tnw_salesforce_mapper'),
+                $setup->getIdxName(
+                    'tnw_salesforce_mapper',
+                    ['object_type', 'magento_entity_type', 'magento_attribute_name', 'salesforce_attribute_name'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                )
+            );
+
+        $setup->getConnection()
+            ->addIndex(
+                $setup->getTable('tnw_salesforce_mapper'),
+                $setup->getIdxName(
+                    'tnw_salesforce_mapper',
+                    ['object_type', 'magento_entity_type', 'magento_attribute_name', 'salesforce_attribute_name', 'website_id'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                ),
+                ['object_type', 'magento_entity_type', 'magento_attribute_name', 'salesforce_attribute_name', 'website_id'],
+                \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+            );
+
+        $setup->getConnection()
+            ->addForeignKey(
+                $setup->getFkName('tnw_salesforce_mapper', 'website_id', 'store_website', 'website_id'),
+                $setup->getTable('tnw_salesforce_mapper'),
+                'website_id',
+                $setup->getTable('store_website'),
+                'website_id',
+                Table::ACTION_CASCADE
+            );
     }
 }

@@ -246,7 +246,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     public function mappers($entity)
     {
         return $this->mapperCollectionFactory->create()
-            ->addObjectToFilter($this->objectType);
+            ->addObjectToFilter($this->objectType)
+            ->applyUniquenessByWebsite($this->load()->get('websiteIds/%s', $entity));
     }
 
     /**

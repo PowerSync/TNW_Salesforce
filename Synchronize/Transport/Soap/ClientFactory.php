@@ -38,7 +38,7 @@ class ClientFactory
      */
     public function client($websiteId = null)
     {
-        $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
+        $websiteId = (int)$this->websiteDetector->detectCurrentWebsite($websiteId);
         if (empty(self::$clients[$websiteId])) {
             self::$clients[$websiteId] = $this->create($websiteId);
         }
@@ -53,7 +53,7 @@ class ClientFactory
      */
     public function create($websiteId = null)
     {
-        $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
+        $websiteId = (int)$this->websiteDetector->detectCurrentWebsite($websiteId);
 
         $wsdl = $this->salesforceConfig->getSalesforceWsdl($websiteId);
         if (!\file_exists($wsdl)) {
