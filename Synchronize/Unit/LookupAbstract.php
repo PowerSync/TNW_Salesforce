@@ -74,14 +74,6 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @return LoadAbstract|LoadByAbstract
-     */
-    public function load()
-    {
-        return $this->unit($this->load);
-    }
-
-    /**
      * Input
      *
      * @return Synchronize\Transport\Calls\Query\Input
