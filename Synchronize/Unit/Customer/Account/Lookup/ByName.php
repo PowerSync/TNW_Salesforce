@@ -57,6 +57,8 @@ class ByName extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Mapper Name
+     *
      * @param int $websiteId
      * @return bool|\Magento\Framework\DataObject|\Magento\Framework\Model\AbstractModel|Model\Mapper
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -95,7 +97,7 @@ class ByName extends Synchronize\Unit\LookupAbstract
     /**
      * Value Company
      *
-     * @param $entity
+     * @param \Magento\Customer\Model\Customer $entity
      * @return mixed|null
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Zend_Db_Select_Exception

@@ -139,12 +139,24 @@ class Load extends Synchronize\Unit\UnitAbstract
             }
 
             $this->cache['entities'][$entity] = $entity;
+            $this->cache['websiteIds'][$entity] = $this->websiteId($entity);
             $message[] = __('Entity %1 loaded', $this->identification->printEntity($entity));
         }
 
         if (!empty($message)) {
             $this->group()->messageDebug(implode("\n", $message));
         }
+    }
+
+    /**
+     * Website Id
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @return int
+     */
+    public function websiteId($entity)
+    {
+        return $entity->getData('config_website');
     }
 
     /**
