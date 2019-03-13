@@ -76,36 +76,41 @@ class Save extends Synchronize\Unit\UnitAbstract
         $message = [];
 
         foreach ($this->entities() as $entity) {
-            $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
+            try {
+                $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
 
-            // Save Salesforce Id
-            $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
-            $this->load()->get('%s/queue', $entity)->setAdditionalByCode($attributeName, $salesforceId);
-
-            $message[] = __(
-                "Updating %1 attribute:\n\t\"%2\": %3",
-                $this->identification->printEntity($entity),
-                $attributeName,
-                $salesforceId
-            );
-
-            // Save Salesforce Id from duplicates
-            foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
-                $this->entityObject->saveValueByAttribute(
-                    $duplicate,
-                    $salesforceId,
-                    $attributeName,
-                    $entity->getData('config_website')
-                );
-
-                $this->load()->get('%s/queue', $duplicate)->setAdditionalByCode($attributeName, $salesforceId);
+                // Save Salesforce Id
+                $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
+                $this->load()->get('%s/queue', $entity)->setAdditionalByCode($attributeName, $salesforceId);
 
                 $message[] = __(
                     "Updating %1 attribute:\n\t\"%2\": %3",
-                    $this->identification->printEntity($duplicate),
+                    $this->identification->printEntity($entity),
                     $attributeName,
                     $salesforceId
                 );
+
+                // Save Salesforce Id from duplicates
+                foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
+                    $this->entityObject->saveValueByAttribute(
+                        $duplicate,
+                        $salesforceId,
+                        $attributeName,
+                        $entity->getData('config_website')
+                    );
+
+                    $this->load()->get('%s/queue', $duplicate)->setAdditionalByCode($attributeName, $salesforceId);
+
+                    $message[] = __(
+                        "Updating %1 attribute:\n\t\"%2\": %3",
+                        $this->identification->printEntity($duplicate),
+                        $attributeName,
+                        $salesforceId
+                    );
+                }
+            } catch (\Exception $e) {
+                $this->group()->messageError($e->getMessage(), $entity->getId());
+                $this->cache[$entity]['message'] = $e->getMessage();
             }
         }
 

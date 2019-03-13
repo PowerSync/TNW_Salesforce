@@ -105,6 +105,11 @@
         </arguments>
     </virtualType>
 
+    <type name="TNW\Salesforce\Synchronize\Unit\MappingAbstract">
+        <plugin name="tnw_salesforce_mapping_customer_group"
+                type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\Customer\Group" />
+    </type>
+
     <virtualType name="TNW\Unit\Customer\BusinessAccount\Mapping" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping">
         <arguments>
             <argument name="name" xsi:type="string">customerAccountMapping</argument>
