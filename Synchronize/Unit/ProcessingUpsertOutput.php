@@ -3,6 +3,7 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 /**
  * Processing Upsert Output
+ * @deprecated
  */
 class ProcessingUpsertOutput extends ProcessingAbstract
 {
