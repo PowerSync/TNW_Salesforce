@@ -54,7 +54,7 @@ class Queue
         \Magento\Framework\Stdlib\DateTime\Timezone $timezone
     ) {
         $this->groups = $groups;
-        $this->phases = $phases;
+        $this->phases = array_filter($phases);
         $this->resourceQueue = $resourceQueue;
         $this->uidProcessor = $uidProcessor;
         $this->timezone = $timezone;
