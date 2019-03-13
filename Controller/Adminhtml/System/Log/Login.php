@@ -29,20 +29,23 @@ class Login extends \Magento\Backend\App\Action
      * Dispatch request
      *
      * @return \Magento\Framework\Controller\ResultInterface|\Magento\Framework\App\ResponseInterface
-     * @throws \Magento\Framework\Exception\NotFoundException
      * @throws \InvalidArgumentException
      * @throws \Exception
      */
     public function execute()
     {
+        $websiteId = $this->_request->getParam('website_id');
+
         try {
-            $loginResult = $this->salesforce->getClient()->getLoginResult();
+            $loginResult = $this->salesforce->getClient($websiteId)->getLoginResult();
             return $this->resultRedirectFactory->create()
-                ->setUrl(sprintf('https://%s.salesforce.com/secur/frontdoor.jsp?sid=%s',
-                    $loginResult->getServerInstance(), $loginResult->getSessionId()));
+                ->setUrl(sprintf(
+                    'https://%s.salesforce.com/secur/frontdoor.jsp?sid=%s',
+                    $loginResult->getServerInstance(),
+                    $loginResult->getSessionId()
+                ));
         } catch (\Exception $e) {
-            $this->getMessageManager()
-                ->addErrorMessage($e->getMessage(), 'backend');
+            $this->messageManager->addExceptionMessage($e);
         }
 
         return $this->resultRedirectFactory->create()

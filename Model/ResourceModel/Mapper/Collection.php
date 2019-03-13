@@ -7,13 +7,18 @@ use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 class Collection extends AbstractCollection
 {
     /**
+     * @var int
+     */
+    private $uniquenessWebsite;
+
+    /**
      * Resource initialization
      *
      * @return void
      */
     protected function _construct()
     {
-        $this->_init('TNW\Salesforce\Model\Mapper', 'TNW\Salesforce\Model\ResourceModel\Mapper');
+        $this->_init(\TNW\Salesforce\Model\Mapper::class, \TNW\Salesforce\Model\ResourceModel\Mapper::class);
     }
 
     /**
@@ -35,6 +40,101 @@ class Collection extends AbstractCollection
     }
 
     /**
+     * @param int|null $websiteId
+     * @return $this
+     */
+    public function applyUniquenessByWebsite($websiteId)
+    {
+        $this->uniquenessWebsite = $websiteId;
+        return $this;
+    }
+
+    /**
+     * Get all data array for collection
+     *
+     * @return array
+     * @throws \Zend_Db_Select_Exception
+     */
+    public function getData()
+    {
+        if ($this->_data === null) {
+            $this->_renderFilters()->_renderOrders()->_renderLimit();
+
+            $select = $this->getSelect();
+            if (null !== $this->uniquenessWebsite) {
+                $select = $this->generateUniquenessByWebsiteSelect($select);
+            }
+
+            $this->_data = $this->_fetchAll($select);
+            $this->_afterLoadData();
+        }
+
+        return $this->_data;
+    }
+
+    /**
+     * @return bool|\Magento\Framework\DataObject|\Magento\Framework\Model\AbstractModel
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
+     */
+    public function fetchItem()
+    {
+        if (null === $this->_fetchStmt) {
+            $this->_renderOrders()->_renderLimit();
+
+            $select = $this->getSelect();
+            if (null !== $this->uniquenessWebsite) {
+                $select = $this->generateUniquenessByWebsiteSelect($select);
+            }
+
+            $this->_fetchStmt = $this->getConnection()->query($select);
+        }
+
+        $data = $this->_fetchStmt->fetch();
+        if (!empty($data) && is_array($data)) {
+            $item = $this->getNewEmptyItem();
+            if ($this->getIdFieldName()) {
+                $item->setIdFieldName($this->getIdFieldName());
+            }
+            $item->setData($data);
+
+            return $item;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param \Zend_Db_Select $baseSelect
+     * @return \Zend_Db_Select
+     * @throws \Zend_Db_Select_Exception
+     */
+    public function generateUniquenessByWebsiteSelect($baseSelect)
+    {
+        $uniqueIdSelect = $this->_conn->select()
+            ->from($this->getMainTable(), ['map_id'])
+            ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
+            ->group([
+                'magento_attribute_name',
+                'salesforce_attribute_name',
+                'object_type',
+                'magento_entity_type'
+            ])
+            ->having('COUNT(website_id) = ?', 1);
+
+        $firstSelect = (clone $baseSelect)
+            ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
+            ->where('map_id IN(?)', $uniqueIdSelect);
+
+        $secondSelect = (clone $baseSelect)
+            ->where('website_id = ?', $this->uniquenessWebsite);
+
+        return $this->_conn->select()
+            ->union([$firstSelect, $secondSelect], \Zend_Db_Select::SQL_UNION_ALL);
+    }
+
+    /**
      * @inheritdoc
      */
     public function addItem(\Magento\Framework\DataObject $item)
@@ -50,6 +150,7 @@ class Collection extends AbstractCollection
      * Id field name getter
      *
      * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getIdFieldName()
     {
