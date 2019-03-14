@@ -491,6 +491,11 @@
             <argument name="systemLogger" xsi:type="object">TNW\Logger</argument>
         </arguments>
     </type>
+    <type name="TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory">
+        <arguments>
+            <argument name="logger" xsi:type="object">TNW\Logger</argument>
+        </arguments>
+    </type>
 
     <virtualType name="salesforceLogSearchResult" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
         <arguments>
