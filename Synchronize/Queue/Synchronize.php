@@ -37,11 +37,6 @@ class Synchronize
     private $messageManager;
 
     /**
-     * @var \TNW\SForceEnterprise\Model\Synchronization\Config
-     */
-    private $syncConfig;
-
-    /**
      * Queue constructor.
      * @param int $type
      * @param \TNW\Salesforce\Synchronize\Queue $synchronizeQueue
@@ -49,7 +44,6 @@ class Synchronize
      * @param \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository
      * @param \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
      * @param \Magento\Framework\Message\ManagerInterface $messageManager
-     * @param \TNW\SForceEnterprise\Model\Synchronization\Config $syncConfig
      */
     public function __construct(
         $type,
@@ -57,8 +51,7 @@ class Synchronize
         \TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory $collectionQueueFactory,
         \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
         \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator,
-        \Magento\Framework\Message\ManagerInterface $messageManager,
-        \TNW\SForceEnterprise\Model\Synchronization\Config $syncConfig
+        \Magento\Framework\Message\ManagerInterface $messageManager
     ) {
         $this->type = $type;
         $this->synchronizeQueue = $synchronizeQueue;
@@ -66,7 +59,6 @@ class Synchronize
         $this->websiteRepository = $websiteRepository;
         $this->websiteEmulator = $websiteEmulator;
         $this->messageManager = $messageManager;
-        $this->syncConfig = $syncConfig;
     }
 
     /**
@@ -86,9 +78,6 @@ class Synchronize
      */
     public function synchronize()
     {
-        // save to config time when cron was executed
-        $this->syncConfig->setGlobalLastCronRun($this->syncConfig->getMagentoTime(), $this->type);
-
         foreach ($this->websiteRepository->getList() as $website) {
             $this->websiteEmulator->wrapEmulationWebsite([$this, 'synchronizeToWebsite'], $website->getId());
         }

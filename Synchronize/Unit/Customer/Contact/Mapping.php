@@ -11,7 +11,7 @@ use TNW\Salesforce\Model;
 class Mapping extends Synchronize\Unit\Mapping
 {
     /**
-     * @var \TNW\SForceBusiness\Model\Customer\Config
+     * @var \TNW\Salesforce\Model\Customer\Config
      */
     private $customerConfig;
 
