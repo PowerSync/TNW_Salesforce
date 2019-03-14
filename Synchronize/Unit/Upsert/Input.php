@@ -1,7 +1,6 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
-use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -121,9 +120,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * Process
      *
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
-     * @throws \OutOfBoundsException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function process()
     {
@@ -160,8 +157,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * Process Input
      *
      * @param Synchronize\Transport\Calls\Upsert\Transport\Input $input
-     * @throws \InvalidArgumentException
-     * @throws \OutOfBoundsException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function processInput(Synchronize\Transport\Calls\Upsert\Transport\Input $input)
     {
@@ -202,6 +198,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     public function findFieldProperty($fieldName)
     {
         if (empty($this->objectDescription[$this->salesforceType])) {
+            //TODO: Cache Field
             $resultObjects = $this->factory->client()->describeSObjects([$this->salesforceType]);
             $this->objectDescription[$this->salesforceType] = $resultObjects[0];
         }
@@ -249,11 +246,11 @@ class Input extends Synchronize\Unit\UnitAbstract
             if (in_array($fieldProperty->getType(), ['datetime', 'date'])) {
                 try {
                     if (!$object[$fieldName] instanceof \DateTime) {
-                        $object[$fieldName] = new \DateTime($object[$fieldName]);
+                        $object[$fieldName] = date_create($object[$fieldName]);
                     }
 
                     if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
-                        $object[$fieldName]->setTimezone(new \DateTimeZone($this->localeDate->getConfigTimezone()));
+                        $object[$fieldName]->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
                     }
 
                     if ($object[$fieldName]->getTimestamp() <= 0) {
