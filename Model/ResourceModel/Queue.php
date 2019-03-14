@@ -1,7 +1,6 @@
 <?php
 namespace TNW\Salesforce\Model\ResourceModel;
 
-use Magento\Framework\DataObject;
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 /**
@@ -56,16 +55,23 @@ class Queue extends AbstractDb
         $connection = $this->getConnection();
         $select = $connection->select()
             ->from($this->getMainTable())
-            ->where('code = ?', $queue->getCode())
-            ->where('entity_id = ?', $queue->getEntityId())
-            ->where('entity_load = ?', $queue->getEntityLoad())
-            ->where('entity_load_additional = ?', $this->getSerializer()->serialize($queue->getEntityLoadAdditional()))
-            ->where('sync_type = ?', $queue->getSyncType())
-            ->where('website_id = ?', $queue->getWebsiteId())
-            ->where('status = ?', 'new')
-        ;
+            ->where('code = :code')
+            ->where('entity_id = :entity_id')
+            ->where('entity_load = :entity_load')
+            ->where('entity_load_additional = :entity_load_additional')
+            ->where('sync_type = :sync_type')
+            ->where('website_id = :website_id')
+            ->where('status = ?', 'new');
 
-        $data = $connection->fetchRow($select);
+        $data = $connection->fetchRow($select, [
+            'code' => $queue->getCode(),
+            'entity_id' => $queue->getEntityId(),
+            'entity_load' => $queue->getEntityLoad(),
+            'entity_load_additional' => $this->getSerializer()->serialize($queue->getEntityLoadAdditional()),
+            'sync_type' => $queue->getSyncType(),
+            'website_id' => $queue->getWebsiteId()
+        ]);
+
         if (!empty($data)) {
             $queue->setData($data);
             $this->unserializeFields($queue);
@@ -122,19 +128,19 @@ class Queue extends AbstractDb
     public function getDependenceByCode($code)
     {
         if (empty($this->dependenceByCode)) {
-            //TODO: Переделать запрос
             $select = $this->getConnection()->select()
                 ->from(['childQueue' => $this->getMainTable()], ['childCode' => 'code'])
                 ->joinInner(
                     ['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')],
-                    'childQueue.queue_id = relation.queue_id'
+                    'childQueue.queue_id = relation.queue_id',
+                    []
                 )
                 ->joinInner(
                     ['parentQueue' => $this->getMainTable()],
                     'relation.parent_id = parentQueue.queue_id',
                     ['parentCode' => 'code']
                 )
-            ;
+                ->distinct();
 
             foreach ($this->getConnection()->fetchAll($select) as $row) {
                 $this->dependenceByCode[$row['childCode']][] = $row['parentCode'];
