@@ -3,7 +3,6 @@
 namespace TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer;
 
 use Magento\Customer\Controller\RegistryConstants;
-use TNW\SForceEnterprise\Model\Cron\Source\MagentoObjectType;
 
 /**
  * Class SForceId
@@ -25,7 +24,7 @@ class SForceId extends \TNW\Salesforce\Block\Adminhtml\Base\Edit\Renderer\SForce
      */
     public function getMagentoObjectType()
     {
-        return MagentoObjectType::OBJECT_TYPE_CUSTOMER;
+        return 'Customer';
     }
 
     /**

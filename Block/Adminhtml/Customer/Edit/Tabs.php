@@ -8,7 +8,6 @@ use Magento\Ui\Component\Layout\Tabs\TabInterface;
 use Magento\Backend\Block\Widget\Form\Generic;
 use TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SForceId;
 use TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SyncStatus;
-use TNW\SForceEnterprise\Model\Cron\Source\MagentoObjectType;
 
 class Tabs extends Generic implements TabInterface
 {
@@ -154,7 +153,7 @@ class Tabs extends Generic implements TabInterface
 
         $status = $this->resourceObjects->loadStatus(
             $this->getCustomerId(),
-            MagentoObjectType::OBJECT_TYPE_CUSTOMER,
+            'Customer',
             $this->websiteId()
         );
 
@@ -168,7 +167,7 @@ class Tabs extends Generic implements TabInterface
 
         $salesforceIds = $this->resourceObjects->loadObjectIds(
             $this->getCustomerId(),
-            MagentoObjectType::OBJECT_TYPE_CUSTOMER,
+            'Customer',
             $this->websiteId()
         );
 
