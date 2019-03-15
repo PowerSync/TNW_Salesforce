@@ -281,7 +281,6 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $magentoEntityType
      * @return \Magento\Framework\Model\AbstractModel
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function objectByEntityType($entity, $magentoEntityType)
     {

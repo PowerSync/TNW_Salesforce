@@ -57,8 +57,6 @@ class ByContact extends Synchronize\Unit\LookupAbstract
 
     /**
      * ProcessInput
-     *
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function processInput()
     {
@@ -66,6 +64,8 @@ class ByContact extends Synchronize\Unit\LookupAbstract
         $magentoWebsiteField = 'tnw_mage_basic__Magento_Website__c';
 
         $this->input->columns[] = 'Id';
+        $this->input->columns[] = $magentoIdField;
+        $this->input->columns[] = $magentoWebsiteField;
         $this->input->columns[] = 'Account.Id';
         $this->input->columns[] = 'Account.OwnerId';
         $this->input->columns[] = 'Account.Name';
@@ -125,7 +125,6 @@ class ByContact extends Synchronize\Unit\LookupAbstract
      * @param array $searchIndex
      * @param \Magento\Customer\Model\Customer $entity
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function searchPriorityOrder(array $searchIndex, $entity)
     {
