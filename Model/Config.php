@@ -304,7 +304,7 @@ class Config extends DataObject
      * Collect list of websites for the current org
      *
      * @param int $currentWebsiteId
-     * @return array
+     * @return int[]
      */
     public function getOrgWebsites($currentWebsiteId)
     {
@@ -317,7 +317,7 @@ class Config extends DataObject
             }
 
             if ($websitesByOrg[$currentWebsiteId] === $baseWebsite) {
-                $currentOrgWebsites[] = $websiteId;
+                $currentOrgWebsites[] = (int)$websiteId;
             }
         }
 
