@@ -40,12 +40,14 @@ class Collection extends AbstractCollection
     }
 
     /**
-     * @param int|null $websiteId
+     * Apply Uniqueness By Website
+     *
+     * @param int $websiteId
      * @return $this
      */
     public function applyUniquenessByWebsite($websiteId)
     {
-        $this->uniquenessWebsite = $websiteId;
+        $this->uniquenessWebsite = (int)$websiteId;
         return $this;
     }
 
@@ -106,12 +108,19 @@ class Collection extends AbstractCollection
     }
 
     /**
+     * Generate Uniqueness By Website Select
+     *
      * @param \Zend_Db_Select $baseSelect
      * @return \Zend_Db_Select
      * @throws \Zend_Db_Select_Exception
      */
     public function generateUniquenessByWebsiteSelect($baseSelect)
     {
+        if (0 === $this->uniquenessWebsite) {
+            return (clone $baseSelect)
+                ->where('website_id = ?', $this->uniquenessWebsite);
+        }
+
         $uniqueIdSelect = $this->_conn->select()
             ->from($this->getMainTable(), ['map_id'])
             ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
