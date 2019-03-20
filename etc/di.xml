@@ -25,7 +25,7 @@
     <!-- Salesforce Id Storage -->
     <virtualType name="TNW\Salesforce\Model\Entity\Object\Website" type="TNW\Salesforce\Model\Entity\SalesforceIdStorage">
         <arguments>
-            <argument name="magentoType" xsi:type="string">Website</argument>
+            <argument name="magentoType" xsi:type="const">TNW\Salesforce\Model\Entity\SalesforceIdStorage::MAGENTO_TYPE_WEBSITE</argument>
             <argument name="mappingAttribute" xsi:type="array">
                 <item name="salesforce_id" xsi:type="string">tnw_mage_basic__Magento_Website__c</item>
             </argument>
@@ -41,7 +41,7 @@
 
     <virtualType name="TNW\Salesforce\Model\Entity\Object\Customer" type="TNW\Salesforce\Model\Entity\SalesforceIdStorage">
         <arguments>
-            <argument name="magentoType" xsi:type="string">Customer</argument>
+            <argument name="magentoType" xsi:type="const">TNW\Salesforce\Model\Entity\SalesforceIdStorage::MAGENTO_TYPE_CUSTOMER</argument>
             <argument name="mappingAttribute" xsi:type="array">
                 <item name="sforce_account_id" xsi:type="string">Account</item>
                 <item name="sforce_id" xsi:type="string">Contact</item>
@@ -541,15 +541,9 @@
         <arguments>
             <argument name="phases" xsi:type="array">
                 <item name="0" xsi:type="array">
-                    <item name="phaseName" xsi:type="string" translatable="true">Input Upsert</item>
+                    <item name="phaseName" xsi:type="string" translatable="true">Upsert</item>
                     <item name="startStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_NEW</item>
                     <item name="processStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_PROCESS_INPUT_UPSERT</item>
-                    <item name="errorStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_ERROR</item>
-                </item>
-                <item name="1" xsi:type="array">
-                    <item name="phaseName" xsi:type="string" translatable="true">Output Upsert</item>
-                    <item name="startStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_WAITING_UPSERT</item>
-                    <item name="processStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_PROCESS_OUTPUT_UPSERT</item>
                     <item name="errorStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_ERROR</item>
                 </item>
             </argument>

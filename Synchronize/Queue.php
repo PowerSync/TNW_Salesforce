@@ -9,11 +9,6 @@ use TNW\Salesforce\Model;
 class Queue
 {
     /**
-     * Page Size
-     */
-    const PAGE_SIZE = 200;
-
-    /**
      * @var Group[]
      */
     private $groups;
@@ -22,6 +17,11 @@ class Queue
      * @var string[]
      */
     private $phases;
+
+    /**
+     * @var Model\Config
+     */
+    private $salesforceConfig;
 
     /**
      * @var Model\ResourceModel\Queue
@@ -42,6 +42,7 @@ class Queue
      * Queue constructor.
      * @param Group[] $groups
      * @param array $phases
+     * @param Model\Config $salesforceConfig
      * @param Model\ResourceModel\Queue $resourceQueue
      * @param Model\Logger\Processor\UidProcessor $uidProcessor
      * @param \Magento\Framework\Stdlib\DateTime\Timezone $timezone
@@ -49,12 +50,14 @@ class Queue
     public function __construct(
         array $groups,
         array $phases,
+        Model\Config $salesforceConfig,
         Model\ResourceModel\Queue $resourceQueue,
         Model\Logger\Processor\UidProcessor $uidProcessor,
         \Magento\Framework\Stdlib\DateTime\Timezone $timezone
     ) {
         $this->groups = $groups;
         $this->phases = array_filter($phases);
+        $this->salesforceConfig = $salesforceConfig;
         $this->resourceQueue = $resourceQueue;
         $this->uidProcessor = $uidProcessor;
         $this->timezone = $timezone;
@@ -108,7 +111,7 @@ class Queue
                 $groupCollection->addFilterToStatus($phase['processStatus']);
                 $groupCollection->addFilterToTransactionUid($this->uidProcessor->uid());
 
-                $groupCollection->setPageSize(self::PAGE_SIZE);
+                $groupCollection->setPageSize($this->salesforceConfig->getPageSizeFromMagento());
 
                 $lastPageNumber = $groupCollection->getLastPageNumber();
                 for ($i = 1; $i <= $lastPageNumber; $i++) {

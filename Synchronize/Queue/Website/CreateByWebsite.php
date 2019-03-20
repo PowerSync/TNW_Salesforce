@@ -65,7 +65,7 @@ class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterfa
         $connection = $this->resourceWebsite->getConnection();
         $select = $connection->select()
             ->from($this->resourceWebsite->getMainTable(), ['website_id', 'code'])
-            ->where("{$this->resourceWebsite->getMainTable()} = :website_id");
+            ->where("{$this->resourceWebsite->getIdFieldName()} = :website_id");
 
         return $connection->fetchAll($select, ['website_id' => $entityId]);
     }

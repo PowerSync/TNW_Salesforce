@@ -153,7 +153,7 @@ class Tabs extends Generic implements TabInterface
 
         $status = $this->resourceObjects->loadStatus(
             $this->getCustomerId(),
-            'Customer',
+            \TNW\Salesforce\Model\Entity\SalesforceIdStorage::MAGENTO_TYPE_CUSTOMER,
             $this->websiteId()
         );
 
@@ -167,7 +167,7 @@ class Tabs extends Generic implements TabInterface
 
         $salesforceIds = $this->resourceObjects->loadObjectIds(
             $this->getCustomerId(),
-            'Customer',
+            \TNW\Salesforce\Model\Entity\SalesforceIdStorage::MAGENTO_TYPE_CUSTOMER,
             $this->websiteId()
         );
 

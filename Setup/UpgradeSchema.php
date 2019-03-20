@@ -152,7 +152,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->version_2_4_9($context, $setup);
 
-        $this->version_2_4_14($context, $setup);
+        $this->version_2_4_24($context, $setup);
 
         $this->addEntityQueue($context, $setup);
 
@@ -442,9 +442,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ->createTable($table);
     }
 
-    protected function version_2_4_14(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    protected function version_2_4_24(ModuleContextInterface $context, SchemaSetupInterface $setup)
     {
-        if (version_compare($context->getVersion(), '2.4.14') >= 0) {
+        if (version_compare($context->getVersion(), '2.4.24') >= 0) {
             return;
         }
 
