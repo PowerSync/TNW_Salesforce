@@ -5,6 +5,22 @@ use Magento\Framework\Exception\LocalizedException;
 
 class SalesforceIdStorage
 {
+    const MAGENTO_TYPE_ORDER = 'Order';
+    const MAGENTO_TYPE_ORDER_ITEM = 'Order Item';
+    const MAGENTO_TYPE_ORDER_NOTE = 'Order Note';
+    const MAGENTO_TYPE_QUOTE = 'Quote';
+    const MAGENTO_TYPE_QUOTE_ITEM = 'Quote Item';
+    const MAGENTO_TYPE_PRODUCT = 'Product';
+    const MAGENTO_TYPE_WEBSITE = 'Website';
+    const MAGENTO_TYPE_CUSTOMER = 'Customer';
+    const MAGENTO_TYPE_ORDER_INVOICE = 'Order Invoice';
+    const MAGENTO_TYPE_ORDER_INVOICE_NOTE = 'Order Invoice Note';
+    const MAGENTO_TYPE_ORDER_INVOICE_ITEM = 'Order Invoice Item';
+    const MAGENTO_TYPE_ORDER_SHIPMENT = 'Order Shipment';
+    const MAGENTO_TYPE_ORDER_SHIPMENT_NOTE = 'Order Shipment Note';
+    const MAGENTO_TYPE_ORDER_SHIPMENT_ITEM = 'Order Shipment Item';
+    const MAGENTO_TYPE_ORDER_SHIPMENT_TRACK = 'Order Shipment Track';
+
     /**
      * @var string
      */

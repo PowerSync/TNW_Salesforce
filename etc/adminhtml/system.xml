@@ -22,7 +22,6 @@
                 </field>
             </group>
 
-
             <group id="salesforce" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>Salesforce API</label>
 
@@ -54,6 +53,14 @@
                 <field id="validate_vat_number" translate="button_label" sortOrder="62" showInDefault="1" showInWebsite="1">
                     <button_label>Test Connection</button_label>
                     <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Salesforce\TestConnection</frontend_model>
+                </field>
+            </group>
+
+            <group id="synchronization" translate="label" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Synchronization</label>
+                <field id="page_size_from_magento" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Sync page size</label>
+                    <comment>The number of objects to include into a single sync session. This setting applies to ALL objects.</comment>
                 </field>
             </group>
 

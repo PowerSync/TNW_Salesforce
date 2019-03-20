@@ -353,6 +353,17 @@ class Config extends DataObject
     }
 
     /**
+     * Get Page Size
+     *
+     * @param int|null $websiteId
+     * @return int
+     */
+    public function getPageSizeFromMagento($websiteId = null)
+    {
+        return (int)$this->getStoreConfig('tnwsforce_general/synchronization/page_size_from_magento', $websiteId);
+    }
+
+    /**
      * Get Log status
      *
      * @param int|null $websiteId
