@@ -57,7 +57,7 @@
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
             <argument name="entityLoaders" xsi:type="array">
-                <item name="website" xsi:type="object" shared="false">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website</item>
+                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website</item>
             </argument>
             <argument name="loaders" xsi:type="array">
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader\Customer</item>
@@ -201,7 +201,8 @@
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
             <argument name="entityLoaders" xsi:type="array">
-                <item name="website" xsi:type="object" shared="false">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website</item>
+                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website</item>
+                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Customer</item>
             </argument>
             <argument name="loaders" xsi:type="array">
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader\Customer</item>

@@ -103,7 +103,7 @@ class Synchronize
 
             if ($this->type === \TNW\Salesforce\Model\Config::DIRECT_SYNC_TYPE_REALTIME) {
                 foreach ($collection as $queue) {
-                    $collection->getResource()->delete($queue);
+                    //$collection->getResource()->delete($queue);
                 }
             }
         }
