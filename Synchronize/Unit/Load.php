@@ -138,7 +138,7 @@ class Load extends Synchronize\Unit\UnitAbstract
                 $entity = $index[$hash];
             }
 
-            $this->cache['entities'][$entity] = $entity;
+            $index[$hash] = $this->cache['entities'][$entity] = $entity;
             $this->cache['websiteIds'][$entity] = $this->websiteId($entity);
             $message[] = __('Entity %1 loaded', $this->identification->printEntity($entity));
         }

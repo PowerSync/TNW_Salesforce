@@ -191,7 +191,6 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param Model\Mapper $mapper
      * @return mixed|null
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function value($entity, $mapper)
     {

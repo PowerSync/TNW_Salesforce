@@ -62,7 +62,6 @@ class Mapping extends Synchronize\Unit\Mapping
      * @param \Magento\Customer\Model\Customer $entity
      * @param string $magentoEntityType
      * @return mixed
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function objectByEntityType($entity, $magentoEntityType)
     {
