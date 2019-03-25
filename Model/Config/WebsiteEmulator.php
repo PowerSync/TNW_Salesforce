@@ -82,7 +82,7 @@ class WebsiteEmulator
                 ->emulateAreaCode(
                     \Magento\Framework\App\Area::AREA_FRONTEND,
                     $callback,
-                    [$websiteId] + $params
+                    array_merge([$websiteId], $params)
                 );
         } finally {
             $this->stopEnvironmentEmulation();
@@ -99,6 +99,7 @@ class WebsiteEmulator
      * @param array $params
      * @return mixed
      * @deprecated
+     * @see execInWebsite
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function wrapEmulationWebsite($callback, $websiteId, $params = [])
