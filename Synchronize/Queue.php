@@ -83,6 +83,9 @@ class Queue
             return;
         }
 
+        // Collection Clear
+        $collection->clear();
+
         ksort($this->phases);
 
         foreach ($this->sortGroup() as $group) {
@@ -113,7 +116,7 @@ class Queue
 
                 $groupCollection->setPageSize($this->salesforceConfig->getPageSizeFromMagento());
 
-                $lastPageNumber = $groupCollection->getLastPageNumber();
+                $lastPageNumber = (int)$groupCollection->getLastPageNumber();
                 for ($i = 1; $i <= $lastPageNumber; $i++) {
                     $groupCollection->clear();
                     $groupCollection->setCurPage($i);
@@ -127,6 +130,7 @@ class Queue
 
                     try {
                         $groupCollection->each('incSyncAttempt');
+                        $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
                         $group->synchronize($groupCollection->getItems());
                     } catch (\Exception $e) {
                         $groupCollection->each('addData', [[
