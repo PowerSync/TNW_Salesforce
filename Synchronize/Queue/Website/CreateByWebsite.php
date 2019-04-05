@@ -36,18 +36,23 @@ class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterfa
     /**
      * Process
      *
-     * @param int $entityId
+     * @param int[] $entityIds
      * @param array $additional
      * @param callable $create
      * @param int $websiteId
      * @return mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function process($entityId, array $additional, callable $create, $websiteId)
+    public function process(array $entityIds, array $additional, callable $create, $websiteId)
     {
         $queues = [];
-        foreach ($this->entities($entityId) as $entity) {
-            $queues[] = $create('website', $entity['website_id'], ['website' => $entity['code']]);
+        foreach ($this->entities($entityIds) as $entity) {
+            $queues[] = $create(
+                'website',
+                $entity['website_id'],
+                $entity['base_entity_id'],
+                ['website' => $entity['code']]
+            );
         }
 
         return $queues;
@@ -56,17 +61,21 @@ class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterfa
     /**
      * Entities
      *
-     * @param int $entityId
+     * @param int[] $entityIds
      * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function entities($entityId)
+    public function entities(array $entityIds)
     {
         $connection = $this->resourceWebsite->getConnection();
         $select = $connection->select()
-            ->from($this->resourceWebsite->getMainTable(), ['website_id', 'code'])
-            ->where("{$this->resourceWebsite->getIdFieldName()} = :website_id");
+            ->from($this->resourceWebsite->getMainTable(), [
+                'website_id',
+                'code',
+                'base_entity_id' => $this->resourceWebsite->getIdFieldName()
+            ])
+            ->where($connection->prepareSqlCondition($this->resourceWebsite->getIdFieldName(), ['in' => $entityIds]));
 
-        return $connection->fetchAll($select, ['website_id' => $entityId]);
+        return $connection->fetchAll($select);
     }
 }

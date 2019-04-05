@@ -165,11 +165,12 @@ class Unit
      *
      * @param string $loadBy
      * @param int $entityId
+     * @param int $baseEntityId
      * @param array $identifiers
      * @param array $additionalLoad
      * @return \TNW\Salesforce\Model\Queue
      */
-    public function createQueue($loadBy, $entityId, array $identifiers, array $additionalLoad = [])
+    public function createQueue($loadBy, $entityId, $baseEntityId, array $identifiers, array $additionalLoad = [])
     {
         return $this->queueFactory->create(['data' => [
             'code' => $this->code,
@@ -179,7 +180,8 @@ class Unit
             'entity_load' => $loadBy,
             'entity_load_additional' => $additionalLoad,
             'object_type' => $this->objectType,
-            'status' => 'new'
+            'status' => 'new',
+            '_base_entity_id' => $baseEntityId
         ]]);
     }
 
@@ -204,17 +206,17 @@ class Unit
      * Get generator
      *
      * @param string $loadBy
-     * @param int $entityId
+     * @param int[] $entityIds
      * @param array $additional
      * @param int $websiteId
      * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
-    public function generateQueues($loadBy, $entityId, array $additional, $websiteId)
+    public function generateQueues($loadBy, $entityIds, array $additional, $websiteId)
     {
         $generator = $this->findGenerator($loadBy);
         if ($generator instanceof CreateInterface) {
-            return $generator->process($entityId, $additional, [$this, 'createQueue'], $websiteId);
+            return $generator->process($entityIds, $additional, [$this, 'createQueue'], $websiteId);
         }
 
         if ($this->ignoreFindGeneratorException) {
