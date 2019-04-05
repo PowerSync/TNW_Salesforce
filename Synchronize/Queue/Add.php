@@ -107,10 +107,8 @@ class Add
         $websiteId = $this->storeManager->getWebsite($website)->getId();
         $syncType = $this->syncType(count($entityIds), $websiteId);
 
-        foreach ($entityIds as $entityId) {
-            foreach ($this->resolves as $resolve) {
-                $this->create($resolve, $this->entityType, $entityId, [], $websiteId, $syncType);
-            }
+        foreach ($this->resolves as $resolve) {
+            $this->create($resolve, $this->entityType, $entityIds, [], $websiteId, $syncType);
         }
 
         if ($syncType === Config::DIRECT_SYNC_TYPE_REALTIME) {
@@ -130,7 +128,7 @@ class Add
      *
      * @param Unit $unit
      * @param string $loadBy
-     * @param int $entityId
+     * @param int[] $entityIds
      * @param array $loadAdditional
      * @param int $websiteId
      * @param string $syncType
@@ -141,14 +139,14 @@ class Add
     public function create(
         Unit $unit,
         $loadBy,
-        $entityId,
+        $entityIds,
         array $loadAdditional,
         $websiteId,
         $syncType,
         array &$cacheQueue = []
     ) {
-        $queues = [];
-        foreach ($unit->generateQueues($loadBy, $entityId, $loadAdditional, $websiteId) as $queue) {
+        $queues = $groupQueues = [];
+        foreach ($unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId) as $queue) {
             $key = sprintf(
                 '%s/%s/%s/%s',
                 $queue->getEntityLoad(),
@@ -162,7 +160,7 @@ class Add
 
             switch (true) {
                 case isset($cacheQueue[$key]):
-                    $queue = $cacheQueue[$key];
+                    $queue = (clone $cacheQueue[$key])->setData('_base_entity_id', $queue->getData('_base_entity_id'));
                     break;
 
                 case $unit->skipQueue($queue):
@@ -173,57 +171,95 @@ class Add
                     // Add cache
                     $cacheQueue[$key] = $queue;
 
-                    // Generate Parents
-                    $parents = [];
-                    foreach ($unit->parents() as $parent) {
-                        $parentQueues = $this->create(
-                            $parent,
-                            $queue->getEntityLoad(),
-                            $queue->getEntityId(),
-                            $queue->getEntityLoadAdditional(),
-                            $websiteId,
-                            $syncType,
-                            $cacheQueue
-                        );
-
-                        if (empty($parentQueues)) {
-                            continue;
-                        }
-
-                        array_push($parents, ...$parentQueues);
-                    }
-
-                    $queue->setDependence($parents);
+                    // Save queue
                     $this->resourceQueue->merge($queue);
 
-                    // Generate Children
-                    $children = [];
-                    foreach ($unit->children() as $child) {
-                        $childQueues = $this->create(
-                            $child,
-                            $queue->getEntityLoad(),
-                            $queue->getEntityId(),
-                            $queue->getEntityLoadAdditional(),
-                            $websiteId,
-                            $syncType,
-                            $cacheQueue
-                        );
+                    $groupName = sprintf(
+                        '%s/%s',
+                        $queue->getEntityLoad(),
+                        serialize($queue->getEntityLoadAdditional())
+                    );
 
-                        if (empty($childQueues)) {
-                            continue;
-                        }
-
-                        array_push($children, ...$childQueues);
-                    }
-
-                    foreach ($children as $child) {
-                        $child->addDependence($queue);
-                        $this->resourceQueue->merge($child);
-                    }
+                    $groupQueues[$groupName][] = $queue;
                     break;
             }
 
             $queues[] = $queue;
+        }
+
+        /** @var \TNW\Salesforce\Model\Queue[] $baseQueues */
+        foreach ($groupQueues as $baseQueues) {
+            $baseEntityLoad = reset($baseQueues)->getEntityLoad();
+            $baseEntityLoadAdditional = reset($baseQueues)->getEntityLoadAdditional();
+            $baseEntityIds = array_map(static function ($queue) {
+                return $queue->getEntityId();
+            }, $baseQueues);
+
+            // Generate Parents
+            $parents = [];
+            foreach ($unit->parents() as $parent) {
+                $parentQueues = $this->create(
+                    $parent,
+                    $baseEntityLoad,
+                    $baseEntityIds,
+                    $baseEntityLoadAdditional,
+                    $websiteId,
+                    $syncType,
+                    $cacheQueue
+                );
+
+                if (empty($parentQueues)) {
+                    continue;
+                }
+
+                array_push($parents, ...$parentQueues);
+            }
+
+            foreach ($baseQueues as $queue) {
+                $filter = static function ($parent) use ($queue) {
+                    return $parent->getData('_base_entity_id') === $queue->getEntityId();
+                };
+
+                $dependence = array_filter($parents, $filter);
+                if (empty($dependence)) {
+                    continue;
+                }
+
+                $queue->setDependence($dependence);
+                $this->resourceQueue->merge($queue);
+            }
+
+            // Generate Children
+            $children = [];
+            foreach ($unit->children() as $child) {
+                $childQueues = $this->create(
+                    $child,
+                    $baseEntityLoad,
+                    $baseEntityIds,
+                    $baseEntityLoadAdditional,
+                    $websiteId,
+                    $syncType,
+                    $cacheQueue
+                );
+
+                if (empty($childQueues)) {
+                    continue;
+                }
+
+                array_push($children, ...$childQueues);
+            }
+
+            foreach ($children as $child) {
+                $filer = static function ($queue) use ($child) {
+                    return $child->getData('_base_entity_id') === $queue->getEntityId();
+                };
+
+                foreach (array_filter($baseQueues, $filer) as $queue) {
+                    $child->addDependence($queue);
+                }
+
+                $this->resourceQueue->merge($child);
+            }
         }
 
         return array_filter($queues);

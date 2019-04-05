@@ -13,11 +13,11 @@ interface CreateInterface
     /**
      * Process
      *
-     * @param int $entityId
+     * @param int[] $entityIds
      * @param array $additional
      * @param callable $create
      * @param int $websiteId
      * @return \TNW\Salesforce\Model\Queue[]
      */
-    public function process($entityId, array $additional, callable $create, $websiteId);
+    public function process(array $entityIds, array $additional, callable $create, $websiteId);
 }

@@ -36,17 +36,22 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
     /**
      * Process
      *
-     * @param int $entityId
+     * @param int[] $entityIds
      * @param array $additional
      * @param callable $create
      * @param int $websiteId
      * @return \TNW\Salesforce\Model\Queue[]
      */
-    public function process($entityId, array $additional, callable $create, $websiteId)
+    public function process(array $entityIds, array $additional, callable $create, $websiteId)
     {
         $queues = [];
-        foreach ($this->entities($entityId) as $entity) {
-            $queues[] = $create('customer', $entity['entity_id'], ['customer' => $entity['email']]);
+        foreach ($this->entities($entityIds) as $entity) {
+            $queues[] = $create(
+                'customer',
+                $entity['entity_id'],
+                $entity['base_entity_id'],
+                ['customer' => $entity['email']]
+            );
         }
 
         return $queues;
@@ -55,19 +60,23 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
     /**
      * Entities
      *
-     * @param int $entityId
+     * @param int[] $entityIds
      * @return array
      */
-    public function entities($entityId)
+    public function entities(array $entityIds)
     {
         $connection = $this->resourceCustomer->getConnection();
         $select = $connection->select()
             ->from($this->resourceCustomer->getEntityTable(), [
                 'entity_id' => $this->resourceCustomer->getEntityIdField(),
+                'base_entity_id' => $this->resourceCustomer->getEntityIdField(),
                 'email'
             ])
-            ->where("{$this->resourceCustomer->getEntityIdField()} = :customer_id");
+            ->where($connection->prepareSqlCondition(
+                $this->resourceCustomer->getEntityIdField(),
+                ['in' => $entityIds]
+            ));
 
-        return $connection->fetchAll($select, ['customer_id' => $entityId]);
+        return $connection->fetchAll($select);
     }
 }
