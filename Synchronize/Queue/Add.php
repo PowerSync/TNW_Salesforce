@@ -1,4 +1,5 @@
 <?php
+
 namespace TNW\Salesforce\Synchronize\Queue;
 
 use TNW\Salesforce\Model\Config;
@@ -68,7 +69,8 @@ class Add
         \TNW\Salesforce\Synchronize\Queue\Synchronize $synchronizeEntity,
         \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
         \Magento\Framework\Message\ManagerInterface $messageManager
-    ) {
+    )
+    {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
         $this->storeManager = $storeManager;
@@ -107,9 +109,7 @@ class Add
         $websiteId = $this->storeManager->getWebsite($website)->getId();
         $syncType = $this->syncType(count($entityIds), $websiteId);
 
-        foreach ($this->resolves as $resolve) {
-            $this->create($resolve, $this->entityType, $entityIds, [], $websiteId, $syncType);
-        }
+        $this->create($this->resolves, $this->entityType, $entityIds, [], $websiteId, $syncType);
 
         if ($syncType === Config::DIRECT_SYNC_TYPE_REALTIME) {
             // Sync realtime type
@@ -126,143 +126,61 @@ class Add
     /**
      * Create
      *
-     * @param Unit $unit
-     * @param string $loadBy
-     * @param int[] $entityIds
+     * @param $unitsList
+     * @param $loadBy
+     * @param $entityIds
      * @param array $loadAdditional
-     * @param int $websiteId
-     * @param string $syncType
-     * @param array $cacheQueue
+     * @param $websiteId
+     * @param $syncType
      * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function create(
-        Unit $unit,
+        $unitsList,
         $loadBy,
         $entityIds,
         array $loadAdditional,
         $websiteId,
-        $syncType,
-        array &$cacheQueue = []
-    ) {
-        $queues = $groupQueues = [];
-        foreach ($unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId) as $queue) {
-            $key = sprintf(
-                '%s/%s/%s/%s',
-                $queue->getEntityLoad(),
-                $queue->getEntityId(),
-                $unit->code(),
-                serialize($queue->getEntityLoadAdditional())
-            );
+        $syncType
+    )
+    {
+        $queueDataToSave = $queues = [];
 
-            $queue->setData('website_id', $websiteId);
-            $queue->setData('sync_type', $syncType);
-
-            switch (true) {
-                case isset($cacheQueue[$key]):
-                    $queue = (clone $cacheQueue[$key])->setData('_base_entity_id', $queue->getData('_base_entity_id'));
-                    break;
-
-                case $unit->skipQueue($queue):
-                    $queue = $cacheQueue[$key] = null;
-                    break;
-
-                default:
-                    // Add cache
-                    $cacheQueue[$key] = $queue;
-
-                    // Save queue
-                    $this->resourceQueue->merge($queue);
-
-                    $groupName = sprintf(
-                        '%s/%s',
-                        $queue->getEntityLoad(),
-                        serialize($queue->getEntityLoadAdditional())
-                    );
-
-                    $groupQueues[$groupName][] = $queue;
-                    break;
+        /**
+         * collect all units responsible for the dependency logic
+         */
+        foreach ($unitsList as $unit) {
+            foreach ($unit->parents() as $key => $parent) {
+                $unitsList[$key] = $parent;
             }
 
-            $queues[] = $queue;
-        }
-
-        /** @var \TNW\Salesforce\Model\Queue[] $baseQueues */
-        foreach ($groupQueues as $baseQueues) {
-            $baseEntityLoad = reset($baseQueues)->getEntityLoad();
-            $baseEntityLoadAdditional = reset($baseQueues)->getEntityLoadAdditional();
-            $baseEntityIds = array_map(static function ($queue) {
-                return $queue->getEntityId();
-            }, $baseQueues);
-
-            // Generate Parents
-            $parents = [];
-            foreach ($unit->parents() as $parent) {
-                $parentQueues = $this->create(
-                    $parent,
-                    $baseEntityLoad,
-                    $baseEntityIds,
-                    $baseEntityLoadAdditional,
-                    $websiteId,
-                    $syncType,
-                    $cacheQueue
-                );
-
-                if (empty($parentQueues)) {
-                    continue;
-                }
-
-                array_push($parents, ...$parentQueues);
-            }
-
-            foreach ($baseQueues as $queue) {
-                $filter = static function ($parent) use ($queue) {
-                    return $parent->getData('_base_entity_id') === $queue->getEntityId();
-                };
-
-                $dependence = array_filter($parents, $filter);
-                if (empty($dependence)) {
-                    continue;
-                }
-
-                $queue->setDependence($dependence);
-                $this->resourceQueue->merge($queue);
-            }
-
-            // Generate Children
-            $children = [];
-            foreach ($unit->children() as $child) {
-                $childQueues = $this->create(
-                    $child,
-                    $baseEntityLoad,
-                    $baseEntityIds,
-                    $baseEntityLoadAdditional,
-                    $websiteId,
-                    $syncType,
-                    $cacheQueue
-                );
-
-                if (empty($childQueues)) {
-                    continue;
-                }
-
-                array_push($children, ...$childQueues);
-            }
-
-            foreach ($children as $child) {
-                $filer = static function ($queue) use ($child) {
-                    return $child->getData('_base_entity_id') === $queue->getEntityId();
-                };
-
-                foreach (array_filter($baseQueues, $filer) as $queue) {
-                    $child->addDependence($queue);
-                }
-
-                $this->resourceQueue->merge($child);
+            foreach ($unit->children() as $key => $child) {
+                $unitsList[$key] = $child;
             }
         }
 
-        return array_filter($queues);
+        /**
+         * save related entities to the Queue
+         */
+        foreach ($unitsList as $key => $unit) {
+            foreach ($unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId) as $queue) {
+
+                // Save queue
+                $queueDataToSave[] = $this->resourceQueue->merge($queue);
+            }
+        }
+
+        if (!empty($queueDataToSave)) {
+            $this
+                ->resourceQueue
+                ->getConnection()
+                ->insertArray(
+                    $this->resourceQueue->getMainTable(),
+                    array_keys(reset($queueDataToSave)),
+                    $queueDataToSave,
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
+                );
+        }
     }
 
     /**
