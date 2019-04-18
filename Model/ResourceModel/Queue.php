@@ -52,32 +52,21 @@ class Queue extends AbstractDb
      */
     public function merge(\TNW\Salesforce\Model\Queue $queue)
     {
-        $connection = $this->getConnection();
-        $select = $connection->select()
-            ->from($this->getMainTable())
-            ->where('code = :code')
-            ->where('entity_id = :entity_id')
-            ->where('entity_load = :entity_load')
-            ->where('entity_load_additional = :entity_load_additional')
-            ->where('sync_type = :sync_type')
-            ->where('website_id = :website_id')
-            ->where('status = ?', 'new');
+//        $this->unserializeFields($queue);
+        $this->serializeFields($queue);
 
-        $data = $connection->fetchRow($select, [
-            'code' => $queue->getCode(),
-            'entity_id' => $queue->getEntityId(),
-            'entity_load' => $queue->getEntityLoad(),
-            'entity_load_additional' => $this->getSerializer()->serialize($queue->getEntityLoadAdditional()),
-            'sync_type' => $queue->getSyncType(),
-            'website_id' => $queue->getWebsiteId()
-        ]);
+        $data = $this->prepareDataForSave($queue);
 
-        if (!empty($data)) {
-            $queue->setData($data);
-            $this->unserializeFields($queue);
-        }
+        return $data;
+    }
 
-        return $this->save($queue);
+    /**
+     * @param \Magento\Framework\Model\AbstractModel $object
+     * @return array
+     */
+    public function prepareDataForSave(\Magento\Framework\Model\AbstractModel $object)
+    {
+        return parent::_prepareDataForSave($object);
     }
 
     /**

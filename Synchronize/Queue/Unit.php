@@ -173,6 +173,7 @@ class Unit
     public function createQueue($loadBy, $entityId, $baseEntityId, array $identifiers, array $additionalLoad = [])
     {
         return $this->queueFactory->create(['data' => [
+            'queue_id' => uniqid('', true),
             'code' => $this->code,
             'description' => $this->description($identifiers),
             'entity_type' => $this->entityType,

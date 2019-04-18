@@ -1,6 +1,8 @@
 <?php
+
 namespace TNW\SalesForce\Setup;
 
+use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
@@ -18,7 +20,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
      * @throws \Zend_Db_Exception
      */
     public function upgrade(SchemaSetupInterface $setup,
-        ModuleContextInterface $context)
+                            ModuleContextInterface $context)
     {
         $setup->startSetup();
 
@@ -139,8 +141,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ->addForeignKey(
                     $setup->getFkName('tnw_system_log', 'website_id', 'store_website', 'website_id'),
                     'website_id', $setup->getTable('store_website'), 'website_id', Table::ACTION_CASCADE
-                )
-            ;
+                );
 
             $setup->getConnection()
                 ->createTable($table);
@@ -155,6 +156,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $this->version_2_4_24($context, $setup);
 
         $this->addEntityQueue($context, $setup);
+
+        $this->version_2_5_1($context, $setup);
 
         $setup->endSetup();
     }
@@ -193,8 +196,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ),
                 ['entity_id', 'salesforce_type', 'magento_type'],
                 ['type' => \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE]
-            )
-        ;
+            );
 
         $setup->getConnection()
             ->createTable($table);
@@ -387,8 +389,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 $setup->getTable('store_website'),
                 'website_id',
                 Table::ACTION_CASCADE
-            )
-        ;
+            );
 
         $setup->getConnection()
             ->createTable($table);
@@ -435,13 +436,16 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 $setup->getTable('tnw_salesforce_entity_queue'),
                 'queue_id',
                 Table::ACTION_CASCADE
-            )
-        ;
+            );
 
         $setup->getConnection()
             ->createTable($table);
     }
 
+    /**
+     * @param ModuleContextInterface $context
+     * @param SchemaSetupInterface $setup
+     */
     protected function version_2_4_24(ModuleContextInterface $context, SchemaSetupInterface $setup)
     {
         if (version_compare($context->getVersion(), '2.4.24') >= 0) {
@@ -486,6 +490,155 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'website_id',
                 $setup->getTable('store_website'),
                 'website_id',
+                Table::ACTION_CASCADE
+            );
+    }
+
+    /**
+     * @param SchemaSetupInterface $setup
+     * @param $fkName
+     * @param $tableName
+     * @param $columnName
+     * @param $refTableName
+     * @param $refColumnName
+     * @param string $onDelete
+     * @param bool $purge
+     * @param null $schemaName
+     * @param null $refSchemaName
+     * @param string $onUpdate
+     * @return $this
+     */
+    public function addForeignKey(
+        $setup,
+        $fkName,
+        $tableName,
+        $columnName,
+        $refTableName,
+        $refColumnName,
+        $onDelete = AdapterInterface::FK_ACTION_CASCADE,
+        $purge = false,
+        $schemaName = null,
+        $refSchemaName = null,
+        $onUpdate = AdapterInterface::FK_ACTION_CASCADE
+    )
+    {
+        $setup->getConnection()->dropForeignKey($tableName, $fkName, $schemaName);
+
+        if ($purge) {
+            $setup->getConnection()->purgeOrphanRecords($tableName, $columnName, $refTableName, $refColumnName, $onDelete);
+        }
+
+        $query = sprintf(
+            'ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)',
+            $setup->getConnection()->quoteIdentifier($setup->getConnection()->getTableName($tableName, $schemaName)),
+            $setup->getConnection()->quoteIdentifier($fkName),
+            $setup->getConnection()->quoteIdentifier($columnName),
+            $setup->getConnection()->quoteIdentifier($setup->getConnection()->getTableName($refTableName, $refSchemaName)),
+            $setup->getConnection()->quoteIdentifier($refColumnName)
+        );
+
+        if ($onDelete !== null) {
+            $query .= ' ON DELETE ' . strtoupper($onDelete);
+        }
+
+        if ($onUpdate !== null) {
+            $query .= ' ON UPDATE ' . strtoupper($onUpdate);
+        }
+
+        $result = $setup->getConnection()->rawQuery($query);
+        $setup->getConnection()->resetDdlCache($tableName);
+
+        return $this;
+    }
+
+    /**
+     * @param ModuleContextInterface $context
+     * @param SchemaSetupInterface $setup
+     */
+    protected function version_2_5_1(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.5.1') >= 0) {
+            return;
+        }
+
+        $foreignKeys = $setup->getConnection()
+            ->getForeignKeys($setup->getTable('tnw_salesforce_entity_queue_relation'));
+
+        foreach ($foreignKeys as $foreignKey) {
+            $setup->getConnection()
+                ->dropForeignKey(
+                    $setup->getTable('tnw_salesforce_entity_queue_relation'),
+                    $foreignKey['FK_NAME']
+                );
+        }
+
+        $setup->getConnection()->modifyColumn(
+            $setup->getTable('tnw_salesforce_entity_queue'),
+            'queue_id',
+            [
+                'type' => Table::TYPE_TEXT,
+                'nullable' => false,
+                'length' => 32
+            ]
+        );
+
+        $setup->getConnection()->modifyColumn(
+            $setup->getTable('tnw_salesforce_entity_queue_relation'),
+            'queue_id',
+            [
+                'type' => Table::TYPE_TEXT,
+                'nullable' => false,
+                'length' => 32
+            ]
+        );
+
+        $setup->getConnection()->modifyColumn(
+            $setup->getTable('tnw_salesforce_entity_queue_relation'),
+            'parent_id',
+            [
+                'type' => Table::TYPE_TEXT,
+                'nullable' => false,
+                'length' => 32
+            ]
+        );
+
+        $setup->getConnection()
+            ->addForeignKey(
+                $setup->getFkName('salesforce_objects', 'website_id', 'store_website', 'website_id'),
+                $setup->getTable('salesforce_objects'),
+                'website_id',
+                $setup->getTable('store_website'),
+                'website_id',
+                Table::ACTION_CASCADE
+            );
+
+        $this
+            ->addForeignKey(
+                $setup,
+                $setup->getFkName(
+                    'tnw_salesforce_entity_queue_relation',
+                    'queue_id',
+                    'tnw_salesforce_entity_queue',
+                    'queue_id'
+                ),
+                $setup->getTable('tnw_salesforce_entity_queue_relation'),
+                'queue_id',
+                $setup->getTable('tnw_salesforce_entity_queue'),
+                'queue_id',
+                Table::ACTION_CASCADE
+            )
+            ->addForeignKey(
+                $setup,
+                $setup->getFkName(
+                    'tnw_salesforce_entity_queue_relation',
+                    'parent_id',
+                    'tnw_salesforce_entity_queue',
+                    'queue_id'
+                ),
+                $setup->getTable('tnw_salesforce_entity_queue_relation'),
+                'parent_id',
+                $setup->getTable('tnw_salesforce_entity_queue'),
+                'queue_id',
                 Table::ACTION_CASCADE
             );
     }
