@@ -9,6 +9,7 @@ use TNW\Salesforce\Model\Config;
  */
 class Add
 {
+    const DIRECT_ADD_TO_QUEUE_COUNT_LIMIT = 200;
     /**
      * @var string
      */
@@ -45,6 +46,11 @@ class Add
     private $resourceQueue;
 
     /**
+     * @var \TNW\Salesforce\Model\ResourceModel\PreQueue
+     */
+    private $resourcePreQueue;
+
+    /**
      * @var \Magento\Framework\Message\ManagerInterface
      */
     private $messageManager;
@@ -68,6 +74,7 @@ class Add
         \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator,
         \TNW\Salesforce\Synchronize\Queue\Synchronize $synchronizeEntity,
         \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
+        \TNW\Salesforce\Model\ResourceModel\PreQueue $resourcePreQueue,
         \Magento\Framework\Message\ManagerInterface $messageManager
     )
     {
@@ -78,6 +85,7 @@ class Add
         $this->websiteEmulator = $websiteEmulator;
         $this->synchronizeEntity = $synchronizeEntity;
         $this->resourceQueue = $resourceQueue;
+        $this->resourcePreQueue = $resourcePreQueue;
         $this->messageManager = $messageManager;
     }
 
@@ -88,6 +96,28 @@ class Add
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function addToQueue(array $entityIds)
+    {
+        if (count($entityIds) < self::DIRECT_ADD_TO_QUEUE_COUNT_LIMIT) {
+            $this->addToQueueDirectly($entityIds);
+        } else {
+            $this->addToPreQueue($entityIds);
+        }
+    }
+
+    /**
+     * @param array $entityIds
+     */
+    public function addToPreQueue(array $entityIds)
+    {
+        foreach (array_chunk($entityIds, self::DIRECT_ADD_TO_QUEUE_COUNT_LIMIT) as $ids) {
+            $this->resourcePreQueue->saveEntityIds($ids, $this->entityType);
+        }
+    }
+
+    /**
+     * @param array $entityIds
+     */
+    public function addToQueueDirectly(array $entityIds)
     {
         $entitiesByWebsite = $this->dividerPool
             ->getDividerByGroupCode($this->entityType)
@@ -124,6 +154,138 @@ class Add
     }
 
     /**
+     * @param $current
+     * @param $parents
+     * @param $children
+     * @return array
+     */
+    public function buildDependency($current, $parents)
+    {
+        $dependency = [];
+        foreach ($current as $queue) {
+            foreach ($parents as $parent) {
+                if (
+                    $parent->getId() != $queue->getId() &&
+                    in_array($queue->getEntityId(), $parent->getData('_base_entity_id'))
+                ) {
+                    $dependency[] = [
+                        'parent_id' => $parent->getId(),
+                        'queue_id' => $queue->getId()
+                    ];
+                }
+            }
+        }
+        return $dependency;
+    }
+
+    /**
+     * @param $unitsList
+     * @param $loadBy
+     * @param $entityIds
+     * @param $loadAdditional
+     * @param $websiteId
+     * @param $dependencies
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function generateQueueObjects(
+        $unitsList,
+        $loadBy,
+        $entityIds,
+        $loadAdditional,
+        $websiteId,
+        &$dependencies,
+        &$queuesUnique = []
+    )
+    {
+
+        $queues = [];
+        /**
+         * save related entities to the Queue
+         */
+        foreach ($unitsList as $key => $unit) {
+            $key = md5(sprintf(
+                    '%s/%s/%s/%s/%s',
+                $unit->code(),
+                $loadBy,
+                serialize($entityIds),
+                serialize($loadAdditional),
+                $websiteId
+                ));
+
+            /**
+             * This unit already processed higher in recursion stack
+             */
+            if(isset($queuesUnique[$key])) {
+                $current = $queuesUnique[$key];
+                $parents = $children = [];
+            } else {
+                $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId);
+                foreach ([$current] as $relation) {
+                    foreach ($relation as $relationItem) {
+                        $queuesUnique[$key][$relationItem->getId()] = $relationItem;
+                    }
+                }
+
+                $parents = $this->generateQueueObjects(
+                    $unit->parents(),
+                    $loadBy,
+                    $entityIds,
+                    $loadAdditional,
+                    $websiteId,
+                    $dependencies,
+                    $queuesUnique
+                );
+
+                $children = $this->generateQueueObjects(
+                    $unit->children(),
+                    $loadBy,
+                    $entityIds,
+                    $loadAdditional,
+                    $websiteId,
+                    $dependencies,
+                    $queuesUnique
+                );
+
+                /**
+                 * add parent dependency only, child has own relations
+                 * and will be created as parent dependency deeper in recursion generateQueueObjects
+                 */
+                $newDependencies = $this->buildDependency($current, $parents);
+                if (!empty($newDependencies)) {
+                    array_push($dependencies, ...$newDependencies);
+                }
+            }
+
+            foreach ([$current, $parents, $children] as $relation) {
+                foreach ($relation as $relationItem) {
+                    $queues[$relationItem->getId()] = $relationItem;
+                }
+            }
+        }
+
+        return $queues;
+    }
+
+    /**
+     * @param $queues
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getInsertArray($queues, $syncType, $websiteId)
+    {
+        $queueDataToSave = [];
+
+        foreach ($queues as $queue) {
+            $queue->setData('website_id', $websiteId);
+            $queue->setData('sync_type', $syncType);
+            $queueDataToSave[] = $this->resourceQueue->convertToArray($queue);
+        }
+
+        return $queueDataToSave;
+    }
+
+    /**
      * Create
      *
      * @param $unitsList
@@ -144,32 +306,32 @@ class Add
         $syncType
     )
     {
-        $queueDataToSave = $queues = [];
-
+        $dependencies = [];
         /**
-         * collect all units responsible for the dependency logic
+         * collect all queue objects and build dependencies
          */
-        foreach ($unitsList as $unit) {
-            foreach ($unit->parents() as $key => $parent) {
-                $unitsList[$key] = $parent;
-            }
+        $queues = $this->generateQueueObjects(
+            $unitsList,
+            $loadBy,
+            $entityIds,
+            $loadAdditional,
+            $websiteId,
+            $dependencies
+        );
 
-            foreach ($unit->children() as $key => $child) {
-                $unitsList[$key] = $child;
-            }
-        }
+        $queueDataToSave = $this->getInsertArray($queues, $syncType, $websiteId);
 
-        /**
-         * save related entities to the Queue
-         */
-        foreach ($unitsList as $key => $unit) {
-            foreach ($unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId) as $queue) {
+        $this->saveQueue($queueDataToSave);
+        $this->saveDependency($dependencies);
 
-                // Save queue
-                $queueDataToSave[] = $this->resourceQueue->merge($queue);
-            }
-        }
+    }
 
+    /**\
+     * @param $queueDataToSave
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function saveQueue($queueDataToSave)
+    {
         if (!empty($queueDataToSave)) {
             $this
                 ->resourceQueue
@@ -179,6 +341,25 @@ class Add
                     array_keys(reset($queueDataToSave)),
                     $queueDataToSave,
                     \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
+                );
+        }
+    }
+
+    /**
+     * @param $dependencies
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function saveDependency($dependencies)
+    {
+        if (!empty($dependencies)) {
+            $this
+                ->resourceQueue
+                ->getConnection()
+                ->insertArray(
+                    $this->resourceQueue->getTable('tnw_salesforce_entity_queue_relation'),
+                    array_keys(reset($dependencies)),
+                    $dependencies,
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_IGNORE
                 );
         }
     }
