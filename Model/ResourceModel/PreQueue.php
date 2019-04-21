@@ -31,7 +31,7 @@ class PreQueue extends AbstractDb
             $arrayToInsert[$id] = [
                 'entity_id' => $id,
                 'entity_type' => $entityType
-            ]
+            ];
         }
 
         $this
