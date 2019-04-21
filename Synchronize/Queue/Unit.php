@@ -182,7 +182,16 @@ class Unit
             'entity_load_additional' => $additionalLoad,
             'object_type' => $this->objectType,
             'status' => 'new',
-            '_base_entity_id' => $baseEntityId
+            '_base_entity_id' => [$baseEntityId],
+            '_identify' => md5(sprintf(
+                '%s/%s/%s/%s/%s/%s',
+                $this->code(),
+                $this->entityType,
+                $entityId,
+                $loadBy,
+                serialize($additionalLoad),
+                $this->objectType
+            ))
         ]]);
     }
 
@@ -217,7 +226,10 @@ class Unit
     {
         $generator = $this->findGenerator($loadBy);
         if ($generator instanceof CreateInterface) {
-            return $generator->process($entityIds, $additional, [$this, 'createQueue'], $websiteId);
+            $queues = $generator->process($entityIds, $additional, [$this, 'createQueue'], $websiteId);
+
+            $queues = $this->mergeQueue($queues);
+            return $queues;
         }
 
         if ($this->ignoreFindGeneratorException) {
@@ -230,6 +242,50 @@ class Unit
             $this->code,
             $loadBy
         ));
+    }
+
+    /**
+     * @param $queues
+     * @return array
+     */
+    public function mergeQueue(&$queues)
+    {
+
+        foreach ($queues as $i => $queue1) {
+            foreach ($queues as $j => $queue2) {
+                if ($j <= $i) {
+                    continue;
+                }
+
+                if ($queue1->getData('_identify') == $queue2->getData('_identify')) {
+                    $queue1 = $this->mergeQueueObjects($queue1, $queue2);
+                    unset($queues[$j]);
+                }
+            }
+        }
+
+        return $queues;
+    }
+
+    /**
+     * @param $queue1
+     * @param $queue2
+     * @return mixed
+     */
+    public function mergeQueueObjects($queue1, $queue2)
+    {
+        $queue1->setDescription(
+            $queue1->getDescription() .
+            "\n" .
+            $queue2->getDescription()
+        );
+        $queue1->setData('_base_entity_id',
+            array_merge(
+                $queue1->getData('_base_entity_id'),
+                $queue2->getData('_base_entity_id')
+            )
+        );
+        return $queue1;
     }
 
     /**

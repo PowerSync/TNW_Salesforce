@@ -642,4 +642,54 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 Table::ACTION_CASCADE
             );
     }
+
+
+    /**
+     * Add Entity Queue
+     *
+     * @param ModuleContextInterface $context
+     * @param SchemaSetupInterface $setup
+     * @throws \Zend_Db_Exception
+     */
+    protected function version_2_5_2(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.5.2') >= 0) {
+            return;
+        }
+
+        $table = $setup->getConnection()
+            ->newTable($setup->getTable('tnw_salesforce_entity_prequeue'))
+            ->addColumn('prequeue_id', Table::TYPE_INTEGER, null, [
+                'identity' => true,
+                'unsigned' => true,
+                'nullable' => false,
+                'primary' => true
+            ], 'Queue Id')
+            ->addColumn('entity_id', Table::TYPE_INTEGER, null, [
+                'nullable' => false,
+            ], 'Entity Id')
+            ->addColumn('entity_type', Table::TYPE_TEXT, 255, [
+                'nullable' => false
+            ], 'Entity Type')
+            ->addColumn('created_at', Table::TYPE_TIMESTAMP, null, [
+                'nullable' => false,
+                'default' => Table::TIMESTAMP_INIT
+            ], 'When create')
+            ->addIndex(
+                $setup->getIdxName('tnw_salesforce_entity_prequeue', ['entity_type']),
+                ['entity_type']
+            )
+            ->addIndex(
+                $setup->getIdxName(
+                    'tnw_salesforce_entity_prequeue',
+                    ['entity_id', 'entity_type'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                ),
+                ['entity_id', 'entity_type'],
+                \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+            );
+
+        $setup->getConnection()
+            ->createTable($table);
+    }
 }

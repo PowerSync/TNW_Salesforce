@@ -50,7 +50,7 @@ class Queue extends AbstractDb
      * @return $this
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function merge(\TNW\Salesforce\Model\Queue $queue)
+    public function convertToArray(\TNW\Salesforce\Model\Queue $queue)
     {
 //        $this->unserializeFields($queue);
         $this->serializeFields($queue);
