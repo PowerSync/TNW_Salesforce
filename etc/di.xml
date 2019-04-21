@@ -619,4 +619,13 @@
             </argument>
         </arguments>
     </virtualType>
+
+    <type name="TNW\SForceEnterprise\Console\Command\PreQueueCommand">
+        <arguments>
+            <argument name="queueAddPool" xsi:type="array">
+                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer</item>
+                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

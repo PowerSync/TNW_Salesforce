@@ -159,6 +159,10 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->version_2_5_1($context, $setup);
 
+        $this->version_2_5_2($context, $setup);
+
+        $this->version_2_5_3($context, $setup);
+
         $setup->endSetup();
     }
 
@@ -643,9 +647,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
             );
     }
 
-
     /**
-     * Add Entity Queue
+     * Add Pre-Queue table
      *
      * @param ModuleContextInterface $context
      * @param SchemaSetupInterface $setup
@@ -691,5 +694,51 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->createTable($table);
+    }
+
+    /**
+     * @param ModuleContextInterface $context
+     * @param SchemaSetupInterface $setup
+     */
+    protected function version_2_5_3(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.5.3') >= 0) {
+            return;
+        }
+
+        $setup->getConnection()->addColumn(
+            $setup->getTable('tnw_salesforce_entity_queue'),
+            'identify',
+            [
+                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                'LENGTH' => 32,
+                'comment' => 'Identifier allow detect entity added to the queue with specific params'
+            ]
+        );
+
+        $setup->getConnection()
+            ->addIndex(
+                $setup->getTable('tnw_salesforce_entity_queue'),
+                $setup->getIdxName(
+                    'tnw_salesforce_entity_queue',
+                    ['identify', 'sync_type', 'website_id', 'transaction_uid'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                ),
+                ['identify', 'sync_type', 'website_id', 'transaction_uid'],
+                \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+            );
+
+        $setup->getConnection()
+            ->addIndex(
+                $setup->getTable('tnw_salesforce_entity_prequeue'),
+
+                $setup->getIdxName(
+                    'tnw_salesforce_entity_prequeue',
+                    ['entity_id', 'entity_type'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                ),
+                ['entity_id', 'entity_type'],
+                \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+            );
     }
 }

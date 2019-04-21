@@ -112,6 +112,7 @@ class Add
         foreach (array_chunk($entityIds, self::DIRECT_ADD_TO_QUEUE_COUNT_LIMIT) as $ids) {
             $this->resourcePreQueue->saveEntityIds($ids, $this->entityType);
         }
+        $this->messageManager->addSuccessMessage('Records were scheduled to be added to the sync queue');
     }
 
     /**
@@ -179,7 +180,7 @@ class Add
     }
 
     /**
-     * @param $unitsList
+     * @param $unitsList \TNW\Salesforce\Synchronize\Queue\Unit[]
      * @param $loadBy
      * @param $entityIds
      * @param $loadAdditional
@@ -288,7 +289,7 @@ class Add
     /**
      * Create
      *
-     * @param $unitsList
+     * @param $unitsList \TNW\Salesforce\Synchronize\Queue\Unit[]
      * @param $loadBy
      * @param $entityIds
      * @param array $loadAdditional
