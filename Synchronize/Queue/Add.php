@@ -97,11 +97,7 @@ class Add
      */
     public function addToQueue(array $entityIds)
     {
-        if (count($entityIds) < self::DIRECT_ADD_TO_QUEUE_COUNT_LIMIT) {
-            $this->addToQueueDirectly($entityIds);
-        } else {
-            $this->addToPreQueue($entityIds);
-        }
+        $this->addToQueueDirectly($entityIds);
     }
 
     /**
@@ -117,6 +113,7 @@ class Add
 
     /**
      * @param array $entityIds
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function addToQueueDirectly(array $entityIds)
     {
@@ -337,11 +334,10 @@ class Add
             $this
                 ->resourceQueue
                 ->getConnection()
-                ->insertArray(
+                ->insertOnDuplicate(
                     $this->resourceQueue->getMainTable(),
-                    array_keys(reset($queueDataToSave)),
                     $queueDataToSave,
-                    \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
+                    array_keys(reset($queueDataToSave))
                 );
         }
     }

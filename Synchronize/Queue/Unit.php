@@ -182,6 +182,7 @@ class Unit
             'entity_load_additional' => $additionalLoad,
             'object_type' => $this->objectType,
             'status' => 'new',
+            'transaction_uid' => '0',
             '_base_entity_id' => [$baseEntityId],
             'identify' => md5(sprintf(
                 '%s/%s/%s/%s/%s/%s',
@@ -257,7 +258,7 @@ class Unit
                     continue;
                 }
 
-                if ($queue1->getData('_identify') == $queue2->getData('_identify')) {
+                if ($queue1->getData('identify') == $queue2->getData('identify')) {
                     $queue1 = $this->mergeQueueObjects($queue1, $queue2);
                     unset($queues[$j]);
                 }
