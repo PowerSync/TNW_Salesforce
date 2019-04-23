@@ -155,6 +155,8 @@ class Queue
                 }
             }
         }
+
+        return;
     }
 
     /**
