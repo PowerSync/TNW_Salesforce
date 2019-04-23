@@ -163,7 +163,7 @@ class Add
         foreach ($current as $queue) {
             foreach ($parents as $parent) {
                 if (
-                    $parent->getId() != $queue->getId() &&
+                    $parent->getIdentify() != $queue->getIdentify() &&
                     in_array($queue->getEntityId(), $parent->getData('_base_entity_id'))
                 ) {
                     $dependency[] = [
@@ -203,12 +203,8 @@ class Add
          */
         foreach ($unitsList as $key => $unit) {
             $key = md5(sprintf(
-                    '%s/%s/%s/%s/%s',
-                $unit->code(),
-                $loadBy,
-                serialize($entityIds),
-                serialize($loadAdditional),
-                $websiteId
+                    '%s',
+                $unit->code()
                 ));
 
             /**
@@ -219,17 +215,29 @@ class Add
                 $parents = $children = [];
             } else {
                 $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId);
+
+                if (empty($current)) {
+                    continue;
+                }
+
+                $currentEntityIds = [];
                 foreach ([$current] as $relation) {
                     foreach ($relation as $relationItem) {
                         $queuesUnique[$key][$relationItem->getId()] = $relationItem;
+                        $currentEntityIds[] = $relationItem->getEntityId();
                     }
                 }
 
+                /** @var \TNW\Salesforce\Model\Queue */
+                $currentItem = reset($current);
+                $baseEntityLoad = $currentItem->getEntityLoad();
+                $baseEntityLoadAdditional = $currentItem->getEntityLoadAdditional();
+
                 $parents = $this->generateQueueObjects(
                     $unit->parents(),
-                    $loadBy,
-                    $entityIds,
-                    $loadAdditional,
+                    $baseEntityLoad,
+                    $currentEntityIds,
+                    $baseEntityLoadAdditional,
                     $websiteId,
                     $dependencies,
                     $queuesUnique
@@ -237,9 +245,9 @@ class Add
 
                 $children = $this->generateQueueObjects(
                     $unit->children(),
-                    $loadBy,
-                    $entityIds,
-                    $loadAdditional,
+                    $baseEntityLoad,
+                    $currentEntityIds,
+                    $baseEntityLoadAdditional,
                     $websiteId,
                     $dependencies,
                     $queuesUnique

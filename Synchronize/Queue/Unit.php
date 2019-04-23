@@ -185,11 +185,10 @@ class Unit
             'transaction_uid' => '0',
             '_base_entity_id' => [$baseEntityId],
             'identify' => md5(sprintf(
-                '%s/%s/%s/%s/%s/%s',
+                '%s/%s/%s/%s/%s',
                 $this->code(),
                 $this->entityType,
                 $entityId,
-                $loadBy,
                 serialize($additionalLoad),
                 $this->objectType
             ))

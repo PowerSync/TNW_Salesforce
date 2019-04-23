@@ -96,6 +96,8 @@ class Synchronize
 
         try {
             $this->synchronizeQueue->synchronize($collection, $websiteId);
+        } catch (\Exception $e) {
+            $this->messageManager->addErrorMessage($e->getMessage());
         } finally {
             if ($collection->count() > 0 && !in_array(false, $collection->walk('isSuccess'), true)) {
                 $this->messageManager->addSuccessMessage('All records were synchronized successfully.');
