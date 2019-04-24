@@ -207,14 +207,17 @@ class Add
                 $unit->code()
                 ));
 
+            $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId);
             /**
              * This unit already processed higher in recursion stack
              */
+
             if(isset($queuesUnique[$key])) {
-                $current = $queuesUnique[$key];
+                $current = $unit->baseByUnique($queuesUnique[$key], $current);
+//                $current = $queuesUnique[$key];
                 $parents = $children = [];
             } else {
-                $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId);
+//                $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId);
 
                 if (empty($current)) {
                     continue;
@@ -257,11 +260,15 @@ class Add
                  * add parent dependency only, child has own relations
                  * and will be created as parent dependency deeper in recursion generateQueueObjects
                  */
-                $newDependencies = $this->buildDependency($current, $parents);
-                if (!empty($newDependencies)) {
-                    array_push($dependencies, ...$newDependencies);
+                foreach ($unit->parents() as $parent) {
+                    $newDependencies = $this->buildDependency($current, $parent->getQueues());
+                    if (!empty($newDependencies)) {
+                        array_push($dependencies, ...$newDependencies);
+                    }
                 }
             }
+
+            $unit->setQueues($current);
 
             foreach ([$current, $parents, $children] as $relation) {
                 foreach ($relation as $relationItem) {
