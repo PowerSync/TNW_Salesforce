@@ -1,4 +1,5 @@
 <?php
+
 namespace TNW\Salesforce\Synchronize\Queue;
 
 use Magento\Framework\Exception\LocalizedException;
@@ -64,6 +65,11 @@ class Unit
     private $ignoreFindGeneratorException;
 
     /**
+     * @var \TNW\Salesforce\Model\Queue[]
+     */
+    private $queues = [];
+
+    /**
      * Queue constructor.
      * @param string $code
      * @param string $description
@@ -89,7 +95,8 @@ class Unit
         array $parents = [],
         array $children = [],
         $ignoreFindGeneratorException = false
-    ) {
+    )
+    {
         $this->code = $code;
         $this->entityType = $entityType;
         $this->objectType = $objectType;
@@ -250,7 +257,6 @@ class Unit
      */
     public function mergeQueue(&$queues)
     {
-
         foreach ($queues as $i => $queue1) {
             foreach ($queues as $j => $queue2) {
                 if ($j <= $i) {
@@ -260,6 +266,25 @@ class Unit
                 if ($queue1->getData('identify') == $queue2->getData('identify')) {
                     $queue1 = $this->mergeQueueObjects($queue1, $queue2);
                     unset($queues[$j]);
+                }
+            }
+        }
+
+        return $queues;
+    }
+
+    /**
+     * @param $unique
+     * @param $queues
+     * @return mixed
+     */
+    public function baseByUnique($unique, $queues)
+    {
+        foreach ($unique as $i => $queue1) {
+            foreach ($queues as $j => $queue2) {
+
+                if ($queue1->getData('identify') == $queue2->getData('identify') && $queue1->getId() != $queue2->getId()) {
+                    $queues[$j] = $this->mergeQueueObjects($queue1, $queue2);
                 }
             }
         }
@@ -280,9 +305,11 @@ class Unit
             $queue2->getDescription()
         );
         $queue1->setData('_base_entity_id',
-            array_merge(
-                $queue1->getData('_base_entity_id'),
-                $queue2->getData('_base_entity_id')
+            array_unique(
+                array_merge(
+                    $queue1->getData('_base_entity_id'),
+                    $queue2->getData('_base_entity_id')
+                )
             )
         );
         return $queue1;
@@ -306,4 +333,21 @@ class Unit
 
         return null;
     }
+
+    /**
+     * @return \TNW\Salesforce\Model\Queue[]
+     */
+    public function getQueues(): array
+    {
+        return $this->queues;
+    }
+
+    /**
+     * @param \TNW\Salesforce\Model\Queue[] $queues
+     */
+    public function setQueues(array $queues): void
+    {
+        $this->queues = $queues;
+    }
+
 }
