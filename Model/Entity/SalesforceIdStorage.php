@@ -79,6 +79,10 @@ class SalesforceIdStorage
      */
     public function load($entity, $website = null)
     {
+        if (empty($this->magentoType)) {
+            throw new \Exception('magentoType was not defined!');
+        }
+
         $objectIds = $this->resourceObjects
             ->loadObjectIds(
                 $entity->getId(),
