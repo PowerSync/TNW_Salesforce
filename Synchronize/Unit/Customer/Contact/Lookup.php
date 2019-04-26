@@ -14,7 +14,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     /**
      * @var \Magento\Customer\Model\Config\Share
      */
-    private $customerConfigShare;
+    protected $customerConfigShare;
 
     /**
      * Lookup constructor.
