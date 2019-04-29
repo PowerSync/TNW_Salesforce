@@ -163,6 +163,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->version_2_5_3($context, $setup);
 
+        $this->version_2_5_4($context, $setup);
+
         $setup->endSetup();
     }
 
@@ -740,5 +742,28 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ['entity_id', 'entity_type'],
                 \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
             );
+    }
+
+    /**
+     * @param ModuleContextInterface $context
+     * @param SchemaSetupInterface $setup
+     */
+    protected function version_2_5_4(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.5.4') >= 0) {
+            return;
+        }
+
+        $setup->getConnection()->addColumn(
+            $setup->getTable('salesforce_objects'),
+            'id',
+            [
+                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_BIGINT,
+                'comment' => 'Id',
+                'nullable' => false,
+                'primary' => true,
+                'identity' => true
+            ]
+        );
     }
 }
