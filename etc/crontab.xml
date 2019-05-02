@@ -7,5 +7,14 @@
              method="execute">
             <schedule>*/5 * * * *</schedule>
         </job>
+
+        <job name="salesforce_sync_clear_old_db_log"
+             instance="TNW\Salesforce\Cron\ClearOldDbLog"
+             method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+
     </group>
+
+
 </config>

@@ -386,6 +386,17 @@ class Config extends DataObject
     }
 
     /**
+     * Get Clear DB Logs
+     *
+     * @param int|null $websiteId
+     * @return int
+     */
+    public function getDbClearLogs($websiteId = null)
+    {
+        return (int)$this->getStoreConfig('tnwsforce_general/debug/dbclearlogs', $websiteId);
+    }
+
+    /**
      * Get log path
      *
      * @return string
