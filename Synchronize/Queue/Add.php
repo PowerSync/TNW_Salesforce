@@ -208,10 +208,10 @@ class Add
                 ));
 
             $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId);
+
             /**
              * This unit already processed higher in recursion stack
              */
-
             if(isset($queuesUnique[$key])) {
                 $current = $unit->baseByUnique($queuesUnique[$key], $current);
 //                $current = $queuesUnique[$key];
@@ -339,7 +339,7 @@ class Add
 
     }
 
-    /**\
+    /**
      * @param $queueDataToSave
      * @throws \Magento\Framework\Exception\LocalizedException
      */

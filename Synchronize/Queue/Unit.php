@@ -278,7 +278,7 @@ class Unit
      * @param $queues
      * @return mixed
      */
-    public function baseByUnique($unique, $queues)
+    public function baseByUnique($unique, &$queues)
     {
         foreach ($unique as $i => $queue1) {
             foreach ($queues as $j => $queue2) {
