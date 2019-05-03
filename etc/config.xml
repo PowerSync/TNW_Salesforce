@@ -14,6 +14,7 @@
                 <dblogstatus>1</dblogstatus>
                 <logbaseday>7</logbaseday>
                 <clearsystemlogs>1</clearsystemlogs>
+                <debugcleardays>30</debugcleardays>
             </debug>
         </tnwsforce_general>
         <tnwsforce_customer>

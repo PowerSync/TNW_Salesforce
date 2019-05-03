@@ -2,6 +2,7 @@
 
 namespace TNW\Salesforce\Console\Command;
 
+use TNW\Salesforce\Cron\ClearSystemLog;
 use Symfony\Component\Console\Command\Command;
 use Magento\Framework\Console\Cli;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
@@ -15,6 +16,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CleanSystemLogsCommand extends Command
 {
+
+    /** @var \TNW\SForceEnterprise\Cron\CleanQueue */
+    protected $clearSystemLogCron;
 
     /**
      * @var \TNW\Salesforce\Model\Config
@@ -35,6 +39,7 @@ class CleanSystemLogsCommand extends Command
      * CleanSystemLogsCommand constructor.
      */
     public function __construct(
+        ClearSystemLog $clearSystemLogCron,
         \TNW\Salesforce\Model\Config $salesforceConfig,
         \Psr\Log\LoggerInterface $logger,
         \Magento\Framework\Filesystem\Driver\File $file,
@@ -45,6 +50,7 @@ class CleanSystemLogsCommand extends Command
         $this->file = $file;
         $this->timezone = $timezone;
         $this->salesforceConfig = $salesforceConfig;
+        $this->clearSystemLogCron = $clearSystemLogCron;
         parent::__construct();
     }
 
@@ -73,42 +79,12 @@ class CleanSystemLogsCommand extends Command
                 return;
             }
 
-            $path = 'var/log/sforce/';
-
-            $result = [];
-
-            $flags = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
-
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($path, $flags),
-                \RecursiveIteratorIterator::CHILD_FIRST
-            );
-
-            $currentDate        =  strtotime($this->getDate());
-
-
-            /** @var \FilesystemIterator $file */
-            foreach ($iterator as $file) {
-
-                $lastModifiedDate   =  strtotime(date('Y-m-d', $file->getMTime()));
-
-                $differenceInDays   = round(($currentDate - $lastModifiedDate) / 86400);
-
-                if($differenceInDays > 30){
-                    
-                    $filePath = $file->getPathname();
-                    $result[] = $filePath;
-
-                    if ($this->file->isExists($filePath))  {
-                        $this->file->deleteFile($filePath);
-                    }
-                }
-                    
+            $executeClearDebuglog = $this->clearSystemLogCron->execute();
+            
+            if($executeClearDebuglog){
+                $output->writeln($this->getDateTime() . ': ' .'Cleared logs successfully.');
             }
-
-            $this->_logger->info($this->getDateTime() . ': ' .'Cleared log files ==>',$result); 
-
-            $output->writeln($this->getDateTime() . ': ' .'Cleared logs successfully.');
+            
            
         } catch (\Exception $e) {
             $output->writeln($this->getDateTime() . ': ' . $e->getMessage());
@@ -126,11 +102,4 @@ class CleanSystemLogsCommand extends Command
         return $this->timezone->date()->format('m/d/y H:i:s');
     }
 
-    /**
-     * @return string
-     */
-    public function getDate()
-    {
-        return $this->timezone->date()->format('m/d/y');
-    }
 }
