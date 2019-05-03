@@ -13,7 +13,7 @@
                 <db_log_limit>10000</db_log_limit>
                 <dblogstatus>1</dblogstatus>
                 <logbaseday>7</logbaseday>
-                <dbclearlogs>1</dbclearlogs>
+                <clearsystemlogs>1</clearsystemlogs>
             </debug>
         </tnwsforce_general>
         <tnwsforce_customer>

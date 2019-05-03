@@ -391,9 +391,9 @@ class Config extends DataObject
      * @param int|null $websiteId
      * @return int
      */
-    public function getDbClearLogs($websiteId = null)
+    public function getClearSystemLogs($websiteId = null)
     {
-        return (int)$this->getStoreConfig('tnwsforce_general/debug/dbclearlogs', $websiteId);
+        return (int)$this->getStoreConfig('tnwsforce_general/debug/clearsystemlogs', $websiteId);
     }
 
     /**

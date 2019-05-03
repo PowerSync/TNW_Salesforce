@@ -83,10 +83,10 @@
                 <field id="logbaseday" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0">
                     <label>Log period (base)</label>
                 </field>
-                <field id="dbclearlogs" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="0">
-                    <label>Clear DB Logs</label>
+                <field id="clearsystemlogs" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="0">
+                    <label>Clear System Logs</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Clear one month old logs in database</comment>
+                    <comment>Clear logs files older than a month. Location is {{base_dir}}/var/log/sforce/</comment>
                     <depends>
                         <field id="logstatus">1</field>
                     </depends>
