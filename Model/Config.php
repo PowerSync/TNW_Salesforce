@@ -386,7 +386,7 @@ class Config extends DataObject
     }
 
     /**
-     * Get Clear DB Logs
+     * Get Clear System Logs
      *
      * @param int|null $websiteId
      * @return int

@@ -375,4 +375,12 @@
         <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Store\StoreManager" sortOrder="10" />
     </type>
 
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="tnw_salesforce_clean_system_logs_command" xsi:type="object">TNW\Salesforce\Console\Command\CleanSystemLogsCommand</item>
+            </argument>
+        </arguments>
+    </type>
+
 </config>
