@@ -214,10 +214,8 @@ class Add
              */
             if(isset($queuesUnique[$key])) {
                 $current = $unit->baseByUnique($queuesUnique[$key], $current);
-//                $current = $queuesUnique[$key];
                 $parents = $children = [];
             } else {
-//                $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId);
 
                 if (empty($current)) {
                     continue;
@@ -336,7 +334,6 @@ class Add
 
         $this->saveQueue($queueDataToSave);
         $this->saveDependency($dependencies);
-
     }
 
     /**
