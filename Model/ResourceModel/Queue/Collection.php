@@ -181,6 +181,8 @@ class Collection extends AbstractCollection
      */
     public function updateLock(array $data)
     {
+        $this->getSelect()->group('identify');
+
         $this->_conn->beginTransaction();
         try {
             $this->_select->forUpdate();
