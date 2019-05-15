@@ -229,11 +229,13 @@ class Unit
      * @return \TNW\Salesforce\Model\Queue[]
      * @throws LocalizedException
      */
-    public function generateQueues($loadBy, $entityIds, array $additional, $websiteId)
+    public function generateQueues($loadBy, $entityIds, array $additional, $websiteId, $relatedUnitCode)
     {
         $generator = $this->findGenerator($loadBy);
         if ($generator instanceof CreateInterface) {
             $queues = $generator->process($entityIds, $additional, [$this, 'createQueue'], $websiteId);
+
+            $queues = $this->correctBaseEntityId($queues, $relatedUnitCode);
 
             $queues = $this->mergeQueue($queues);
             return $queues;
@@ -249,6 +251,21 @@ class Unit
             $this->code,
             $loadBy
         ));
+    }
+
+    /**
+     * @param $queues
+     * @param $createBy
+     */
+    public function correctBaseEntityId($queues, $relatedUnitCode)
+    {
+        foreach ($queues as $queue) {
+            $queue->setData(
+                '_base_entity_id',
+                [$relatedUnitCode => $queue->getData('_base_entity_id')]
+            );
+        }
+        return $queues;
     }
 
     /**
@@ -304,14 +321,17 @@ class Unit
             "\n" .
             $queue2->getDescription()
         );
-        $queue1->setData('_base_entity_id',
-            array_unique(
-                array_merge(
-                    $queue1->getData('_base_entity_id'),
-                    $queue2->getData('_base_entity_id')
-                )
-            )
+
+        $_base_entity_ids = array_merge_recursive(
+            $queue1->getData('_base_entity_id'),
+            $queue2->getData('_base_entity_id')
         );
+
+        foreach ($_base_entity_ids as $k => $_base_entity_id) {
+            $_base_entity_ids[$k] = array_unique($_base_entity_id);
+        }
+
+        $queue1->setData('_base_entity_id', $_base_entity_ids);
         return $queue1;
     }
 
