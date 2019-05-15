@@ -157,14 +157,15 @@ class Add
      * @param $children
      * @return array
      */
-    public function buildDependency($current, $parents)
+    public function buildDependency($current, $parents, $unitCode)
     {
         $dependency = [];
         foreach ($current as $queue) {
             foreach ($parents as $parent) {
                 if (
                     $parent->getIdentify() != $queue->getIdentify() &&
-                    in_array($queue->getEntityId(), $parent->getData('_base_entity_id'))
+                    $parent->getData('_base_entity_id/' . $unitCode) &&
+                    in_array($queue->getEntityId(), $parent->getData('_base_entity_id/' . $unitCode))
                 ) {
                     $dependency[] = [
                         'parent_id' => $parent->getId(),
@@ -193,7 +194,8 @@ class Add
         $loadAdditional,
         $websiteId,
         &$dependencies,
-        &$queuesUnique = []
+        &$queuesUnique = [],
+        $relatedUnitCode = null
     )
     {
 
@@ -206,8 +208,9 @@ class Add
                     '%s',
                 $unit->code()
                 ));
+            $relatedUnitCode = $relatedUnitCode ?? $unit->code();
 
-            $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId);
+            $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId, $relatedUnitCode);
 
             /**
              * This unit already processed higher in recursion stack
@@ -241,7 +244,8 @@ class Add
                     $baseEntityLoadAdditional,
                     $websiteId,
                     $dependencies,
-                    $queuesUnique
+                    $queuesUnique,
+                    $unit->code()
                 );
 
                 $children = $this->generateQueueObjects(
@@ -251,7 +255,8 @@ class Add
                     $baseEntityLoadAdditional,
                     $websiteId,
                     $dependencies,
-                    $queuesUnique
+                    $queuesUnique,
+                    $unit->code()
                 );
 
                 /**
@@ -259,7 +264,7 @@ class Add
                  * and will be created as parent dependency deeper in recursion generateQueueObjects
                  */
                 foreach ($unit->parents() as $parent) {
-                    $newDependencies = $this->buildDependency($current, $parent->getQueues());
+                    $newDependencies = $this->buildDependency($current, $parent->getQueues(), $unit->code());
                     if (!empty($newDependencies)) {
                         array_push($dependencies, ...$newDependencies);
                     }
