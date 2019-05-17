@@ -46,7 +46,7 @@ jobs:
         name: Get Magento Code Quality Tool
         command: |
           cd /var/www/html/
-          git clone https://github.com/magento/marketplace-eqp magento-coding-standard
+          composer create-project --repository=https://repo.magento.com magento/marketplace-eqp magento-coding-standard
           cd magento-coding-standard
           composer install
     - run:
@@ -205,7 +205,7 @@ jobs:
         name: Get Magento Code Quality Tool
         command: |
           cd /var/www/html/
-          git clone https://github.com/magento/marketplace-eqp magento-coding-standard
+          composer create-project --repository=https://repo.magento.com magento/marketplace-eqp magento-coding-standard
           cd magento-coding-standard
           composer install
     - run:
@@ -338,7 +338,7 @@ jobs:
         name: Get Magento Code Quality Tool
         command: |
           cd /var/www/html/
-          git clone https://github.com/magento/marketplace-eqp magento-coding-standard
+          composer create-project --repository=https://repo.magento.com magento/marketplace-eqp magento-coding-standard
           cd magento-coding-standard
           composer install
     - run:
