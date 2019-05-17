@@ -15,6 +15,7 @@ use Magento\Framework\App\Cache\State;
  * Class Website
  *
  * @package TNW\Salesforce\Client
+ * @deprecated
  */
 class Website extends Salesforce implements WebsiteInterface
 {
@@ -72,6 +73,7 @@ class Website extends Salesforce implements WebsiteInterface
      * @param bool $forceSync - Force sync even if sync queue enabled
      * @return array
      * @throws \Exception
+     * @deprecated
      */
     public function syncWebsites($websites, $forceSync = false)
     {

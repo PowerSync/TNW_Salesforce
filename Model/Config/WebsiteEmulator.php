@@ -28,24 +28,21 @@ class WebsiteEmulator
         WebsiteDetector $websiteDetector,
         \Magento\Store\Model\App\Emulation $storeEmulator,
         \Magento\Framework\App\State $appState
-    )
-    {
+    ) {
         $this->websiteDetector = $websiteDetector;
         $this->storeEmulator = $storeEmulator;
         $this->appState = $appState;
     }
 
     /**
-     * emulate specific store
+     * Emulate specific store
      *
-     * @param null $websiteId
+     * @param int $websiteId
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function startEnvironmentEmulation($websiteId = null)
+    public function startEnvironmentEmulation($websiteId)
     {
-
-        if (
-            $this->websiteDetector->getCurrentStoreWebsite()->getId() ==
+        if ($this->websiteDetector->getCurrentStoreWebsite()->getId() ==
             $this->websiteDetector->detectCurrentWebsite($websiteId)
         ) {
             /**
@@ -68,12 +65,15 @@ class WebsiteEmulator
     }
 
     /**
-     * @param $callback
-     * @param null $websiteId
+     * Execute In Website
+     *
+     * @param callable $callback
+     * @param int $websiteId
+     * @param array $params
      * @return mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function execInWebsite($callback, $websiteId = null)
+    public function execInWebsite($callback, $websiteId, $params = [])
     {
         $this->startEnvironmentEmulation($websiteId);
 
@@ -82,7 +82,7 @@ class WebsiteEmulator
                 ->emulateAreaCode(
                     \Magento\Framework\App\Area::AREA_FRONTEND,
                     $callback,
-                    [$websiteId]
+                    array_merge([$websiteId], $params)
                 );
         } finally {
             $this->stopEnvironmentEmulation();
@@ -92,13 +92,18 @@ class WebsiteEmulator
     }
 
     /**
-     * @param $callback
-     * @param null $websiteId
+     * Wrap Emulation Website
+     *
+     * @param callable $callback
+     * @param int $websiteId
+     * @param array $params
      * @return mixed
-     * @throws \Exception
+     * @deprecated
+     * @see execInWebsite
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function wrapEmulationWebsite($callback, $websiteId = null)
+    public function wrapEmulationWebsite($callback, $websiteId, $params = [])
     {
-        return $this->execInWebsite($callback, $websiteId);
+        return $this->execInWebsite($callback, $websiteId, $params);
     }
 }

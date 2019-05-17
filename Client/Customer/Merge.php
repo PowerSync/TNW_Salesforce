@@ -3,9 +3,9 @@ namespace TNW\Salesforce\Client\Customer;
 
 class Merge
 {
-    /** @var \TNW\SForceBusiness\Model\Customer\Config */
+    /** @var \TNW\Salesforce\Model\Customer\Config */
     protected $config;
-    /** @var \TNW\SForceBusiness\Client\Customer */
+    /** @var \TNW\Salesforce\Client\Customer */
     protected $client;
 
     public function __construct(

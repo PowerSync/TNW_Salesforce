@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
 
+/**
+ * Collect
+ */
 class Collect extends Synchronize\Unit\UnitAbstract
 {
     /**
@@ -12,7 +15,7 @@ class Collect extends Synchronize\Unit\UnitAbstract
 
     /**
      * CollectAbstract constructor.
-     * @param $name
+     * @param string $name
      * @param string[] $collect
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
@@ -29,7 +32,7 @@ class Collect extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function description()
     {
@@ -37,7 +40,7 @@ class Collect extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     *
+     * Process
      */
     public function process()
     {
@@ -45,7 +48,9 @@ class Collect extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @param null $path
+     * Get
+     *
+     * @param string|null $path
      * @param array $objects
      * @return mixed
      * @throws \OutOfBoundsException
@@ -65,6 +70,8 @@ class Collect extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Skipped
+     *
      * @param object $entity
      * @return bool
      * @throws \OutOfBoundsException

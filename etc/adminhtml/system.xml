@@ -22,7 +22,6 @@
                 </field>
             </group>
 
-
             <group id="salesforce" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>Salesforce API</label>
 
@@ -49,6 +48,7 @@
                     <label>WSDL Path</label>
                     <frontend_model>TNW\Salesforce\Block\Adminhtml\Config\Form\Field\Wsdl</frontend_model>
                     <backend_model>TNW\Salesforce\Model\Config\Backend\Wsdl</backend_model>
+                    <comment>An Enterprise WSDL file is required.</comment>
                 </field>
 
                 <field id="validate_vat_number" translate="button_label" sortOrder="62" showInDefault="1" showInWebsite="1">
@@ -57,12 +57,33 @@
                 </field>
             </group>
 
+            <group id="synchronization" translate="label" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Synchronization</label>
+                <field id="page_size_from_magento" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Batch size</label>
+                    <comment>The number of objects to include into a single batch. This a global setting for ALL objects.</comment>
+                    <depends>
+                        <field id="tnwsforce_general/debug/developer_mode">1</field>
+                    </depends>
+                </field>
+            </group>
+
             <group id="debug" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>Debug and Logging</label>
+
+                <field id="developer_mode" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0">
+                    <label>Developer Mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Enabling the developer mode exposes some additional system features. <strong style='color: red'>Use at your own risk.<strong>]]></comment>
+                </field>
+
                 <field id="logstatus" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0">
                     <label>Enable Log</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Location is {{base_dir}}/var/log/sforce.log</comment>
+                    <depends>
+                        <field id="developer_mode">1</field>
+                    </depends>
                 </field>
                 <field id="logdebug" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0">
                     <label>Enable Debug Log</label>
@@ -73,15 +94,20 @@
                     </depends>
                 </field>
                 <field id="dblogstatus" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="0">
-                    <label>Enable DB Log</label>
+                    <label>Database Logging</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Add log to the database</comment>
+                    <comment>System will also log to the database for easy access.</comment>
                 </field>
                 <field id="db_log_limit" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0">
-                    <label>DB log Limit</label>
+                    <label>Database Log Limit</label>
+                    <comment>Maximum number of records to be stored in the database.</comment>
                 </field>
                 <field id="logbaseday" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0">
-                    <label>Log period (base)</label>
+                    <label>Log limit</label>
+                    <comment>Maximum number of days before archiving.</comment>
+                    <depends>
+                        <field id="developer_mode">1</field>
+                    </depends>
                 </field>
             </group>
         </section>

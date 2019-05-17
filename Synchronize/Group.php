@@ -1,9 +1,10 @@
 <?php
 namespace TNW\Salesforce\Synchronize;
 
+use Magento\Framework\Exception\LocalizedException;
+
 /**
- * Class Group
- * @package TNW\Salesforce\Synchronize
+ * Group
  *
  * @method messageError($format, $args = null, $_ = null)
  * @method messageSuccess($format, $args = null, $_ = null)
@@ -66,6 +67,8 @@ class Group
     }
 
     /**
+     * Code
+     *
      * @return string
      */
     public function code()
@@ -74,13 +77,15 @@ class Group
     }
 
     /**
-     * @param array $entities
+     * Synchronize
+     *
+     * @param \TNW\Salesforce\Model\Queue[] $queues
      * @return Units
-     * @throws \RuntimeException
+     * @throws LocalizedException
      */
-    public function synchronize(array $entities)
+    public function synchronize(array $queues)
     {
-        $units = $this->createUnits($entities)->sort();
+        $units = $this->createUnits($queues)->sort();
         /** @var Unit\UnitInterface $unit */
         foreach ($units as $unit) {
             foreach ($unit->dependents() as $dependent) {
@@ -88,7 +93,7 @@ class Group
                     continue;
                 }
 
-                throw new \RuntimeException(sprintf('Unit (%s) process not complete', $units->get($dependent)->name()));
+                throw new LocalizedException(__('Unit (%1) process not complete', $units->get($dependent)->name()));
             }
 
             $this->messageDebug('----------------------------------------------------');
@@ -102,17 +107,19 @@ class Group
     }
 
     /**
-     * @param array $entities
+     * Create Units
+     *
+     * @param \TNW\Salesforce\Model\Queue[] $queues
      * @return Units
      */
-    protected function createUnits(array $entities)
+    protected function createUnits(array $queues)
     {
         /** @var Units $units */
         $units = $this->unitsFactory->create();
         foreach ($this->units as $instanceName) {
             $units->add($this->objectManager->create($instanceName, [
                 'group' => $this,
-                'entities' => $entities,
+                'queues' => $queues,
                 'units' => $units
             ]));
         }
@@ -121,6 +128,8 @@ class Group
     }
 
     /**
+     * Call
+     *
      * @param string $name
      * @param array $arguments
      * @throws \BadMethodCallException
@@ -128,7 +137,7 @@ class Group
      */
     public function __call($name, $arguments)
     {
-        if (stripos($name, 'message') !== 0){
+        if (stripos($name, 'message') !== 0) {
             throw new \BadMethodCallException('Unknown method');
         }
 
@@ -137,39 +146,7 @@ class Group
         }
 
         //Prepare arguments
-        $arguments = array_map(function ($argument) {
-            if ($argument instanceof \Magento\Framework\Phrase) {
-                $argument = $argument->render();
-            }
-
-            if ($argument instanceof \Exception) {
-                $argument = $argument->getMessage();
-            }
-
-            if ($argument instanceof Transport\Calls\Query\Input) {
-                $argument = $argument->query();
-            }
-
-            if ($argument instanceof \SplObjectStorage) {
-                $argument = array_map(function ($entity) use($argument) {
-                    return $argument[$entity];
-                }, iterator_to_array($argument));
-            }
-
-            if ($argument instanceof \Iterator) {
-                $argument = iterator_to_array($argument);
-            }
-
-            if (is_bool($argument)) {
-                return $argument ? 'true' : 'false';
-            }
-
-            if (is_scalar($argument)) {
-                return (string) $argument;
-            }
-
-            return print_r($argument, true);
-        }, $arguments);
+        $arguments = array_map([$this, 'prepareArgument'], $arguments);
 
         //FIX: Too few argument
         if (substr_count($arguments[0], '%') > (count($arguments) - 1)) {
@@ -208,6 +185,49 @@ class Group
     }
 
     /**
+     * Prepare Argument
+     *
+     * @param mixed $argument
+     * @return string
+     */
+    public function prepareArgument($argument)
+    {
+        if ($argument instanceof \Magento\Framework\Phrase) {
+            $argument = $argument->render();
+        }
+
+        if ($argument instanceof \Exception) {
+            $argument = $argument->getMessage();
+        }
+
+        if ($argument instanceof Transport\Calls\Query\Input) {
+            $argument = $argument->query();
+        }
+
+        if ($argument instanceof \SplObjectStorage) {
+            $argument = array_map(function ($entity) use ($argument) {
+                return $argument[$entity];
+            }, iterator_to_array($argument));
+        }
+
+        if ($argument instanceof \Iterator) {
+            $argument = iterator_to_array($argument);
+        }
+
+        if (is_bool($argument)) {
+            return $argument ? 'true' : 'false';
+        }
+
+        if (is_scalar($argument)) {
+            return (string) $argument;
+        }
+
+        return print_r($argument, true);
+    }
+
+    /**
+     * Is Error
+     *
      * @return bool
      */
     public function isError()
@@ -216,6 +236,8 @@ class Group
     }
 
     /**
+     * Error
+     *
      * @return string
      */
     public function error()

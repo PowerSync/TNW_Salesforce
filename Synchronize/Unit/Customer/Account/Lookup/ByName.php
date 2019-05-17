@@ -5,15 +5,30 @@ use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
 
 /**
+ * Account Lookup By Name
+ *
  * @method \Magento\Customer\Model\Customer[] entities()
  */
 class ByName extends Synchronize\Unit\LookupAbstract
 {
     /**
-     * @var Model\Mapper|bool
+     * @var Model\ResourceModel\Mapper\CollectionFactory
      */
-    private $mapperName;
+    private $mapperCollectionFactory;
 
+    /**
+     * ByName constructor.
+     * @param string $name
+     * @param string $load
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param Synchronize\Unit\IdentificationInterface $identification
+     * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
+     * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
+     * @param Synchronize\Transport\Calls\QueryInterface $process
+     * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
+     * @param array $dependents
+     */
     public function __construct(
         $name,
         $load,
@@ -26,15 +41,45 @@ class ByName extends Synchronize\Unit\LookupAbstract
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
         array $dependents = []
     ) {
-        parent::__construct($name, $load, $units, $group, $identification, $inputFactory, $outputFactory, $process, $dependents);
+        parent::__construct(
+            $name,
+            $load,
+            $units,
+            $group,
+            $identification,
+            $inputFactory,
+            $outputFactory,
+            $process,
+            $dependents
+        );
 
-        $this->mapperName = $mapperCollectionFactory->create()
-            ->addObjectToFilter('Account')
-            ->addFieldToFilter('salesforce_attribute_name', 'Name')
-            ->fetchItem();
+        $this->mapperCollectionFactory = $mapperCollectionFactory;
     }
 
     /**
+     * Mapper Name
+     *
+     * @param int $websiteId
+     * @return bool|\Magento\Framework\DataObject|\Magento\Framework\Model\AbstractModel|Model\Mapper
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
+     */
+    public function mapperName($websiteId)
+    {
+        return $this->mapperCollectionFactory->create()
+                ->addObjectToFilter('Account')
+                ->addFieldToFilter('salesforce_attribute_name', 'Name')
+                ->applyUniquenessByWebsite($websiteId)
+                ->fetchItem();
+    }
+
+    /**
+     * Process Input
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
      */
     public function processInput()
     {
@@ -50,17 +95,25 @@ class ByName extends Synchronize\Unit\LookupAbstract
     }
 
     /**
-     * @param $entity
+     * Value Company
+     *
+     * @param \Magento\Customer\Model\Customer $entity
      * @return mixed|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
      */
     private function valueCompany($entity)
     {
-        return $this->mapperName instanceof Model\Mapper && null !== $this->mapperName->getId()
-            ? $this->unit('customerAccountMapping')->value($entity, $this->mapperName)
+        $mapperName = $this->mapperName($this->load()->get('websiteIds/%s', $entity));
+        return $mapperName instanceof Model\Mapper && null !== $mapperName->getId()
+            ? $this->unit('customerAccountMapping')->value($entity, $mapperName)
             : Synchronize\Unit\Customer\Account\Mapping::companyByCustomer($entity);
     }
 
     /**
+     * Collect Index
+     *
      * @return array
      */
     public function collectIndex()
@@ -76,14 +129,18 @@ class ByName extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Search Priority Order
+     *
      * @param array $searchIndex
      * @param \Magento\Customer\Model\Customer $entity
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
      */
     public function searchPriorityOrder(array $searchIndex, $entity)
     {
-        $recordsIds = array();
-
+        $recordsIds = [];
         if (!empty($searchIndex['name'])) {
             $recordsIds[10] = array_keys($searchIndex['name'], strtolower($this->valueCompany($entity)));
         }

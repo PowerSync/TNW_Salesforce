@@ -3,7 +3,7 @@
 namespace TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer;
 
 use Magento\Customer\Controller\RegistryConstants;
-use TNW\SForceEnterprise\Model\Cron\Source\MagentoObjectType;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Class SForceId
@@ -25,12 +25,12 @@ class SForceId extends \TNW\Salesforce\Block\Adminhtml\Base\Edit\Renderer\SForce
      */
     public function getMagentoObjectType()
     {
-        return MagentoObjectType::OBJECT_TYPE_CUSTOMER;
+        return \TNW\Salesforce\Model\Entity\SalesforceIdStorage::MAGENTO_TYPE_CUSTOMER;
     }
 
     /**
      * @return null|string
-     * @throws \Exception
+     * @throws LocalizedException
      */
     public function getSalesforceObjectByAttribute()
     {
@@ -47,10 +47,9 @@ class SForceId extends \TNW\Salesforce\Block\Adminhtml\Base\Edit\Renderer\SForce
             case 'sforce_lead_id':
                 $salesforceObject = 'Lead';
                 break;
-            default:
-                throw new \Exception(__('Unknown attribute: %1', $this->getId()));
-                break;
 
+            default:
+                throw new LocalizedException(__('Unknown attribute: %1', $this->getId()));
         }
 
         return $salesforceObject;

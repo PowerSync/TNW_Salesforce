@@ -11,7 +11,6 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 
 /**
  * Class Config
- * @package TNW\Salesforce\Model
  */
 class Config extends DataObject
 {
@@ -20,6 +19,16 @@ class Config extends DataObject
     const SFORCE_WEBSITE_ID = 'Magento_Website__c';
     const SFORCE_MAGENTO_ID = 'Magento_ID__c';
     const BASE_DAY = 7;
+
+    /**
+     * Base batch limit for simple sync
+     */
+    const SFORCE_BASE_UPDATE_LIMIT = 200;
+
+    /**
+     * Cron queue types
+     */
+    const DIRECT_SYNC_TYPE_REALTIME = 3;
 
     /** @comment Base batch limit for simple sync */
     const REALTIME_MAX_SYNC = 30;
@@ -56,7 +65,7 @@ class Config extends DataObject
     private $filesystem;
 
     /** @var Config\WebsiteDetector  */
-    private $websiteDetector;
+    protected $websiteDetector;
 
     /** @var array  */
     private $credentialsConfigPaths = [
@@ -102,6 +111,7 @@ class Config extends DataObject
 
     /**
      * Base batch limit for simple sync
+     *
      * @return int
      */
     public function getBaseUpdateLimit()
@@ -111,6 +121,7 @@ class Config extends DataObject
 
     /**
      * Get magento product Id field name in Salesforce database
+     *
      * @return string
      */
     public static function getMagentoIdField()
@@ -120,6 +131,7 @@ class Config extends DataObject
 
     /**
      * Get magento product Id field name in Salesforce database
+     *
      * @return string
      */
     public function getWebsiteIdField()
@@ -214,7 +226,6 @@ class Config extends DataObject
     public function isDefaultOrg()
     {
         foreach ($this->credentialsConfigPaths as $configPath) {
-
             if ($this->getStoreConfig($configPath) != $this->scopeConfig->getValue($configPath)) {
                 return false;
             }
@@ -270,8 +281,9 @@ class Config extends DataObject
     }
 
     /**
-     * @return array
      * Collect list of websites for the active orgs
+     *
+     * @return array
      */
     public function getOrgsWebsites()
     {
@@ -289,21 +301,23 @@ class Config extends DataObject
     }
 
     /**
-     * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * Collect list of websites for the current org
+     *
+     * @param int $currentWebsiteId
+     * @return int[]
      */
-    public function getCurrentOrgWebsites()
+    public function getOrgWebsites($currentWebsiteId)
     {
-        $websitesGrouppedByOrg = $this->getWebsitesGrouppedByOrg();
+        $websitesByOrg = $this->getWebsitesGrouppedByOrg();
 
-        $currentWebsite = $this->storeManager->getWebsite()->getId();
         $currentOrgWebsites = [];
+        foreach ($websitesByOrg as $websiteId => $baseWebsite) {
+            if (!$this->getSalesforceStatus($websiteId)) {
+                continue;
+            }
 
-        $baseOrgWebsite = $websitesGrouppedByOrg[$currentWebsite];
-
-        foreach ($websitesGrouppedByOrg as $websiteId => $baseWebsite) {
-            if ($baseOrgWebsite == $baseWebsite) {
-                $currentOrgWebsites[] = $websiteId;
+            if ($websitesByOrg[$currentWebsiteId] === $baseWebsite) {
+                $currentOrgWebsites[] = (int)$websiteId;
             }
         }
 
@@ -311,11 +325,24 @@ class Config extends DataObject
     }
 
     /**
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @deprecated
+     * @see getOrgWebsites
+     */
+    public function getCurrentOrgWebsites()
+    {
+        return $this->getOrgWebsites($this->storeManager->getWebsite()->getId());
+    }
+
+    /**
+     * Base Website Id Login
+     *
      * @param int $websiteId
      *
      * @return mixed
      */
-    public function uniqueWebsiteIdLogin($websiteId)
+    public function baseWebsiteIdLogin($websiteId)
     {
         $grouped = $this->getWebsitesGrouppedByOrg();
         if (isset($grouped[$websiteId])) {
@@ -323,6 +350,17 @@ class Config extends DataObject
         }
 
         return $websiteId;
+    }
+
+    /**
+     * Get Page Size
+     *
+     * @param int|null $websiteId
+     * @return int
+     */
+    public function getPageSizeFromMagento($websiteId = null)
+    {
+        return (int)$this->getStoreConfig('tnwsforce_general/synchronization/page_size_from_magento', $websiteId);
     }
 
     /**

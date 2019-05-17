@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
 
+/**
+ * UnitAbstract
+ */
 abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
 {
     /**
@@ -35,6 +38,13 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      */
     private $status = self::PENDING;
 
+    /**
+     * UnitAbstract constructor.
+     * @param string $name
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param array $dependents
+     */
     public function __construct(
         $name,
         Synchronize\Units $units,
@@ -51,6 +61,8 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
+     * Name
+     *
      * @return string
      */
     public function name()
@@ -59,6 +71,8 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
+     * Dependents
+     *
      * @return array
      */
     public function dependents()
@@ -67,7 +81,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function description()
     {
@@ -75,6 +89,8 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
+     * Group
+     *
      * @return Synchronize\Group
      */
     public function group()
@@ -83,6 +99,8 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
+     * Units
+     *
      * @return Synchronize\Units
      */
     public function units()
@@ -91,7 +109,9 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
-     * @param $name
+     * Unit
+     *
+     * @param string $name
      * @return UnitInterface
      * @throws \OutOfBoundsException
      */
@@ -101,7 +121,9 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
-     * @param null $path
+     * Get
+     *
+     * @param string|null $path
      * @param array ...$objects
      * @return mixed
      * @throws \RuntimeException
@@ -116,7 +138,9 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
-     * @param $entity
+     * Skipped
+     *
+     * @param object $entity
      * @return bool
      */
     public function skipped($entity)
@@ -125,7 +149,9 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
-     * @param $status
+     * Status
+     *
+     * @param string $status
      */
     public function status($status)
     {
@@ -133,6 +159,8 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
+     * Is Complete
+     *
      * @return bool
      */
     public function isComplete()

@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Observer;
 
 use Magento\Framework\Event\Observer;
 
+/**
+ * Controller Action Post Dispatch
+ */
 class ControllerActionPostDispatch implements \Magento\Framework\Event\ObserverInterface
 {
     /**
@@ -10,6 +13,10 @@ class ControllerActionPostDispatch implements \Magento\Framework\Event\ObserverI
      */
     private $eventManager;
 
+    /**
+     * ControllerActionPostDispatch constructor.
+     * @param \Magento\Framework\Event\Manager $eventManager
+     */
     public function __construct(
         \Magento\Framework\Event\Manager $eventManager
     ) {
@@ -17,6 +24,8 @@ class ControllerActionPostDispatch implements \Magento\Framework\Event\ObserverI
     }
 
     /**
+     * Execute
+     *
      * @param Observer $observer
      * @return void
      */
