@@ -1,21 +1,28 @@
 <?php
 namespace TNW\Salesforce\Observer;
 
+/**
+ * Website Save Commit After
+ */
 class WebsiteSaveCommitAfter implements \Magento\Framework\Event\ObserverInterface
 {
-
     /**
      * @var Entities
      */
     private $entities;
 
-    public function __construct(
-        \TNW\Salesforce\Observer\Entities $entities
-    ) {
+    /**
+     * WebsiteSaveCommitAfter constructor.
+     * @param Entities $entities
+     */
+    public function __construct(Entities $entities)
+    {
         $this->entities = $entities;
     }
 
     /**
+     * Execute
+     *
      * @param \Magento\Framework\Event\Observer $observer
      * @return void
      */

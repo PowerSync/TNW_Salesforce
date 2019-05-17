@@ -127,7 +127,7 @@ class WebsiteDetector
      */
     public function getStroreIdByWebsite($websiteId = null)
     {
-        $websiteId = $this->detectCurrentWebsite($websiteId);
+        $websiteId = (int)$this->detectCurrentWebsite($websiteId);
 
         if (!$this->websiteDefaultStores) {
 

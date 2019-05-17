@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
 
+/**
+ * Unit Save
+ */
 class Save extends Synchronize\Unit\UnitAbstract
 {
     /**
@@ -13,7 +16,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * @var string
      */
-    private $upsert;
+    private $fieldModifier;
 
     /**
      * @var IdentificationInterface
@@ -30,7 +33,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      *
      * @param string $name
      * @param string $load
-     * @param string $upsert
+     * @param string $fieldModifier
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param IdentificationInterface $identification
@@ -40,22 +43,22 @@ class Save extends Synchronize\Unit\UnitAbstract
     public function __construct(
         $name,
         $load,
-        $upsert,
+        $fieldModifier,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject,
         array $dependents = []
     ) {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsert]));
+        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $fieldModifier]));
         $this->load = $load;
-        $this->upsert = $upsert;
+        $this->fieldModifier = $fieldModifier;
         $this->identification = $identification;
         $this->entityObject = $entityObject;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function description()
     {
@@ -63,23 +66,22 @@ class Save extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Process
+     *
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function process()
     {
-        $attributeName = $this->upsert()->fieldSalesforceId();
+        $attributeName = $this->fieldModifier()->fieldSalesforceId();
         $message = [];
 
         foreach ($this->entities() as $entity) {
             try {
-                if (null === $entity->getId()) {
-                    continue;
-                }
-
                 $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
 
                 // Save Salesforce Id
-                $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getConfigWebsite());
+                $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
+                $this->load()->get('%s/queue', $entity)->setAdditionalByCode($attributeName, $salesforceId);
 
                 $message[] = __(
                     "Updating %1 attribute:\n\t\"%2\": %3",
@@ -90,7 +92,14 @@ class Save extends Synchronize\Unit\UnitAbstract
 
                 // Save Salesforce Id from duplicates
                 foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
-                    $this->entityObject->saveValueByAttribute($duplicate, $salesforceId, $attributeName, $entity->getConfigWebsite());
+                    $this->entityObject->saveValueByAttribute(
+                        $duplicate,
+                        $salesforceId,
+                        $attributeName,
+                        $entity->getData('config_website')
+                    );
+
+                    $this->load()->get('%s/queue', $duplicate)->setAdditionalByCode($attributeName, $salesforceId);
 
                     $message[] = __(
                         "Updating %1 attribute:\n\t\"%2\": %3",
@@ -99,7 +108,6 @@ class Save extends Synchronize\Unit\UnitAbstract
                         $salesforceId
                     );
                 }
-
             } catch (\Exception $e) {
                 $this->group()->messageError($e->getMessage(), $entity->getId());
                 $this->cache[$entity]['message'] = $e->getMessage();
@@ -114,7 +122,9 @@ class Save extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @return LoadAbstract|LoadByAbstract
+     * Unit Load
+     *
+     * @return Load|UnitInterface
      */
     public function load()
     {
@@ -122,14 +132,18 @@ class Save extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @return Upsert
+     * Unit Upsert
+     *
+     * @return FieldModifierInterface|UnitInterface
      */
-    public function upsert()
+    public function fieldModifier()
     {
-        return $this->unit($this->upsert);
+        return $this->unit($this->fieldModifier);
     }
 
     /**
+     * Entities
+     *
      * @return \Magento\Catalog\Model\Product[]
      * @throws \OutOfBoundsException
      */
@@ -139,11 +153,13 @@ class Save extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * Filter
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @return bool
      */
     public function filter($entity)
     {
-        return $this->upsert()->get('%s/success', $entity);
+        return $this->fieldModifier()->get('%s/success', $entity);
     }
 }

@@ -1,11 +1,16 @@
 <?php
 namespace TNW\Salesforce\Synchronize;
 
+/**
+ * Units
+ */
 class Units implements \IteratorAggregate
 {
     protected $units = [];
 
     /**
+     * Add
+     *
      * @param Unit\UnitInterface $unit
      * @return $this
      */
@@ -16,7 +21,9 @@ class Units implements \IteratorAggregate
     }
 
     /**
-     * @param $name
+     * Get
+     *
+     * @param string $name
      * @return Unit\UnitInterface
      * @throws \OutOfBoundsException
      */
@@ -30,12 +37,14 @@ class Units implements \IteratorAggregate
     }
 
     /**
+     * Sort
+     *
      * @return $this
      * @throws \RuntimeException
      */
     public function sort()
     {
-        $addUnit = function(array &$sortUnits, Unit\UnitInterface $unit) use(&$addUnit) {
+        $addUnit = function (array &$sortUnits, Unit\UnitInterface $unit) use (&$addUnit) {
             foreach ($unit->dependents() as $dependent) {
                 if (empty($this->units[$dependent])) {
                     throw new \RuntimeException(sprintf('Not fount unit "%s"', $dependent));
@@ -61,6 +70,8 @@ class Units implements \IteratorAggregate
     }
 
     /**
+     * Retrieve an external iterator
+     *
      * @return \Traversable
      */
     public function getIterator()

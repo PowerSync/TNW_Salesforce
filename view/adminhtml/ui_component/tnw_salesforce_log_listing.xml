@@ -7,11 +7,7 @@
         </item>
         <item name="spinner" xsi:type="string">tnw_salesforce_log_columns</item>
         <item name="buttons" xsi:type="array">
-            <item name="login" xsi:type="array">
-                <item name="name" xsi:type="string">login</item>
-                <item name="label" xsi:type="string" translate="true">Login Salesforce</item>
-                <item name="url" xsi:type="string">tnw_salesforce/system_log/login</item>
-            </item>
+            <item name="login" xsi:type="string">TNW\Salesforce\Block\Adminhtml\System\Log\LoginButton</item>
             <item name="download" xsi:type="array">
                 <item name="name" xsi:type="string">download</item>
                 <item name="label" xsi:type="string" translate="true">Download File</item>

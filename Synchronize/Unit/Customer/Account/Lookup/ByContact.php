@@ -4,69 +4,52 @@ namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup;
 use TNW\Salesforce\Synchronize;
 
 /**
+ * Lookup By Contact
+ *
  * @method \Magento\Customer\Model\Customer[] entities()
  */
-class ByContact extends Synchronize\Unit\LookupAbstract
+class ByContact extends \TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup
 {
+
     /**
+     * ProcessInput
      */
     public function processInput()
     {
-        //TODO Костыль
-        foreach ($this->entities() as $entity) {
-            $salesforce = $this->units()->get('customerContactLookup')->get('%s/record/Id', $entity);
-            $entity->setData('sforce_id', $salesforce);
-        }
+        $magentoIdField = 'tnw_mage_basic__Magento_ID__c';
+        $magentoWebsiteField = 'tnw_mage_basic__Magento_Website__c';
 
         $this->input->columns[] = 'Id';
+        $this->input->columns[] = 'Email';
+        $this->input->columns[] = $magentoIdField;
+        $this->input->columns[] = $magentoWebsiteField;
         $this->input->columns[] = 'Account.Id';
         $this->input->columns[] = 'Account.OwnerId';
         $this->input->columns[] = 'Account.Name';
 
         foreach ($this->entities() as $entity) {
-            $salesforceId = $entity->getData('sforce_id');
-            if (!empty($salesforceId)) {
-                $this->input[$entity]['AND']['Id']['IN'][] = $salesforceId;
-                $this->input[$entity]['AND']['AccountId']['!='] = '';
+            $this->input[$entity]['AND']['CoM']['AND']['EaW']['AND']['Email']['=']
+                = strtolower($entity->getEmail());
+
+            if ($this->customerConfigShare->isWebsiteScope()) {
+                $this->input[$entity]['AND']['CoM']['AND']['EaW']['AND'][$magentoWebsiteField]['IN']
+                    = ['', $this->load()->entityByType($entity, 'website')->getData('salesforce_id')];
             }
+
+            $magentoId = $entity->getId();
+            if (!empty($magentoId)) {
+                $this->input[$entity]['AND']['CoM']['OR'][$magentoIdField]['='] = $magentoId;
+            }
+
+            $this->input[$entity]['AND']['AccountId']['!='] = '';
         }
 
         $this->input->from = 'Contact';
     }
 
     /**
-     * @return array
-     */
-    public function collectIndex()
-    {
-        $searchIndex = [];
-        foreach ($this->output as $key => $record) {
-            if (!empty($record['Id'])) {
-                $searchIndex['contactId'][$key] = $record['Id'];
-            }
-        }
-
-        return $searchIndex;
-    }
-
-    /**
-     * @param array $searchIndex
-     * @param \Magento\Customer\Model\Customer $entity
-     * @return array
-     */
-    public function searchPriorityOrder(array $searchIndex, $entity)
-    {
-        $recordsIds = array();
-
-        // Priority 1
-        if (!empty($searchIndex['contactId'])) {
-            $recordsIds[10] = array_keys($searchIndex['contactId'], $entity->getData('sforce_id'));
-        }
-
-        return $recordsIds;
-    }
-
-    /**
+     * Prepare Record
+     *
      * @param array $record
      * @return mixed
      */

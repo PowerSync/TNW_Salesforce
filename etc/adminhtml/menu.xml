@@ -20,12 +20,12 @@
         <add id="TNW_Salesforce::tools" title="Tools" module="TNW_Salesforce" sortOrder="90"
              parent="TNW_Salesforce::salesforce" resource="TNW_Salesforce::tools_log"/>
 
-        <add id="TNW_Salesforce::tools_log" action="tnw_salesforce/system_log/view" title="Salesforce Sync Log"
+        <add id="TNW_Salesforce::tools_log" action="tnw_salesforce/system_log/view" title="Synchronization Log (DB)"
              translate="title" module="TNW_Salesforce" sortOrder="90" parent="TNW_Salesforce::tools"
              resource="TNW_Salesforce::tools_log"/>
 
         <!-- Customer menu -->
-        <add id="TNW_Salesforce::tnw_customer" title="TNW Salesforce" module="TNW_Salesforce" sortOrder="50"
+        <add id="TNW_Salesforce::tnw_customer" title="Salesforce" module="TNW_Salesforce" sortOrder="50"
              dependsOnModule="TNW_Salesforce" parent="Magento_Customer::customer"
              resource="Magento_Customer::customers"/>
 
