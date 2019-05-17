@@ -3,6 +3,9 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
 
+/**
+ * Processing Abstract
+ */
 abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
 {
     /**
@@ -15,9 +18,18 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
      */
     protected $identification;
 
+    /**
+     * ProcessingAbstract constructor.
+     * @param string $name
+     * @param string $load
+     * @param Synchronize\Units $units
+     * @param Synchronize\Group $group
+     * @param IdentificationInterface $identification
+     * @param array $dependents
+     */
     public function __construct(
         $name,
-        $load = '',
+        $load,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
@@ -29,7 +41,7 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function description()
     {
@@ -37,7 +49,9 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @return Synchronize\Unit\LoadAbstract|Synchronize\Unit\LoadByAbstract
+     * Load
+     *
+     * @return Load|UnitInterface
      */
     public function load()
     {
@@ -45,15 +59,32 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @return array
+     * Entities
+     *
+     * @return \Magento\Framework\Model\AbstractModel[]
      * @throws \OutOfBoundsException
      */
     public function entities()
     {
-        return $this->load()->get('entities');
+        return array_filter($this->load()->get('entities'), [$this, 'filter']);
     }
 
     /**
+     * Filter
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @return bool
+     */
+    protected function filter($entity)
+    {
+        return !in_array(true, array_map(function ($unit) use ($entity) {
+            return $this->unit($unit)->skipped($entity);
+        }, $this->dependents()), true);
+    }
+
+    /**
+     * Process
+     *
      * @throws \InvalidArgumentException
      * @throws \OutOfBoundsException
      */
@@ -91,7 +122,9 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @param $entity
+     * Analize
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
      * @return bool|\Magento\Framework\Phrase
      */
     abstract public function analize($entity);

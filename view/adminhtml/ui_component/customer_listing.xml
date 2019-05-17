@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
-    <columns name="customer_columns" class="Magento\Customer\Ui\Component\Listing\Columns">
+    <columns name="customer_columns">
         <column name="sforce_sync_status" class="TNW\Salesforce\Ui\Component\Listing\Columns\SyncStatus">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">

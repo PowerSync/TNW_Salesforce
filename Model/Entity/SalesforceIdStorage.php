@@ -5,6 +5,22 @@ use Magento\Framework\Exception\LocalizedException;
 
 class SalesforceIdStorage
 {
+    const MAGENTO_TYPE_ORDER = 'Order';
+    const MAGENTO_TYPE_ORDER_ITEM = 'Order Item';
+    const MAGENTO_TYPE_ORDER_NOTE = 'Order Note';
+    const MAGENTO_TYPE_QUOTE = 'Quote';
+    const MAGENTO_TYPE_QUOTE_ITEM = 'Quote Item';
+    const MAGENTO_TYPE_PRODUCT = 'Product';
+    const MAGENTO_TYPE_WEBSITE = 'Website';
+    const MAGENTO_TYPE_CUSTOMER = 'Customer';
+    const MAGENTO_TYPE_ORDER_INVOICE = 'Order Invoice';
+    const MAGENTO_TYPE_ORDER_INVOICE_NOTE = 'Order Invoice Note';
+    const MAGENTO_TYPE_ORDER_INVOICE_ITEM = 'Order Invoice Item';
+    const MAGENTO_TYPE_ORDER_SHIPMENT = 'Order Shipment';
+    const MAGENTO_TYPE_ORDER_SHIPMENT_NOTE = 'Order Shipment Note';
+    const MAGENTO_TYPE_ORDER_SHIPMENT_ITEM = 'Order Shipment Item';
+    const MAGENTO_TYPE_ORDER_SHIPMENT_TRACK = 'Order Shipment Track';
+
     /**
      * @var string
      */
@@ -54,6 +70,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Load
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
      *
@@ -61,6 +79,10 @@ class SalesforceIdStorage
      */
     public function load($entity, $website = null)
     {
+        if (empty($this->magentoType)) {
+            throw new \Exception('magentoType was not defined!');
+        }
+
         $objectIds = $this->resourceObjects
             ->loadObjectIds(
                 $entity->getId(),
@@ -78,6 +100,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Save
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
      *
@@ -100,6 +124,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Save By Attribute
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $attributeName
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
@@ -113,15 +139,21 @@ class SalesforceIdStorage
     }
 
     /**
+     * Save Value By Attribute
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
-     * @param $value
-     * @param $attributeName
+     * @param string $value
+     * @param string $attributeName
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
      *
      * @throws LocalizedException
      */
     public function saveValueByAttribute($entity, $value, $attributeName, $website = null)
     {
+        if (null === $entity->getId()) {
+            return;
+        }
+
         $records[] = [
             'magento_type' => $this->magentoType,
             'entity_id' => $entity->getId(),
@@ -134,6 +166,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Save Status
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param bool $status
      * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
@@ -142,6 +176,10 @@ class SalesforceIdStorage
      */
     public function saveStatus($entity, $status, $website = null)
     {
+        if (null === $entity->getId()) {
+            return;
+        }
+
         $this->resourceObjects
             ->saveStatus(
                 $entity->getId(),
@@ -152,6 +190,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Value By Attribute
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $attributeName
      *
@@ -163,6 +203,8 @@ class SalesforceIdStorage
     }
 
     /**
+     * Object By Attribute
+     *
      * @param string $attributeName
      *
      * @return false|int|string
@@ -178,7 +220,9 @@ class SalesforceIdStorage
     }
 
     /**
-     * @param $website
+     * Prepare Website Id
+     *
+     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
      *
      * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -186,6 +230,6 @@ class SalesforceIdStorage
     private function prepareWebsiteId($website)
     {
         $websiteId = $this->storeManager->getWebsite($website)->getId();
-        return $this->config->uniqueWebsiteIdLogin($websiteId);
+        return $this->config->baseWebsiteIdLogin($websiteId);
     }
 }

@@ -1,6 +1,9 @@
 <?php
 namespace TNW\Salesforce\Synchronize;
 
+/**
+ * Cache
+ */
 class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     /**
@@ -8,6 +11,10 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     private $data;
 
+    /**
+     * Cache constructor.
+     * @param array $data
+     */
     public function __construct(
         array &$data
     ) {
@@ -15,6 +22,8 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * Prepare Hash
+     *
      * @param mixed $offset
      * @return mixed
      * @throws \InvalidArgumentException
@@ -33,9 +42,11 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * @param $path
-     * @param array ...$objects
-     * @return mixed|null
+     * Get
+     *
+     * @param string|null $path
+     * @param array $objects
+     * @return array|mixed|null
      */
     public function get($path = null, ...$objects)
     {
@@ -58,6 +69,8 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * Whether a offset exists
+     *
      * @param mixed $offset
      * @return bool
      * @throws \InvalidArgumentException
@@ -69,6 +82,8 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * Offset to retrieve
+     *
      * @param mixed $offset
      * @return Cache
      * @throws \InvalidArgumentException
@@ -86,6 +101,8 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * Offset to set
+     *
      * @param mixed $offset
      * @param mixed $value
      * @throws \InvalidArgumentException
@@ -101,6 +118,8 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * Offset to unset
+     *
      * @param mixed $offset
      * @throws \InvalidArgumentException
      */
@@ -111,6 +130,8 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * Retrieve an external iterator
+     *
      * @return \ArrayIterator
      */
     public function getIterator()
@@ -119,6 +140,8 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * Count elements of an object
+     *
      * @return int
      */
     public function count()
@@ -127,10 +150,12 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * @param $cache
+     * Is Empty
+     *
+     * @param Cache|mixed $cache
      * @return bool
      */
-    static public function isEmpty($cache)
+    public static function isEmpty($cache)
     {
         if ($cache instanceof self) {
             return $cache->count() === 0;

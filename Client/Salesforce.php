@@ -81,7 +81,7 @@ class Salesforce extends DataObject
     public function getClient($websiteId = null)
     {
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
-        $cacheKey = $this->salesforceConfig->uniqueWebsiteIdLogin($websiteId);
+        $cacheKey = $this->salesforceConfig->baseWebsiteIdLogin($websiteId);
 
         if (empty($this->client[$cacheKey])) {
             try {
@@ -242,7 +242,9 @@ class Salesforce extends DataObject
     }
 
     /**
-     * @param $type
+     * Prepare SObject
+     *
+     * @param string $type
      * @param \stdClass $object
      * @throws \Exception
      */
@@ -258,8 +260,15 @@ class Salesforce extends DataObject
             }
 
             if ($describeField->getType() === 'string' && $describeField->getLength() < mb_strlen($value)) {
-                $this->logger->messageDebug('Truncating a long value for an "%s:%s". Limit is %d value length is %d. Initial value: %s',
-                    $type, $field, $describeField->getLength(), mb_strlen($value), $object->$field);
+                $this->logger->messageDebug(
+                    'Truncating a long value for an "%s:%s". Limit is %d value length is %d. Initial value: %s',
+                    $type,
+                    $field,
+                    $describeField->getLength(),
+                    mb_strlen($value),
+                    $object->$field
+                );
+
                 $object->$field = mb_substr($object->$field, 0, $describeField->getLength() - 3) . '...';
             }
         }
@@ -295,7 +304,7 @@ class Salesforce extends DataObject
     public function getSalesForceUrl($websiteId = null)
     {
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
-        $cacheKey = $this->salesforceConfig->uniqueWebsiteIdLogin($websiteId);
+        $cacheKey = $this->salesforceConfig->baseWebsiteIdLogin($websiteId);
 
         $active = $this->salesforceConfig->getSalesforceStatus($websiteId);
         if (!$active) {

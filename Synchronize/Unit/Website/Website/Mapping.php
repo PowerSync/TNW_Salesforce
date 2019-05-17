@@ -4,36 +4,48 @@ namespace TNW\Salesforce\Synchronize\Unit\Website\Website;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
 
-class Mapping extends Synchronize\Unit\MappingAbstract
+/**
+ * Mapping
+ */
+class Mapping extends Synchronize\Unit\Mapping
 {
-
     /**
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * Object By Entity Type
+     *
+     * @param \Magento\Store\Model\Website $entity
      * @param string $magentoEntityType
      * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function objectByEntityType($entity, $magentoEntityType)
     {
-        switch ($magentoEntityType) {
-            case 'website':
-                return $entity;
-
-            default:
-                return null;
+        if ($magentoEntityType === 'website') {
+            return $entity;
         }
+
+        return parent::objectByEntityType($entity, $magentoEntityType);
     }
 
+    /**
+     * Prepare Value
+     *
+     * @param \Magento\Store\Model\Website $entity
+     * @param string $attributeCode
+     * @return mixed
+     */
     public function prepareValue($entity, $attributeCode)
     {
         if ($entity instanceof \Magento\Store\Model\Website && strcasecmp($attributeCode, 'sforce_id') === 0) {
-            return $this->unit('websiteWebsiteLookup')->get('%s/record/Id', $entity);
+            return $this->lookup()->get('%s/record/Id', $entity);
         }
 
         return parent::prepareValue($entity, $attributeCode);
     }
 
     /**
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * Mappers
+     *
+     * @param \Magento\Store\Model\Website $entity
      * @return Model\ResourceModel\Mapper\Collection
      * @throws \Exception
      */

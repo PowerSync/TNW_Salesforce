@@ -118,7 +118,7 @@ class Objects extends AbstractDb
      */
     public function baseWebsiteId($websiteId)
     {
-        return $this->config->uniqueWebsiteIdLogin($websiteId);
+        return $this->config->baseWebsiteIdLogin($websiteId);
     }
 
     /**
