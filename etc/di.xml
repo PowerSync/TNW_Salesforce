@@ -620,10 +620,4 @@
         </arguments>
     </virtualType>
 
-    <type name="TNW\SForceBusiness\Synchronize\Unit\Order\Load\Loader\Order">
-        <arguments>
-            <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Order</argument>
-        </arguments>
-    </type>
-
 </config>
