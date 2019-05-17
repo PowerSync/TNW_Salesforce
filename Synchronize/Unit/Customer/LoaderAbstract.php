@@ -17,11 +17,6 @@ abstract class LoaderAbstract  extends \TNW\Salesforce\Synchronize\Unit\EntityLo
     private $resourceCustomer;
 
     /**
-     * @var \TNW\SForceBusiness\Synchronize\Entity\Customer\Generate
-     */
-    private $customerGenerate;
-
-    /**
      * Customer constructor.
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
@@ -31,13 +26,11 @@ abstract class LoaderAbstract  extends \TNW\Salesforce\Synchronize\Unit\EntityLo
     public function __construct(
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer,
-        \TNW\SForceBusiness\Synchronize\Entity\Customer\Generate $customerGenerate,
         \TNW\Salesforce\Model\Entity\SalesforceIdStorage $salesforceIdStorage = null
     ) {
         parent::__construct($salesforceIdStorage);
         $this->customerFactory = $customerFactory;
         $this->resourceCustomer = $resourceCustomer;
-        $this->customerGenerate = $customerGenerate;
     }
 
     /**
@@ -50,10 +43,6 @@ abstract class LoaderAbstract  extends \TNW\Salesforce\Synchronize\Unit\EntityLo
     {
         $customer = $this->customerFactory->create();
         $this->resourceCustomer->load($customer, $entity->getCustomerId());
-
-        if (null === $customer->getId()) {
-            $customer = $this->customerGenerate->bySale($entity);
-        }
 
         return $customer;
     }
