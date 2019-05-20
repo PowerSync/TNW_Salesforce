@@ -1,6 +1,12 @@
 <?php
 namespace TNW\Salesforce\Model\Customer;
 
+/**
+ * Class Mapper
+ *
+ * @deprecated
+ * TODO: Remove
+ */
 class Mapper extends \TNW\Salesforce\Model\Mapper
 {
 

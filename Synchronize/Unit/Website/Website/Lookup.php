@@ -4,11 +4,14 @@ namespace TNW\Salesforce\Synchronize\Unit\Website\Website;
 use TNW\Salesforce\Synchronize;
 
 /**
+ * Lookup
+ *
  * @method \Magento\Store\Model\Website[] entities()
  */
 class Lookup extends Synchronize\Unit\LookupAbstract
 {
     /**
+     * ProcessInput
      */
     public function processInput()
     {
@@ -25,6 +28,8 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Collect Index
+     *
      * @return array
      */
     public function collectIndex()
@@ -42,14 +47,15 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     }
 
     /**
+     * Search Priority Order
+     *
      * @param array $searchIndex
      * @param \Magento\Store\Model\Website $entity
      * @return array
      */
     public function searchPriorityOrder(array $searchIndex, $entity)
     {
-        $recordsIds = array();
-
+        $recordsIds = [];
         if (!empty($searchIndex['code'])) {
             // Priority 1
             $recordsIds[10] = array_keys($searchIndex['code'], strtolower($entity->getCode()));

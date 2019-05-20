@@ -1,9 +1,11 @@
 <?php
 namespace TNW\Salesforce\Observer;
 
+/**
+ * Customer Address Save Commit After
+ */
 class CustomerAddressSaveCommitAfter implements \Magento\Framework\Event\ObserverInterface
 {
-
     /**
      * @var Entities
      */
@@ -16,6 +18,7 @@ class CustomerAddressSaveCommitAfter implements \Magento\Framework\Event\Observe
 
     /**
      * AfterSaveCommitObserver constructor.
+     * @param \TNW\Salesforce\Observer\Entities $entities
      * @param \TNW\Salesforce\Model\Customer\Config $customerConfig
      */
     public function __construct(
@@ -27,6 +30,8 @@ class CustomerAddressSaveCommitAfter implements \Magento\Framework\Event\Observe
     }
 
     /**
+     * Execute
+     *
      * @param \Magento\Framework\Event\Observer $observer
      * @return void
      */
@@ -48,9 +53,9 @@ class CustomerAddressSaveCommitAfter implements \Magento\Framework\Event\Observe
             return;
         }
 
-        if (
-            !$this->customerConfig->getCustomerAllGroups($customer->getWebsiteId()) &&
-            !in_array((int)$customer->getGroupId(), $this->customerConfig->getCustomerSyncGroups($customer->getWebsiteId()))
+        $customerSyncGroups = $this->customerConfig->getCustomerSyncGroups($customer->getWebsiteId());
+        if (!$this->customerConfig->getCustomerAllGroups($customer->getWebsiteId()) &&
+            !in_array((int)$customer->getGroupId(), $customerSyncGroups)
         ) {
             return;
         }

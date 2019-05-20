@@ -9,6 +9,9 @@
             <salesforce>
                 <wsdl>var/enterprise.wsdl.xml</wsdl>
             </salesforce>
+            <synchronization>
+                <page_size_from_magento>500</page_size_from_magento>
+            </synchronization>
             <debug>
                 <db_log_limit>10000</db_log_limit>
                 <dblogstatus>1</dblogstatus>

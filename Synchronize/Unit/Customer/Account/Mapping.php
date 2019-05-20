@@ -5,10 +5,13 @@ use Magento\Customer\Model\Address;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
 
-class Mapping extends Synchronize\Unit\MappingAbstract
+/**
+ * Customer Account Mapping
+ */
+class Mapping extends Synchronize\Unit\Mapping
 {
     /**
-     * @var \TNW\SForceBusiness\Model\Customer\Config
+     * @var \TNW\Salesforce\Model\Customer\Config
      */
     private $customerConfig;
 
@@ -54,6 +57,8 @@ class Mapping extends Synchronize\Unit\MappingAbstract
     }
 
     /**
+     * Object By Entity Type
+     *
      * @param \Magento\Customer\Model\Customer $entity
      * @param string $magentoEntityType
      * @return mixed
@@ -71,11 +76,13 @@ class Mapping extends Synchronize\Unit\MappingAbstract
                 return $entity->getDefaultBillingAddress();
 
             default:
-                return null;
+                return parent::objectByEntityType($entity, $magentoEntityType);
         }
     }
 
     /**
+     * Prepare Value
+     *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @param string $attributeCode
      * @return mixed
@@ -84,13 +91,15 @@ class Mapping extends Synchronize\Unit\MappingAbstract
     public function prepareValue($entity, $attributeCode)
     {
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'sforce_id') === 0) {
-            return $this->units()->get('customerAccountLookup')->get('%s/record/Id', $entity);
+            return $this->units()->get('customerBusinessAccountLookup')->get('%s/record/Id', $entity);
         }
 
         return parent::prepareValue($entity, $attributeCode);
     }
 
     /**
+     * Default Value
+     *
      * @param \Magento\Customer\Model\Customer $entity
      * @param \TNW\Salesforce\Model\Mapper $mapper
      * @return mixed
@@ -99,23 +108,20 @@ class Mapping extends Synchronize\Unit\MappingAbstract
     {
         $default = parent::defaultValue($entity, $mapper);
 
-        if (
-            strcasecmp($mapper->getSalesforceAttributeName(), 'Name') === 0 &&
-            empty($default)
-        ) {
+        if (empty($default) && strcasecmp($mapper->getSalesforceAttributeName(), 'Name') === 0) {
             return self::generateCompanyByCustomer($entity);
         }
 
-        if (
-            strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0
-        ) {
-            return $this->customerConfig->defaultOwner($entity->getConfigWebsite());
+        if (strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0) {
+            return $this->customerConfig->defaultOwner($entity->getData('config_website'));
         }
 
         return $default;
     }
 
     /**
+     * Company By Customer
+     *
      * @param \Magento\Customer\Model\Customer $entity
      * @return string
      */
@@ -130,6 +136,8 @@ class Mapping extends Synchronize\Unit\MappingAbstract
     }
 
     /**
+     * Get Company By Customer
+     *
      * @param \Magento\Customer\Model\Customer $entity
      * @return string
      */
@@ -146,6 +154,8 @@ class Mapping extends Synchronize\Unit\MappingAbstract
     }
 
     /**
+     * Generate Company By Customer
+     *
      * @param \Magento\Customer\Model\Customer $entity
      * @return string
      */
