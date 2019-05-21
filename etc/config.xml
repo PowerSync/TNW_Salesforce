@@ -16,6 +16,8 @@
                 <db_log_limit>10000</db_log_limit>
                 <dblogstatus>1</dblogstatus>
                 <logbaseday>7</logbaseday>
+                <clearsystemlogs>1</clearsystemlogs>
+                <debugcleardays>30</debugcleardays>
             </debug>
         </tnwsforce_general>
         <tnwsforce_customer>

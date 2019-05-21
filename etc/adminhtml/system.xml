@@ -109,6 +109,19 @@
                         <field id="developer_mode">1</field>
                     </depends>
                 </field>
+                <field id="clearsystemlogs" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="0">
+                    <label>Enable Log Cleanup</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Clears log files older than a month. Location is {{base_dir}}/var/log/sforce/</comment>
+                    <depends>
+                        <field id="logstatus">1</field>
+                    </depends>
+                </field>
+                <field id="debugcleardays" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0">
+                    <label>Log clean up</label>
+                    <comment>Automatically clean up old log files older than X number of days</comment>
+                </field>
+                
             </group>
         </section>
 

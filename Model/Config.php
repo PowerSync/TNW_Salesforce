@@ -424,6 +424,29 @@ class Config extends DataObject
     }
 
     /**
+     * Get Clear System Logs
+     *
+     * @param int|null $websiteId
+     * @return int
+     */
+    public function getClearSystemLogs($websiteId = null)
+    {
+       return (int)$this->getStoreConfig('tnwsforce_general/debug/clearsystemlogs', $websiteId);
+    }
+
+
+    /**
+     * Get Clear System Logs
+     *
+     * @param int|null $websiteId
+     * @return int
+     */
+    public function getDebugLogClearDays($websiteId = null)
+    {
+        return (int)$this->getStoreConfig('tnwsforce_general/debug/debugcleardays', $websiteId);
+    }
+
+    /**
      * Get log path
      *
      * @return string
