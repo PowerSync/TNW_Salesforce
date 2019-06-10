@@ -8,10 +8,13 @@
 
 namespace TNW\Salesforce\Cron;
 
+use Magento\Framework\App\Filesystem\DirectoryList;
 use \TNW\Salesforce\Model\Logger;
 use \TNW\Salesforce\Model\Config;
 use \TNW\Salesforce\Console\Command\CleanSystemLogsCommand;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use Magento\Framework\Filesystem;
+
 /**
  * Class CurrencyRatesUpdate
  *
@@ -19,13 +22,16 @@ use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
  */
 class ClearSystemLog
 {
-   
-   
     /** @var Logger */
     private $logger;
 
     /** @var Config */
     private $config;
+
+    /**
+     * @var Filesystem
+     */
+    protected $_filesystem;
 
     /**
      * UpdateCurrencyRates constructor.
@@ -40,7 +46,8 @@ class ClearSystemLog
         \Magento\Framework\Filesystem\Driver\File $file,
         \Magento\Framework\Filesystem\DirectoryList $dir,
         TimezoneInterface $timezone,
-        Config $config
+        Config $config,
+        Filesystem $filesystem
     )
     {
         $this->logger = $logger;
@@ -49,7 +56,8 @@ class ClearSystemLog
         $this->timezone = $timezone;
         $this->config = $config;
         $this->salesforceConfig = $salesforceConfig;
-       
+        $this->_filesystem = $filesystem;
+
     }
 
     /**
@@ -72,25 +80,26 @@ class ClearSystemLog
                 return;
             }
 
-           // $this->cleanSystemLogsCommand->execute($input,$output);
-           
-            $path = '/var/log/sforce/';
+            $path = $this->_filesystem->getDirectoryRead(DirectoryList::LOG)->getAbsolutePath() . 'sforce';
 
             $result = [];
 
             $flags = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
 
             $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($this->dir->getRoot().$path, $flags),
+                new \RecursiveDirectoryIterator($path, $flags),
                 \RecursiveIteratorIterator::CHILD_FIRST
             );
 
             $currentDate        =  strtotime($this->getDate());
             $logClearTershold = $this->salesforceConfig->getDebugLogClearDays();
 
-
             /** @var \FilesystemIterator $file */
             foreach ($iterator as $file) {
+
+                if (substr($file->getFilename(), -4) !== '.log') {
+                    continue;
+                }
 
                 $lastModifiedDate   =  strtotime(date('Y-m-d', $file->getMTime()));
 
