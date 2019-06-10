@@ -7,5 +7,12 @@
              method="execute">
             <schedule>*/5 * * * *</schedule>
         </job>
+
+        <job name="salesforce_sync_clear_system_log"
+             instance="TNW\Salesforce\Cron\ClearSystemLog"
+             method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+
     </group>
 </config>
