@@ -17,7 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CleanSystemLogsCommand extends Command
 {
 
-    /** @var \TNW\SForceEnterprise\Cron\CleanQueue */
+    /** @var ClearSystemLog */
     protected $clearSystemLogCron;
 
     /**
