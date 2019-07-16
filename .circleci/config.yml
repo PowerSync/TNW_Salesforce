@@ -27,6 +27,7 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
@@ -186,6 +187,7 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
@@ -317,6 +319,7 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
