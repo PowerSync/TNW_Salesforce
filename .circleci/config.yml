@@ -31,9 +31,7 @@ jobs:
     - run:
         name: Install PHP extension
         command: |
-          sudo apt-get install -y libwebp-dev libjpeg62-turbo-dev libpng-dev libxpm-dev  libfreetype6-dev
-          sudo docker-php-ext-configure gd --with-gd --with-webp-dir --with-jpeg-dir  --with-png-dir --with-zlib-dir --with-xpm-dir --with-freetype-dir  --enable-gd-native-ttf
-          docker-php-ext-install gd
+          sudo docker-php-ext-install gd
           sudo -E docker-php-ext-install -j$(nproc) intl soap xsl zip mcrypt pdo pdo_mysql gd gettext mbstring bcmath
     - run:
         name: Configure PHP
@@ -193,9 +191,7 @@ jobs:
     - run:
         name: Install PHP extension
         command: |
-          sudo apt-get install -y libwebp-dev libjpeg62-turbo-dev libpng-dev libxpm-dev  libfreetype6-dev
-          sudo docker-php-ext-configure gd --with-gd --with-webp-dir --with-jpeg-dir  --with-png-dir --with-zlib-dir --with-xpm-dir --with-freetype-dir  --enable-gd-native-ttf
-          docker-php-ext-install gd
+          sudo docker-php-ext-install gd
           sudo -E docker-php-ext-install -j$(nproc) intl soap xsl zip mcrypt pdo pdo_mysql gd gettext mbstring bcmath
     - run:
         name: Configure PHP
@@ -329,9 +325,7 @@ jobs:
         command: |
           sudo pecl install mcrypt-1.0.1
           sudo docker-php-ext-enable mcrypt
-          sudo apt-get install -y libwebp-dev libjpeg62-turbo-dev libpng-dev libxpm-dev  libfreetype6-dev
-          sudo docker-php-ext-configure gd --with-gd --with-webp-dir --with-jpeg-dir  --with-png-dir --with-zlib-dir --with-xpm-dir --with-freetype-dir  --enable-gd-native-ttf
-          docker-php-ext-install gd
+          sudo docker-php-ext-install gd
           sudo -E docker-php-ext-install -j$(nproc) intl soap xsl zip pdo pdo_mysql gd gettext mbstring bcmath
     - run:
         name: Configure PHP
