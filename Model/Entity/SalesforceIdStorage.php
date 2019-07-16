@@ -227,7 +227,7 @@ class SalesforceIdStorage
      * @return int
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function prepareWebsiteId($website)
+    public function prepareWebsiteId($website)
     {
         $websiteId = $this->storeManager->getWebsite($website)->getId();
         return $this->config->baseWebsiteIdLogin($websiteId);

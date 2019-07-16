@@ -27,10 +27,11 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
-          sudo docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+          sudo docker-php-ext-install gd
           sudo -E docker-php-ext-install -j$(nproc) intl soap xsl zip mcrypt pdo pdo_mysql gd gettext mbstring bcmath
     - run:
         name: Configure PHP
@@ -186,10 +187,11 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
-          sudo docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+          sudo docker-php-ext-install gd
           sudo -E docker-php-ext-install -j$(nproc) intl soap xsl zip mcrypt pdo pdo_mysql gd gettext mbstring bcmath
     - run:
         name: Configure PHP
@@ -317,12 +319,13 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
           sudo pecl install mcrypt-1.0.1
           sudo docker-php-ext-enable mcrypt
-          sudo docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+          sudo docker-php-ext-install gd
           sudo -E docker-php-ext-install -j$(nproc) intl soap xsl zip pdo pdo_mysql gd gettext mbstring bcmath
     - run:
         name: Configure PHP
