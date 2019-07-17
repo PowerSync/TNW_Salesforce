@@ -122,7 +122,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
         $message = [];
         foreach ($this->entities() as $entity) {
             $mappers = $this->mappers($entity);
-
+//            $mappers->getSelectSql()
             $count = 0;
             $message[] = __(
                 "Entity %1 mapping:\n%2",
@@ -244,9 +244,10 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function mappers($entity)
     {
-        return $this->mapperCollectionFactory->create()
+        $collection = $this->mapperCollectionFactory->create()
             ->addObjectToFilter($this->objectType)
             ->applyUniquenessByWebsite($this->load()->get('websiteIds/%s', $entity));
+        return $collection;
     }
 
     /**
