@@ -140,7 +140,7 @@ class Collection extends AbstractCollection
             ->where('website_id = ?', $this->uniquenessWebsite);
 
         return $this->_conn->select()
-            ->union([$firstSelect, $secondSelect], \Zend_Db_Select::SQL_UNION_ALL);
+            ->union([$firstSelect, $secondSelect], \Zend_Db_Select::SQL_UNION);
     }
 
     /**
