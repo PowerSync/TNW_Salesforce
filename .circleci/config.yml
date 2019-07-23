@@ -282,7 +282,7 @@ jobs:
 
   m230_php72:
     docker:
-    - image: circleci/php:7.2-apache-node-browsers-legacy
+    - image: circleci/php:7.2-apache-stretch-node-browsers-legacy
     - image: circleci/mysql:5.7
       environment:
         MYSQL_PASSWORD: mage
