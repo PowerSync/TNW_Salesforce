@@ -27,6 +27,7 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
@@ -186,6 +187,7 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
@@ -280,7 +282,7 @@ jobs:
 
   m230_php72:
     docker:
-    - image: circleci/php:7.2-apache-node-browsers-legacy
+    - image: circleci/php:7.2-apache-stretch-node-browsers-legacy
     - image: circleci/mysql:5.7
       environment:
         MYSQL_PASSWORD: mage
@@ -317,6 +319,7 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
