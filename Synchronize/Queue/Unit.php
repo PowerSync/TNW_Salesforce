@@ -179,7 +179,7 @@ class Unit
      */
     public function createQueue($loadBy, $entityId, $baseEntityId, array $identifiers, array $additionalLoad = [])
     {
-        return $this->queueFactory->create(['data' => [
+         $queue = $this->queueFactory->create(['data' => [
             'queue_id' => uniqid('', true),
             'code' => $this->code,
             'description' => $this->description($identifiers),
@@ -200,6 +200,11 @@ class Unit
                 $this->objectType
             ))
         ]]);
+
+         if ($this->skipQueue($queue)){
+             return [];
+         }
+        return $queue;
     }
 
     /**
@@ -235,9 +240,13 @@ class Unit
         if ($generator instanceof CreateInterface) {
             $queues = $generator->process($entityIds, $additional, [$this, 'createQueue'], $websiteId);
 
-            $queues = $this->correctBaseEntityId($queues, $relatedUnitCode);
+            $queues = array_filter($queues);
 
-            $queues = $this->mergeQueue($queues);
+            if (!empty($queues)) {
+                $queues = $this->correctBaseEntityId($queues, $relatedUnitCode);
+
+                $queues = $this->mergeQueue($queues);
+            }
             return $queues;
         }
 
