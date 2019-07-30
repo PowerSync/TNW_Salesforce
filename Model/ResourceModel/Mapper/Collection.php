@@ -124,13 +124,6 @@ class Collection extends AbstractCollection
 
         $uniqueIdSelectByWebsite = (clone $baseSelect)
             ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
-            ->group([
-                'magento_attribute_name',
-                'salesforce_attribute_name',
-                'object_type',
-                'magento_entity_type'
-            ])
-            ->having('COUNT(website_id) = ?', 1)
             ->order('website_id','ASC');
            
         return $uniqueIdSelectByWebsite;
