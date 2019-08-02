@@ -11,7 +11,7 @@ jobs:
           ssh $SSH_USER@$SSH_HOST "./release"
   check-composer-installation:
     docker:
-    - image: circleci/php:7.1-apache-node-browsers
+    - image: circleci/php:7.1-apache-stretch-node-browsers
     - image: circleci/mysql:5.7
       environment:
         MYSQL_PASSWORD: mage
@@ -27,6 +27,7 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
@@ -92,7 +93,7 @@ jobs:
 
   update-wiki:
     docker:
-    - image: circleci/php:7.1-apache-node-browsers
+    - image: circleci/php:7.1-apache-stretch-node-browsers
     steps:
     - run:
         name: Prepare for wiki update
@@ -186,6 +187,7 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
@@ -317,6 +319,7 @@ jobs:
         command: |
           sudo apt-get update
           sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
+          sudo apt-get install libfreetype6-dev
     - run:
         name: Install PHP extension
         command: |
