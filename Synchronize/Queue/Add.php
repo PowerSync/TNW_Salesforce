@@ -200,64 +200,86 @@ class Add
     {
 
         $queues = [];
+        $parents = $children = [];
+
         /**
          * save related entities to the Queue
          */
         foreach ($unitsList as $key => $unit) {
-            $key = md5(sprintf(
-                    '%s',
+            $key = (sprintf(
+                '%s',
                 $unit->code()
-                ));
+            ));
             $relatedUnitCode = $relatedUnitCode ?? $unit->code();
 
             $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId, $relatedUnitCode);
 
+            if (empty($current)) {
+                continue;
+            }
+
             /**
              * This unit already processed higher in recursion stack
              */
-            if(isset($queuesUnique[$key])) {
+            if (isset($queuesUnique[$key])) {
                 $current = $unit->baseByUnique($queuesUnique[$key], $current);
                 $parents = $children = [];
-            } else {
 
-                if (empty($current)) {
-                    continue;
-                }
-
-                $currentEntityIds = [];
+                /**
+                 * add if items were added partially (regular/guest customers for example)
+                 */
                 foreach ([$current] as $relation) {
                     foreach ($relation as $relationItem) {
                         $queuesUnique[$key][$relationItem->getId()] = $relationItem;
-                        $currentEntityIds[] = $relationItem->getEntityId();
+                    }
+                }
+            } else {
+
+                $currentEntityIds = [];
+                $currentByEntityLoad = [];
+                foreach ([$current] as $relation) {
+                    foreach ($relation as $relationItem) {
+                        $queuesUnique[$key][$relationItem->getId()] = $relationItem;
+                        $currentEntityIds[$relationItem->getEntityLoad()][] = $relationItem->getEntityId();
+                        $currentByEntityLoad[$relationItem->getEntityLoad()][] = $relationItem;
                     }
                 }
 
-                /** @var \TNW\Salesforce\Model\Queue */
-                $currentItem = reset($current);
-                $baseEntityLoad = $currentItem->getEntityLoad();
-                $baseEntityLoadAdditional = $currentItem->getEntityLoadAdditional();
+                foreach ($currentByEntityLoad as $baseEntityLoad => $itemByEntityLoad) {
+                    /** @var \TNW\Salesforce\Model\Queue */
+                    $currentItem = reset($itemByEntityLoad);
+                    $baseEntityLoadAdditional = $currentItem->getEntityLoadAdditional();
 
-                $parents = $this->generateQueueObjects(
-                    $unit->parents(),
-                    $baseEntityLoad,
-                    $currentEntityIds,
-                    $baseEntityLoadAdditional,
-                    $websiteId,
-                    $dependencies,
-                    $queuesUnique,
-                    $unit->code()
-                );
+                    $parentsTmp = $this->generateQueueObjects(
+                        $unit->parents(),
+                        $baseEntityLoad,
+                        $currentEntityIds[$baseEntityLoad],
+                        $baseEntityLoadAdditional,
+                        $websiteId,
+                        $dependencies,
+                        $queuesUnique,
+                        $unit->code()
+                    );
 
-                $children = $this->generateQueueObjects(
-                    $unit->children(),
-                    $baseEntityLoad,
-                    $currentEntityIds,
-                    $baseEntityLoadAdditional,
-                    $websiteId,
-                    $dependencies,
-                    $queuesUnique,
-                    $unit->code()
-                );
+                    foreach ($parentsTmp as $item) {
+                        $parents[] = $item;
+                    }
+
+                    $childrenTmp = $this->generateQueueObjects(
+                        $unit->children(),
+                        $baseEntityLoad,
+                        $currentEntityIds[$baseEntityLoad],
+                        $baseEntityLoadAdditional,
+                        $websiteId,
+                        $dependencies,
+                        $queuesUnique,
+                        $unit->code()
+                    );
+
+                    foreach ($childrenTmp as $item) {
+                        $children[] = $item;
+                    }
+                }
 
                 /**
                  * add parent dependency only, child has own relations
@@ -337,8 +359,26 @@ class Add
 
         $queueDataToSave = $this->getInsertArray($queues, $syncType, $websiteId);
 
-        $this->saveQueue($queueDataToSave);
-        $this->saveDependency($dependencies);
+        $this->saveData($queueDataToSave, $dependencies);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function saveData($queueDataToSave, $dependencies)
+    {
+        $connection = $this->resourceQueue->getConnection();
+
+        $connection->beginTransaction();
+        try {
+            $this->saveQueue($queueDataToSave);
+            $this->saveDependency($dependencies);
+
+            $connection->commit();
+        } catch (\Exception $e) {
+            $connection->rollBack();
+            throw new \Exception($e->getMessage());
+        }
     }
 
     /**
@@ -347,7 +387,9 @@ class Add
      */
     public function saveQueue($queueDataToSave)
     {
+
         if (!empty($queueDataToSave)) {
+
             $this
                 ->resourceQueue
                 ->getConnection()

@@ -300,6 +300,7 @@ class Unit
     }
 
     /**
+     * avoid items duplication
      * @param $unique
      * @param $queues
      * @return mixed
