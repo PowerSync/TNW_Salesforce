@@ -11,7 +11,7 @@ jobs:
           ssh $SSH_USER@$SSH_HOST "./release"
   check-composer-installation:
     docker:
-    - image: circleci/php:7.1-apache-node-browsers
+    - image: circleci/php:7.1-apache-stretch-node-browsers
     - image: circleci/mysql:5.7
       environment:
         MYSQL_PASSWORD: mage
@@ -93,7 +93,7 @@ jobs:
 
   update-wiki:
     docker:
-    - image: circleci/php:7.1-apache-node-browsers
+    - image: circleci/php:7.1-apache-stretch-node-browsers
     steps:
     - run:
         name: Prepare for wiki update
@@ -150,7 +150,7 @@ jobs:
 
   m225_php71: &php71-base
     docker:
-    - image: circleci/php:7.1-apache-node-browsers
+    - image: circleci/php:7.1-apache-stretch-node-browsers
     - image: circleci/mysql:5.7
       environment:
         MYSQL_PASSWORD: mage
@@ -282,7 +282,7 @@ jobs:
 
   m230_php72:
     docker:
-    - image: circleci/php:7.2-apache-node-browsers-legacy
+    - image: circleci/php:7.2-apache-stretch-node-browsers-legacy
     - image: circleci/mysql:5.7
       environment:
         MYSQL_PASSWORD: mage

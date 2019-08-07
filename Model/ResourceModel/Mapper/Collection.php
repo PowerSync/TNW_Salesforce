@@ -117,30 +117,16 @@ class Collection extends AbstractCollection
     public function generateUniquenessByWebsiteSelect($baseSelect)
     {
         if (0 === $this->uniquenessWebsite) {
+
             return (clone $baseSelect)
                 ->where('website_id = ?', $this->uniquenessWebsite);
         }
 
-        $uniqueIdSelect = $this->_conn->select()
-            ->from($this->getMainTable(), ['map_id'])
+        $uniqueIdSelectByWebsite = (clone $baseSelect)
             ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
-            ->group([
-                'magento_attribute_name',
-                'salesforce_attribute_name',
-                'object_type',
-                'magento_entity_type'
-            ])
-            ->having('COUNT(website_id) = ?', 1);
-
-        $firstSelect = (clone $baseSelect)
-            ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
-            ->where('map_id IN(?)', $uniqueIdSelect);
-
-        $secondSelect = (clone $baseSelect)
-            ->where('website_id = ?', $this->uniquenessWebsite);
-
-        return $this->_conn->select()
-            ->union([$firstSelect, $secondSelect], \Zend_Db_Select::SQL_UNION_ALL);
+            ->order('website_id','ASC');
+           
+        return $uniqueIdSelectByWebsite;
     }
 
     /**
