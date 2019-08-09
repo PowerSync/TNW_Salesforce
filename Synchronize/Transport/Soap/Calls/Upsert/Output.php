@@ -32,6 +32,22 @@ class Output implements Transport\Calls\Upsert\OutputInterface
     }
 
     /**
+     * @return Storage
+     */
+    public function getStorage()
+    {
+        return $this->storage;
+    }
+
+    /**
+     * @param Storage $storage
+     */
+    public function setStorage(Storage $storage)
+    {
+        $this->storage = $storage;
+    }
+
+    /**
      * Do Unit syncronization to Salesforce object
      *
      * @param Transport\Calls\Upsert\Transport\Output $output

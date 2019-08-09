@@ -159,6 +159,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     public function createTransport()
     {
         $output = $this->outputFactory->create(['type' => $this->salesforceType()]);
+        $output->setUnit($this);
+
         foreach ($this->entities() as $entity) {
             $output->offsetSet($entity, [
                 'success' => false,
