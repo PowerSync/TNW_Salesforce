@@ -17,6 +17,11 @@ class Output extends \SplObjectStorage
     protected $type;
 
     /**
+     * @var
+     */
+    protected $unit;
+
+    /**
      * Data constructor.
      *
      * @param string $type
@@ -24,6 +29,22 @@ class Output extends \SplObjectStorage
     public function __construct($type)
     {
         $this->type = $type;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUnit()
+    {
+        return $this->unit;
+    }
+
+    /**
+     * @param mixed $unit
+     */
+    public function setUnit($unit)
+    {
+        $this->unit = $unit;
     }
 
     /**

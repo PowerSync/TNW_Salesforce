@@ -41,6 +41,22 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * @return IdentificationInterface
+     */
+    public function getIdentification()
+    {
+        return $this->identification;
+    }
+
+    /**
+     * @param IdentificationInterface $identification
+     */
+    public function setIdentification(IdentificationInterface $identification)
+    {
+        $this->identification = $identification;
+    }
+
+    /**
      * @inheritdoc
      */
     public function description()
