@@ -8,6 +8,9 @@ use TNW\Salesforce\Synchronize;
  */
 abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
 {
+
+    const MIN_LEN_SF_ID = 15;
+
     /**
      * @var
      */
@@ -166,5 +169,14 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     public function isComplete()
     {
         return $this->status === self::COMPLETE;
+    }
+
+    /**
+     * @param $id
+     * @return bool|string
+     */
+    public function correctSalesforceId($id)
+    {
+        return substr($id, 0, self::MIN_LEN_SF_ID);
     }
 }

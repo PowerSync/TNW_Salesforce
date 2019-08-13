@@ -165,6 +165,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->version_2_5_4($context, $setup);
 
+        $this->version_2_5_12($context, $setup);
+
         $setup->endSetup();
     }
 
@@ -765,5 +767,41 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'identity' => true
             ]
         );
+    }
+
+    /**
+     * @param ModuleContextInterface $context
+     * @param SchemaSetupInterface $setup
+     */
+    protected function version_2_5_12(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.5.12') >= 0) {
+            return;
+        }
+
+        $setup->getConnection()->delete($setup->getTable('tnw_salesforce_entity_queue'), ['transaction_uid != ?' => 0]);
+
+
+        $setup->getConnection()->dropIndex(
+            $setup->getTable('tnw_salesforce_entity_queue'),
+            $setup->getIdxName(
+                'tnw_salesforce_entity_queue',
+                ['identify', 'sync_type', 'website_id', 'transaction_uid'],
+                \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+            )
+        );
+
+        $setup->getConnection()
+            ->addIndex(
+                $setup->getTable('tnw_salesforce_entity_queue'),
+                $setup->getIdxName(
+                    'tnw_salesforce_entity_queue',
+                    ['identify', 'sync_type', 'website_id'],
+                    \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+                ),
+                ['identify', 'sync_type', 'website_id'],
+                \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
+            );
+
     }
 }
