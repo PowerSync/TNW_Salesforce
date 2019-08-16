@@ -14,6 +14,16 @@ class Collection extends AbstractCollection
     protected $_idFieldName = 'queue_id';
 
     /**
+     * @return AbstractCollection|void
+     */
+    protected function _initSelect()
+    {
+        $this->addFilterToMap('queue_id', 'main_table.queue_id');
+
+        parent::_initSelect();
+    }
+
+    /**
      * Resource initialization
      *
      * @return void
@@ -221,5 +231,23 @@ class Collection extends AbstractCollection
     {
         $this->getResource()->unserializeFields($item);
         return parent::beforeAddLoadedItem($item);
+    }
+
+    /**
+     * @return $this
+     */
+    public function denyDependentItems()
+    {
+        $this->joinLeft(
+            ['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')],
+            'main_table.queue_id = relation.parent_id',
+            []
+        );
+
+        $this->addFieldToFilter('relation.parent_id', ['null' => true]);
+
+        $this->distinct(true);
+
+        return $this;
     }
 }
