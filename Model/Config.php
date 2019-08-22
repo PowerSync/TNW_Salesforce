@@ -20,6 +20,8 @@ class Config extends DataObject
     const SFORCE_MAGENTO_ID = 'Magento_ID__c';
     const BASE_DAY = 7;
 
+    const SYNC_MAX_ATTEMPT_COUNT_XML = 'tnwsforce_general/synchronization/max_attempt_count';
+
     /**
      * Base batch limit for simple sync
      */
@@ -501,5 +503,19 @@ class Config extends DataObject
         }
 
         return $this->isIntegrationActive;
+    }
+
+    /**
+     * Get cron maximum attempt count to sync
+     * @return int
+     */
+    public function getSyncMaxAttemptsCount()
+    {
+        $value = (int)$this->getStoreConfig(self::SYNC_MAX_ATTEMPT_COUNT_XML);
+        if (!$value) {
+            $value = 5;
+        }
+
+        return $value;
     }
 }

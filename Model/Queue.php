@@ -186,6 +186,17 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
+     * Decrement Sync Attempt
+     *
+     * @return Queue
+     */
+    public function decrSyncAttempt()
+    {
+        $this->setData('sync_attempt', $this->getSyncAttempt() - 1);
+        return $this;
+    }
+
+    /**
      * Is Error
      *
      * @return bool
