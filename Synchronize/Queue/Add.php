@@ -55,6 +55,9 @@ class Add
      */
     private $messageManager;
 
+    /** @var \Magento\Framework\App\State  */
+    private $state;
+
     /**
      * Entity constructor.
      * @param string $entityType
@@ -75,7 +78,8 @@ class Add
         \TNW\Salesforce\Synchronize\Queue\Synchronize $synchronizeEntity,
         \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
         \TNW\Salesforce\Model\ResourceModel\PreQueue $resourcePreQueue,
-        \Magento\Framework\Message\ManagerInterface $messageManager
+        \Magento\Framework\Message\ManagerInterface $messageManager,
+        \Magento\Framework\App\State $state
     )
     {
         $this->resolves = $resolves;
@@ -87,6 +91,7 @@ class Add
         $this->resourceQueue = $resourceQueue;
         $this->resourcePreQueue = $resourcePreQueue;
         $this->messageManager = $messageManager;
+        $this->state = $state;
     }
 
     /**
@@ -148,7 +153,9 @@ class Add
             return;
         }
 
-        $this->messageManager->addSuccessMessage('All records were added to the synchronization queue');
+        if ($this->state->getAreaCode() == \Magento\Framework\App\Area::AREA_ADMINHTML ) {
+            $this->messageManager->addSuccessMessage('All records were added to the synchronization queue');
+        }
     }
 
     /**

@@ -77,6 +77,7 @@ class Queue
 
         // Filter To Website
         $collection->addFilterToWebsiteId($websiteId);
+        $collection->addFieldToFilter('main_table.sync_attempt', ['lt' => $this->salesforceConfig->getSyncMaxAttemptsCount()]);
 
         // Check not empty
         if ($collection->getSize() === 0) {
@@ -133,6 +134,8 @@ class Queue
                         $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
                         $group->synchronize($groupCollection->getItems());
                     } catch (\Exception $e) {
+                        $groupCollection->each('decrSyncAttempt');
+
                         $groupCollection->each('addData', [[
                             'status' => $phase['errorStatus'],
                             'message' => $e->getMessage()
