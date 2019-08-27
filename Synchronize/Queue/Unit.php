@@ -326,11 +326,6 @@ class Unit
      */
     public function mergeQueueObjects($queue1, $queue2)
     {
-        $queue1->setDescription(
-            $queue1->getDescription() .
-            "\n" .
-            $queue2->getDescription()
-        );
 
         $_base_entity_ids = array_merge_recursive(
             $queue1->getData('_base_entity_id'),

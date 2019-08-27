@@ -28,7 +28,7 @@ class View extends \Magento\Backend\App\Action
         $resultPage = $this->resultPageFactory->create();
 
         $resultPage->setActiveMenu('TNW_Salesforce::salesforce_sync_log');
-        $resultPage->getConfig()->getTitle()->prepend(__('Salesforce sync log'));
+        $resultPage->getConfig()->getTitle()->prepend(__('Salesforce Synchronization Log'));
 
         return $resultPage;
     }
