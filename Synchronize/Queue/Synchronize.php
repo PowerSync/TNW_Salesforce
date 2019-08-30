@@ -37,6 +37,11 @@ class Synchronize
     private $messageManager;
 
     /**
+     * @var \TNW\Salesforce\Model\Config
+     */
+    private $salesforceConfig;
+
+    /**
      * Queue constructor.
      * @param int $type
      * @param \TNW\Salesforce\Synchronize\Queue $synchronizeQueue
@@ -51,7 +56,8 @@ class Synchronize
         \TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory $collectionQueueFactory,
         \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
         \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator,
-        \Magento\Framework\Message\ManagerInterface $messageManager
+        \Magento\Framework\Message\ManagerInterface $messageManager,
+        \TNW\Salesforce\Model\Config $salesforceConfig
     ) {
         $this->type = $type;
         $this->synchronizeQueue = $synchronizeQueue;
@@ -59,6 +65,7 @@ class Synchronize
         $this->websiteRepository = $websiteRepository;
         $this->websiteEmulator = $websiteEmulator;
         $this->messageManager = $messageManager;
+        $this->salesforceConfig = $salesforceConfig;
     }
 
     /**
@@ -93,6 +100,7 @@ class Synchronize
     {
         $collection = $this->collectionQueueFactory->create()
             ->addFilterToSyncType($this->type);
+        $collection->addFieldToFilter('main_table.sync_attempt', ['lt' => $this->salesforceConfig->getSyncMaxAttemptsCount()]);
 
         try {
             $this->synchronizeQueue->synchronize($collection, $websiteId);
