@@ -190,6 +190,7 @@ class Unit
             'object_type' => $this->objectType,
             'status' => 'new',
             'transaction_uid' => '0',
+            'sync_attempt' => 0,
             '_base_entity_id' => [$baseEntityId],
             'identify' => md5(sprintf(
                 '%s/%s/%s/%s/%s',
