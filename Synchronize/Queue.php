@@ -77,7 +77,6 @@ class Queue
 
         // Filter To Website
         $collection->addFilterToWebsiteId($websiteId);
-        $collection->addFieldToFilter('main_table.sync_attempt', ['lt' => $this->salesforceConfig->getSyncMaxAttemptsCount()]);
 
         // Check not empty
         if ($collection->getSize() === 0) {
