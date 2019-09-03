@@ -108,7 +108,7 @@ class Synchronize
             $this->messageManager->addErrorMessage($e->getMessage());
         } finally {
             if ($collection->count() > 0 && !in_array(false, $collection->walk('isSuccess'), true)) {
-                $this->messageManager->addSuccessMessage('All records were synchronized successfully.');
+                $this->messageManager->addSuccessMessage('All records were successfully synchronized with Salesforce.');
             }
 
             if ($this->type === \TNW\Salesforce\Model\Config::DIRECT_SYNC_TYPE_REALTIME) {
