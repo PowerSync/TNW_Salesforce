@@ -9,12 +9,12 @@ abstract class LoaderAbstract  extends \TNW\Salesforce\Synchronize\Unit\EntityLo
     /**
      * @var \Magento\Customer\Model\CustomerFactory
      */
-    private $customerFactory;
+    protected $customerFactory;
 
     /**
      * @var \Magento\Customer\Model\ResourceModel\Customer
      */
-    private $resourceCustomer;
+    protected $resourceCustomer;
 
     /**
      * Customer constructor.
