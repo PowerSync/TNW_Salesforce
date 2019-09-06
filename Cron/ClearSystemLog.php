@@ -11,6 +11,7 @@ namespace TNW\Salesforce\Cron;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use \TNW\Salesforce\Model\Logger;
 use \TNW\Salesforce\Model\Config;
+use TNW\SForceEnterprise\Model\Synchronization\Config as SysConfig;
 use \TNW\Salesforce\Console\Command\CleanSystemLogsCommand;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Framework\Filesystem;
@@ -34,6 +35,11 @@ class ClearSystemLog
     protected $_filesystem;
 
     /**
+     * @var Filesystem
+     */
+    protected $sysConfig;
+
+    /**
      * UpdateCurrencyRates constructor.
      *
      * @param Logger $logger
@@ -47,6 +53,7 @@ class ClearSystemLog
         \Magento\Framework\Filesystem\DirectoryList $dir,
         TimezoneInterface $timezone,
         Config $config,
+        SysConfig $sysConfig,
         Filesystem $filesystem
     )
     {
@@ -56,6 +63,7 @@ class ClearSystemLog
         $this->timezone = $timezone;
         $this->config = $config;
         $this->salesforceConfig = $salesforceConfig;
+        $this->sysConfig = $sysConfig;
         $this->_filesystem = $filesystem;
 
     }
@@ -75,10 +83,16 @@ class ClearSystemLog
     {
         try {
 
-             if (!$this->salesforceConfig->getClearSystemLogs()) {
+            if (!$this->salesforceConfig->getClearSystemLogs()) {
                 $this->logger->info($this->getDateTime() . ': ' .' Clear System logs not configured');
                 return;
             }
+
+            // save to config time when cron was executed
+            $this->sysConfig->setGlobalLastCronRun(
+                $this->sysConfig->getMagentoTime(),
+                SysConfig::CLEAN_SYSTEM_LOGS
+            );
 
             $path = $this->_filesystem->getDirectoryRead(DirectoryList::LOG)->getAbsolutePath() . 'sforce';
 
