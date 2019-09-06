@@ -181,7 +181,10 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      */
     public function incSyncAttempt()
     {
-        $this->setData('sync_attempt', $this->getSyncAttempt() + 1);
+        // To restrict incrementing sync attempt upon processing from "In Progress: Salesforce Update" (waiting_upsert)
+        if($this->isProcessOutputUpsert() === false){
+            $this->setData('sync_attempt', $this->getSyncAttempt() + 1);
+        }
         return $this;
     }
 
