@@ -100,9 +100,8 @@ class Synchronize
     {
         $collection = $this->collectionQueueFactory->create()
             ->addFilterToSyncType($this->type);
-            
-        // commented out to process infinite times until we get positive reply 
-        //$collection->addFieldToFilter('main_table.sync_attempt', ['lt' => $this->salesforceConfig->getSyncMaxAttemptsCount()]);
+ 
+        $collection->addFieldToFilter('main_table.sync_attempt', ['lt' => $this->salesforceConfig->getSyncMaxAttemptsCount()]);
 
         try {
             $this->synchronizeQueue->synchronize($collection, $websiteId);
