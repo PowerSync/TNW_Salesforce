@@ -14,6 +14,8 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
 
     const USE_BULK_API_VERSION_CACHE_IDENTIFIER = 'use_bulk_api_version';
 
+    const API_URL = 'https://login.salesforce.com/services/Soap/c/';
+
     /** @var \Magento\Framework\Xml\Parser */
     protected $xmlParser;
 
@@ -159,8 +161,7 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
     public function getAPIVersion($serviceNode)
     {
         $location = $this->arrayFindValueByKey($serviceNode,'location');
-        $getAPIVersion = str_replace('https://login.salesforce.com/services/Soap/c/','',$location);
-        
+        $getAPIVersion = str_replace(self::API_URL,'',$location);
         $apiversion = explode('/',$getAPIVersion);
 
         return reset($apiversion);
