@@ -129,6 +129,7 @@
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="mapping" xsi:type="string">customerAccountMapping</argument>
             <argument name="salesforceType" xsi:type="string">Account</argument>
+            <argument name="lookup" xsi:type="string">customerBusinessAccountLookup</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
         </arguments>
     </virtualType>
@@ -360,8 +361,15 @@
             <argument name="name" xsi:type="string">websiteWebsiteUpsertInput</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
             <argument name="mapping" xsi:type="string">websiteWebsiteMapping</argument>
+            <argument name="lookup" xsi:type="string">websiteWebsiteLookup</argument>
             <argument name="salesforceType" xsi:type="string">tnw_mage_basic__Magento_Website__c</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
+            <argument name="compareFields" xsi:type="array">
+                <item name="0" xsi:type="string">Id</item>
+                <item name="1" xsi:type="string">tnw_mage_basic__Code__c</item>
+                <item name="2" xsi:type="string">Name</item>
+                <item name="3" xsi:type="string">tnw_mage_basic__Website_ID__c</item>
+            </argument>
         </arguments>
     </virtualType>
 
@@ -414,7 +422,6 @@
                 <item name="processingUpsertInput" xsi:type="string">TNW\Unit\Website\Website\ProcessingUpsertInput</item>
                 <item name="lookup" xsi:type="string">TNW\Unit\Website\Website\Lookup</item>
                 <item name="mapping" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Website\Mapping</item>
-                <item name="checkChanges" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Website\CheckChanges</item>
                 <item name="upsertInput" xsi:type="string">TNW\Unit\Website\Website\UpsertInput</item>
                 <item name="processingUpsertOutput" xsi:type="string">TNW\Unit\Website\Website\ProcessingUpsertOutput</item>
                 <item name="upsertOutput" xsi:type="string">TNW\Unit\Website\Website\UpsertOutput</item>
@@ -423,15 +430,6 @@
             </argument>
         </arguments>
     </virtualType>
-
-    <type name="TNW\Salesforce\Synchronize\Unit\Website\Website\CheckChanges">
-        <arguments>
-            <argument name="name" xsi:type="string">websiteWebsiteCheckChanges</argument>
-            <argument name="load" xsi:type="string">websiteLoad</argument>
-            <argument name="lookup" xsi:type="string">websiteWebsiteLookup</argument>
-            <argument name="mapping" xsi:type="string">websiteWebsiteMapping</argument>
-        </arguments>
-    </type>
 
     <type name="TNW\Salesforce\Controller\Adminhtml\Customer\SyncCustomer">
         <arguments>
