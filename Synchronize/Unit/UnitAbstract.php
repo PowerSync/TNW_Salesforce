@@ -14,22 +14,22 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     /**
      * @var
      */
-    private $name;
+    protected $name;
 
     /**
      * @var array
      */
-    private $dependents;
+    protected $dependents;
 
     /**
      * @var Synchronize\Group
      */
-    private $group;
+    protected $group;
 
     /**
      * @var Synchronize\Units
      */
-    private $units;
+    protected $units;
 
     /**
      * @var Synchronize\Cache
