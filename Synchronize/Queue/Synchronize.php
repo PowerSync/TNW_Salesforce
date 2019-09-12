@@ -12,6 +12,11 @@ class Synchronize
     private $type;
 
     /**
+     * @var boolean
+     */
+    private $isCheck = false;
+
+    /**
      * @var \TNW\Salesforce\Synchronize\Queue
      */
     private $synchronizeQueue;
@@ -57,7 +62,8 @@ class Synchronize
         \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
         \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator,
         \Magento\Framework\Message\ManagerInterface $messageManager,
-        \TNW\Salesforce\Model\Config $salesforceConfig
+        \TNW\Salesforce\Model\Config $salesforceConfig,
+        $isCheck = false
     ) {
         $this->type = $type;
         $this->synchronizeQueue = $synchronizeQueue;
@@ -66,6 +72,23 @@ class Synchronize
         $this->websiteEmulator = $websiteEmulator;
         $this->messageManager = $messageManager;
         $this->salesforceConfig = $salesforceConfig;
+        $this->setIsCheck($isCheck);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCheck()
+    {
+        return $this->isCheck;
+    }
+
+    /**
+     * @param bool $isCheck
+     */
+    public function setIsCheck(bool $isCheck)
+    {
+        $this->isCheck = $isCheck;
     }
 
     /**
@@ -100,6 +123,7 @@ class Synchronize
     {
         $collection = $this->collectionQueueFactory->create()
             ->addFilterToSyncType($this->type);
+ 
         $collection->addFieldToFilter('main_table.sync_attempt', ['lt' => $this->salesforceConfig->getSyncMaxAttemptsCount()]);
 
         try {
@@ -108,7 +132,7 @@ class Synchronize
             $this->messageManager->addErrorMessage($e->getMessage());
         } finally {
             if ($collection->count() > 0 && !in_array(false, $collection->walk('isSuccess'), true)) {
-                $this->messageManager->addSuccessMessage('All records were synchronized successfully.');
+                $this->messageManager->addSuccessMessage('All records were successfully synchronized with Salesforce.');
             }
 
             if ($this->type === \TNW\Salesforce\Model\Config::DIRECT_SYNC_TYPE_REALTIME) {
