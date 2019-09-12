@@ -12,6 +12,11 @@ class Synchronize
     private $type;
 
     /**
+     * @var boolean
+     */
+    private $isCheck = false;
+
+    /**
      * @var \TNW\Salesforce\Synchronize\Queue
      */
     private $synchronizeQueue;
@@ -57,7 +62,8 @@ class Synchronize
         \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
         \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator,
         \Magento\Framework\Message\ManagerInterface $messageManager,
-        \TNW\Salesforce\Model\Config $salesforceConfig
+        \TNW\Salesforce\Model\Config $salesforceConfig,
+        $isCheck = false
     ) {
         $this->type = $type;
         $this->synchronizeQueue = $synchronizeQueue;
@@ -66,6 +72,23 @@ class Synchronize
         $this->websiteEmulator = $websiteEmulator;
         $this->messageManager = $messageManager;
         $this->salesforceConfig = $salesforceConfig;
+        $this->setIsCheck($isCheck);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCheck()
+    {
+        return $this->isCheck;
+    }
+
+    /**
+     * @param bool $isCheck
+     */
+    public function setIsCheck(bool $isCheck)
+    {
+        $this->isCheck = $isCheck;
     }
 
     /**

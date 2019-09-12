@@ -39,6 +39,14 @@ class Input extends Synchronize\Unit\UnitAbstract
     private $salesforceType;
 
     /**
+     * @var string
+     */
+    private $lookup;
+
+    /** @var [] */
+    private $compareFields;
+
+    /**
      * @var array
      */
     protected $objectDescription = [];
@@ -71,19 +79,23 @@ class Input extends Synchronize\Unit\UnitAbstract
         $load,
         $mapping,
         $salesforceType,
+        $lookup,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
+        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate,
+        $compareFields = []
     ) {
         parent::__construct($name, $units, $group, [$load, $mapping]);
         $this->process = $process;
         $this->load = $load;
         $this->mapping = $mapping;
         $this->salesforceType = $salesforceType;
+        $this->lookup = $lookup;
+        $this->compareFields = $compareFields;
         $this->identification = $identification;
         $this->inputFactory = $inputFactory;
 
@@ -174,7 +186,10 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function entities()
     {
-        return array_filter($this->load()->get('entities'), [$this, 'filter']);
+        $entities = array_filter($this->load()->get('entities'), [$this, 'filter']);
+        $entities = array_filter($entities, [$this, 'actual']);
+
+        return $entities;
     }
 
     /**
@@ -277,6 +292,39 @@ class Input extends Synchronize\Unit\UnitAbstract
         }
 
         return $object;
+    }
+
+    /**
+     * actual
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @return bool
+     */
+    public function actual($entity)
+    {
+        if (!$this->compareFields) {
+            return true;
+        }
+
+        $mappedObject = $this->unit($this->mapping)->get('%s', $entity);
+        $lookupObject = $this->unit($this->lookup)->get('%s/record', $entity);
+
+        if (empty($lookupObject)) {
+            return true;
+        }
+
+        foreach ($this->compareFields as $compareField) {
+            if ($mappedObject[$compareField] != $lookupObject[$compareField]) {
+                return true;
+            }
+        }
+
+        $this->cache[$entity]['message']
+            = __('Entity %1 has actual data in the Salesforce already', $this->identification->printEntity($entity));
+
+        $this->group()->messageDebug('Entity %1 has actual data in the Salesforce already', $this->identification->printEntity($entity));
+
+        return false;
     }
 
     /**
