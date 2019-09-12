@@ -21,6 +21,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         $this->input->columns[] = $codeField;
         $this->input->columns[] = 'Name';
         $this->input->columns[] = 'tnw_mage_basic__Website_ID__c';
+        $this->input->columns[] = 'OwnerId';
 
         foreach ($this->entities() as $entity) {
             $this->input[$entity]['OR'][$codeField]['IN'][] = $entity->getCode();

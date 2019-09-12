@@ -636,4 +636,9 @@
         </arguments>
     </type>
 
+    <type name="TNW\Salesforce\Synchronize\Unit\Mapping">
+        <plugin name="tnw_salesforce_check_owner_field"
+                type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" />
+    </type>
+
 </config>

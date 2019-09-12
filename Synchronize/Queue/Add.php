@@ -113,7 +113,10 @@ class Add
         foreach (array_chunk($entityIds, self::DIRECT_ADD_TO_QUEUE_COUNT_LIMIT) as $ids) {
             $this->resourcePreQueue->saveEntityIds($ids, $this->entityType);
         }
-        $this->messageManager->addSuccessMessage('Records were scheduled to be added to the sync queue');
+
+        if ($this->state->getAreaCode() == \Magento\Framework\App\Area::AREA_ADMINHTML ) {
+            $this->messageManager->addSuccessMessage('Records were scheduled to be added to the sync queue');
+        }
     }
 
     /**
