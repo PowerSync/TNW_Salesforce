@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+  <table name="tnw_salesforce_mapper" resource="default" engine="innodb" comment="TNW Magento&lt;-&gt;Salesforce mapping">
+    <column xsi:type="int" name="map_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Map Id"/>
+    <column xsi:type="varchar" name="magento_attribute_name" nullable="true" length="255"/>
+    <column xsi:type="varchar" name="salesforce_attribute_name" nullable="true" length="255"/>
+    <column xsi:type="varchar" name="attribute_type" nullable="true" length="255"/>
+    <column xsi:type="int" name="attribute_id" padding="11" unsigned="false" nullable="true" identity="false" comment="Attribute Id"/>
+    <column xsi:type="varchar" name="default_value" nullable="true" length="255"/>
+    <column xsi:type="varchar" name="object_type" nullable="true" length="255"/>
+    <column xsi:type="varchar" name="magento_entity_type" nullable="true" length="255"/>
+    <column xsi:type="smallint" name="is_default" padding="6" unsigned="false" nullable="true" identity="false" default="0" comment="Default Map Field"/>
+    <column xsi:type="smallint" name="website_id" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Website ID"/>
+    <constraint xsi:type="primary" referenceId="PRIMARY">
+      <column name="map_id"/>
+    </constraint>
+    <constraint xsi:type="unique" referenceId="salesforce_business_mapper_index_unique">
+      <column name="object_type"/>
+      <column name="magento_entity_type"/>
+      <column name="magento_attribute_name"/>
+      <column name="salesforce_attribute_name"/>
+    </constraint>
+    <constraint xsi:type="unique" referenceId="UNQ_60349F8A9E5C5B146928AD8B9CAF78E7">
+      <column name="object_type"/>
+      <column name="magento_entity_type"/>
+      <column name="magento_attribute_name"/>
+      <column name="salesforce_attribute_name"/>
+      <column name="website_id"/>
+    </constraint>
+    <constraint xsi:type="foreign" referenceId="TNW_SALESFORCE_MAPPER_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID" table="tnw_salesforce_mapper" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE"/>
+    <index referenceId="TNW_SALESFORCE_MAPPER_MAP_ID" indexType="btree">
+      <column name="map_id"/>
+    </index>
+  </table>
+  <table name="store_website" resource="default">
+    <column xsi:type="varchar" name="salesforce_id" nullable="true" length="50" comment="Salesforce Id"/>
+  </table>
+  <table name="tnw_salesforce_log" resource="default" engine="innodb" comment="tnw_salesforce_log">
+    <column xsi:type="bigint" name="id" padding="20" unsigned="true" nullable="false" identity="true" comment="Log ID"/>
+    <column xsi:type="varchar" name="transaction_uid" nullable="true" length="32" comment="Transaction"/>
+    <column xsi:type="smallint" name="level" padding="5" unsigned="true" nullable="true" identity="false" comment="Level"/>
+    <column xsi:type="smallint" name="website_id" padding="5" unsigned="true" nullable="true" identity="false" comment="Website"/>
+    <column xsi:type="text" name="message" nullable="true" comment="Message"/>
+    <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Create At"/>
+    <constraint xsi:type="primary" referenceId="PRIMARY">
+      <column name="id"/>
+    </constraint>
+    <constraint xsi:type="foreign" referenceId="TNW_SYSTEM_LOG_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID" table="tnw_salesforce_log" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE"/>
+    <index referenceId="TNW_SYSTEM_LOG_WEBSITE_ID" indexType="btree">
+      <column name="website_id"/>
+    </index>
+  </table>
+  <table name="salesforce_objects" resource="default" engine="innodb" comment="salesforce_objects">
+    <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Entity Id"/>
+    <column xsi:type="varchar" name="object_id" nullable="true" length="255" comment="Object Id"/>
+    <column xsi:type="varchar" name="magento_type" nullable="false" length="255" comment="Magento Type"/>
+    <column xsi:type="varchar" name="salesforce_type" nullable="true" length="255" comment="Salesforce Type"/>
+    <column xsi:type="smallint" name="status" padding="6" unsigned="false" nullable="false" identity="false" comment="Status"/>
+    <column xsi:type="smallint" name="website_id" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Website ID"/>
+    <column xsi:type="smallint" name="store_id" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Store ID"/>
+    <column xsi:type="bigint" name="id" padding="20" unsigned="false" nullable="false" identity="true" comment="Id"/>
+    <constraint xsi:type="unique" referenceId="SALESFORCE_OBJECTS_ENTITY_ID_SALESFORCE_TYPE_MAGENTO_TYPE" disabled="true">
+      <column name="entity_id"/>
+      <column name="salesforce_type"/>
+      <column name="magento_type"/>
+    </constraint>
+    <constraint xsi:type="unique" referenceId="SALESFORCE_OBJECTS_ENTT_ID_SALESFORCE_TYPE_MAGENTO_TYPE_WS_ID" disabled="true">
+      <column name="entity_id"/>
+      <column name="salesforce_type"/>
+      <column name="magento_type"/>
+      <column name="website_id"/>
+    </constraint>
+    <constraint xsi:type="unique" referenceId="UNQ_43ED4E0733AB5D74307906A6569F24E3">
+      <column name="entity_id"/>
+      <column name="salesforce_type"/>
+      <column name="magento_type"/>
+      <column name="website_id"/>
+      <column name="store_id"/>
+    </constraint>
+    <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID" table="salesforce_objects" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE"/>
+    <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID" table="salesforce_objects" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE"/>
+    <constraint xsi:type="primary" referenceId="PRIMARY">
+      <column name="id"/>
+    </constraint>
+  </table>
+  <table name="tnw_salesforce_entity_queue" resource="default" engine="innodb" comment="tnw_salesforce_entity_queue">
+    <column xsi:type="varchar" name="queue_id" padding="10" unsigned="true" nullable="false" identity="true" length="32"/>
+    <column xsi:type="int" name="entity_id" padding="11" unsigned="false" nullable="false" identity="false" comment="Entity Id"/>
+    <column xsi:type="varchar" name="entity_load" nullable="false" length="255" comment="Entity Load"/>
+    <column xsi:type="text" name="entity_load_additional" nullable="true" comment="Entity Load"/>
+    <column xsi:type="varchar" name="entity_type" nullable="false" length="255" comment="Entity Type"/>
+    <column xsi:type="varchar" name="object_type" nullable="false" length="255" comment="Object Type"/>
+    <column xsi:type="int" name="sync_type" padding="10" unsigned="true" nullable="false" identity="false" default="0" comment="Sync Type"/>
+    <column xsi:type="int" name="sync_attempt" padding="10" unsigned="true" nullable="false" identity="false" default="0" comment="Sync Attempt"/>
+    <column xsi:type="datetime" name="sync_at" on_update="false" nullable="true" comment="When synced"/>
+    <column xsi:type="varchar" name="status" nullable="false" length="255" default="new" comment="Status"/>
+    <column xsi:type="text" name="message" nullable="true" comment="Message"/>
+    <column xsi:type="varchar" name="code" nullable="false" length="255" comment="Code"/>
+    <column xsi:type="varchar" name="description" nullable="false" length="255" comment="Description"/>
+    <column xsi:type="smallint" name="website_id" padding="5" unsigned="true" nullable="false" identity="false" comment="Website Id"/>
+    <column xsi:type="varchar" name="transaction_uid" nullable="true" length="32" comment="Transaction Uid"/>
+    <column xsi:type="text" name="additional_data" nullable="true" comment="Additional Data"/>
+    <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="When create"/>
+    <column xsi:type="varchar" name="identify" nullable="true" length="32" comment="Identifier allow detect entity added to the queue with specific params"/>
+    <constraint xsi:type="primary" referenceId="PRIMARY">
+      <column name="queue_id"/>
+    </constraint>
+    <constraint xsi:type="foreign" referenceId="TNW_SALESFORCE_ENTITY_QUEUE_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID" table="tnw_salesforce_entity_queue" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE"/>
+    <constraint xsi:type="unique" referenceId="UNQ_CF57A815B4B152C31BAEED19492E0D41" disabled="true">
+      <column name="identify"/>
+      <column name="sync_type"/>
+      <column name="website_id"/>
+      <column name="transaction_uid"/>
+    </constraint>
+    <constraint xsi:type="unique" referenceId="TNW_SALESFORCE_ENTITY_QUEUE_IDENTIFY_SYNC_TYPE_WEBSITE_ID">
+      <column name="identify"/>
+      <column name="sync_type"/>
+      <column name="website_id"/>
+    </constraint>
+    <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_CODE_ENTITY_ID_ENTITY_LOAD" indexType="btree">
+      <column name="code"/>
+      <column name="entity_id"/>
+      <column name="entity_load"/>
+    </index>
+    <index referenceId="TNW_SALESFORCE_ENTT_QUEUE_TRANSACTION_UID_CODE_STS_WS_ID" indexType="btree">
+      <column name="transaction_uid"/>
+      <column name="code"/>
+      <column name="status"/>
+      <column name="website_id"/>
+    </index>
+  </table>
+  <table name="tnw_salesforce_entity_queue_relation" resource="default" engine="innodb" comment="tnw_salesforce_entity_queue_relation">
+    <column xsi:type="varchar" name="queue_id" padding="10" unsigned="true" nullable="false" identity="false" length="32"/>
+    <column xsi:type="varchar" name="parent_id" padding="10" unsigned="true" nullable="false" identity="false" length="32"/>
+    <constraint xsi:type="foreign" referenceId="FK_BC913D0C23021919FC91247BBA30B1FE" table="tnw_salesforce_entity_queue_relation" column="queue_id" referenceTable="tnw_salesforce_entity_queue" referenceColumn="queue_id" onDelete="CASCADE"/>
+    <constraint xsi:type="foreign" referenceId="FK_CCC1AE8889A03ECB2CD24E793F468CD5" table="tnw_salesforce_entity_queue_relation" column="parent_id" referenceTable="tnw_salesforce_entity_queue" referenceColumn="queue_id" onDelete="CASCADE"/>
+    <constraint xsi:type="foreign" referenceId="BC913D0C23021919FC91247BBA30B1FE" disabled="true"/>
+    <constraint xsi:type="foreign" referenceId="CCC1AE8889A03ECB2CD24E793F468CD5" disabled="true"/>
+    <constraint xsi:type="unique" referenceId="TNW_SALESFORCE_ENTITY_QUEUE_RELATION_QUEUE_ID_PARENT_ID">
+      <column name="queue_id"/>
+      <column name="parent_id"/>
+    </constraint>
+  </table>
+  <table name="tnw_salesforce_entity_prequeue" resource="default" engine="innodb" comment="tnw_salesforce_entity_prequeue">
+    <column xsi:type="int" name="prequeue_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Queue Id"/>
+    <column xsi:type="int" name="entity_id" padding="11" unsigned="false" nullable="false" identity="false" comment="Entity Id"/>
+    <column xsi:type="varchar" name="entity_type" nullable="false" length="255" comment="Entity Type"/>
+    <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="When create"/>
+    <constraint xsi:type="primary" referenceId="PRIMARY">
+      <column name="prequeue_id"/>
+    </constraint>
+    <constraint xsi:type="unique" referenceId="TNW_SALESFORCE_ENTITY_PREQUEUE_ENTITY_ID_ENTITY_TYPE" indexType="btree">
+      <column name="entity_id"/>
+      <column name="entity_type"/>
+      <column name="entity_id"/>
+      <column name="entity_type"/>
+    </constraint>
+    <index referenceId="TNW_SALESFORCE_ENTITY_PREQUEUE_ENTITY_TYPE" indexType="btree">
+      <column name="entity_type"/>
+    </index>
+  </table>
+</schema>
