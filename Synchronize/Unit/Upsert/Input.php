@@ -320,9 +320,9 @@ class Input extends Synchronize\Unit\UnitAbstract
         }
 
         $this->cache[$entity]['message']
-            = __('Entity %1 has actual data in the Salesforce already', $this->identification->printEntity($entity));
+            = __('Synchronization of the %1 was skipped, data is Salesforce matches the data in Magento.', $this->identification->printEntity($entity));
 
-        $this->group()->messageDebug('Entity %1 has actual data in the Salesforce already', $this->identification->printEntity($entity));
+        $this->group()->messageDebug('Synchronization of the %1 was skipped, data is Salesforce matches the data in Magento.', $this->identification->printEntity($entity));
 
         return false;
     }

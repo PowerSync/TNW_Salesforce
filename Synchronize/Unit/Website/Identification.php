@@ -16,6 +16,6 @@ class Identification implements Synchronize\Unit\IdentificationInterface
      */
     public function printEntity($entity)
     {
-        return sprintf('Website, Code "%s"', $entity->getCode());
+        return sprintf('website (code: %s)', $entity->getCode());
     }
 }
