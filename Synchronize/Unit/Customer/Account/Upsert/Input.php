@@ -42,7 +42,7 @@ class Input extends Synchronize\Unit\Upsert\Input
         Model\Customer\Config $customerConfig,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate,
-        $lookup
+        $lookup = null
     ) {
         parent::__construct(
             $name,
