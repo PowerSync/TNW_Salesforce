@@ -6,9 +6,9 @@ use Magento\Customer\Model\Customer;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Framework\Module\ModuleResource;
+use Magento\Framework\Setup\Patch\PatchVersionInterface;
 
-class AddSalesForceAttribute implements DataPatchInterface
+class AddSalesForceAttribute implements DataPatchInterface, PatchVersionInterface
 {
     /**
      * ModuleDataSetupInterface
@@ -23,10 +23,6 @@ class AddSalesForceAttribute implements DataPatchInterface
      * @var EavSetupFactory
      */
     private $_eavSetupFactory;
-    /**
-     * @var ModuleResource
-     */
-    private $_moduleResource;
 
     /**
      *
@@ -35,16 +31,13 @@ class AddSalesForceAttribute implements DataPatchInterface
      *
      * @param ModuleDataSetupInterface $moduleDataSetup
      * @param EavSetupFactory $eavSetupFactory
-     * @param ModuleResource $resource
      */
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
-        EavSetupFactory $eavSetupFactory,
-        ModuleResource $resource
+        EavSetupFactory $eavSetupFactory
     ) {
         $this->_moduleDataSetup = $moduleDataSetup;
         $this->_eavSetupFactory = $eavSetupFactory;
-        $this->_moduleResource = $resource;
     }
 
     /**
@@ -74,16 +67,6 @@ class AddSalesForceAttribute implements DataPatchInterface
      */
     public function apply()
     {
-
-        //if we already have some version in db we don't need to execute this
-        if (version_compare(
-            $this->getVersion(),
-            $this->_moduleResource->getDataVersion('TNW_Salesforce'),
-            '<'
-        )
-        ) {
-            return;
-        }
 
         $eavSetup = $this->_eavSetupFactory->create(
             ['setup' => $this->_moduleDataSetup]
@@ -279,7 +262,7 @@ class AddSalesForceAttribute implements DataPatchInterface
      *
      * @return string
      */
-    private function getVersion()
+    public static function getVersion()
     {
         return '0.0.1';
     }
