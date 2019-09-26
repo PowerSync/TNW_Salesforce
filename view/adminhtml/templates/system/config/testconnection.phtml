@@ -2,7 +2,10 @@
 /**
  * @see \TNW\Salesforce\Controller\Adminhtml\System\Config\Testconnection
  */
+
+$urlr = $block->getAjaxUrl() ;
 ?>
+
 <div class="actions actions-test-salesforce-connection"
      data-mage-init='{"TNW_Salesforce/js/connection":{"url": "<?php echo $block->getAjaxUrl()?>",
         "type": "<?php echo $block->getFormId() ?>",
@@ -14,3 +17,13 @@
     </button>
     <div class="message-box connection-test-status"><div class="connection-test-status-label"></div></div>
 </div>
+
+<script type="text/x-magento-init">
+    {
+        "#tnwsforce_general_salesforce_wsdl": {
+            "TNW_Salesforce/js/upload": {
+                "ajaxUrl": "<?= $block->getAjaxUrl() ?>"
+            }
+        }
+    }
+</script>
