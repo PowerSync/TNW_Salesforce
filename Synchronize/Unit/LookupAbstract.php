@@ -102,6 +102,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     public function process()
     {
         $this->processInput();
+        $this->addMappingFieldsToSelect();
+
         if ($this->input->count() === 0) {
             $this->group()->messageDebug('Lookup skipped');
             return;
@@ -113,10 +115,45 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         $this->processOutput();
     }
 
+
     /**
      * Process Input
      */
     abstract public function processInput();
+    /**
+     * @return Synchronize\Unit\UnitInterface
+     */
+    public function getMappingUnit()
+    {
+        return $this->unit('mapping');
+    }
+
+    /**
+     *
+     */
+    public function addMappingFieldsToSelect()
+    {
+        /** emulate lookup complete to load Update/Upsert mapping */
+        $this->status(self::COMPLETE);
+
+        foreach ($this->entities() as $entity) {
+            $entity->setForceUpdateOnly(true);
+
+            /** @var \TNW\Salesforce\Model\ResourceModel\Mapper\Collection $mapping */
+            $mapping = $this->getMappingUnit()->mappers($entity);
+            $entity->setForceUpdateOnly(false);
+            break;
+        }
+
+        /** stop lookup complete emulation */
+        $this->status(self::PROCESS);
+
+        foreach ($mapping as $map) {
+            if (!in_array($map->getSalesforceAttributeName(), $this->input->columns)) {
+                $this->input->columns[] = $map->getSalesforceAttributeName();
+            }
+        }
+    }
 
     /**
      * Process Output

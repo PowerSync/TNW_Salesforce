@@ -112,7 +112,7 @@
 
     <virtualType name="TNW\Unit\Customer\BusinessAccount\Mapping" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping">
         <arguments>
-            <argument name="name" xsi:type="string">customerAccountMapping</argument>
+            <argument name="name" xsi:type="string">mapping</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="lookup" xsi:type="string">customerBusinessAccountLookup</argument>
             <argument name="objectType" xsi:type="string">Account</argument>
@@ -127,7 +127,7 @@
         <arguments>
             <argument name="name" xsi:type="string">customerBusinessAccountUpsertInput</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
-            <argument name="mapping" xsi:type="string">customerAccountMapping</argument>
+            <argument name="mapping" xsi:type="string">mapping</argument>
             <argument name="salesforceType" xsi:type="string">Account</argument>
             <argument name="lookup" xsi:type="string">customerBusinessAccountLookup</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
@@ -232,7 +232,7 @@
 
     <virtualType name="TNW\Unit\Customer\Contact\Mapping" type="TNW\Salesforce\Synchronize\Unit\Customer\Contact\Mapping">
         <arguments>
-            <argument name="name" xsi:type="string">customerContactMapping</argument>
+            <argument name="name" xsi:type="string">mapping</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="lookup" xsi:type="string">customerContactLookup</argument>
             <argument name="objectType" xsi:type="string">Contact</argument>
@@ -247,7 +247,7 @@
         <arguments>
             <argument name="name" xsi:type="string">customerContactUpsertInput</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
-            <argument name="mapping" xsi:type="string">customerContactMapping</argument>
+            <argument name="mapping" xsi:type="string">mapping</argument>
             <argument name="salesforceType" xsi:type="string">Contact</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
         </arguments>
@@ -345,7 +345,7 @@
 
     <type name="TNW\Salesforce\Synchronize\Unit\Website\Website\Mapping">
         <arguments>
-            <argument name="name" xsi:type="string">websiteWebsiteMapping</argument>
+            <argument name="name" xsi:type="string">mapping</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
             <argument name="lookup" xsi:type="string">websiteWebsiteLookup</argument>
             <argument name="objectType" xsi:type="string">Website</argument>
@@ -360,16 +360,10 @@
         <arguments>
             <argument name="name" xsi:type="string">websiteWebsiteUpsertInput</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
-            <argument name="mapping" xsi:type="string">websiteWebsiteMapping</argument>
+            <argument name="mapping" xsi:type="string">mapping</argument>
             <argument name="lookup" xsi:type="string">websiteWebsiteLookup</argument>
             <argument name="salesforceType" xsi:type="string">tnw_mage_basic__Magento_Website__c</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
-            <argument name="compareFields" xsi:type="array">
-                <item name="0" xsi:type="string">Id</item>
-                <item name="1" xsi:type="string">tnw_mage_basic__Code__c</item>
-                <item name="2" xsi:type="string">Name</item>
-                <item name="3" xsi:type="string">tnw_mage_basic__Website_ID__c</item>
-            </argument>
         </arguments>
     </virtualType>
 

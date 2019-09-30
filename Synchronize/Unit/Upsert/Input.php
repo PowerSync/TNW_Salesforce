@@ -44,7 +44,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     private $lookup;
 
     /** @var [] */
-    private $compareFields;
+    private $compareIgnoreFields;
 
     /**
      * @var array
@@ -87,7 +87,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate,
         $lookup = null,
-        $compareFields = []
+        $compareIgnoreFields = []
     ) {
         parent::__construct($name, $units, $group, [$load, $mapping]);
         $this->process = $process;
@@ -95,7 +95,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         $this->mapping = $mapping;
         $this->salesforceType = $salesforceType;
         $this->lookup = $lookup;
-        $this->compareFields = $compareFields;
+        $this->compareIgnoreFields = $compareIgnoreFields;
         $this->identification = $identification;
         $this->inputFactory = $inputFactory;
 
@@ -302,7 +302,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function actual($entity)
     {
-        if (!$this->compareFields || empty($this->lookup)) {
+        if (empty($this->lookup)) {
             return true;
         }
 
@@ -312,9 +312,13 @@ class Input extends Synchronize\Unit\UnitAbstract
         if (empty($lookupObject)) {
             return true;
         }
+        foreach ($mappedObject as $compareField => $compareValue) {
 
-        foreach ($this->compareFields as $compareField) {
-            if ($mappedObject[$compareField] != $lookupObject[$compareField]) {
+            if (in_array($compareField, $this->compareIgnoreFields)) {
+                continue;
+            }
+
+            if (empty($lookupObject[$compareField]) || $compareValue != $lookupObject[$compareField]) {
                 return true;
             }
         }
