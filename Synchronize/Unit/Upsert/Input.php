@@ -79,7 +79,6 @@ class Input extends Synchronize\Unit\UnitAbstract
         $load,
         $mapping,
         $salesforceType,
-        $lookup,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
@@ -87,6 +86,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate,
+        $lookup = null,
         $compareFields = []
     ) {
         parent::__construct($name, $units, $group, [$load, $mapping]);
@@ -302,7 +302,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function actual($entity)
     {
-        if (!$this->compareFields) {
+        if (!$this->compareFields || empty($this->lookup)) {
             return true;
         }
 
