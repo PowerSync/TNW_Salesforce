@@ -8,7 +8,7 @@ use Magento\Framework\Console\Cli;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use \TNW\SForceEnterprise\Model\Synchronization\Config as SyncConfig;
+use \TNW\Salesforce\Model\Synchronization\Config as SyncConfig;
 
 /**
  * Class CleanSystemLogsCommand
