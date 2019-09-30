@@ -34,7 +34,6 @@ class Input extends Synchronize\Unit\Upsert\Input
         $load,
         $mapping,
         $salesforceType,
-        $lookup,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
@@ -42,21 +41,22 @@ class Input extends Synchronize\Unit\Upsert\Input
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         Model\Customer\Config $customerConfig,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
+        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate,
+        $lookup = null
     ) {
         parent::__construct(
             $name,
             $load,
             $mapping,
             $salesforceType,
-            $lookup,
             $units,
             $group,
             $identification,
             $inputFactory,
             $process,
             $factory,
-            $localeDate
+            $localeDate,
+            $lookup
         );
 
         $this->customerConfig = $customerConfig;
