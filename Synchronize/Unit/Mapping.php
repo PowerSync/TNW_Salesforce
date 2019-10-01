@@ -36,6 +36,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     protected $identification;
 
+
+    protected $websiteId;
+
+    protected $mappercollection;
+
     /**
      * MappingAbstract constructor.
      *
@@ -120,10 +125,13 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     public function process()
     {
         $message = [];
+        $entititi = $this->entities();
         foreach ($this->entities() as $entity) {
-            $mappers = $this->mappers($entity);
-//            $mappers->getSelectSql()
+         // $websiteId = $this->load()->get('websiteIds/%s', $entity);
+          $mappers = $this->mappers($entity);
+          $sslls =   $mappers->getSelect()->__toString();
             $count = 0;
+
             $message[] = __(
                 "Entity %1 mapping:\n%2",
                 $this->identification->printEntity($entity),
@@ -144,6 +152,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
             );
 
             $this->cache[$entity] = $this->generateObject($entity, $mappers);
+            
         }
 
         if ($this->cache->count() === 0) {
@@ -244,10 +253,21 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function mappers($entity)
     {
-        $collection = $this->mapperCollectionFactory->create()
+        
+        if(empty($this->websiteId)){
+            $this->websiteId = $this->load()->get('websiteIds/%s', $entity);
+            $collection = $this->mapperCollectionFactory->create()
             ->addObjectToFilter($this->objectType)
             ->applyUniquenessByWebsite($this->load()->get('websiteIds/%s', $entity));
-        return $collection;
+            $this->mappercollection = $collection;
+            return $this->mappercollection;
+        }else{
+            $this->mappercollection->clear();
+            //->getSelect()->reset(\Magento\Framework\DB\Select::WHERE);
+            return $this->mappercollection;
+        }
+        
+        // return $collection;
     }
 
     /**
