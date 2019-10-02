@@ -38,11 +38,6 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     private $salesforceType;
 
-    /**
-     * @var string
-     */
-    private $lookup;
-
     /** @var [] */
     private $compareIgnoreFields;
 
@@ -86,7 +81,6 @@ class Input extends Synchronize\Unit\UnitAbstract
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate,
-        $lookup = null,
         $compareIgnoreFields = []
     ) {
         parent::__construct($name, $units, $group, [$load, $mapping]);
@@ -94,7 +88,6 @@ class Input extends Synchronize\Unit\UnitAbstract
         $this->load = $load;
         $this->mapping = $mapping;
         $this->salesforceType = $salesforceType;
-        $this->lookup = $lookup;
         $this->compareIgnoreFields = $compareIgnoreFields;
         $this->identification = $identification;
         $this->inputFactory = $inputFactory;
@@ -302,12 +295,13 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function actual($entity)
     {
-        if (empty($this->lookup)) {
+        $lookup = $this->unit('lookup');
+        if (empty($lookup)) {
             return true;
         }
 
         $mappedObject = $this->unit($this->mapping)->get('%s', $entity);
-        $lookupObject = $this->unit($this->lookup)->get('%s/record', $entity);
+        $lookupObject = $lookup->get('%s/record', $entity);
 
         if (empty($lookupObject)) {
             return true;
@@ -319,6 +313,7 @@ class Input extends Synchronize\Unit\UnitAbstract
             }
 
             if (empty($lookupObject[$compareField]) || $compareValue != $lookupObject[$compareField]) {
+                $this->group()->messageDebug('Entity %1 has changed field: %2 = %3', $this->identification->printEntity($entity), $compareField, $compareValue);
                 return true;
             }
         }

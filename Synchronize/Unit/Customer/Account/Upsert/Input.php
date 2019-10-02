@@ -42,7 +42,7 @@ class Input extends Synchronize\Unit\Upsert\Input
         Model\Customer\Config $customerConfig,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate,
-        $lookup = null
+        $compareIgnoreFields = []
     ) {
         parent::__construct(
             $name,
@@ -56,7 +56,7 @@ class Input extends Synchronize\Unit\Upsert\Input
             $process,
             $factory,
             $localeDate,
-            $lookup
+            $compareIgnoreFields
         );
 
         $this->customerConfig = $customerConfig;

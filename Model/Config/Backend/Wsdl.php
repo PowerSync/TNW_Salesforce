@@ -173,7 +173,7 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
         foreach($array as $key => $value) {
             if (is_array($value)) {
                 $sub = $this->arrayFindValueByKey($value, $search, array_merge($keys, array($key)));
-                if (count($sub)) {
+                if (is_scalar($sub) || count($sub)) {
                     return $sub;
                 }
             } elseif ($key === $search) {
