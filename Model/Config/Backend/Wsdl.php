@@ -1,12 +1,27 @@
 <?php
 namespace TNW\Salesforce\Model\Config\Backend;
 
-use Magento\MediaStorage\Model\File\Uploader;
+use Exception;
+use Magento\Config\Model\Config\Backend\File;
+use Magento\Config\Model\Config\Backend\File\RequestData\RequestDataInterface;
+use Magento\Config\Model\ResourceModel\Config;
 use Magento\Framework\App\Cache\State;
 use Magento\Framework\App\Cache\Type\Collection;
+use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Filesystem;
+use Magento\Framework\Model\Context;
+use Magento\Framework\Model\ResourceModel\AbstractResource;
+use Magento\Framework\Registry;
+use Magento\Framework\Xml\Parser;
+use Magento\MediaStorage\Model\File\Uploader;
+use Magento\MediaStorage\Model\File\UploaderFactory;
 use TNW\Salesforce\Model\Config\WebsiteDetector;
 
-class Wsdl extends \Magento\Config\Model\Config\Backend\File
+class Wsdl extends File
 {
     const CACHE_TAG = 'tnw_salesforce_client';
 
@@ -16,10 +31,10 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
 
     const API_URL = 'https://login.salesforce.com/services/Soap/c/';
 
-    /** @var \Magento\Framework\Xml\Parser */
+    /** @var Parser */
     protected $xmlParser;
 
-    /** @var \Magento\Config\Model\ResourceModel\Config */
+    /** @var Config */
     protected $resourceConfig;
 
     /** @var WebsiteDetector  */
@@ -33,7 +48,6 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
 
     /** @var  array */
     protected $handCache = [];
- 
 
     /**
      * The tail part of directory path for uploading
@@ -42,26 +56,36 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
     const UPLOAD_DIR = 'wsdl';
 
     public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\App\Config\ScopeConfigInterface $config,
-        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
-        \Magento\MediaStorage\Model\File\UploaderFactory $uploaderFactory,
-        \Magento\Config\Model\Config\Backend\File\RequestData\RequestDataInterface $requestData,
-        \Magento\Framework\Filesystem $filesystem,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        \Magento\Framework\Xml\Parser $xmlParser,
-        \Magento\Config\Model\ResourceModel\Config $resourceConfig,
+        Context $context,
+        Registry $registry,
+        ScopeConfigInterface $config,
+        TypeListInterface $cacheTypeList,
+        UploaderFactory $uploaderFactory,
+        RequestDataInterface $requestData,
+        Filesystem $filesystem,
+        AbstractResource $resource = null,
+        AbstractDb $resourceCollection = null,
+        Parser $xmlParser,
+        Config $resourceConfig,
         WebsiteDetector $websiteDetector,
         Collection $cacheCollection,
         State $cacheState,
         array $data = []
     ) {
-        parent::__construct($context, $registry, $config, $cacheTypeList, $uploaderFactory,
-            $requestData, $filesystem, $resource, $resourceCollection, $data);
+        parent::__construct(
+            $context,
+            $registry,
+            $config,
+            $cacheTypeList,
+            $uploaderFactory,
+            $requestData,
+            $filesystem,
+            $resource,
+            $resourceCollection,
+            $data
+        );
 
-        $this->_mediaDirectory = $filesystem->getDirectoryWrite(\Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR);
+        $this->_mediaDirectory = $filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
 
         $this->xmlParser = $xmlParser;
 
@@ -72,14 +96,13 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
         $this->cacheCollection = $cacheCollection;
 
         $this->cacheState = $cacheState;
-
     }
 
     /**
      * Save uploaded file before saving config value
      *
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function beforeSave()
     {
@@ -95,9 +118,8 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
                 $uploader->addValidateCallback('size', $this, 'validateMaxSize');
                 $result = $uploader->save($uploadDir);
 
+                $loadedxmlfile = $result['path'] . '/' . $result['file'];
 
-                $loadedxmlfile = $result['path'].'/'.$result['file'];
-           
                 /** Disable external entity loading to prevent possible vulnerability */
                 $previousLoaderState = libxml_disable_entity_loader(true);
 
@@ -105,11 +127,11 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
 
                 $parsedXMLData = $this->xmlParser->load($loadedxmlfile)->xmlToArray();
 
-                if(isset($parsedXMLData['definitions']['_value']['service'])){
+                if (isset($parsedXMLData['definitions']['_value']['service'])) {
                     $serviceNode = $parsedXMLData['definitions']['_value']['service'];
                     $apiVersion = $this->getAPIVersion($serviceNode);
 
-                    if($apiVersion){
+                    if ($apiVersion) {
                         $this->resourceConfig->saveConfig(
                             'tnwsforce_general/synchronization/use_bulk_api_version',
                             $apiVersion,
@@ -120,15 +142,13 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
                         $this->saveCache($apiVersion, self::USE_BULK_API_VERSION_CACHE_IDENTIFIER, $websiteId);
                     }
                 }
-
-            } catch (\Exception $e) {
-                throw new \Magento\Framework\Exception\LocalizedException(__('%1', $e->getMessage()));
+            } catch (Exception $e) {
+                throw new LocalizedException(__('%1', $e->getMessage()));
             }
 
             $filename = $this->_mediaDirectory->getRelativePath("{$result['path']}/{$result['file']}");
 
             $this->setValue("{var}/$filename");
-
         } else {
             $this->setValue($value[0]);
         }
@@ -157,31 +177,39 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
         return true;
     }
 
-    
+    /**
+     * @param $serviceNode
+     * @return mixed
+     */
     public function getAPIVersion($serviceNode)
     {
-        $location = $this->arrayFindValueByKey($serviceNode,'location');
-        $getAPIVersion = str_replace(self::API_URL,'',$location);
-        $apiversion = explode('/',$getAPIVersion);
+        $location = $this->arrayFindValueByKey($serviceNode, 'location');
+        $getAPIVersion = str_replace(self::API_URL, '', $location);
+        $apiversion = explode('/', $getAPIVersion);
 
         return reset($apiversion);
-
     }
-    
-    public function arrayFindValueByKey($array, $search, $keys = array())
+
+    /**
+     * @param $array
+     * @param $search
+     * @param array $keys
+     * @return array
+     */
+    public function arrayFindValueByKey($array, $search, $keys = [])
     {
-        foreach($array as $key => $value) {
+        foreach ($array as $key => $value) {
             if (is_array($value)) {
-                $sub = $this->arrayFindValueByKey($value, $search, array_merge($keys, array($key)));
-                if (count($sub)) {
+                $sub = $this->arrayFindValueByKey($value, $search, array_merge($keys, [$key]));
+                if (is_scalar($sub) || count($sub)) {
                     return $sub;
                 }
             } elseif ($key === $search) {
                 return $value;
             }
         }
-    
-        return array();
+
+        return [];
     }
 
     /**
@@ -191,7 +219,7 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
      * @param String $identifier
      * @param int|null $websiteId
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function saveCache($value, $identifier)
     {
@@ -210,7 +238,4 @@ class Wsdl extends \Magento\Config\Model\Config\Backend\File
             $this->handCache[$identifier] = $value;
         }
     }
-    
-
-    
 }
