@@ -61,7 +61,7 @@ class Objects extends AbstractDb
      */
     protected function _construct()
     {
-        $this->_init('salesforce_objects', 'row_id');
+        $this->_init('tnw_salesforce_objects', 'row_id');
 
         $this->selectObjectId = $this->getConnection()->select()
             ->from($this->getMainTable(), ['object_id', 'salesforce_type'])

@@ -51,7 +51,7 @@
     </index>
   </table>
 
-  <table name="tnw_salesforce_objects" resource="default" engine="innodb" comment="salesforce_objects">
+  <table name="tnw_salesforce_objects" resource="default" engine="innodb" comment="tnw_salesforce_objects">
     <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Entity Id"/>
     <column xsi:type="varchar" name="object_id" nullable="true" length="255" comment="Object Id"/>
     <column xsi:type="varchar" name="magento_type" nullable="false" length="255" comment="Magento Type"/>
@@ -78,8 +78,8 @@
       <column name="website_id"/>
       <column name="store_id"/>
     </constraint>
-    <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID" table="salesforce_objects" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE"/>
-    <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID" table="salesforce_objects" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE"/>
+    <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID" table="tnw_salesforce_objects" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE"/>
+    <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID" table="tnw_salesforce_objects" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE"/>
     <constraint xsi:type="primary" referenceId="PRIMARY">
       <column name="id"/>
     </constraint>

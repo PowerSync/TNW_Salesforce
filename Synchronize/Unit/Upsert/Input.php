@@ -79,7 +79,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         $load,
         $mapping,
         $salesforceType,
-        $lookup,
+        $lookup = null,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
