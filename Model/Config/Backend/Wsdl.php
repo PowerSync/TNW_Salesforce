@@ -183,18 +183,20 @@ class Wsdl extends File
      */
     public function getAPIVersion($serviceNode)
     {
+        // https://login.salesforce.com/services/Soap/c/46.0/0DF1p000000HDYU
         $location = $this->arrayFindValueByKey($serviceNode, 'location');
-        $getAPIVersion = str_replace(self::API_URL, '', $location);
-        $apiversion = explode('/', $getAPIVersion);
+        $locationArray = explode('/', $location);
 
-        return reset($apiversion);
+        $apiversion = $locationArray[6];
+
+        return $apiversion;
     }
 
     /**
      * @param $array
      * @param $search
      * @param array $keys
-     * @return array
+     * @return string|array
      */
     public function arrayFindValueByKey($array, $search, $keys = [])
     {
