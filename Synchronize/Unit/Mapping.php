@@ -3,6 +3,8 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
+use Magento\Store\Model\StoreManagerInterface;
+use TNW\SForceBusiness\Model as BusinessModel;
 
 /**
  * Mapping Abstract
@@ -36,10 +38,18 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     protected $identification;
 
-
+    /**
+     * @var websiteId
+     */
     protected $websiteId;
 
+    /**
+     * @var mappercollection
+     */
     protected $mappercollection;
+
+    /** @var StoreManagerInterface */
+    private $storeManager;
 
     /**
      * MappingAbstract constructor.
@@ -63,7 +73,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
-        array $dependents = []
+        array $dependents = [],
+        StoreManagerInterface $storeManager = null
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $lookup]));
         $this->load = $load;
@@ -71,6 +82,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
         $this->identification = $identification;
         $this->mapperCollectionFactory = $mapperCollectionFactory;
         $this->lookup = $lookup;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -125,11 +137,32 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     public function process()
     {
         $message = [];
-        $entititi = $this->entities();
+
+        $entitylists = $this->entities();
+
+        $mappingperwebsite = $this->mappingPerWebsite();
+
         foreach ($this->entities() as $entity) {
-         // $websiteId = $this->load()->get('websiteIds/%s', $entity);
-          $mappers = $this->mappers($entity);
-          $sslls =   $mappers->getSelect()->__toString();
+
+            $websiteId = $this->load()->get('websiteIds/%s', $entity);
+
+            $mappers = $mappingperwebsite[$websiteId];
+
+            //$mappers = $this->mappers($entity);
+
+            // to test - not working 
+            $when[] = BusinessModel\Config::MAPPING_WHEN_UPSERT;
+            if ($this->findSalesforce($entity)) {
+                $when[] = BusinessModel\Config::MAPPING_WHEN_UPDATE_ONLY;
+            } else {
+                $when[] = BusinessModel\Config::MAPPING_WHEN_INSERT_ONLY;
+            }
+
+            $mappers->addFieldToFilter(BusinessModel\Config::COLUMN_MAGENTO_TO_SF_WHEN, $when);
+            // to test - not working 
+            
+            $sslls = $mappers->getSelect()->__toString();
+
             $count = 0;
 
             $message[] = __(
@@ -251,23 +284,14 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @return Model\ResourceModel\Mapper\Collection
      */
-    public function mappers($entity)
+    public function mappers($collection)
     {
-        
-        if(empty($this->websiteId)){
-            $this->websiteId = $this->load()->get('websiteIds/%s', $entity);
-            $collection = $this->mapperCollectionFactory->create()
+
+        $collection = $this->mapperCollectionFactory->create()
             ->addObjectToFilter($this->objectType)
             ->applyUniquenessByWebsite($this->load()->get('websiteIds/%s', $entity));
-            $this->mappercollection = $collection;
-            return $this->mappercollection;
-        }else{
-            $this->mappercollection->clear();
-            //->getSelect()->reset(\Magento\Framework\DB\Select::WHERE);
-            return $this->mappercollection;
-        }
-        
-        // return $collection;
+
+        return $collection;
     }
 
     /**
@@ -356,5 +380,25 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     protected function defaultValue($entity, $mapper)
     {
         return $mapper->getDefaultValue();
+    }
+
+    protected function mappingPerWebsite()
+    {
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $storeManager = $objectManager->get('Magento\Store\Model\StoreManager');
+
+        $websiteIds = array_keys($storeManager->getWebsites());
+
+        $mapping = [];
+        foreach ($websiteIds as $websiteId) {
+            $collection = $this->mapperCollectionFactory->create()
+            ->addObjectToFilter($this->objectType);
+            $collection->applyUniquenessByWebsite($websiteId);
+            $mapping[$websiteId] = $collection;
+        }
+
+        //$sslls = $collection->getSelect()->__toString();
+        //$dsfdf = $collection->getData();
+        return $mapping;
     }
 }
