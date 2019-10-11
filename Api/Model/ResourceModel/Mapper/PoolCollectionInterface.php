@@ -15,7 +15,7 @@ interface PoolCollectionInterface
     /**
      * @return mixed
      */
-    public function getPoolCollection(DataObject $entity, $context = null):?AbstractCollection;
+    public function getPoolCollection(DataObject $entity, $context = null): ?AbstractCollection;
 
     /**
      * @param $entity

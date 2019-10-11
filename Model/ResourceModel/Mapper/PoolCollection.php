@@ -54,6 +54,6 @@ class PoolCollection implements PoolCollectionInterface
     public function setCollectionToPool(DataObject $entity, AbstractCollection $collection): void
     {
         $hash = $this->getHash($entity);
-        $this->poolCollection[$hash] =$collection;
+        $this->poolCollection[$hash] = $collection;
     }
 }
