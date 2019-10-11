@@ -195,9 +195,9 @@ class Collection extends AbstractCollection
 
         $this->_conn->beginTransaction();
         try {
-            $this->_select->forUpdate();
+//            $this->_select->forUpdate();
             $queueIds = $this->getAllIds();
-            $this->_select->forUpdate(false);
+//            $this->_select->forUpdate(false);
 
             if (!empty($queueIds)) {
                 $this->_conn->update(
