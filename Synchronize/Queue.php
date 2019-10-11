@@ -103,7 +103,8 @@ class Queue
                 $countUpdate = $lockCollection->updateLock([
                     'status' => $phase['processStatus'],
                     'transaction_uid' => $this->uidProcessor->uid(),
-                    'sync_at' => $this->timezone->date()->format('c')
+                    'sync_at' => $this->timezone->date()->format('c'),
+                    'identify' => new \Zend_Db_Expr('queue_id')
                 ]);
 
                 if (0 === $countUpdate) {
