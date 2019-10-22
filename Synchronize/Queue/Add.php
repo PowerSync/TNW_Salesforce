@@ -303,7 +303,7 @@ class Add
                 }
             }
 
-            $unit->setQueues($current);
+            $unit->addQueues($current);
 
             foreach ([$current, $parents, $children] as $relation) {
                 foreach ($relation as $relationItem) {
