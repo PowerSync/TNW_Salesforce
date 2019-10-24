@@ -72,12 +72,25 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function process()
     {
-        $attributeName = $this->fieldModifier()->fieldSalesforceId();
+        $this->processEntities($this->entities(), $this->fieldModifier()->fieldSalesforceId());
+        $this->processEntities($this->skippedEntities());
+    }
+
+    /**
+     * Process skipped
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function processEntities($entities, $attributeName = 'salesforce_id')
+    {
         $message = [];
 
-        foreach ($this->entities() as $entity) {
+        foreach ($entities as $entity) {
             try {
                 $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
+                if (!$salesforceId) {
+                    continue;
+                }
 
                 // Save Salesforce Id
                 $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
@@ -161,5 +174,27 @@ class Save extends Synchronize\Unit\UnitAbstract
     public function filter($entity)
     {
         return $this->fieldModifier()->get('%s/success', $entity);
+    }
+
+    /**
+     * Entities
+     *
+     * @return \Magento\Catalog\Model\Product[]
+     * @throws \OutOfBoundsException
+     */
+    protected function skippedEntities()
+    {
+        return array_filter($this->load()->get('entities'), [$this, 'skipped']);
+    }
+
+    /**
+     * Filter
+     *
+     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @return bool
+     */
+    public function skipped($entity)
+    {
+        return $this->fieldModifier()->get('%s/skipped', $entity);
     }
 }
