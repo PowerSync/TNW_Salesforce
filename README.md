@@ -38,7 +38,7 @@ After the extension is installed [follow the installation starting at STEP 3](ht
 * [Additional troubleshooting articles](https://technweb.atlassian.net/wiki/spaces/IWS/pages/57671700/How+To+M2+SF) are available as well.
 
 ## Contribute to this module
-Feel free to Fork and contrinute to this module and create a pull request so we will merge your changes to `develop` branch.
+Feel free to Fork and contribute to this module and create a pull request, so we will merge your changes to `develop` branch.
 
 ## Features
 * Customer sync
@@ -49,7 +49,7 @@ Feel free to Fork and contrinute to this module and create a pull request so we 
 #### Paid Version
 More information about the paid version is available on [PowerSync.biz - Magento 2 + Salesforce Integration](https://powersync.biz/integrations-magento2-salesforce/) website. View the [full list of features](https://technweb.atlassian.net/wiki/spaces/IWS/pages/251691015/Introduction).
 
-You can [view the demo of our paid verion](https://www.youtube.com/watch?v=6Z38jwLMj2g&t=25s) on YouTube.
+You can [view the demo of our paid version](https://www.youtube.com/watch?v=6Z38jwLMj2g&t=25s) on YouTube.
 
 ## License
 [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/)
