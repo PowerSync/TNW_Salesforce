@@ -269,7 +269,7 @@ class Salesforce extends DataObject
                     $object->$field
                 );
 
-                $object->$field = mb_substr($object->$field, 0, $describeField->getLength() - 3) . '...';
+                $object->$field = mb_strcut($object->$field, 0, $describeField->getLength() - 3) . '...';
             }
         }
     }
