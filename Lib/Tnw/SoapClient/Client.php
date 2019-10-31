@@ -1,11 +1,17 @@
 <?php
 namespace TNW\Salesforce\Lib\Tnw\SoapClient;
 
+use Symfony\Component\EventDispatcher\Event;
+
 /**
  * A class for extending the Salesforce SOAP API
  */
 class Client extends \Tnw\SoapClient\Client
 {
+    /**
+     * @var bool
+     */
+    public $canDispatch = true;
     /**
      * @param object $object
      * @param string $objectType
@@ -65,4 +71,31 @@ class Client extends \Tnw\SoapClient\Client
 
          return $this;
      }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function doLogin($username, $password, $token)
+    {
+        $this->canDispatch = false;
+        $result = parent::doLogin($username, $password, $token);
+        $this->canDispatch = true;
+        return $result;
+    }
+
+    /**
+     * Dispatch an event
+     *
+     * @param string $name  Name of event: see Events.php
+     * @param Event  $event Event object
+     *
+     * @return Event |null
+     */
+    protected function dispatch($name, Event $event)
+    {
+        if ($this->canDispatch) {
+            return $this->getEventDispatcher()->dispatch($name, $event);
+        }
+        return null;
+    }
 }

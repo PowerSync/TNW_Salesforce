@@ -32,6 +32,23 @@ class Raw extends Column
     }
 
     /**
+     * @param $message
+     * @return string|string[]|null
+     */
+    private function hideConfidentialInfo(string $message): string
+    {
+        $isHideConfidentialInfo = true;
+        if ($isHideConfidentialInfo) {
+            $posMiddle = strpos($message, '@');
+            if ($posMiddle) {
+                $message = (string)preg_replace("/\b([a-z0-9._-]+@[a-z0-9.-]+)\b/i", '****', $message);
+            }
+
+        }
+        return $message;
+    }
+
+    /**
      * @param array $dataSource
      *
      * @return array
@@ -47,6 +64,7 @@ class Raw extends Column
             if (!isset($item[$this->getData('name')])) {
                 continue;
             }
+            $item['message'] = $this->hideConfidentialInfo($item['message']);
 
             $item["{$name}_html"] = sprintf('<div style="white-space: pre-wrap">%s</div>', $this->escaper->escapeHtml($item[$name]));
         }
