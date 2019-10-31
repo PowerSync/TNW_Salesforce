@@ -280,7 +280,7 @@ class Input extends Synchronize\Unit\UnitAbstract
             ) {
                 $this->group()->messageNotice('Salesforce field "%s" value truncated.', $fieldName);
                 $limit = $fieldProperty->getLength();
-                $object[$fieldName] = mb_substr($object[$fieldName], 0, $limit - 3) . '...';
+                $object[$fieldName] = mb_strcut($object[$fieldName], 0, $limit - 3) . '...';
             }
         }
 
@@ -318,6 +318,7 @@ class Input extends Synchronize\Unit\UnitAbstract
             }
         }
 
+        $entity->setSalesforceId($lookupObject['Id']);
         $this->cache[$entity]['message']
             = __('Entity %1 has actual data in the Salesforce already', $this->identification->printEntity($entity));
 
