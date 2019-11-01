@@ -6,7 +6,7 @@ use Monolog\Logger;
 
 class Database extends AbstractProcessingHandler
 {
-    const MESSAGE_LIMIT_SIZE = 65000;
+    const MESSAGE_LIMIT_SIZE = 130000;
 
     /**
      * @var \TNW\Salesforce\Model\Log

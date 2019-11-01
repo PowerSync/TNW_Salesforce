@@ -31,6 +31,38 @@ class Raw extends Column
         $this->escaper = $escaper;
     }
 
+
+    /**
+     * @param string $message
+     * @return string
+     */
+    public function prepareMessage(string $message): string
+    {
+        $startFrom = strpos($message, "<?xml");
+        if ($startFrom === false) {
+            return $message;
+        }
+        try {
+            $message = substr($message, $startFrom);
+            $message = str_ireplace(['SOAP-ENV:', 'SOAP:'], '', $message);
+            $message = str_replace('ns1:', '', $message);
+            $message = str_replace('soapenv:', '', $message);
+            $domXmlElement = simplexml_load_string($message);
+            $data = json_encode($domXmlElement);
+            $arrLog = json_decode($data, true);
+            if ($arrLog) {
+                $messageString = "";
+                array_walk_recursive($arrLog, function (&$item, $key) use (&$messageString) {
+                    $element = "{$key} : {$item}" . PHP_EOL;
+                    $messageString .= $element;
+                });
+                $message = $messageString;
+            }
+        } catch (\Exception $exception) {
+            return (string)$message;
+        }
+        return (string)$message;
+    }
     /**
      * @param array $dataSource
      *
@@ -47,6 +79,7 @@ class Raw extends Column
             if (!isset($item[$this->getData('name')])) {
                 continue;
             }
+            $item['message'] = $this->prepareMessage($item['message']);
 
             $item["{$name}_html"] = sprintf('<div style="white-space: pre-wrap">%s</div>', $this->escaper->escapeHtml($item[$name]));
         }

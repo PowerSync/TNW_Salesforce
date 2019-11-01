@@ -167,6 +167,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->version_2_5_12($context, $setup);
 
+        $this->version2_5_22($context, $setup);
+
         $setup->endSetup();
     }
 
@@ -803,5 +805,24 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
             );
 
+    }
+
+    /**
+     * @param ModuleContextInterface $context
+     * @param SchemaSetupInterface $setup
+     */
+    public function version2_5_22(ModuleContextInterface $context, SchemaSetupInterface $setup)
+    {
+        if (version_compare($context->getVersion(), '2.5.22') >= 0) {
+            return;
+        }
+        $setup->getConnection()->modifyColumn(
+            $setup->getTable('tnw_salesforce_log'),
+            'message',
+            [
+                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                'length' => '2M'
+            ]
+        );
     }
 }
