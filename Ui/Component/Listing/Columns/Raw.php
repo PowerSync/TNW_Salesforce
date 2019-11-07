@@ -44,9 +44,7 @@ class Raw extends Column
         }
         try {
             $message = substr($message, $startFrom);
-            $message = str_ireplace(['SOAP-ENV:', 'SOAP:'], '', $message);
-            $message = str_replace('ns1:', '', $message);
-            $message = str_replace('soapenv:', '', $message);
+            $message = str_ireplace(['SOAP-ENV:', 'SOAP:','ns1:','soapenv:'], '', $message);
             $domXmlElement = simplexml_load_string($message);
             $data = json_encode($domXmlElement);
             $arrLog = json_decode($data, true);
