@@ -161,7 +161,7 @@
 
     <virtualType name="TNW\Customer\BusinessAccount\Save" type="TNW\Salesforce\Synchronize\Unit\Save">
         <arguments>
-            <argument name="name" xsi:type="string">customerBusinessAccountSave</argument>
+            <argument name="name" xsi:type="string">save</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="fieldModifier" xsi:type="string">customerBusinessAccountUpsertOutput</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
@@ -228,9 +228,9 @@
             <argument name="name" xsi:type="string">lookup</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
-            <argument name="dependents" xsi:type="array">
-                <item name="processUpsertInput" xsi:type="string">customerContactProcessingUpsertInput</item>
-            </argument>
+<!--            <argument name="dependents" xsi:type="array">-->
+<!--                <item name="processUpsertInput" xsi:type="string">customerContactProcessingUpsertInput</item>-->
+<!--            </argument>-->
         </arguments>
     </virtualType>
 
@@ -281,7 +281,7 @@
 
     <virtualType name="TNW\Customer\Contact\Save" type="TNW\Salesforce\Synchronize\Unit\Save">
         <arguments>
-            <argument name="name" xsi:type="string">customerContactSave</argument>
+            <argument name="name" xsi:type="string">save</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="fieldModifier" xsi:type="string">customerContactUpsertOutput</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
@@ -341,9 +341,9 @@
             <argument name="name" xsi:type="string">lookup</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
-            <argument name="dependents" xsi:type="array">
-                <item name="upsertInput" xsi:type="string">websiteWebsiteProcessingUpsertInput</item>
-            </argument>
+<!--            <argument name="dependents" xsi:type="array">-->
+<!--                <item name="upsertInput" xsi:type="string">websiteWebsiteProcessingUpsertInput</item>-->
+<!--            </argument>-->
         </arguments>
     </virtualType>
 
@@ -394,7 +394,7 @@
 
     <virtualType name="TNW\Unit\Website\Website\Save" type="TNW\Salesforce\Synchronize\Unit\Save">
         <arguments>
-            <argument name="name" xsi:type="string">websiteWebsiteSave</argument>
+            <argument name="name" xsi:type="string">save</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
             <argument name="fieldModifier" xsi:type="string">websiteWebsiteUpsertOutput</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Website</argument>
