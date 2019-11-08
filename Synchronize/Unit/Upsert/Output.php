@@ -230,11 +230,11 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function prepare($entity)
     {
-        if (empty($this->cache[$entity]['success'])) {
+        if (empty($this->cache[$entity]['success']) || empty($this->cache->get('%s/salesforce', $entity))) {
             return;
         }
 
-        $entity->setData($this->fieldSalesforceId, $this->cache[$entity]['salesforce']);
+        $entity->setData($this->fieldSalesforceId, $this->cache->get('%s/salesforce', $entity));
     }
 
     /**
