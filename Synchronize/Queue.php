@@ -135,8 +135,10 @@ class Queue
                     } catch (\Exception $e) {
                         $groupCollection->each('decrSyncAttempt');
 
+                        $status = ($e->getCode() === \TNW\Salesforce\Model\Queue::INVALID_API_VERSION_BULK_CODE)
+                            ? \TNW\Salesforce\Model\Queue::STATUS_NEW : $phase['errorStatus'];
                         $groupCollection->each('addData', [[
-                            'status' => $phase['errorStatus'],
+                            'status' => $status,
                             'message' => $e->getMessage()
                         ]]);
 
