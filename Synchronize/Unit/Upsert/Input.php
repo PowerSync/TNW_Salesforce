@@ -185,7 +185,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     public function entities()
     {
         $entities = array_filter($this->load()->get('entities'), [$this, 'filter']);
-        $entities = array_filter($entities, [$this, 'actual']);
+        $entities = array_filter($entities, [$this, 'needUpdate']);
 
         return $entities;
     }
@@ -314,7 +314,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @param AbstractModel $entity
      * @return bool
      */
-    public function actual($entity)
+    public function needUpdate($entity)
     {
         $lookup = $this->unit('lookup');
 
