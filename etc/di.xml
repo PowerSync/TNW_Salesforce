@@ -147,7 +147,7 @@
 
     <virtualType name="TNW\Unit\Customer\BusinessAccount\UpsertOutput" type="TNW\Salesforce\Synchronize\Unit\Upsert\Output">
         <arguments>
-            <argument name="name" xsi:type="string">customerBusinessAccountUpsertOutput</argument>
+            <argument name="name" xsi:type="string">upsertOutput</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="upsertInput" xsi:type="string">upsertInput</argument>
             <argument name="salesforceType" xsi:type="string">Account</argument>
@@ -163,7 +163,7 @@
         <arguments>
             <argument name="name" xsi:type="string">save</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
-            <argument name="fieldModifier" xsi:type="string">customerBusinessAccountUpsertOutput</argument>
+            <argument name="fieldModifier" xsi:type="string">upsertOutput</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
         </arguments>
@@ -173,7 +173,7 @@
         <arguments>
             <argument name="name" xsi:type="string">customerBusinessAccountStatus</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
-            <argument name="upsertOutput" xsi:type="string">customerBusinessAccountUpsertOutput</argument>
+            <argument name="upsertOutput" xsi:type="string">upsertOutput</argument>
             <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
         </arguments>
     </virtualType>
@@ -267,7 +267,7 @@
 
     <virtualType name="TNW\Unit\Customer\Contact\UpsertOutput" type="TNW\Salesforce\Synchronize\Unit\Upsert\Output">
         <arguments>
-            <argument name="name" xsi:type="string">customerContactUpsertOutput</argument>
+            <argument name="name" xsi:type="string">upsertOutput</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="upsertInput" xsi:type="string">upsertInput</argument>
             <argument name="salesforceType" xsi:type="string">Contact</argument>
@@ -283,7 +283,7 @@
         <arguments>
             <argument name="name" xsi:type="string">save</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
-            <argument name="fieldModifier" xsi:type="string">customerContactUpsertOutput</argument>
+            <argument name="fieldModifier" xsi:type="string">upsertOutput</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
         </arguments>
@@ -293,7 +293,7 @@
         <arguments>
             <argument name="name" xsi:type="string">customerContactStatus</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
-            <argument name="upsertOutput" xsi:type="string">customerContactUpsertOutput</argument>
+            <argument name="upsertOutput" xsi:type="string">upsertOutput</argument>
             <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
         </arguments>
     </virtualType>
@@ -380,7 +380,7 @@
 
     <virtualType name="TNW\Unit\Website\Website\UpsertOutput" type="TNW\Salesforce\Synchronize\Unit\Upsert\Output">
         <arguments>
-            <argument name="name" xsi:type="string">websiteWebsiteUpsertOutput</argument>
+            <argument name="name" xsi:type="string">upsertOutput</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
             <argument name="upsertInput" xsi:type="string">upsertInput</argument>
             <argument name="salesforceType" xsi:type="string">tnw_mage_basic__Magento_Website__c</argument>
@@ -396,7 +396,7 @@
         <arguments>
             <argument name="name" xsi:type="string">save</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
-            <argument name="fieldModifier" xsi:type="string">websiteWebsiteUpsertOutput</argument>
+            <argument name="fieldModifier" xsi:type="string">upsertOutput</argument>
             <argument name="entityObject" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Website</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
         </arguments>
@@ -406,7 +406,7 @@
         <arguments>
             <argument name="name" xsi:type="string">websiteWebsiteStatus</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
-            <argument name="upsertOutput" xsi:type="string">websiteWebsiteUpsertOutput</argument>
+            <argument name="upsertOutput" xsi:type="string">upsertOutput</argument>
             <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Website</argument>
         </arguments>
     </virtualType>

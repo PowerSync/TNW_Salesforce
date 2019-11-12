@@ -342,7 +342,7 @@ class Input extends Synchronize\Unit\UnitAbstract
             }
         }
 
-        $fieldName = $this->unit('upsertOutput')->fieldModifier()->fieldSalesforceId();
+        $fieldName = $this->unit('upsertOutput')->fieldSalesforceId();
         $entity->setData($fieldName, $lookupObject['Id']);
         $this->cache[$entity]['message']
             = __('Entity %1 has actual data in the Salesforce already', $this->identification->printEntity($entity));
