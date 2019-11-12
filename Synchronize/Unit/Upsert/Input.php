@@ -277,7 +277,9 @@ class Input extends Synchronize\Unit\UnitAbstract
                     }
 
                     if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
-                        $object[$fieldName]->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
+                        /** @var DateTime $value */
+                        $object[$fieldName]->setTime(0, 0, 0);
+                        //->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
                     }
 
                     if ($object[$fieldName]->getTimestamp() <= 0) {
@@ -315,7 +317,8 @@ class Input extends Synchronize\Unit\UnitAbstract
     public function actual($entity)
     {
         $lookup = $this->unit('lookup');
-        if (empty($lookup)) {
+
+        if (empty($lookup) || !$this->unit('upsertOutput')) {
             return true;
         }
 
@@ -339,7 +342,7 @@ class Input extends Synchronize\Unit\UnitAbstract
             }
         }
 
-        $fieldName = $this->unit('save')->fieldModifier()->fieldSalesforceId();
+        $fieldName = $this->unit('upsertOutput')->fieldModifier()->fieldSalesforceId();
         $entity->setData($fieldName, $lookupObject['Id']);
         $this->cache[$entity]['message']
             = __('Entity %1 has actual data in the Salesforce already', $this->identification->printEntity($entity));

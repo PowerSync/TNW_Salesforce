@@ -137,6 +137,9 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         $this->unit('lookup')->forceStatus(self::COMPLETE);
         $mapping = [];
 
+        /** @var \TNW\Salesforce\Synchronize\Unit\Upsert\Input $upsertInput */
+        $upsertInput = $this->unit('upsertInput');
+
         foreach ($this->entities() as $entity) {
             $entity->setForceUpdateOnly(true);
 
@@ -158,6 +161,15 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         $definedColumns = array_map('strtolower', $definedColumns);
 
         foreach ($mapping as $map) {
+
+            /** check if field is correct, available */
+            if ($upsertInput) {
+                $fieldName = $map->getSalesforceAttributeName();
+                $fieldProperty = $upsertInput->findFieldProperty($fieldName);
+                if (!$upsertInput->checkFieldProperty($fieldProperty, $fieldName, ['Id' => true])) {
+                    continue;
+                }
+            }
             if (!in_array(strtolower($map->getSalesforceAttributeName()), $definedColumns)) {
                 $this->input->columns[] = $map->getSalesforceAttributeName();
             }

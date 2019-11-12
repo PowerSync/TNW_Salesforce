@@ -129,7 +129,7 @@
 
     <virtualType name="TNW\Unit\Customer\BusinessAccount\UpsertInput" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert\Input">
         <arguments>
-            <argument name="name" xsi:type="string">customerBusinessAccountUpsertInput</argument>
+            <argument name="name" xsi:type="string">upsertInput</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="mapping" xsi:type="string">mapping</argument>
             <argument name="salesforceType" xsi:type="string">Account</argument>
@@ -149,7 +149,7 @@
         <arguments>
             <argument name="name" xsi:type="string">customerBusinessAccountUpsertOutput</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
-            <argument name="upsertInput" xsi:type="string">customerBusinessAccountUpsertInput</argument>
+            <argument name="upsertInput" xsi:type="string">upsertInput</argument>
             <argument name="salesforceType" xsi:type="string">Account</argument>
             <argument name="fieldSalesforceId" xsi:type="string">sforce_account_id</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
@@ -249,7 +249,7 @@
 
     <virtualType name="TNW\Unit\Customer\Contact\UpsertInput" type="TNW\Salesforce\Synchronize\Unit\Upsert\Input">
         <arguments>
-            <argument name="name" xsi:type="string">customerContactUpsertInput</argument>
+            <argument name="name" xsi:type="string">upsertInput</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
             <argument name="mapping" xsi:type="string">mapping</argument>
             <argument name="salesforceType" xsi:type="string">Contact</argument>
@@ -269,7 +269,7 @@
         <arguments>
             <argument name="name" xsi:type="string">customerContactUpsertOutput</argument>
             <argument name="load" xsi:type="string">customerLoad</argument>
-            <argument name="upsertInput" xsi:type="string">customerContactUpsertInput</argument>
+            <argument name="upsertInput" xsi:type="string">upsertInput</argument>
             <argument name="salesforceType" xsi:type="string">Contact</argument>
             <argument name="fieldSalesforceId" xsi:type="string">sforce_id</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Identification</argument>
@@ -362,7 +362,7 @@
 
     <virtualType name="TNW\Unit\Website\Website\UpsertInput" type="TNW\Salesforce\Synchronize\Unit\Upsert\Input">
         <arguments>
-            <argument name="name" xsi:type="string">websiteWebsiteUpsertInput</argument>
+            <argument name="name" xsi:type="string">upsertInput</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
             <argument name="mapping" xsi:type="string">mapping</argument>
             <argument name="salesforceType" xsi:type="string">tnw_mage_basic__Magento_Website__c</argument>
@@ -382,7 +382,7 @@
         <arguments>
             <argument name="name" xsi:type="string">websiteWebsiteUpsertOutput</argument>
             <argument name="load" xsi:type="string">websiteLoad</argument>
-            <argument name="upsertInput" xsi:type="string">websiteWebsiteUpsertInput</argument>
+            <argument name="upsertInput" xsi:type="string">upsertInput</argument>
             <argument name="salesforceType" xsi:type="string">tnw_mage_basic__Magento_Website__c</argument>
             <argument name="fieldSalesforceId" xsi:type="string">salesforce_id</argument>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Website\Identification</argument>
