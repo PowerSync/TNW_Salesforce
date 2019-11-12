@@ -1,7 +1,12 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
+use DateTime;
+use Exception;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Synchronize;
+use Tnw\SoapClient\Result\DescribeSObjectResult\Field;
 
 /**
  * Upsert Input
@@ -125,7 +130,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * Process
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function process()
     {
@@ -162,7 +167,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * Process Input
      *
      * @param Synchronize\Transport\Calls\Upsert\Transport\Input $input
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function processInput(Synchronize\Transport\Calls\Upsert\Transport\Input $input)
     {
@@ -188,7 +193,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * Filter
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
     public function filter($entity)
@@ -200,8 +205,8 @@ class Input extends Synchronize\Unit\UnitAbstract
      * Find Field Property
      *
      * @param string $fieldName
-     * @return \Tnw\SoapClient\Result\DescribeSObjectResult\Field|false
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return Field|false
+     * @throws LocalizedException
      */
     public function findFieldProperty($fieldName)
     {
@@ -215,12 +220,41 @@ class Input extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * @param $fieldProperty
+     * @param $fieldName
+     * @param $object
+     * @return bool
+     */
+    public function checkFieldProperty($fieldProperty, $fieldName, $object)
+    {
+        switch (true) {
+            case (!$fieldProperty instanceof Field):
+                $this->group()
+                    ->messageNotice('Salesforce field "%s" does not exist, value sync skipped.', $fieldName);
+                break;
+            case (empty($object['Id']) && !$fieldProperty->isCreateable()):
+                $this->group()
+                    ->messageNotice('Salesforce field "%s" is not creatable, value sync skipped.', $fieldName);
+                break;
+
+            case (!empty($object['Id']) && !$fieldProperty->isUpdateable()):
+                $this->group()
+                    ->messageNotice('Salesforce field "%s" is not updateable, value sync skipped.', $fieldName);
+                break;
+            default:
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Prepare Object
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param array $object
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function prepareObject($entity, array $object)
     {
@@ -230,30 +264,15 @@ class Input extends Synchronize\Unit\UnitAbstract
             }
 
             $fieldProperty = $this->findFieldProperty($fieldName);
-            if (!$fieldProperty instanceof \Tnw\SoapClient\Result\DescribeSObjectResult\Field) {
-                $this->group()
-                    ->messageNotice('Salesforce field "%s" does not exist, value sync skipped.', $fieldName);
-                unset($object[$fieldName]);
-                continue;
-            }
 
-            if (empty($object['Id']) && !$fieldProperty->isCreateable()) {
-                $this->group()
-                    ->messageNotice('Salesforce field "%s" is not creatable, value sync skipped.', $fieldName);
-                unset($object[$fieldName]);
-                continue;
-            }
-
-            if (!empty($object['Id']) && !$fieldProperty->isUpdateable()) {
-                $this->group()
-                    ->messageNotice('Salesforce field "%s" is not updateable, value sync skipped.', $fieldName);
+            if (!$this->checkFieldProperty($fieldProperty, $fieldName, $object)) {
                 unset($object[$fieldName]);
                 continue;
             }
 
             if (in_array($fieldProperty->getType(), ['datetime', 'date'])) {
                 try {
-                    if (!$object[$fieldName] instanceof \DateTime) {
+                    if (!$object[$fieldName] instanceof DateTime) {
                         $object[$fieldName] = date_create($object[$fieldName]);
                     }
 
@@ -265,7 +284,7 @@ class Input extends Synchronize\Unit\UnitAbstract
                         $this->group()->messageDebug('Date field "%s" is empty', $fieldName);
                         unset($object[$fieldName]);
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->group()->messageDebug(
                         'Field "%s" incorrect datetime format: %s',
                         $fieldName,
@@ -290,7 +309,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * actual
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
     public function actual($entity)
@@ -301,13 +320,15 @@ class Input extends Synchronize\Unit\UnitAbstract
         }
 
         $mappedObject = $this->unit($this->mapping)->get('%s', $entity);
+        $mappedObject = (object)$this->prepareObject($entity, (array)$mappedObject);
+
         $lookupObject = $lookup->get('%s/record', $entity);
 
         if (empty($lookupObject)) {
             return true;
         }
-        foreach ($mappedObject as $compareField => $compareValue) {
 
+        foreach ($mappedObject as $compareField => $compareValue) {
             if (in_array($compareField, $this->compareIgnoreFields)) {
                 continue;
             }
@@ -331,7 +352,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * Skipped
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
     public function skipped($entity)
