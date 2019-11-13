@@ -1,4 +1,5 @@
 <?php
+
 namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
 use DateTime;
@@ -43,15 +44,12 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     private $salesforceType;
 
-    /** @var [] */
-    private $compareIgnoreFields;
-
     /**
      * @var array
      */
     protected $objectDescription = [];
 
-    /** @var   */
+    /** @var */
     protected $localeDate;
 
     /**
@@ -85,15 +83,14 @@ class Input extends Synchronize\Unit\UnitAbstract
         Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate,
-        $compareIgnoreFields = []
-    ) {
+        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
+    )
+    {
         parent::__construct($name, $units, $group, [$load, $mapping]);
         $this->process = $process;
         $this->load = $load;
         $this->mapping = $mapping;
         $this->salesforceType = $salesforceType;
-        $this->compareIgnoreFields = $compareIgnoreFields;
         $this->identification = $identification;
         $this->inputFactory = $inputFactory;
 
@@ -230,16 +227,16 @@ class Input extends Synchronize\Unit\UnitAbstract
         switch (true) {
             case (!$fieldProperty instanceof Field):
                 $this->group()
-                    ->messageNotice('Salesforce field "%s" does not exist, value sync skipped.', $fieldName);
+                    ->messageDebug('Salesforce field "%s" does not exist, value sync skipped.', $fieldName);
                 break;
             case (empty($object['Id']) && !$fieldProperty->isCreateable()):
                 $this->group()
-                    ->messageNotice('Salesforce field "%s" is not creatable, value sync skipped.', $fieldName);
+                    ->messageDebug('Salesforce field "%s" is not creatable, value sync skipped.', $fieldName);
                 break;
 
             case (!empty($object['Id']) && !$fieldProperty->isUpdateable()):
                 $this->group()
-                    ->messageNotice('Salesforce field "%s" is not updateable, value sync skipped.', $fieldName);
+                    ->messageDebug('Salesforce field "%s" is not updateable, value sync skipped.', $fieldName);
                 break;
             default:
                 return true;
@@ -294,14 +291,16 @@ class Input extends Synchronize\Unit\UnitAbstract
                     );
                     unset($object[$fieldName]);
                 }
-            } elseif (
-                is_string($object[$fieldName])
-                && $fieldProperty->getLength()
-                && $fieldProperty->getLength() < strlen($object[$fieldName])
-            ) {
-                $this->group()->messageNotice('Salesforce field "%s" value truncated.', $fieldName);
-                $limit = $fieldProperty->getLength();
-                $object[$fieldName] = mb_strcut($object[$fieldName], 0, $limit - 3) . '...';
+            } elseif (is_string($object[$fieldName])) {
+                $object[$fieldName] = trim($object[$fieldName]);
+
+                if ($fieldProperty->getLength()
+                    && $fieldProperty->getLength() < strlen($object[$fieldName])
+                ) {
+                    $this->group()->messageNotice('Salesforce field "%s" value truncated.', $fieldName);
+                    $limit = $fieldProperty->getLength();
+                    $object[$fieldName] = mb_strcut($object[$fieldName], 0, $limit - 3) . '...';
+                }
             }
         }
 
@@ -332,7 +331,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         }
 
         foreach ($mappedObject as $compareField => $compareValue) {
-            if (in_array($compareField, $this->compareIgnoreFields)) {
+            if (in_array($compareField, $this->unit($this->mapping)->getCompareIgnoreFields())) {
                 continue;
             }
 
