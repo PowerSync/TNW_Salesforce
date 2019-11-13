@@ -10,9 +10,6 @@ use TNW\Salesforce\Synchronize\Queue\DependenciesQueue;
  */
 class Queue extends AbstractDb
 {
-
-    private static $recursionMaxDeep = 100;
-    private static $recursionCurrentDeep = 0;
     /**
      * @var string[][]
      */
@@ -178,11 +175,16 @@ class Queue extends AbstractDb
     private function buildDependencies(iterable $elements): void
     {
         foreach ($elements as $resolveEntity) {
-            self::$recursionCurrentDeep++;
-            if (self::$recursionCurrentDeep > self::$recursionMaxDeep) {
+            $currentCode = $resolveEntity->code();
+            $isExist = false;
+            array_walk($this->dependencies, function ($arrItem) use ($currentCode, &$isExist) {
+                if ($arrItem['parentCode'] == $currentCode) {
+                    $isExist = true;
+                }
+            });
+            if ($isExist) {
                 return;
             }
-            $currentCode = $resolveEntity->code();
             if (!empty($resolveEntity->children()) && is_array($resolveEntity->children())) {
                 $codes = $this->getDependObjCode($resolveEntity->children());
                 $this->addDependency($currentCode, $codes);
@@ -191,6 +193,7 @@ class Queue extends AbstractDb
             if (!empty($resolveEntity->parents()) && is_array($resolveEntity->parents())) {
                 $parentCodes = $this->getDependObjCode($resolveEntity->parents());
                 $this->addDependency($currentCode, $parentCodes, true);
+                $this->buildDependencies($resolveEntity->parents()); //recursion
             }
         }
     }
@@ -214,7 +217,6 @@ class Queue extends AbstractDb
             $data[$row['childCode']] = array_unique($data[$row['childCode']]);
         }
 
-        self::$recursionCurrentDeep = 0; //reset recursion
         $this->dependencies = [];
         return $data;
     }
