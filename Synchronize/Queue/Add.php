@@ -18,7 +18,7 @@ class Add
     /**
      * @var Unit[]
      */
-    private $resolves;
+    public $resolves;
 
     /**
      * @var \Magento\Store\Model\StoreManagerInterface

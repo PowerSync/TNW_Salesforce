@@ -1,13 +1,23 @@
 <?php
 namespace TNW\Salesforce\Model\ResourceModel;
 
+use Magento\Framework\App\ObjectManager;
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use TNW\Salesforce\Synchronize\Queue\DependenciesQueue;
 
 /**
  * Class Queue
  */
 class Queue extends AbstractDb
 {
+
+    private static $recursionMaxDeep = 100;
+    private static $recursionCurrentDeep = 0;
+    /**
+     * @var string[][]
+     */
+    private $dependencies = [];
+
     /**
      * Serializable Fields
      *
@@ -117,23 +127,8 @@ class Queue extends AbstractDb
     public function getDependenceByCode($code)
     {
         if (empty($this->dependenceByCode)) {
-            $select = $this->getConnection()->select()
-                ->from(['childQueue' => $this->getMainTable()], ['childCode' => 'code'])
-                ->joinInner(
-                    ['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')],
-                    'childQueue.queue_id = relation.queue_id',
-                    []
-                )
-                ->joinInner(
-                    ['parentQueue' => $this->getMainTable()],
-                    'relation.parent_id = parentQueue.queue_id',
-                    ['parentCode' => 'code']
-                )
-                ->distinct();
-
-            foreach ($this->getConnection()->fetchAll($select) as $row) {
-                $this->dependenceByCode[$row['childCode']][] = $row['parentCode'];
-            }
+            $data = $this->resolveDependencies();
+            $this->dependenceByCode = $data;
         }
 
         if (!isset($this->dependenceByCode[$code])) {
@@ -141,6 +136,87 @@ class Queue extends AbstractDb
         }
 
         return $this->dependenceByCode[$code];
+    }
+
+
+    /**
+     * @param array $arrObj
+     * @return array
+     */
+    public function getDependObjCode(array $arrObj): array
+    {
+        $codes = [];
+        array_walk($arrObj, function ($children) use (&$codes) {
+            $codes[] = $children->code();
+        });
+        return $codes;
+    }
+
+    /**
+     * @param string $element
+     * @param array $elements
+     * @param bool $isParent
+     */
+    public function addDependency(string $element, array $elements, $isParent = false): void
+    {
+        foreach ($elements as $el) {
+            $parent = $element;
+            if ($isParent) {
+                $parent = $el;
+                $el = $element;
+            }
+            $this->dependencies[] = [
+                'childCode' => $el,
+                'parentCode' => $parent
+            ];
+        }
+    }
+
+    /**
+     * @param $elements
+     */
+    private function buildDependencies(iterable $elements): void
+    {
+        foreach ($elements as $resolveEntity) {
+            self::$recursionCurrentDeep++;
+            if (self::$recursionCurrentDeep > self::$recursionMaxDeep) {
+                return;
+            }
+            $currentCode = $resolveEntity->code();
+            if (!empty($resolveEntity->children()) && is_array($resolveEntity->children())) {
+                $codes = $this->getDependObjCode($resolveEntity->children());
+                $this->addDependency($currentCode, $codes);
+                $this->buildDependencies($resolveEntity->children()); //recursion
+            }
+            if (!empty($resolveEntity->parents()) && is_array($resolveEntity->parents())) {
+                $parentCodes = $this->getDependObjCode($resolveEntity->parents());
+                $this->addDependency($currentCode, $parentCodes, true);
+            }
+        }
+    }
+
+    /**
+     * @return array
+     */
+    private function resolveDependencies(): array
+    {
+        $objManager = ObjectManager::getInstance();
+        $preQueue = $objManager->create(DependenciesQueue::class);
+        foreach ($preQueue->queueAddPool as $entity) {
+            if ($entity->resolves) {
+                $this->buildDependencies($entity->resolves);
+                $entity = null;
+            }
+        }
+        $data = [];
+        foreach ($this->dependencies as $row) {
+            $data[$row['childCode']][] = $row['parentCode'];
+            $data[$row['childCode']] = array_unique($data[$row['childCode']]);
+        }
+
+        self::$recursionCurrentDeep = 0; //reset recursion
+        $this->dependencies = [];
+        return $data;
     }
 
     /**
