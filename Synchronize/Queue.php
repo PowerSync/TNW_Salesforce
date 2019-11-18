@@ -88,7 +88,7 @@ class Queue
 
         ksort($this->phases);
 
-        foreach ($this->sortGroup() as $group) {
+        foreach ($this->sortGroup() as $groupKey => $group) {
             // refresh uid
             $this->uidProcessor->refresh();
 
