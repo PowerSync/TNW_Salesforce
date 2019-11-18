@@ -637,5 +637,12 @@
         <plugin name="tnw_salesforce_check_owner_field"
                 type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" />
     </type>
-
+    <type name="TNW\Salesforce\Synchronize\Queue\DependenciesQueue">
+        <arguments>
+            <argument name="queueAddPool" xsi:type="array">
+                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website</item>
+                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
