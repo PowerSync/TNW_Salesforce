@@ -30,6 +30,8 @@ class Queue extends AbstractDb
      */
     private $dependenceByCode = [];
 
+    /** @var string[][] */
+    protected $appliedResolvers = [];
     /**
      * Construct
      */
@@ -176,15 +178,12 @@ class Queue extends AbstractDb
     {
         foreach ($elements as $resolveEntity) {
             $currentCode = $resolveEntity->code();
-            $isExist = false;
-            array_walk($this->dependencies, function ($arrItem) use ($currentCode, &$isExist) {
-                if ($arrItem['parentCode'] == $currentCode) {
-                    $isExist = true;
-                }
-            });
-            if ($isExist) {
+            if (!empty($this->appliedResolvers[$currentCode])) {
                 return;
+            } else {
+                $this->appliedResolvers[$currentCode] = $currentCode;
             }
+
             if (!empty($resolveEntity->children()) && is_array($resolveEntity->children())) {
                 $codes = $this->getDependObjCode($resolveEntity->children());
                 $this->addDependency($currentCode, $codes);
@@ -205,7 +204,7 @@ class Queue extends AbstractDb
     {
         $objManager = ObjectManager::getInstance();
         $preQueue = $objManager->create(DependenciesQueue::class);
-        foreach ($preQueue->queueAddPool as $entity) {
+        foreach ($preQueue->queueAddPool as $entotyCode => $entity) {
             if ($entity->resolves) {
                 $this->buildDependencies($entity->resolves);
                 $entity = null;
