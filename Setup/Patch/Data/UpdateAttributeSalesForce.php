@@ -11,12 +11,13 @@ use Magento\Framework\DB\Select;
 use Magento\Framework\Module\ModuleResource;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Framework\Setup\Patch\PatchVersionInterface;
 use TNW\Salesforce\Model\Customer\Attribute\Source\SyncStatus;
 use TNW\Salesforce\Model\Customer\Map;
 use TNW\Salesforce\Setup\SalesforceSetup;
 use TNW\Salesforce\Setup\SalesforceSetupFactory;
 
-class UpdateAttributeSalesForce implements DataPatchInterface
+class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInterface
 {
     /**
      * ModuleDataSetupInterface
@@ -31,10 +32,6 @@ class UpdateAttributeSalesForce implements DataPatchInterface
      * @var EavSetupFactory
      */
     private $_salesForceSetupFactory;
-    /**
-     * @var ModuleResource
-     */
-    private $_moduleResource;
 
     /**
      *
@@ -43,12 +40,10 @@ class UpdateAttributeSalesForce implements DataPatchInterface
      */
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
-        SalesforceSetupFactory $salesforceSetupFactory,
-        ModuleResource $resource
+        SalesforceSetupFactory $salesforceSetupFactory
     ) {
         $this->_moduleDataSetup = $moduleDataSetup;
         $this->_salesForceSetupFactory = $salesforceSetupFactory;
-        $this->_moduleResource = $resource;
     }
 
     /**
@@ -78,16 +73,6 @@ class UpdateAttributeSalesForce implements DataPatchInterface
      */
     public function apply()
     {
-        //if we already have some version in db we don't need to execute this
-        if (version_compare(
-            $this->getVersion(),
-            $this->_moduleResource->getDataVersion('TNW_Salesforce'),
-            '<'
-        )
-        ) {
-            return;
-        }
-
         $this->_moduleDataSetup->getConnection()->startSetup();
         $setup = $this->_moduleDataSetup;
         $salesForceSetup = $this->_salesForceSetupFactory->create(
@@ -695,7 +680,7 @@ class UpdateAttributeSalesForce implements DataPatchInterface
 
         $query = $connection->insertFromSelect(
             $select,
-            $this->_moduleDataSetup->getTable('salesforce_objects'),
+            $this->_moduleDataSetup->getTable('tnw_salesforce_objects'),
             [
                 'entity_id',
                 'object_id',
@@ -734,7 +719,7 @@ class UpdateAttributeSalesForce implements DataPatchInterface
 
         $query = $connection->insertFromSelect(
             $select,
-            $this->_moduleDataSetup->getTable('salesforce_objects'),
+            $this->_moduleDataSetup->getTable('tnw_salesforce_objects'),
             [
                 'entity_id',
                 'object_id',
@@ -770,7 +755,7 @@ class UpdateAttributeSalesForce implements DataPatchInterface
 
         $query = $connection->insertFromSelect(
             $select,
-            $this->_moduleDataSetup->getTable('salesforce_objects'),
+            $this->_moduleDataSetup->getTable('tnw_salesforce_objects'),
             [
                 'entity_id',
                 'object_id',
@@ -862,7 +847,7 @@ class UpdateAttributeSalesForce implements DataPatchInterface
      *
      * @return string
      */
-    private function getVersion()
+    public static function getVersion()
     {
         return '0.0.1';
     }
