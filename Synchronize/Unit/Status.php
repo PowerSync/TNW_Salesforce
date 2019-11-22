@@ -78,14 +78,15 @@ class Status extends Synchronize\Unit\UnitAbstract
 
                 case $upsertOutput->get('%s/waiting', $entity) === true:
                     $this->cache[$entity]['status'] = Queue::STATUS_WAITING_UPSERT;
+                    $this->cache[$entity]['message'] = $upsertOutput->upsertInput()->get('%s/message', $entity);
                     continue 2;
 
                 case $upsertOutput->get('%s/success', $entity) === true:
                     if (null !== $this->salesforceIdStorage) {
                         $this->salesforceIdStorage->saveStatus($entity, 1, $entity->getData('config_website'));
                     }
-
                     $this->cache[$entity]['status'] = Queue::STATUS_COMPLETE;
+                    $this->cache[$entity]['message'] = $upsertOutput->upsertInput()->get('%s/message', $entity);
                     continue 2;
 
                 default:

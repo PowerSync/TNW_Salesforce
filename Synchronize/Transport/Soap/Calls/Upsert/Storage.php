@@ -21,7 +21,9 @@ class Storage
      */
     public function saveResult($entity, $result)
     {
-        $this->results[\spl_object_hash($entity)] = $result;
+        // hack, actually different objects could have the same hash
+        $classType = get_class($entity);
+        $this->results[\spl_object_hash($entity) . $classType] = $result;
     }
 
     /**
@@ -32,7 +34,9 @@ class Storage
      */
     public function searchResult($entity)
     {
-        $hash = \spl_object_hash($entity);
+        // hack, actually different objects could have the same hash
+        $classType = get_class($entity);
+        $hash = \spl_object_hash($entity) . $classType;
         if (empty($this->results[$hash])) {
             return null;
         }

@@ -30,7 +30,8 @@ class Units implements \IteratorAggregate
     public function get($name)
     {
         if (empty($this->units[$name])) {
-            throw new \OutOfBoundsException(__('Unit name "%1" not fount', $name));
+            return null;
+//            throw new \OutOfBoundsException(__('Unit name "%1" not fount', $name));
         }
 
         return $this->units[$name];
