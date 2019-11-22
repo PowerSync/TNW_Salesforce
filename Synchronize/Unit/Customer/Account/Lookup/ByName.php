@@ -107,7 +107,7 @@ class ByName extends Synchronize\Unit\LookupAbstract
     {
         $mapperName = $this->mapperName($this->load()->get('websiteIds/%s', $entity));
         return $mapperName instanceof Model\Mapper && null !== $mapperName->getId()
-            ? $this->unit('customerAccountMapping')->value($entity, $mapperName)
+            ? $this->unit('mapping')->value($entity, $mapperName)
             : Synchronize\Unit\Customer\Account\Mapping::companyByCustomer($entity);
     }
 

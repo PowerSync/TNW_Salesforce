@@ -70,6 +70,33 @@ class Collect extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * @param string $status
+     * @return $this|void
+     */
+    public function forceStatus($status)
+    {
+        foreach ($this->collect as $unit) {
+            $this->units()->get($unit)->forceStatus($status);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $status
+     * @return $this|void
+     */
+    public function restoreStatus()
+    {
+        foreach ($this->collect as $unit) {
+            $this->units()->get($unit)->restoreStatus();
+        }
+
+        return $this;
+    }
+
+
+    /**
      * Skipped
      *
      * @param object $entity

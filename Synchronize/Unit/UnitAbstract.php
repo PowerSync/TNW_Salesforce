@@ -1,6 +1,8 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use OutOfBoundsException;
+use RuntimeException;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -40,6 +42,11 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      * @var int
      */
     private $status = self::PENDING;
+
+    /**
+     * @var int
+     */
+    private $origStatus = self::PENDING;
 
     /**
      * UnitAbstract constructor.
@@ -116,7 +123,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      *
      * @param string $name
      * @return UnitInterface
-     * @throws \OutOfBoundsException
+     * @throws OutOfBoundsException
      */
     public function unit($name)
     {
@@ -129,12 +136,12 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      * @param string|null $path
      * @param array ...$objects
      * @return mixed
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function get($path = null, ...$objects)
     {
         if (!$this->isComplete()) {
-            throw new \RuntimeException(__('Unit "%1" not complete', $this->name()));
+            throw new RuntimeException(__('Unit "%1" not complete', $this->name()));
         }
 
         return $this->cache->get($path, ...$objects);
@@ -159,6 +166,23 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     public function status($status)
     {
         $this->status = $status;
+    }
+
+    /**
+     * @return int
+     */
+    public function forceStatus($status)
+    {
+        $this->origStatus = $this->status;
+        $this->status($status);
+    }
+
+    /**
+     * @return int
+     */
+    public function restoreStatus()
+    {
+        $this->status($this->origStatus);
     }
 
     /**

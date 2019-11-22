@@ -1,4 +1,5 @@
 <?php
+
 namespace TNW\Salesforce\Synchronize\Unit\Website\Website;
 
 use TNW\Salesforce\Synchronize;
