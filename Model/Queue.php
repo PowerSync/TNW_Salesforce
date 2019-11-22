@@ -25,8 +25,6 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     const STATUS_PROCESS_OUTPUT_UPSERT = 'process_output_upsert';
     const STATUS_PROCESS_OUTPUT_LOOKUP = 'process_output_lookup';
 
-    const INVALID_API_VERSION_BULK_CODE = 333;
-
     /**
      * @var Queue[]
      */
