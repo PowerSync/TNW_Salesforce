@@ -2,6 +2,7 @@
 namespace TNW\Salesforce\Synchronize;
 
 use TNW\Salesforce\Model;
+use \TNW\Salesforce\Synchronize\Exception as SalesforceException;
 
 /**
  * Queue
@@ -129,16 +130,28 @@ class Queue
                     );
 
                     try {
-                        $groupCollection->each('incSyncAttempt');
-                        $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
-                        $group->synchronize($groupCollection->getItems());
+                        try {
+                            $groupCollection->each('incSyncAttempt');
+                            $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
+                            $group->synchronize($groupCollection->getItems());
+
+                        } catch (SalesforceException $e) {
+                            $groupCollection->each('decrSyncAttempt');
+
+                            $status = $phase[$e->getQueueStatus()];
+
+                            $groupCollection->each('addData', [[
+                                'status' => $status,
+                                'message' => $e->getMessage()
+                            ]]);
+
+                            $group->messageError($e);
+                        }
                     } catch (\Exception $e) {
                         $groupCollection->each('decrSyncAttempt');
 
-                        $status = ($e->getCode() === \TNW\Salesforce\Model\Queue::INVALID_API_VERSION_BULK_CODE)
-                            ? \TNW\Salesforce\Model\Queue::STATUS_NEW : $phase['errorStatus'];
                         $groupCollection->each('addData', [[
-                            'status' => $status,
+                            'status' => $phase['errorStatus'],
                             'message' => $e->getMessage()
                         ]]);
 
