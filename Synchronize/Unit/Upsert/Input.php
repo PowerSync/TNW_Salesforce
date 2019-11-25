@@ -1,7 +1,13 @@
 <?php
+
 namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
+use DateTime;
+use Exception;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Synchronize;
+use Tnw\SoapClient\Result\DescribeSObjectResult\Field;
 
 /**
  * Upsert Input
@@ -39,19 +45,11 @@ class Input extends Synchronize\Unit\UnitAbstract
     private $salesforceType;
 
     /**
-     * @var string
-     */
-    private $lookup;
-
-    /** @var [] */
-    private $compareFields;
-
-    /**
      * @var array
      */
     protected $objectDescription = [];
 
-    /** @var   */
+    /** @var */
     protected $localeDate;
 
     /**
@@ -78,23 +76,20 @@ class Input extends Synchronize\Unit\UnitAbstract
         $load,
         $mapping,
         $salesforceType,
-        $lookup = null,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate,
-        $compareFields = []
-    ) {
+        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
+    )
+    {
         parent::__construct($name, $units, $group, [$load, $mapping]);
         $this->process = $process;
         $this->load = $load;
         $this->mapping = $mapping;
         $this->salesforceType = $salesforceType;
-        $this->lookup = $lookup;
-        $this->compareFields = $compareFields;
         $this->identification = $identification;
         $this->inputFactory = $inputFactory;
 
@@ -131,7 +126,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * Process
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function process()
     {
@@ -168,7 +163,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * Process Input
      *
      * @param Synchronize\Transport\Calls\Upsert\Transport\Input $input
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function processInput(Synchronize\Transport\Calls\Upsert\Transport\Input $input)
     {
@@ -186,7 +181,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     public function entities()
     {
         $entities = array_filter($this->load()->get('entities'), [$this, 'filter']);
-        $entities = array_filter($entities, [$this, 'actual']);
+        $entities = array_filter($entities, [$this, 'needUpdate']);
 
         return $entities;
     }
@@ -194,7 +189,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * Filter
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
     public function filter($entity)
@@ -206,8 +201,8 @@ class Input extends Synchronize\Unit\UnitAbstract
      * Find Field Property
      *
      * @param string $fieldName
-     * @return \Tnw\SoapClient\Result\DescribeSObjectResult\Field|false
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return Field|false
+     * @throws LocalizedException
      */
     public function findFieldProperty($fieldName)
     {
@@ -221,12 +216,41 @@ class Input extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * @param $fieldProperty
+     * @param $fieldName
+     * @param $object
+     * @return bool
+     */
+    public function checkFieldProperty($fieldProperty, $fieldName, $object)
+    {
+        switch (true) {
+            case (!$fieldProperty instanceof Field):
+                $this->group()
+                    ->messageDebug('Salesforce field "%s" does not exist, value sync skipped.', $fieldName);
+                break;
+            case (empty($object['Id']) && !$fieldProperty->isCreateable()):
+                $this->group()
+                    ->messageDebug('Salesforce field "%s" is not creatable, value sync skipped.', $fieldName);
+                break;
+
+            case (!empty($object['Id']) && !$fieldProperty->isUpdateable()):
+                $this->group()
+                    ->messageDebug('Salesforce field "%s" is not updateable, value sync skipped.', $fieldName);
+                break;
+            default:
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Prepare Object
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param array $object
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function prepareObject($entity, array $object)
     {
@@ -236,42 +260,29 @@ class Input extends Synchronize\Unit\UnitAbstract
             }
 
             $fieldProperty = $this->findFieldProperty($fieldName);
-            if (!$fieldProperty instanceof \Tnw\SoapClient\Result\DescribeSObjectResult\Field) {
-                $this->group()
-                    ->messageNotice('Salesforce field "%s" does not exist, value sync skipped.', $fieldName);
-                unset($object[$fieldName]);
-                continue;
-            }
 
-            if (empty($object['Id']) && !$fieldProperty->isCreateable()) {
-                $this->group()
-                    ->messageNotice('Salesforce field "%s" is not creatable, value sync skipped.', $fieldName);
-                unset($object[$fieldName]);
-                continue;
-            }
-
-            if (!empty($object['Id']) && !$fieldProperty->isUpdateable()) {
-                $this->group()
-                    ->messageNotice('Salesforce field "%s" is not updateable, value sync skipped.', $fieldName);
+            if (!$this->checkFieldProperty($fieldProperty, $fieldName, $object)) {
                 unset($object[$fieldName]);
                 continue;
             }
 
             if (in_array($fieldProperty->getType(), ['datetime', 'date'])) {
                 try {
-                    if (!$object[$fieldName] instanceof \DateTime) {
+                    if (!$object[$fieldName] instanceof DateTime) {
                         $object[$fieldName] = date_create($object[$fieldName]);
                     }
 
                     if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
-                        $object[$fieldName]->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
+                        /** @var DateTime $value */
+                        $object[$fieldName]->setTime(0, 0, 0);
+                        //->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
                     }
 
                     if ($object[$fieldName]->getTimestamp() <= 0) {
                         $this->group()->messageDebug('Date field "%s" is empty', $fieldName);
                         unset($object[$fieldName]);
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->group()->messageDebug(
                         'Field "%s" incorrect datetime format: %s',
                         $fieldName,
@@ -279,14 +290,16 @@ class Input extends Synchronize\Unit\UnitAbstract
                     );
                     unset($object[$fieldName]);
                 }
-            } elseif (
-                is_string($object[$fieldName])
-                && $fieldProperty->getLength()
-                && $fieldProperty->getLength() < strlen($object[$fieldName])
-            ) {
-                $this->group()->messageNotice('Salesforce field "%s" value truncated.', $fieldName);
-                $limit = $fieldProperty->getLength();
-                $object[$fieldName] = mb_substr($object[$fieldName], 0, $limit - 3) . '...';
+            } elseif (is_string($object[$fieldName])) {
+                $object[$fieldName] = trim($object[$fieldName]);
+
+                if ($fieldProperty->getLength()
+                    && $fieldProperty->getLength() < strlen($object[$fieldName])
+                ) {
+                    $this->group()->messageNotice('Salesforce field "%s" value truncated.', $fieldName);
+                    $limit = $fieldProperty->getLength();
+                    $object[$fieldName] = mb_strcut($object[$fieldName], 0, $limit - 3) . '...';
+                }
             }
         }
 
@@ -296,28 +309,39 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * actual
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
-    public function actual($entity)
+    public function needUpdate($entity)
     {
-        if (!$this->compareFields) {
+        $lookup = $this->unit('lookup');
+
+        if (empty($lookup) || !$this->unit('upsertOutput')) {
             return true;
         }
 
         $mappedObject = $this->unit($this->mapping)->get('%s', $entity);
-        $lookupObject = $this->unit($this->lookup)->get('%s/record', $entity);
+        $mappedObject = (object)$this->prepareObject($entity, (array)$mappedObject);
+
+        $lookupObject = $lookup->get('%s/record', $entity);
 
         if (empty($lookupObject)) {
             return true;
         }
 
-        foreach ($this->compareFields as $compareField) {
-            if ($mappedObject[$compareField] != $lookupObject[$compareField]) {
+        foreach ($mappedObject as $compareField => $compareValue) {
+            if (in_array($compareField, $this->unit($this->mapping)->getCompareIgnoreFields())) {
+                continue;
+            }
+
+            if (empty($lookupObject[$compareField]) || $compareValue != $lookupObject[$compareField]) {
+                $this->group()->messageDebug('Entity %1 has changed field: %2 = %3', $this->identification->printEntity($entity), $compareField, $compareValue);
                 return true;
             }
         }
 
+        $fieldName = $this->unit('upsertOutput')->fieldSalesforceId();
+        $entity->setData($fieldName, $lookupObject['Id']);
         $this->cache[$entity]['message']
             = __('Entity %1 has actual data in the Salesforce already', $this->identification->printEntity($entity));
 
@@ -329,7 +353,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * Skipped
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
     public function skipped($entity)

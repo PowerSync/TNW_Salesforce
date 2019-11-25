@@ -375,5 +375,14 @@ class Unit
     {
         $this->queues = $queues;
     }
+    /**
+     * @param \TNW\Salesforce\Model\Queue[] $queues
+     */
+    public function addQueues(array $queues): void
+    {
+        foreach ($queues as $queue) {
+            $this->queues[$queue->getIdentify()] = $queue;
+        }
+    }
 
 }

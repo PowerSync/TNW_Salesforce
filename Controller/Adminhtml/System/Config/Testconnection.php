@@ -9,8 +9,6 @@ class Testconnection extends \Magento\Backend\App\Action
 {
     /**
      * Perform Salesforce connection test
-     *
-     * @return \Magento\Framework\Object
      */
     public function execute()
     {

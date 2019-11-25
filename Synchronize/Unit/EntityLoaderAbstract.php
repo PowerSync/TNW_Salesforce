@@ -9,7 +9,7 @@ abstract class EntityLoaderAbstract
     /**
      * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage
      */
-    private $salesforceIdStorage;
+    protected $salesforceIdStorage;
 
     /**
      * MappingEntityLoaderAbstract constructor.
