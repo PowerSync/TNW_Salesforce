@@ -58,12 +58,11 @@ class Input extends Synchronize\Unit\UnitAbstract
     private $inputFactory;
 
     /**
-     * Upsert constructor.
-     *
-     * @param string $name
-     * @param string $load
-     * @param string $mapping
-     * @param string $salesforceType
+     * Input constructor.
+     * @param $name
+     * @param $load
+     * @param $mapping
+     * @param $salesforceType
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
