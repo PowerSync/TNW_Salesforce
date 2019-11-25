@@ -115,12 +115,12 @@ class Mapping extends Synchronize\Unit\Mapping
             strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0
         ) {
             if ($this->customerConfig->contactAssignee($entity->getData('config_website')) === ContactAssignee::DEFAULT_OWNER ||
-                !$this->unit('customerContactLookup')->get('%s/record/OwnerId', $entity)
+                !$this->unit('lookup')->get('%s/record/OwnerId', $entity)
             ) {
                 return $this->customerConfig->defaultOwner($entity->getData('config_website'));
             }
 
-            return $this->unit('customerContactLookup')->get('%s/record/OwnerId', $entity);
+            return $this->unit('lookup')->get('%s/record/OwnerId', $entity);
         }
 
         return parent::defaultValue($entity, $mapper);

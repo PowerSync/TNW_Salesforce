@@ -349,4 +349,15 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     {
         return $mapper->getDefaultValue();
     }
+
+    /**
+     * @return array
+     */
+    public function getCompareIgnoreFields()
+    {
+        return [
+            'tnw_mage_enterp__disableMagentoSync__c',
+            'tnw_mage_basic__Sort_Order__c'
+        ];
+    }
 }
