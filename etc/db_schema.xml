@@ -51,7 +51,7 @@
         </index>
     </table>
 
-<!--    Deprekated, keep it here because M2 doesn't have conditional table rename-->
+<!--    Depricated, keep it here because M2 doesn't have conditional table rename-->
     <table name="salesforce_objects" resource="default" engine="innodb" comment="salesforce_objects">
         <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Entity Id" />
         <column xsi:type="varchar" name="object_id" nullable="true" length="255" comment="Object Id" />
@@ -79,8 +79,8 @@
             <column name="website_id" />
             <column name="store_id" />
         </constraint>
-        <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID" table="tnw_salesforce_objects" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE" />
-        <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID" table="tnw_salesforce_objects" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE" />
+        <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID1" table="tnw_salesforce_objects" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE" />
+        <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID1" table="tnw_salesforce_objects" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE" />
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id" />
         </constraint>
@@ -119,8 +119,9 @@
             <column name="id" />
         </constraint>
     </table>
+
     <table name="tnw_salesforce_entity_queue" resource="default" engine="innodb" comment="tnw_salesforce_entity_queue">
-        <column xsi:type="varchar" name="queue_id" padding="10" unsigned="true" nullable="false" identity="true" length="32" />
+        <column xsi:type="varchar" name="queue_id" nullable="false" length="32" />
         <column xsi:type="int" name="entity_id" padding="11" unsigned="false" nullable="false" identity="false" comment="Entity Id" />
         <column xsi:type="varchar" name="entity_load" nullable="false" length="255" comment="Entity Load" />
         <column xsi:type="text" name="entity_load_additional" nullable="true" comment="Entity Load" />
@@ -166,8 +167,8 @@
         </index>
     </table>
     <table name="tnw_salesforce_entity_queue_relation" resource="default" engine="innodb" comment="tnw_salesforce_entity_queue_relation">
-        <column xsi:type="varchar" name="queue_id" padding="10" unsigned="true" nullable="false" identity="false" length="32" />
-        <column xsi:type="varchar" name="parent_id" padding="10" unsigned="true" nullable="false" identity="false" length="32" />
+        <column xsi:type="varchar" name="queue_id" nullable="false" length="32" />
+        <column xsi:type="varchar" name="parent_id" nullable="false" length="32" />
         <constraint xsi:type="foreign" referenceId="FK_BC913D0C23021919FC91247BBA30B1FE" table="tnw_salesforce_entity_queue_relation" column="queue_id" referenceTable="tnw_salesforce_entity_queue" referenceColumn="queue_id" onDelete="CASCADE" />
         <constraint xsi:type="foreign" referenceId="FK_CCC1AE8889A03ECB2CD24E793F468CD5" table="tnw_salesforce_entity_queue_relation" column="parent_id" referenceTable="tnw_salesforce_entity_queue" referenceColumn="queue_id" onDelete="CASCADE" />
         <constraint xsi:type="foreign" referenceId="BC913D0C23021919FC91247BBA30B1FE" disabled="true" />
