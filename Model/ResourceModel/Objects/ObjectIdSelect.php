@@ -46,7 +46,7 @@ class ObjectIdSelect extends SelectAbstract
     public function build()
     {
         return $this->select()
-            ->from(['object' => $this->getTable('salesforce_objects')], ['object_id'])
+            ->from(['object' => $this->getTable('tnw_salesforce_objects')], ['object_id'])
             ->where("object.entity_id = {$this->entityIdField}")
             ->where('object.magento_type = ?', $this->magentoType)
             ->where('object.salesforce_type = ?', $this->salesforceType)

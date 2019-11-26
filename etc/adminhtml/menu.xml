@@ -32,7 +32,6 @@
         <add id="TNW_Salesforce::salesforce_customer_configuration" title="Configuration" module="TNW_Salesforce"
              sortOrder="150" parent="TNW_Salesforce::tnw_customer"
              action="adminhtml/system_config/edit/section/tnwsforce_customer" resource="TNW_Salesforce::config_customer"/>
-
     </menu>
 
 </config>
