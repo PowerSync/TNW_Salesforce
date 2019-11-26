@@ -38,7 +38,7 @@ class StatusSelect extends SelectAbstract
     public function build()
     {
         return $this->select()
-            ->from(['object' => $this->getTable('salesforce_objects')], ['status'])
+            ->from(['object' => $this->getTable('tnw_salesforce_objects')], ['status'])
             ->where("object.entity_id = {$this->entityIdField}")
             ->where('object.magento_type = ?', $this->magentoType)
             ->where('object.store_id = 0')

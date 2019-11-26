@@ -58,8 +58,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     private $inputFactory;
 
     /**
-     * Upsert constructor.
-     *
+     * Input constructor.
      * @param string $name
      * @param string $load
      * @param string $mapping
@@ -72,6 +71,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Transport\Soap\ClientFactory $factory
      * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
      */
+
     public function __construct(
         $name,
         $load,

@@ -13,6 +13,6 @@ class Salesforceids extends AbstractDb
      */
     public function _construct()
     {
-        $this->_init('salesforce_objects', 'id');
+        $this->_init('tnw_salesforce_objects', 'id');
     }
 }

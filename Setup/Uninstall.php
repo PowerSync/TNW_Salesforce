@@ -55,6 +55,6 @@ class Uninstall implements UninstallInterface
         ]);
 
         $connection->dropTable($setup->getTable('tnw_salesforce_log'));
-        $connection->dropTable($setup->getTable('salesforce_objects'));
+        $connection->dropTable($setup->getTable('tnw_salesforce_objects'));
     }
 }
