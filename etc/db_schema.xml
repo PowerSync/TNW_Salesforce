@@ -79,8 +79,8 @@
             <column name="website_id" />
             <column name="store_id" />
         </constraint>
-        <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID1" table="tnw_salesforce_objects" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE" />
-        <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID1" table="tnw_salesforce_objects" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE" />
+        <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID1" table="salesforce_objects" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE" />
+        <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID1" table="salesforce_objects" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE" />
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id" />
         </constraint>
