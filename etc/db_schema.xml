@@ -51,7 +51,8 @@
         </index>
     </table>
 
-    <table disabled="true" name="salesforce_objects" resource="default" engine="innodb" comment="salesforce_objects">
+<!--    Deprekated, keep it here because M2 doesn't have conditional table rename-->
+    <table name="salesforce_objects" resource="default" engine="innodb" comment="salesforce_objects">
         <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Entity Id" />
         <column xsi:type="varchar" name="object_id" nullable="true" length="255" comment="Object Id" />
         <column xsi:type="varchar" name="magento_type" nullable="false" length="255" comment="Magento Type" />
