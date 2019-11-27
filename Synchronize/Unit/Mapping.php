@@ -1,8 +1,6 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
-use Magento\Framework\App\ObjectManager;
-use TNW\Salesforce\Api\Model\ResourceModel\Mapper\PoolCollectionInterface;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
 
@@ -122,19 +120,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     public function process()
     {
         $message = [];
-        /**
-         * @var $poolCollection PoolCollectionInterface
-         */
-        $poolCollection = ObjectManager::getInstance()->create(PoolCollectionInterface::class);
         foreach ($this->entities() as $entity) {
-            //check has in pool collection
-            $collectionFromPool = $poolCollection->getPoolCollection($entity, $this);
-            if ($collectionFromPool !== null) {
-                $mappers = $collectionFromPool;
-            } else {
-                $mappers = $this->mappers($entity);
-                $poolCollection->setCollectionToPool($entity, $mappers);
-            }
+            $mappers = $this->mappers($entity);
+//            $mappers->getSelectSql()
             $count = 0;
             $message[] = __(
                 "Entity %1 mapping:\n%2",
