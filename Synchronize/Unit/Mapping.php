@@ -37,7 +37,13 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     protected $identification;
 
     /**
-     * MappingAbstract constructor.
+     * ['insert/update']['entity_type']['website_id'] => Model\ResourceModel\Mapper\Collection
+     * @var []
+     */
+    protected $collectionCache;
+
+    /**
+     * Mapping constructor.
      *
      * @param string $name
      * @param string $load
@@ -122,7 +128,6 @@ class Mapping extends Synchronize\Unit\UnitAbstract
         $message = [];
         foreach ($this->entities() as $entity) {
             $mappers = $this->mappers($entity);
-//            $mappers->getSelectSql()
             $count = 0;
             $message[] = __(
                 "Entity %1 mapping:\n%2",
@@ -237,6 +242,15 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * @param $entity
+     * @return string
+     */
+    public function getUpdateInsertFlag($entity)
+    {
+        return Model\Config::MAPPING_WHEN_INSERT_ONLY;
+    }
+
+    /**
      * Mappers
      *
      * @param \Magento\Framework\Model\AbstractModel $entity
@@ -244,10 +258,16 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function mappers($entity)
     {
-        $collection = $this->mapperCollectionFactory->create()
-            ->addObjectToFilter($this->objectType)
-            ->applyUniquenessByWebsite($this->load()->get('websiteIds/%s', $entity));
-        return $collection;
+        $upsertInsertFlag = $this->getUpdateInsertFlag($entity);
+        $websiteId = (int)$this->load()->get('websiteIds/%s', $entity);
+        if (empty($this->collectionCache[$upsertInsertFlag][$this->objectType][$websiteId])) {
+
+            $this->collectionCache[$upsertInsertFlag][$this->objectType][$websiteId] = $this->mapperCollectionFactory->create()
+                ->addObjectToFilter($this->objectType)
+                ->applyUniquenessByWebsite($websiteId);
+        }
+
+        return $this->collectionCache[$upsertInsertFlag][$this->objectType][$websiteId];
     }
 
     /**
