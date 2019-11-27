@@ -109,9 +109,11 @@
         </arguments>
     </virtualType>
 
-    <type name="TNW\Salesforce\Synchronize\Unit\MappingAbstract">
+    <type name="TNW\Salesforce\Synchronize\Unit\Mapping">
         <plugin name="tnw_salesforce_mapping_customer_group"
                 type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\Customer\Group" />
+        <plugin name="tnw_salesforce_check_owner_field"
+                type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" />
     </type>
 
     <virtualType name="TNW\Unit\Customer\BusinessAccount\Mapping" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping">
@@ -633,10 +635,6 @@
         </arguments>
     </type>
 
-    <type name="TNW\Salesforce\Synchronize\Unit\Mapping">
-        <plugin name="tnw_salesforce_check_owner_field"
-                type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" />
-    </type>
     <type name="TNW\Salesforce\Synchronize\Queue\DependenciesQueue">
         <arguments>
             <argument name="queueAddPool" xsi:type="array">

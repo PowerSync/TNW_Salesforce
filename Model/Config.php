@@ -20,6 +20,8 @@ class Config extends DataObject
     const SFORCE_MAGENTO_ID = 'Magento_ID__c';
     const BASE_DAY = 7;
 
+    const MAPPING_WHEN_INSERT_ONLY = 'InsertOnly';
+
     const SYNC_MAX_ATTEMPT_COUNT_XML = 'tnwsforce_general/synchronization/max_attempt_count';
 
     /**

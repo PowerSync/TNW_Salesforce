@@ -28,14 +28,14 @@ class Group
     }
 
     /**
-     * @param \TNW\Salesforce\Synchronize\Unit\MappingAbstract $subject
+     * @param \TNW\Salesforce\Synchronize\Unit\Mapping $subject
      * @param callable $proceed
      * @param $entity
      * @param $attributeCode
      * @return mixed
      */
     public function aroundPrepareValue(
-        \TNW\Salesforce\Synchronize\Unit\MappingAbstract $subject,
+        \TNW\Salesforce\Synchronize\Unit\Mapping $subject,
         callable $proceed,
         $entity,
         $attributeCode) {
