@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="TNW\Salesforce\Api\WebsiteInterface" type="TNW\Salesforce\Client\Website" />
-    <preference for="TNW\Salesforce\Api\Model\ResourceModel\Mapper\PoolCollectionInterface" type="TNW\Salesforce\Model\ResourceModel\Mapper\PoolCollection" />
     <type name="TNW\Salesforce\Client\Salesforce" shared="true" />
     <virtualType name="TNW\Salesforce\Setup\Module\DataSetup" type="Magento\Setup\Module\DataSetup">
         <arguments>
@@ -245,7 +244,6 @@
             <argument name="dependents" xsi:type="array">
                 <item name="processUpsertInput" xsi:type="string">customerContactProcessingUpsertInput</item>
             </argument>
-            <argument xsi:type="object" name="poolCollection">TNW\Salesforce\Api\Model\ResourceModel\Mapper\PoolCollectionInterface</argument>
         </arguments>
     </virtualType>
 
