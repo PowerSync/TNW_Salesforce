@@ -1,37 +1,49 @@
 <?php
 namespace TNW\Salesforce\Controller\Adminhtml\System\Config;
 
-use Magento\Config\Model\Config\Backend\File;
+use Exception;
+use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Config\Model\Config\Backend\File;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Controller\Result\Json;
+use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Filesystem;
+use Magento\MediaStorage\Model\File\UploaderFactory;
+use TNW\Salesforce\Client\Salesforce;
+use TNW\Salesforce\Model\Config;
+
 /**
  * Class Testconnection
  * @package TNW\Salesforce\Controller\Adminhtml\System\Config
  */
-class Testconnection extends \Magento\Backend\App\Action
+class Testconnection extends Action
 {
-
     const UPLOAD_DIR = 'wsdl/tmp';
 
     /**
-     * @var \Magento\Config\Model\Config\Backend\File
+     * @var File
      */
     protected $file;
 
     /**
-     * @var \Magento\Framework\Controller\Result\JsonFactory
+     * @var JsonFactory
      */
     protected $resultJsonFactory;
+
+    /** @var Filesystem\Directory\WriteInterface  */
+    protected $_mediaDirectory;
 
     public function __construct(
         Context $context,
         File $file,
-        \Magento\Framework\Filesystem $filesystem,
-        \Magento\MediaStorage\Model\File\UploaderFactory $uploaderFactory,
-        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
+        Filesystem $filesystem,
+        UploaderFactory $uploaderFactory,
+        JsonFactory $resultJsonFactory
     ) {
         parent::__construct($context);
         $this->file = $file;
-        $this->_mediaDirectory = $filesystem->getDirectoryWrite(\Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR);
+        $this->_mediaDirectory = $filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
         $this->_uploaderFactory = $uploaderFactory;
         $this->resultJsonFactory = $resultJsonFactory;
     }
@@ -42,22 +54,22 @@ class Testconnection extends \Magento\Backend\App\Action
     public function execute()
     {
         /**
-         * @var \TNW\Salesforce\Client\Salesforce $client
+         * @var Salesforce $client
          */
         $client = $this->_objectManager->get('\TNW\Salesforce\Client\Salesforce');
 
         /**
-         * @var \TNW\Salesforce\Model\Config $config
+         * @var Config $config
          */
         $config = $this->_objectManager->get('\TNW\Salesforce\Model\Config');
 
-        /** @var \Magento\Framework\Controller\Result\Json $resultJson */
+        /** @var Json $resultJson */
         $resultJson = $this->resultJsonFactory->create();
 
         $file = $this->getRequest()->getFiles('file');
         if (!empty($file)) {
             $fileName = ($file && array_key_exists('name', $file)) ? $file['name'] : null;
-            
+
             $uploadDir = $this->_getUploadDir();
             try {
 
@@ -70,15 +82,11 @@ class Testconnection extends \Magento\Backend\App\Action
 
                 $response = ['success' => 'true', 'message' => 'file uploaded successfully'];
                 return $resultJson->setData($response);
-                
-
-            } catch (\Exception $e) {
-    
+            } catch (Exception $e) {
                 $response = ['error' => 'true', 'message' => $e->getMessage()];
                 return $resultJson->setData($response);
             }
-
-        } 
+        }
 
         // get website id from url
         $websiteId = $this->getRequest()->getParam('website');
@@ -86,24 +94,23 @@ class Testconnection extends \Magento\Backend\App\Action
         // get wsld path
         $wsdl = $this->getRequest()->getParam('wsdl');
 
-        if(strpos($wsdl, 'fakepath') == false){
+        if (strpos($wsdl, 'fakepath') === false) {
             // read website specific configuration
             $wsdl = $config->getSalesforceWsdl($websiteId);
             $username = $config->getSalesforceUsername($websiteId);
             $password = $config->getSalesforcePassword($websiteId);
             $token = $config->getSalesforceToken($websiteId);
-        }else{
+        } else {
             // get config from current values
             $wsdl = $this->_getWsdlPath($wsdl);
             $username = $this->getRequest()->getParam('username');
             $password = $this->getRequest()->getParam('password');
-            $token = $this->getRequest()->getParam('token');  
+            $token = $this->getRequest()->getParam('token');
         }
-
 
         try {
             $result = $client->checkConnection($wsdl, $username, $password, $token);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result = $e->getMessage();
         }
         $this->getResponse()->setBody($result);
@@ -120,8 +127,9 @@ class Testconnection extends \Magento\Backend\App\Action
         return $this->_mediaDirectory->getAbsolutePath(self::UPLOAD_DIR);
     }
 
-    protected function _getWsdlPath($wsdl){
+    protected function _getWsdlPath($wsdl)
+    {
         $fileName = basename($wsdl);
-        return $this->_mediaDirectory->getAbsolutePath(self::UPLOAD_DIR).'/'.$fileName;
+        return $this->_mediaDirectory->getAbsolutePath(self::UPLOAD_DIR) . '/' . $fileName;
     }
 }
