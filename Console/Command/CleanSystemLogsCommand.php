@@ -8,6 +8,7 @@ use Magento\Framework\Console\Cli;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use \TNW\Salesforce\Model\Synchronization\Config as SyncConfig;
 
 /**
  * Class CleanSystemLogsCommand
@@ -36,6 +37,11 @@ class CleanSystemLogsCommand extends Command
     private $timezone;
 
     /**
+     * @var syncConfig
+     */
+    private $syncConfig;
+
+    /**
      * CleanSystemLogsCommand constructor.
      */
     public function __construct(
@@ -43,7 +49,8 @@ class CleanSystemLogsCommand extends Command
         \TNW\Salesforce\Model\Config $salesforceConfig,
         \Psr\Log\LoggerInterface $logger,
         \Magento\Framework\Filesystem\Driver\File $file,
-        TimezoneInterface $timezone
+        TimezoneInterface $timezone,
+        SyncConfig $syncConfig
     )
     {
         $this->_logger = $logger;
@@ -51,6 +58,7 @@ class CleanSystemLogsCommand extends Command
         $this->timezone = $timezone;
         $this->salesforceConfig = $salesforceConfig;
         $this->clearSystemLogCron = $clearSystemLogCron;
+        $this->syncConfig = $syncConfig;
         parent::__construct();
     }
 
@@ -78,6 +86,12 @@ class CleanSystemLogsCommand extends Command
                 $this->_logger->info($this->getDateTime() . ': ' .' Clear System logs not configured');
                 return;
             }
+
+            // save to config time when cron was executed
+            $this->syncConfig->setGlobalLastCronRun(
+                $this->syncConfig->getMagentoTime(),
+                    SyncConfig::CLEAN_SYSTEM_LOGS
+            );
 
             $executeClearDebuglog = $this->clearSystemLogCron->execute();
             
