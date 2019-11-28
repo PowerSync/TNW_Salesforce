@@ -127,9 +127,19 @@ class Testconnection extends Action
         return $this->_mediaDirectory->getAbsolutePath(self::UPLOAD_DIR);
     }
 
+    /**
+     * @param $wsdl
+     * @return string
+     */
     protected function _getWsdlPath($wsdl)
     {
-        $fileName = basename($wsdl);
+        $wsdl = basename($wsdl);
+
+        $fileName = substr(strrchr($wsdl, '\\'), 1);
+        if (empty($fileName)) {
+            $fileName = $wsdl;
+        }
+
         return $this->_mediaDirectory->getAbsolutePath(self::UPLOAD_DIR) . '/' . $fileName;
     }
 }
