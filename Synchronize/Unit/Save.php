@@ -89,9 +89,6 @@ class Save extends Synchronize\Unit\UnitAbstract
         foreach ($entities as $entity) {
             try {
                 $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
-                if (!$salesforceId) {
-                    continue;
-                }
 
                 // Save Salesforce Id
                 $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
@@ -174,7 +171,8 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function filter($entity)
     {
-        return $this->fieldModifier()->get('%s/success', $entity);
+        $attributeName = $this->fieldModifier()->fieldSalesforceId();
+        return $this->fieldModifier()->get('%s/success', $entity) && $this->entityObject->valueByAttribute($entity, $attributeName);
     }
 
     /**
@@ -196,6 +194,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function skipped($entity)
     {
-        return $this->fieldModifier()->get('%s/skipped', $entity);
+        $attributeName = $this->fieldModifier()->fieldSalesforceId();
+        return $this->fieldModifier()->get('%s/skipped', $entity) && $this->entityObject->valueByAttribute($entity, $attributeName);
     }
 }
