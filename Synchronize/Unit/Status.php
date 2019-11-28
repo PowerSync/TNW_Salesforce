@@ -72,7 +72,7 @@ class Status extends Synchronize\Unit\UnitAbstract
                     continue 2;
 
                 case $upsertOutput->get('%s/skipped', $entity) === true:
-                    $this->cache[$entity]['status'] = Queue::STATUS_SKIPPED;
+                    $this->cache[$entity]['status'] = $upsertOutput->upsertInput()->get('%s/updated', $entity)? Queue::STATUS_COMPLETE: Queue::STATUS_SKIPPED;
                     $this->cache[$entity]['message'] = $upsertOutput->upsertInput()->get('%s/message', $entity);
                     continue 2;
 
