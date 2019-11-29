@@ -91,7 +91,7 @@ class Mapping extends Synchronize\Unit\Mapping
     public function prepareValue($entity, $attributeCode)
     {
         if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'sforce_id') === 0) {
-            return $this->units()->get('customerBusinessAccountLookup')->get('%s/record/Id', $entity);
+            return $this->units()->get('lookup')->get('%s/record/Id', $entity);
         }
 
         return parent::prepareValue($entity, $attributeCode);

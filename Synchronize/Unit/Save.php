@@ -11,22 +11,22 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * @var string
      */
-    private $load;
+    protected $load;
 
     /**
      * @var string
      */
-    private $fieldModifier;
+    protected $fieldModifier;
 
     /**
      * @var IdentificationInterface
      */
-    private $identification;
+    protected $identification;
 
     /**
      * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage
      */
-    private $entityObject;
+    protected $entityObject;
 
     /**
      * Save constructor.
@@ -72,7 +72,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function process()
     {
-        $this->processEntities($this->entities(), $this->fieldModifier()->fieldSalesforceId());
+        $this->processEntities($this->entities());
         $this->processEntities($this->skippedEntities());
     }
 
@@ -81,16 +81,14 @@ class Save extends Synchronize\Unit\UnitAbstract
      *
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function processEntities($entities, $attributeName = 'salesforce_id')
+    public function processEntities($entities)
     {
         $message = [];
 
+        $attributeName = $this->fieldModifier()->fieldSalesforceId();
         foreach ($entities as $entity) {
             try {
                 $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
-                if (!$salesforceId) {
-                    continue;
-                }
 
                 // Save Salesforce Id
                 $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
@@ -173,7 +171,8 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function filter($entity)
     {
-        return $this->fieldModifier()->get('%s/success', $entity);
+        $attributeName = $this->fieldModifier()->fieldSalesforceId();
+        return $this->fieldModifier()->get('%s/success', $entity) && $this->entityObject->valueByAttribute($entity, $attributeName);
     }
 
     /**
@@ -195,6 +194,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function skipped($entity)
     {
-        return $this->fieldModifier()->get('%s/skipped', $entity);
+        $attributeName = $this->fieldModifier()->fieldSalesforceId();
+        return $this->fieldModifier()->get('%s/skipped', $entity) && $this->entityObject->valueByAttribute($entity, $attributeName);
     }
 }

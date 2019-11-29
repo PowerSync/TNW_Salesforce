@@ -57,4 +57,41 @@ class ByContact extends \TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup
     {
         return $record['Account'];
     }
+
+
+    /**
+     *
+     */
+    public function addMappingFieldsToSelect()
+    {
+        /** emulate lookup complete to load Update/Upsert mapping */
+        $this->unit('lookup')->forceStatus(self::COMPLETE);
+        $mapping = [];
+
+        foreach ($this->entities() as $entity) {
+            $entity->setForceUpdateOnly(true);
+
+            if ($this->getMappingUnit()) {
+                /** @var \TNW\Salesforce\Model\ResourceModel\Mapper\Collection $mapping */
+                $mapping = $this->getMappingUnit()->mappers($entity);
+            }
+            $entity->setForceUpdateOnly(false);
+            break;
+        }
+
+        /** stop lookup complete emulation */
+        $this->unit('lookup')->restoreStatus();
+
+        $definedColumns = $this->input->columns;
+        // TODO : change it to the compareIgnoreFields as defined for \TNW\Salesforce\Synchronize\Unit\Upsert\Input
+        $definedColumns[] = 'tnw_mage_enterp__disableMagentoSync__c';
+
+        $definedColumns = array_map('strtolower', $definedColumns);
+
+        foreach ($mapping as $map) {
+            if (!in_array(strtolower('Account.' . $map->getSalesforceAttributeName()), $definedColumns)) {
+                $this->input->columns[] = 'Account.' . $map->getSalesforceAttributeName();
+            }
+        }
+    }
 }

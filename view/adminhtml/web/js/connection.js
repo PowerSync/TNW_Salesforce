@@ -13,7 +13,11 @@ define([
             testActionSelector: '.action.test-connection',
             errorMessageClass: 'tnw-message-error',
             successMessageClass: 'tnw-message-success',
-            loaderClass: 'tnw-message-spinner'
+            loaderClass: 'tnw-message-spinner',
+            usernameElem: '#tnwsforce_general_salesforce_username',
+            passwordElem: '#tnwsforce_general_salesforce_password',
+            tokenElem: '#tnwsforce_general_salesforce_token',
+            wsdlElem: '#tnwsforce_general_salesforce_wsdl'
         },
 
         /**
@@ -99,7 +103,11 @@ define([
                 dataType: 'json',
                 context: this,
                 data: {
-                    'formId': this.options.type
+                    'formId': this.options.type,
+                    username: $(this.options.usernameElem).val(),
+                    password: $(this.options.passwordElem).val(),
+                    token: $(this.options.tokenElem).val(),
+                    wsdl: $(this.options.wsdlElem).val()
                 },
                 beforeSend: function () {
                     this._resetAllStyling();

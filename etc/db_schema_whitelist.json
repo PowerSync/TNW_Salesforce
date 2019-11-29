@@ -1,0 +1,145 @@
+{
+    "tnw_salesforce_mapper": {
+        "column": {
+            "map_id": true,
+            "magento_attribute_name": true,
+            "salesforce_attribute_name": true,
+            "attribute_type": true,
+            "attribute_id": true,
+            "default_value": true,
+            "object_type": true,
+            "magento_entity_type": true,
+            "is_default": true,
+            "website_id": true
+        },
+        "index": {
+            "TNW_SALESFORCE_MAPPER_MAP_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "UNQ_126CF0C9950E3217BC49EF360F69259E": true,
+            "UNQ_60349F8A9E5C5B146928AD8B9CAF78E7": true,
+            "TNW_SALESFORCE_MAPPER_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID": true
+        }
+    },
+    "store_website": {
+        "column": {
+            "salesforce_id": true
+        }
+    },
+    "tnw_salesforce_log": {
+        "column": {
+            "id": true,
+            "transaction_uid": true,
+            "level": true,
+            "website_id": true,
+            "message": true,
+            "created_at": true
+        },
+        "index": {
+            "TNW_SALESFORCE_LOG_WEBSITE_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "TNW_SALESFORCE_LOG_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID": true
+        }
+    },
+    "salesforce_objects": {
+        "column": {
+            "entity_id": true,
+            "object_id": true,
+            "magento_type": true,
+            "salesforce_type": true,
+            "status": true,
+            "website_id": true,
+            "store_id": true,
+            "id": true
+        },
+        "constraint": {
+            "SALESFORCE_OBJECTS_ENTITY_ID_SALESFORCE_TYPE_MAGENTO_TYPE": true,
+            "SALESFORCE_OBJECTS_ENTT_ID_SALESFORCE_TYPE_MAGENTO_TYPE_WS_ID": true,
+            "UNQ_43ED4E0733AB5D74307906A6569F24E3": true,
+            "SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID": true,
+            "SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID": true,
+            "PRIMARY": true
+        }
+    },
+    "tnw_salesforce_objects": {
+        "column": {
+            "entity_id": true,
+            "object_id": true,
+            "magento_type": true,
+            "salesforce_type": true,
+            "status": true,
+            "website_id": true,
+            "store_id": true,
+            "id": true
+        },
+        "constraint": {
+            "TNW_SALESFORCE_OBJECTS_ENTITY_ID_SALESFORCE_TYPE_MAGENTO_TYPE": true,
+            "UNQ_9FDE5D1FB3D6B00ACE433FA9F627CB7A": true,
+            "UNQ_841C9F764B2E165295E5FD196EB9C9EC": true,
+            "TNW_SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID": true,
+            "TNW_SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID": true,
+            "PRIMARY": true
+        }
+    },
+    "tnw_salesforce_entity_queue": {
+        "column": {
+            "queue_id": true,
+            "entity_id": true,
+            "entity_load": true,
+            "entity_load_additional": true,
+            "entity_type": true,
+            "object_type": true,
+            "sync_type": true,
+            "sync_attempt": true,
+            "sync_at": true,
+            "status": true,
+            "message": true,
+            "code": true,
+            "description": true,
+            "website_id": true,
+            "transaction_uid": true,
+            "additional_data": true,
+            "created_at": true,
+            "identify": true
+        },
+        "index": {
+            "TNW_SALESFORCE_ENTITY_QUEUE_CODE_ENTITY_ID_ENTITY_LOAD": true,
+            "TNW_SALESFORCE_ENTT_QUEUE_TRANSACTION_UID_CODE_STS_WS_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "TNW_SALESFORCE_ENTITY_QUEUE_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID": true,
+            "UNQ_CF57A815B4B152C31BAEED19492E0D41": true,
+            "TNW_SALESFORCE_ENTITY_QUEUE_IDENTIFY_SYNC_TYPE_WEBSITE_ID": true
+        }
+    },
+    "tnw_salesforce_entity_queue_relation": {
+        "column": {
+            "queue_id": true,
+            "parent_id": true
+        },
+        "constraint": {
+            "FK_BC913D0C23021919FC91247BBA30B1FE": true,
+            "FK_CCC1AE8889A03ECB2CD24E793F468CD5": true,
+            "TNW_SALESFORCE_ENTITY_QUEUE_RELATION_QUEUE_ID_PARENT_ID": true
+        }
+    },
+    "tnw_salesforce_entity_prequeue": {
+        "column": {
+            "prequeue_id": true,
+            "entity_id": true,
+            "entity_type": true,
+            "created_at": true
+        },
+        "index": {
+            "TNW_SALESFORCE_ENTITY_PREQUEUE_ENTITY_TYPE": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "TNW_SALESFORCE_ENTITY_PREQUEUE_ENTITY_ID_ENTITY_TYPE": true
+        }
+    }
+}

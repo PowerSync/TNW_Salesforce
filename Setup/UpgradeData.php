@@ -675,7 +675,7 @@ class UpgradeData implements UpgradeDataInterface
 
         $query = $connection->insertFromSelect(
             $select,
-            $setup->getTable('salesforce_objects'),
+            $setup->getTable('tnw_salesforce_objects'),
             ['entity_id', 'object_id', 'magento_type', 'salesforce_type', 'website_id'],
             \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
         );
@@ -695,7 +695,7 @@ class UpgradeData implements UpgradeDataInterface
 
         $query = $connection->insertFromSelect(
             $select,
-            $setup->getTable('salesforce_objects'),
+            $setup->getTable('tnw_salesforce_objects'),
             ['entity_id', 'object_id', 'magento_type', 'salesforce_type', 'website_id'],
             \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
         );
@@ -715,7 +715,7 @@ class UpgradeData implements UpgradeDataInterface
 
         $query = $connection->insertFromSelect(
             $select,
-            $setup->getTable('salesforce_objects'),
+            $setup->getTable('tnw_salesforce_objects'),
             ['entity_id', 'object_id', 'magento_type', 'salesforce_type', 'website_id'],
             \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
         );

@@ -177,7 +177,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         }
 
         $table = $setup->getConnection()
-            ->newTable($setup->getTable('salesforce_objects'))
+            ->newTable($setup->getTable('tnw_salesforce_objects'))
             ->addColumn('entity_id', Table::TYPE_INTEGER, null, [
                 'unsigned' => true,
                 'nullable' => false,
@@ -198,7 +198,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ], 'Status')
             ->addIndex(
                 $setup->getIdxName(
-                    'salesforce_objects',
+                    'tnw_salesforce_objects',
                     ['entity_id', 'salesforce_type', 'magento_type'],
                     \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
                 ),
@@ -217,7 +217,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         }
 
         $setup->getConnection()
-            ->addColumn($setup->getTable('salesforce_objects'), 'website_id', [
+            ->addColumn($setup->getTable('tnw_salesforce_objects'), 'website_id', [
                 'type' => Table::TYPE_SMALLINT,
                 'unsigned' => true,
                 'nullable' => false,
@@ -227,9 +227,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->dropIndex(
-                $setup->getTable('salesforce_objects'),
+                $setup->getTable('tnw_salesforce_objects'),
                 $setup->getIdxName(
-                    'salesforce_objects',
+                    'tnw_salesforce_objects',
                     ['entity_id', 'salesforce_type', 'magento_type'],
                     \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
                 )
@@ -237,9 +237,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->addIndex(
-                $setup->getTable('salesforce_objects'),
+                $setup->getTable('tnw_salesforce_objects'),
                 $setup->getIdxName(
-                    'salesforce_objects',
+                    'tnw_salesforce_objects',
                     ['entity_id', 'salesforce_type', 'magento_type', 'website_id'],
                     \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
                 ),
@@ -249,8 +249,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->addForeignKey(
-                $setup->getFkName('salesforce_objects', 'website_id', 'store_website', 'website_id'),
-                $setup->getTable('salesforce_objects'),
+                $setup->getFkName('tnw_salesforce_objects', 'website_id', 'store_website', 'website_id'),
+                $setup->getTable('tnw_salesforce_objects'),
                 'website_id',
                 $setup->getTable('store_website'),
                 'website_id',
@@ -265,7 +265,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         }
 
         $setup->getConnection()
-            ->addColumn($setup->getTable('salesforce_objects'), 'store_id', [
+            ->addColumn($setup->getTable('tnw_salesforce_objects'), 'store_id', [
                 'type' => Table::TYPE_SMALLINT,
                 'unsigned' => true,
                 'nullable' => false,
@@ -275,9 +275,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->dropIndex(
-                $setup->getTable('salesforce_objects'),
+                $setup->getTable('tnw_salesforce_objects'),
                 $setup->getIdxName(
-                    'salesforce_objects',
+                    'tnw_salesforce_objects',
                     ['entity_id', 'salesforce_type', 'magento_type', 'website_id'],
                     \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
                 )
@@ -285,9 +285,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->addIndex(
-                $setup->getTable('salesforce_objects'),
+                $setup->getTable('tnw_salesforce_objects'),
                 $setup->getIdxName(
-                    'salesforce_objects',
+                    'tnw_salesforce_objects',
                     ['entity_id', 'salesforce_type', 'magento_type', 'website_id', 'store_id'],
                     \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE
                 ),
@@ -297,8 +297,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->addForeignKey(
-                $setup->getFkName('salesforce_objects', 'store_id', 'store', 'store_id'),
-                $setup->getTable('salesforce_objects'),
+                $setup->getFkName('tnw_salesforce_objects', 'store_id', 'store', 'store_id'),
+                $setup->getTable('tnw_salesforce_objects'),
                 'store_id',
                 $setup->getTable('store'),
                 'store_id',
@@ -612,8 +612,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->addForeignKey(
-                $setup->getFkName('salesforce_objects', 'website_id', 'store_website', 'website_id'),
-                $setup->getTable('salesforce_objects'),
+                $setup->getFkName('tnw_salesforce_objects', 'website_id', 'store_website', 'website_id'),
+                $setup->getTable('tnw_salesforce_objects'),
                 'website_id',
                 $setup->getTable('store_website'),
                 'website_id',
@@ -757,7 +757,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         }
 
         $setup->getConnection()->addColumn(
-            $setup->getTable('salesforce_objects'),
+            $setup->getTable('tnw_salesforce_objects'),
             'id',
             [
                 'type' => \Magento\Framework\DB\Ddl\Table::TYPE_BIGINT,
