@@ -292,7 +292,7 @@ jobs:
         MYSQL_DATABASE: magento
         MYSQL_ROOT_PASSWORD: docker
     environment:
-      MAGENTO_VERSION: "2.3.0"
+      MAGENTO_VERSION: "2.3.3"
     working_directory: ~/tnw_extension/
     steps:
     - checkout
