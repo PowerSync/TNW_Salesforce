@@ -282,7 +282,7 @@ jobs:
         command: |
           /var/www/html/magento-coding-standard/vendor/bin/phpcs $CIRCLE_WORKING_DIRECTORY --standard=MEQP2 --severity=10 --extensions=php,phtml
 
-  m233_php72:
+  m230_php72:
     docker:
     - image: circleci/php:7.2.10-apache-stretch-node-browsers-legacy
     - image: circleci/mysql:5.7
