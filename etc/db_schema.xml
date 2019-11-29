@@ -171,8 +171,6 @@
         <column xsi:type="varchar" name="parent_id" nullable="false" length="32" />
         <constraint xsi:type="foreign" referenceId="FK_BC913D0C23021919FC91247BBA30B1FE" table="tnw_salesforce_entity_queue_relation" column="queue_id" referenceTable="tnw_salesforce_entity_queue" referenceColumn="queue_id" onDelete="CASCADE" />
         <constraint xsi:type="foreign" referenceId="FK_CCC1AE8889A03ECB2CD24E793F468CD5" table="tnw_salesforce_entity_queue_relation" column="parent_id" referenceTable="tnw_salesforce_entity_queue" referenceColumn="queue_id" onDelete="CASCADE" />
-        <constraint xsi:type="foreign" referenceId="BC913D0C23021919FC91247BBA30B1FE" disabled="true" />
-        <constraint xsi:type="foreign" referenceId="CCC1AE8889A03ECB2CD24E793F468CD5" disabled="true" />
         <constraint xsi:type="unique" referenceId="TNW_SALESFORCE_ENTITY_QUEUE_RELATION_QUEUE_ID_PARENT_ID">
             <column name="queue_id" />
             <column name="parent_id" />
