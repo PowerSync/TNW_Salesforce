@@ -19,7 +19,7 @@ jobs:
         MYSQL_DATABASE: magento
         MYSQL_ROOT_PASSWORD: docker
     environment:
-      MAGENTO_VERSION: "2.3.0"
+      MAGENTO_VERSION: "2.3.3"
     working_directory: ~/tnw_extension
     steps:
     - run:
@@ -62,7 +62,6 @@ jobs:
           composer config -g http-basic.repo.magento.com $MAGENTO_REPO_LOGIN $MAGENTO_REPO_PASSWORD
           composer create-project -s RC --repository-url=https://repo.magento.com/ magento/project-community-edition magento2-$MAGENTO_VERSION $MAGENTO_VERSION
           cd magento2-$MAGENTO_VERSION
-          composer install --prefer-dist
           ./bin/magento setup:install --backend-frontname admin --db-host 127.0.0.1 --db-prefix tnwc_ --db-name magento --db-user mage --db-password mage --base-url http://magento-qa.box/ --language en_US --timezone America/Chicago --currency USD --admin-lastname Admin --admin-firstname Admin --admin-email admin@example.com --admin-user admin --admin-password admin123 --cleanup-database --use-rewrites 1
           ./bin/magento --version
     - run:
