@@ -385,9 +385,7 @@ class Add
 
         $connection->beginTransaction();
         try {
-            foreach ($queueDataToSave as $q) {
-                $this->saveQueue([$q]);
-            }
+            $this->saveQueue($queueDataToSave);
             $this->saveDependency($dependencies);
 
             $connection->commit();
