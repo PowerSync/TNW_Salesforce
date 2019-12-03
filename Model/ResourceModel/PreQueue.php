@@ -2,6 +2,7 @@
 namespace TNW\Salesforce\Model\ResourceModel;
 
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use TNW\SForceEnterprise\Model\Synchronization\Config;
 
 /**
  * Class Prequeue
@@ -20,7 +21,7 @@ class PreQueue extends AbstractDb
      * @param $ids
      * @param $entityType
      */
-    public function saveEntityIds($ids, $entityType)
+    public function saveEntityIds($ids, $entityType, $syncType =  Config::DIRECT_SYNC_TYPE_REALTIME)
     {
         if (empty($ids) || empty($entityType)) {
             return;
@@ -30,7 +31,8 @@ class PreQueue extends AbstractDb
         foreach ($ids as $id) {
             $arrayToInsert[$id] = [
                 'entity_id' => $id,
-                'entity_type' => $entityType
+                'entity_type' => $entityType,
+                'sync_type' => $syncType
             ];
         }
 

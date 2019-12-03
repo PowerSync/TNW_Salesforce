@@ -111,7 +111,8 @@ class Add
     public function addToPreQueue(array $entityIds)
     {
         foreach (array_chunk($entityIds, self::DIRECT_ADD_TO_QUEUE_COUNT_LIMIT) as $ids) {
-            $this->resourcePreQueue->saveEntityIds($ids, $this->entityType);
+            $syncType = $this->syncType(count($entityIds), 0);
+            $this->resourcePreQueue->saveEntityIds($ids, $this->entityType, $syncType);
         }
 
         if ($this->state->getAreaCode() == \Magento\Framework\App\Area::AREA_ADMINHTML ) {
@@ -123,13 +124,13 @@ class Add
      * @param array $entityIds
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function addToQueueDirectly(array $entityIds)
+    public function addToQueueDirectly(array $entityIds, $syncType = null)
     {
         $entitiesByWebsite = $this->dividerPool
             ->getDividerByGroupCode($this->entityType)
             ->process($entityIds);
 
-        array_walk($entitiesByWebsite, [$this, 'addToQueueByWebsite']);
+        array_walk($entitiesByWebsite, [$this, 'addToQueueByWebsite'], $syncType);
     }
 
     /**
@@ -140,10 +141,13 @@ class Add
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Exception
      */
-    public function addToQueueByWebsite(array $entityIds, $website = null)
+    public function addToQueueByWebsite(array $entityIds, $website = null, $syncType = null)
     {
         $websiteId = $this->storeManager->getWebsite($website)->getId();
-        $syncType = $this->syncType(count($entityIds), $websiteId);
+
+        if ($syncType === null) {
+            $syncType = $this->syncType(count($entityIds), $websiteId);
+        }
 
         $this->create($this->resolves, $this->entityType, $entityIds, [], $websiteId, $syncType);
 
@@ -381,7 +385,9 @@ class Add
 
         $connection->beginTransaction();
         try {
-            $this->saveQueue($queueDataToSave);
+            foreach ($queueDataToSave as $q) {
+                $this->saveQueue([$q]);
+            }
             $this->saveDependency($dependencies);
 
             $connection->commit();
