@@ -180,6 +180,7 @@
         <column xsi:type="int" name="prequeue_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Queue Id" />
         <column xsi:type="int" name="entity_id" padding="11" unsigned="false" nullable="false" identity="false" comment="Entity Id" />
         <column xsi:type="varchar" name="entity_type" nullable="false" length="255" comment="Entity Type" />
+        <column xsi:type="int" name="sync_type" default="0" padding="20" unsigned="false" nullable="false" identity="false" comment="sync_type" />
         <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="When create" />
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="prequeue_id" />

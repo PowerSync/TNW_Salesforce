@@ -2,32 +2,49 @@
 
 namespace TNW\Salesforce\Block\System\Config\Form\Field\Extension;
 
-class Version extends \Magento\Config\Block\System\Config\Form\Field
-{
-    protected $moduleList;
+use Magento\Backend\Block\Template\Context;
+use Magento\Config\Block\System\Config\Form\Field;
+use Magento\Framework\App\DeploymentConfig\Reader as ConfigReader;
+use Magento\Framework\Composer\ComposerInformation;
+use Magento\Framework\Data\Form\Element\AbstractElement;
+use Magento\Framework\Module\ModuleList;
+use Magento\Framework\Module\PackageInfo;
+use Magento\Setup\Model\InstallerFactory;
 
+class Version extends Field
+{
+    /** @var PackageInfo  */
+    protected $packageInfo;
+
+    /**
+     * Version constructor.
+     * @param Context $context
+     * @param ComposerInformation $composer
+     * @param PackageInfo $packageInfo
+     * @param array $data
+     */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \Magento\Framework\Module\ModuleList $moduleList,
-        array $data = [])
-    {
-        $this->moduleList = $moduleList;
+        Context $context,
+        ComposerInformation $composer,
+        PackageInfo $packageInfo,
+        array $data = []
+    ) {
+        $this->packageInfo = $packageInfo;
+
         parent::__construct($context, $data);
     }
 
     /**
-     * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
+     * @param AbstractElement $element
      * @return string
      */
-    protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement  $element)
+    protected function _getElementHtml(AbstractElement $element)
     {
         $element->setReadonly(1);
-        $module = $this->moduleList->getOne('TNW_Salesforce');
-        if ($module && isset($module['setup_version'])) {
-            $element->setValue($module['setup_version']);
-        }
+
+        $version = $this->packageInfo->getVersion($this->getModuleName());
+        $element->setValue($version);
 
         return $element->getElementHtml();
     }
-
 }

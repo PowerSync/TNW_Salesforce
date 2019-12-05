@@ -132,7 +132,8 @@
             "prequeue_id": true,
             "entity_id": true,
             "entity_type": true,
-            "created_at": true
+            "created_at": true,
+            "sync_type": true
         },
         "index": {
             "TNW_SALESFORCE_ENTITY_PREQUEUE_ENTITY_TYPE": true
