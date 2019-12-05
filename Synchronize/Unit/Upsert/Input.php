@@ -345,6 +345,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         $entity->setData($fieldName, $lookupObject['Id']);
 
         $this->cache[$entity]['updated'] = true;
+        $this->cache[$entity]['salesforce'] = $lookupObject['Id'];
         $this->cache[$entity]['message']
             = __('Synchronization of the %1 was skipped, data is Salesforce matches the data in Magento.', $this->identification->printEntity($entity));
 

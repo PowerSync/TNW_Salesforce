@@ -68,6 +68,9 @@ class ByContact extends \TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup
         $this->unit('lookup')->forceStatus(self::COMPLETE);
         $mapping = [];
 
+        /** @var \TNW\Salesforce\Synchronize\Unit\Upsert\Input $upsertInput */
+        $upsertInput = $this->unit('upsertInput');
+
         foreach ($this->entities() as $entity) {
             $entity->setForceUpdateOnly(true);
 
@@ -89,8 +92,19 @@ class ByContact extends \TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup
         $definedColumns = array_map('strtolower', $definedColumns);
 
         foreach ($mapping as $map) {
+            /** check if field is correct, available */
+            if ($upsertInput) {
+                $fieldName = $map->getSalesforceAttributeName();
+                $fieldProperty = $upsertInput->findFieldProperty($fieldName);
+                if (!$upsertInput->checkFieldProperty($fieldProperty, $fieldName, ['Id' => true])) {
+                    continue;
+                }
+            }
+
             if (!in_array(strtolower('Account.' . $map->getSalesforceAttributeName()), $definedColumns)) {
                 $this->input->columns[] = 'Account.' . $map->getSalesforceAttributeName();
+                $definedColumns[] = strtolower('Account.' . $map->getSalesforceAttributeName());
+
             }
         }
     }
