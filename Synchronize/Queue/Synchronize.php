@@ -1,4 +1,5 @@
 <?php
+
 namespace TNW\Salesforce\Synchronize\Queue;
 
 /**
@@ -46,6 +47,9 @@ class Synchronize
      */
     private $salesforceConfig;
 
+    /** @var \Magento\Framework\App\State  */
+    private $state;
+
     /**
      * Queue constructor.
      * @param int $type
@@ -63,8 +67,10 @@ class Synchronize
         \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator,
         \Magento\Framework\Message\ManagerInterface $messageManager,
         \TNW\Salesforce\Model\Config $salesforceConfig,
+        \Magento\Framework\App\State $state,
         $isCheck = false
-    ) {
+    )
+    {
         $this->type = $type;
         $this->synchronizeQueue = $synchronizeQueue;
         $this->collectionQueueFactory = $collectionQueueFactory;
@@ -72,6 +78,7 @@ class Synchronize
         $this->websiteEmulator = $websiteEmulator;
         $this->messageManager = $messageManager;
         $this->salesforceConfig = $salesforceConfig;
+        $this->state = $state;
         $this->setIsCheck($isCheck);
     }
 
@@ -123,16 +130,20 @@ class Synchronize
     {
         $collection = $this->collectionQueueFactory->create()
             ->addFilterToSyncType($this->type);
- 
+
         $collection->addFieldToFilter('main_table.sync_attempt', ['lt' => $this->salesforceConfig->getSyncMaxAttemptsCount()]);
 
         try {
             $this->synchronizeQueue->synchronize($collection, $websiteId);
         } catch (\Exception $e) {
-            $this->messageManager->addErrorMessage($e->getMessage());
+            if ($this->state->getAreaCode() == \Magento\Framework\App\Area::AREA_ADMINHTML) {
+                $this->messageManager->addErrorMessage($e->getMessage());
+            }
         } finally {
             if ($collection->count() > 0 && !in_array(false, $collection->walk('isSuccess'), true)) {
-                $this->messageManager->addSuccessMessage('All records were successfully synchronized with Salesforce.');
+                if ($this->state->getAreaCode() == \Magento\Framework\App\Area::AREA_ADMINHTML) {
+                    $this->messageManager->addSuccessMessage('All records were successfully synchronized with Salesforce.');
+                }
             }
 
             if ($this->type === \TNW\Salesforce\Model\Config::DIRECT_SYNC_TYPE_REALTIME) {
