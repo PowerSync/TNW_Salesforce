@@ -26,7 +26,25 @@ class Soql
             $data['where'] = [];
         }
 
-        return sprintf($soqlTemplate, $this->select($data['columns']), $data['from'], $this->where($data['where']));
+        if (!empty($data['limit'])) {
+            $soqlTemplate .=' LIMIT %s';
+        } else {
+            $data['limit'] = '';
+        }
+
+        if (!empty($data['offset'])) {
+            $soqlTemplate .=' OFFSET %s';
+        } else {
+            $data['offset'] = '';
+        }
+
+        return sprintf(
+            $soqlTemplate,
+            $this->select($data['columns']),
+            $data['from'],
+            $this->where($data['where']),
+            $data['limit'], $data['offset']
+        );
     }
 
     /**
