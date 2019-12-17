@@ -20,6 +20,45 @@
                     <label>Base Version</label>
                     <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Extension\Version</frontend_model>
                 </field>
+
+                <group id="upsells" translate="label" type="fieldset" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Our products built by PowerSync</label>
+                    <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Upsells</frontend_model>
+
+                    <field id="tnw_module_authorizenetcim" type="button"  sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <button_url>https://www.signifyd.com/magento-guaranteed-fraud-protection</button_url>
+                        <label>tnw_module_authorizenetcim</label>
+                        <button_label>tnw_module_authorizenetcim</button_label>
+                        <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\UpsellItem</frontend_model>
+                        <comment>TEST comment tnw_module_authorizenetcim</comment>
+                        <attribute type="image">TNW_Salesforce::images/preloader-sm.gif</attribute>
+                        <frontend_class>tnw_upsells</frontend_class>
+                    </field>
+
+                    <field id="tnw_module_stripe" type="button"  sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <button_url>https://www.signifyd.com/magento-guaranteed-fraud-protection</button_url>
+                        <label>tnw_module_stripe</label>
+                        <button_label>tnw_module_stripe</button_label>
+                        <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\UpsellItem</frontend_model>
+                        <comment>TEST comment tnw_module_stripe</comment>
+                        <attribute type="image">TNW_Salesforce::images/preloader-sm.gif</attribute>
+                        <frontend_class>tnw_upsells</frontend_class>
+                    </field>
+
+<!--                    <field id="tnw_module_stripe" type="link" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">-->
+<!--                        <label>tnw_module_stripe</label>-->
+<!--                        <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\UpsellItem</frontend_model>-->
+<!--                        <comment>TEST comment tnw_module_stripe</comment>-->
+<!--                    </field>-->
+
+<!--                    <field id="tnw_subscriptions" type="link" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">-->
+<!--                        <label>tnw_subscriptions</label>-->
+<!--                        <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\UpsellItem</frontend_model>-->
+<!--                        <comment>TEST comment tnw_subscriptions</comment>-->
+<!--                    </field>-->
+
+                </group>
+
             </group>
 
             <group id="salesforce" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">

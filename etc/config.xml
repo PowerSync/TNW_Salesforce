@@ -5,6 +5,9 @@
         <tnwsforce_general>
             <general>
                 <active>0</active>
+                <upsells>
+                    <tnw_module_authorizenetcim>Learn More</tnw_module_authorizenetcim>
+                </upsells>
             </general>
             <salesforce>
                 <wsdl>var/enterprise.wsdl.xml</wsdl>

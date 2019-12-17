@@ -1,0 +1,7 @@
+<div class="pp-buttons-container">
+    <button onclick="javascript:window.open(
+            '<?= $block->escapeUrl($block->getButtonUrl()) ?>'); return false;"
+            class="action-primary" type="button" id="<?= $block->escapeHtml($block->getHtmlId()) ?>">
+        <span><span><span><?= $block->escapeHtml($block->getButtonLabel()) ?></span></span></span>
+    </button>
+</div>
