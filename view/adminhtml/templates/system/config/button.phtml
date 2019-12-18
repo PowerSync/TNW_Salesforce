@@ -1,3 +1,18 @@
+<?php
+/** @var $block \TNW\Salesforce\Block\System\Config\Form\Field\Upsells\Item */
+?>
+<div class="title">
+    <?= $block->getTitle() ?>
+</div>
+
+<div class="title">
+<img src="<?= $block->escapeUrl($block->getViewFileUrl('Magento_Captcha::reload.png')) ?>" />
+</div>
+
+<div class="description">
+    <?= $block->getDescription() ?>
+</div>
+
 <div class="pp-buttons-container">
     <button onclick="javascript:window.open(
             '<?= $block->escapeUrl($block->getButtonUrl()) ?>'); return false;"

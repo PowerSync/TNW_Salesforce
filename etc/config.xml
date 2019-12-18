@@ -7,6 +7,9 @@
                 <active>0</active>
                 <upsells>
                     <tnw_module_authorizenetcim>Learn More</tnw_module_authorizenetcim>
+                    <tnw_module_stripe>Learn More</tnw_module_stripe>
+                    <tnw_subscriptions>Learn More</tnw_subscriptions>
+                    <tnw_quickbooksbasic>Learn More</tnw_quickbooksbasic>
                 </upsells>
             </general>
             <salesforce>

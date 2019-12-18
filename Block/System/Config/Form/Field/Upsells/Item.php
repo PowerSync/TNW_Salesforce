@@ -1,11 +1,11 @@
 <?php
 
-namespace TNW\Salesforce\Block\System\Config\Form\Field;
+namespace TNW\Salesforce\Block\System\Config\Form\Field\Upsells;
 
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 
-class UpsellItem extends Field
+class Item extends Field
 {
     const WIZARD_TEMPLATE = 'Magento_Paypal::system/config/bml_api_wizard.phtml';
     /**
@@ -66,22 +66,10 @@ class UpsellItem extends Field
      */
     protected function _renderValue(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
-        if ($element->getTooltip()) {
-//            $html = '<td class="value with-tooltip">';
-            $html = $this->_getElementHtml($element);
-//            $html .= '<div class="tooltip"><span class="help"><span></span></span>';
-//            $html .= '<div class="tooltip-content">' . $element->getTooltip() . '</div></div>';
-        } else {
-//            $html = '<td class="value">';
-            $html = $this->_getElementHtml($element);
-        }
-//        if ($element->getComment()) {
-//            $html .= '<p class="note"><span>' . $element->getComment() . '</span></p>';
-//        }
-//        $html .= '</td>';
+        $html = $this->_getElementHtml($element);
+
         return $html;
     }
-
 
     /**
      * Get the button and scripts contents
@@ -94,7 +82,10 @@ class UpsellItem extends Field
         $originalData = $element->getOriginalData();
         $this->addData(
             [
-                'button_label' => __($originalData['button_label']),
+                'title' => __($element->getLabel()),
+                'description' => __($element->getComment()),
+                'image_url' => $originalData['image'],
+                'button_label' => __($element->getValue()),
                 'button_url' => $originalData['button_url'],
                 'html_id' => $element->getHtmlId(),
             ]
