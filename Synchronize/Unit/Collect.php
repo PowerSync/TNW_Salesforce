@@ -48,7 +48,7 @@ class Collect extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * Get
+     * Get first matched record
      *
      * @param string|null $path
      * @param array $objects
@@ -67,6 +67,39 @@ class Collect extends Synchronize\Unit\UnitAbstract
         }
 
         return null;
+    }
+    /**
+     * Get all matched records
+     *
+     * @param string|null $path
+     * @param array $objects
+     * @return mixed
+     * @throws \OutOfBoundsException
+     */
+    public function getAll($path = null, ...$objects)
+    {
+        $result = [];
+        foreach ($this->collect as $unit) {
+            $cache = $this->units()->get($unit)->get($path, ...$objects);
+
+            if (!$cache) {
+                continue;
+            }
+
+            foreach ($cache as $item) {
+                $itemAddedAlready = false;
+                foreach ($result as $addedItem) {
+                    if ($item['Id'] == $addedItem['Id']) {
+                        $itemAddedAlready = true;
+                    }
+                }
+                if (!$itemAddedAlready) {
+                    $result[] = $item;
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**
