@@ -199,8 +199,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
                 continue;
             }
 
-            $this->cache[$entity]['records']
-                = array_map([$this, 'prepareRecord'], array_replace(...$recordsPriority));
+            $this->cache[$entity]['records'] = $this->mergeLookupResult($recordsPriority);
 
             $record = $this->filterByPriority($recordsPriority, $entity);
             if (empty($record)) {
@@ -219,6 +218,24 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         if (!empty($message)) {
             $this->group()->messageDebug(implode("\n", $message));
         }
+    }
+
+    /**
+     * @param $recordsPriority
+     * @return array
+     */
+    public function mergeLookupResult($recordsPriority)
+    {
+        $result = [];
+        foreach ($recordsPriority as $priorityKey => $records) {
+            $records = array_map([$this, 'prepareRecord'], $records);
+            foreach ($records as $record) {
+                $result[$record['Id']] = $record;
+            }
+        }
+        $result = array_values($result);
+
+        return  $result;
     }
 
     /**
