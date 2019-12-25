@@ -57,6 +57,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         $this->customerConfigShare = $customerConfigShare;
     }
 
+
     /**
      * Process Input
      *
