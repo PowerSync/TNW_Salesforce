@@ -14,6 +14,16 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     private $load;
 
     /**
+     * @var Synchronize\Transport\Calls\Query\InputFactory
+     */
+    protected $inputFactory;
+
+    /**
+     * @var Synchronize\Transport\Calls\Query\OutputFactory
+     */
+    protected $outputFactory;
+
+    /**
      * @var Synchronize\Transport\Calls\Query\Input
      */
     protected $input;
@@ -59,8 +69,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
 
         $this->load = $load;
-        $this->input = $inputFactory->create();
-        $this->output = $outputFactory->create();
+        $this->inputFactory = $inputFactory;
+        $this->outputFactory = $outputFactory;
         $this->process = $process;
         $this->identification = $identification;
     }
@@ -101,6 +111,9 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      */
     public function process()
     {
+        $this->input = $this->inputFactory->create();
+        $this->output = $this->outputFactory->create();
+
         $this->processInput();
         $this->addMappingFieldsToSelect();
 
@@ -112,6 +125,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         $this->group()->messageDebug("Query request:\n%s", $this->input);
         $this->process->process($this->input, $this->output);
         $this->group()->messageDebug("Query response:\n%s", $this->output);
+
         $this->processOutput();
     }
 
