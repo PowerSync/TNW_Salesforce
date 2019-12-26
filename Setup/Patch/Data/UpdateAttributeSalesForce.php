@@ -8,7 +8,6 @@ use Magento\Customer\Model\Indexer\Address\AttributeProvider;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
-use Magento\Framework\Module\ModuleResource;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchVersionInterface;
@@ -16,6 +15,7 @@ use TNW\Salesforce\Model\Customer\Attribute\Source\SyncStatus;
 use TNW\Salesforce\Model\Customer\Map;
 use TNW\Salesforce\Setup\SalesforceSetup;
 use TNW\Salesforce\Setup\SalesforceSetupFactory;
+use Zend_Db_Expr;
 
 class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInterface
 {
@@ -122,7 +122,7 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
             ]
         ];
         $this->updateAttributes($entityAttributes, $salesForceSetup);
-            $salesForceSetup->addAttributeGroup(
+        $salesForceSetup->addAttributeGroup(
                 Customer::ENTITY,
                 CustomerMetadataInterface::ATTRIBUTE_SET_ID_CUSTOMER,
                 'Salesforce'
@@ -178,7 +178,6 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
         ];
 
         foreach ($customerToContact as $magento_attr) {
-
             $attribute = $salesForceSetup->getAttribute(
                 Customer::ENTITY,
                 $magento_attr['magento_attribute_name']
@@ -232,7 +231,6 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
         ];
 
         foreach ($customerShippingToContact as $magento_attr) {
-
             $attribute = $salesForceSetup->getAttribute(
                 'customer_address',
                 $magento_attr['magento_attribute_name']
@@ -285,7 +283,6 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
         ];
 
         foreach ($customerBillingToContact as $magento_attr) {
-
             $attribute = $salesForceSetup->getAttribute(
                 'customer_address',
                 $magento_attr['magento_attribute_name']
@@ -330,7 +327,6 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
         ];
 
         foreach ($customerToAccount as $magento_attr) {
-
             $attribute = $salesForceSetup->getAttribute(
                 Customer::ENTITY,
                 $magento_attr['magento_attribute_name']
@@ -384,7 +380,6 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
         ];
 
         foreach ($customerShippingToAccount as $magento_attr) {
-
             $attribute = $salesForceSetup->getAttribute(
                 'customer_address',
                 $magento_attr['magento_attribute_name']
@@ -410,12 +405,12 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
                 'attribute_type' => 'string',
                 'object_type' => 'Account'
             ],
-            [
-                'magento_attribute_name' => 'region_id',
-                'salesforce_attribute_name' => 'BillingState',
-                'attribute_type' => 'string',
-                'object_type' => 'Account'
-            ],
+//            [
+//                'magento_attribute_name' => 'region_id',
+//                'salesforce_attribute_name' => 'BillingState',
+//                'attribute_type' => 'string',
+//                'object_type' => 'Account'
+//            ],
             [
                 'magento_attribute_name' => 'postcode',
                 'salesforce_attribute_name' => 'BillingPostalCode',
@@ -431,7 +426,6 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
         ];
 
         foreach ($customerBillingToAccount as $magento_attr) {
-
             $attribute = $salesForceSetup->getAttribute(
                 'customer_address',
                 $magento_attr['magento_attribute_name']
@@ -671,10 +665,9 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
                 [
                     'entity_id' => 'website_id',
                     'object_id' => 'salesforce_id',
-                    'magento_type' => new \Zend_Db_Expr('"Website"'),
-                    'salesforce_type' =>
-                        new \Zend_Db_Expr('"tnw_mage_basic__Magento_Website__c"'),
-                    'website_id' => new \Zend_Db_Expr('0'),
+                    'magento_type' => new Zend_Db_Expr('"Website"'),
+                    'salesforce_type' => new Zend_Db_Expr('"tnw_mage_basic__Magento_Website__c"'),
+                    'website_id' => new Zend_Db_Expr('0'),
                 ]
             );
 
@@ -703,9 +696,9 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
                 [
                     'entity_id' => 'entity_id',
                     'object_id' => 'value',
-                    'magento_type' => new \Zend_Db_Expr('"Customer"'),
-                    'salesforce_type' => new \Zend_Db_Expr('"Account"'),
-                    'website_id' => new \Zend_Db_Expr('0'),
+                    'magento_type' => new Zend_Db_Expr('"Customer"'),
+                    'salesforce_type' => new Zend_Db_Expr('"Account"'),
+                    'website_id' => new Zend_Db_Expr('0'),
                 ]
             )
             ->where(
@@ -739,9 +732,9 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
                 [
                     'entity_id' => 'entity_id',
                     'object_id' => 'value',
-                    'magento_type' => new \Zend_Db_Expr('"Customer"'),
-                    'salesforce_type' => new \Zend_Db_Expr('"Contact"'),
-                    'website_id' => new \Zend_Db_Expr('0'),
+                    'magento_type' => new Zend_Db_Expr('"Customer"'),
+                    'salesforce_type' => new Zend_Db_Expr('"Contact"'),
+                    'website_id' => new Zend_Db_Expr('0'),
                 ]
             )
             ->where(

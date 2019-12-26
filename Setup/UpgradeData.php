@@ -2,17 +2,19 @@
 
 namespace TNW\Salesforce\Setup;
 
+use Magento\Customer\Api\CustomerMetadataInterface;
+use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\Indexer\Address\AttributeProvider;
+use Magento\Eav\Model\Config;
+use Magento\Eav\Setup\EavSetup;
+use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
-use Magento\Framework\Setup\UpgradeDataInterface;
+use Magento\Framework\Indexer\IndexerRegistry;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
-use Magento\Framework\Indexer\IndexerRegistry;
-use Magento\Customer\Model\Customer;
-use Magento\Eav\Model\Config;
-use Magento\Customer\Api\CustomerMetadataInterface;
-use Magento\Eav\Setup\EavSetup;
+use Magento\Framework\Setup\UpgradeDataInterface;
 use TNW\Salesforce\Model\Customer\Map;
+use Zend_Db_Expr;
 
 /**
  * Class UpgradeData
@@ -101,9 +103,12 @@ class UpgradeData implements UpgradeDataInterface
                 ]
             ];
             $this->updateAttributes($entityAttributes, $salesforceSetup);
-            $salesforceSetup->addAttributeGroup(Customer::ENTITY, CustomerMetadataInterface::ATTRIBUTE_SET_ID_CUSTOMER,
-                'Salesforce');
-            $attributeCodes = array('sforce_id', 'sforce_account_id', 'sync_status');
+            $salesforceSetup->addAttributeGroup(
+                Customer::ENTITY,
+                CustomerMetadataInterface::ATTRIBUTE_SET_ID_CUSTOMER,
+                'Salesforce'
+            );
+            $attributeCodes = ['sforce_id', 'sforce_account_id', 'sync_status'];
             foreach ($attributeCodes as $code) {
                 $salesforceSetup->addAttributeToSet(
                     Customer::ENTITY,
@@ -155,8 +160,8 @@ class UpgradeData implements UpgradeDataInterface
             ];
 
             foreach ($customerToContact as $magento_attr) {
-
-                $attribute = $this->eavSetup->getAttribute(\Magento\Customer\Model\Customer::ENTITY,
+                $attribute = $this->eavSetup->getAttribute(
+                    Customer::ENTITY,
                     $magento_attr['magento_attribute_name']
                 );
                 $magento_attr['attribute_id'] = $attribute['attribute_id'];
@@ -205,8 +210,8 @@ class UpgradeData implements UpgradeDataInterface
             ];
 
             foreach ($customerShippingToContact as $magento_attr) {
-
-                $attribute = $this->eavSetup->getAttribute('customer_address',
+                $attribute = $this->eavSetup->getAttribute(
+                    'customer_address',
                     $magento_attr['magento_attribute_name']
                 );
                 $magento_attr['magento_entity_type'] = 'customer_address/shipping';
@@ -255,8 +260,8 @@ class UpgradeData implements UpgradeDataInterface
             ];
 
             foreach ($customerBillingToContact as $magento_attr) {
-
-                $attribute = $this->eavSetup->getAttribute('customer_address',
+                $attribute = $this->eavSetup->getAttribute(
+                    'customer_address',
                     $magento_attr['magento_attribute_name']
                 );
                 $magento_attr['attribute_id'] = $attribute['attribute_id'];
@@ -296,8 +301,8 @@ class UpgradeData implements UpgradeDataInterface
             ];
 
             foreach ($customerToAccount as $magento_attr) {
-
-                $attribute = $this->eavSetup->getAttribute(\Magento\Customer\Model\Customer::ENTITY,
+                $attribute = $this->eavSetup->getAttribute(
+                    Customer::ENTITY,
                     $magento_attr['magento_attribute_name']
                 );
                 $magento_attr['attribute_id'] = $attribute['attribute_id'];
@@ -348,8 +353,8 @@ class UpgradeData implements UpgradeDataInterface
             ];
 
             foreach ($customerShippingToAccount as $magento_attr) {
-
-                $attribute = $this->eavSetup->getAttribute('customer_address',
+                $attribute = $this->eavSetup->getAttribute(
+                    'customer_address',
                     $magento_attr['magento_attribute_name']
                 );
                 $magento_attr['magento_entity_type'] = 'customer_address/shipping';
@@ -371,12 +376,12 @@ class UpgradeData implements UpgradeDataInterface
                     'attribute_type' => 'string',
                     'object_type' => 'Account'
                 ],
-                [
-                    'magento_attribute_name' => 'region_id',
-                    'salesforce_attribute_name' => 'BillingState',
-                    'attribute_type' => 'string',
-                    'object_type' => 'Account'
-                ],
+//                [
+//                    'magento_attribute_name' => 'region_id',
+//                    'salesforce_attribute_name' => 'BillingState',
+//                    'attribute_type' => 'string',
+//                    'object_type' => 'Account'
+//                ],
                 [
                     'magento_attribute_name' => 'postcode',
                     'salesforce_attribute_name' => 'BillingPostalCode',
@@ -392,8 +397,8 @@ class UpgradeData implements UpgradeDataInterface
             ];
 
             foreach ($customerBillingToAccount as $magento_attr) {
-
-                $attribute = $this->eavSetup->getAttribute('customer_address',
+                $attribute = $this->eavSetup->getAttribute(
+                    'customer_address',
                     $magento_attr['magento_attribute_name']
                 );
                 $magento_attr['attribute_id'] = $attribute['attribute_id'];
@@ -411,7 +416,6 @@ class UpgradeData implements UpgradeDataInterface
                 'magento_entity_type' => 'customer',
                 'is_default' => 1
             ];
-
 
             $setup->getConnection()->insertOnDuplicate($setup->getTable('tnw_salesforce_mapper'), $customerToContact);
 
@@ -546,14 +550,14 @@ class UpgradeData implements UpgradeDataInterface
 
         foreach ($customerToContactsAndAccounts as $customerToContactAndAccount) {
             switch ($customerToContactAndAccount['magento_entity_type']) {
-                case 'customer' :
+                case 'customer':
                     $attribute = $this->eavSetup->getAttribute(
                         Customer::ENTITY,
                         $customerToContactAndAccount['magento_attribute_name']
                     );
                     break;
-                case 'customer_address/billing' :
-                case 'customer_address/shipping' :
+                case 'customer_address/billing':
+                case 'customer_address/shipping':
                     $attribute = $this->eavSetup->getAttribute(
                         AttributeProvider::ENTITY,
                         $customerToContactAndAccount['magento_attribute_name']
@@ -600,7 +604,6 @@ class UpgradeData implements UpgradeDataInterface
             ->insertOnDuplicate($setup->getTable('tnw_salesforce_mapper'), $defaultMap);
     }
 
-
     /**
      * @param ModuleContextInterface $context
      * @param ModuleDataSetupInterface $setup
@@ -643,7 +646,7 @@ class UpgradeData implements UpgradeDataInterface
         ModuleDataSetupInterface $setup
     ) {
         if (version_compare($context->getVersion(), '2.3.11') < 0) {
-        $setup->getConnection()->insert(
+            $setup->getConnection()->insert(
             $setup->getTable('core_config_data'),
             [
                 'scope' => 'default',
@@ -652,7 +655,7 @@ class UpgradeData implements UpgradeDataInterface
                 'value' => date_create()->modify('+7 day')->getTimestamp()
             ]
         );
-    }
+        }
     }
 
     protected function version_2_4_8(ModuleContextInterface $context, ModuleDataSetupInterface $setup)
@@ -668,16 +671,16 @@ class UpgradeData implements UpgradeDataInterface
             ->from($setup->getTable('store_website'), [
                 'entity_id' => 'website_id',
                 'object_id' => 'salesforce_id',
-                'magento_type' => new \Zend_Db_Expr('"Website"'),
-                'salesforce_type' => new \Zend_Db_Expr('"tnw_mage_basic__Magento_Website__c"'),
-                'website_id' => new \Zend_Db_Expr('0'),
+                'magento_type' => new Zend_Db_Expr('"Website"'),
+                'salesforce_type' => new Zend_Db_Expr('"tnw_mage_basic__Magento_Website__c"'),
+                'website_id' => new Zend_Db_Expr('0'),
             ]);
 
         $query = $connection->insertFromSelect(
             $select,
             $setup->getTable('tnw_salesforce_objects'),
             ['entity_id', 'object_id', 'magento_type', 'salesforce_type', 'website_id'],
-            \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
+            AdapterInterface::INSERT_ON_DUPLICATE
         );
 
         $connection->query($query);
@@ -687,9 +690,9 @@ class UpgradeData implements UpgradeDataInterface
             ->from($this->eavSetup->getAttributeTable(Customer::ENTITY, 'sforce_account_id'), [
                 'entity_id' => 'entity_id',
                 'object_id' => 'value',
-                'magento_type' => new \Zend_Db_Expr('"Customer"'),
-                'salesforce_type' => new \Zend_Db_Expr('"Account"'),
-                'website_id' => new \Zend_Db_Expr('0'),
+                'magento_type' => new Zend_Db_Expr('"Customer"'),
+                'salesforce_type' => new Zend_Db_Expr('"Account"'),
+                'website_id' => new Zend_Db_Expr('0'),
             ])
             ->where('attribute_id = ?', $this->eavSetup->getAttribute(Customer::ENTITY, 'sforce_account_id', 'attribute_id'));
 
@@ -697,7 +700,7 @@ class UpgradeData implements UpgradeDataInterface
             $select,
             $setup->getTable('tnw_salesforce_objects'),
             ['entity_id', 'object_id', 'magento_type', 'salesforce_type', 'website_id'],
-            \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
+            AdapterInterface::INSERT_ON_DUPLICATE
         );
 
         $connection->query($query);
@@ -707,9 +710,9 @@ class UpgradeData implements UpgradeDataInterface
             ->from($this->eavSetup->getAttributeTable(Customer::ENTITY, 'sforce_id'), [
                 'entity_id' => 'entity_id',
                 'object_id' => 'value',
-                'magento_type' => new \Zend_Db_Expr('"Customer"'),
-                'salesforce_type' => new \Zend_Db_Expr('"Contact"'),
-                'website_id' => new \Zend_Db_Expr('0'),
+                'magento_type' => new Zend_Db_Expr('"Customer"'),
+                'salesforce_type' => new Zend_Db_Expr('"Contact"'),
+                'website_id' => new Zend_Db_Expr('0'),
             ])
             ->where('attribute_id = ?', $this->eavSetup->getAttribute(Customer::ENTITY, 'sforce_id', 'attribute_id'));
 
@@ -717,7 +720,7 @@ class UpgradeData implements UpgradeDataInterface
             $select,
             $setup->getTable('tnw_salesforce_objects'),
             ['entity_id', 'object_id', 'magento_type', 'salesforce_type', 'website_id'],
-            \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_ON_DUPLICATE
+            AdapterInterface::INSERT_ON_DUPLICATE
         );
 
         $connection->query($query);
