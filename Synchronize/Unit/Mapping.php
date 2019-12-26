@@ -1,8 +1,14 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
-use TNW\Salesforce\Synchronize;
+use InvalidArgumentException;
+use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
+use OutOfBoundsException;
 use TNW\Salesforce\Model;
+use TNW\Salesforce\Model\ResourceModel\Mapper\CollectionFactory;
+use TNW\Salesforce\Synchronize;
 
 /**
  * Mapping Abstract
@@ -27,7 +33,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     private $objectType;
 
     /**
-     * @var \TNW\Salesforce\Model\ResourceModel\Mapper\CollectionFactory
+     * @var CollectionFactory
      */
     private $mapperCollectionFactory;
 
@@ -52,7 +58,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param IdentificationInterface $identification
-     * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
+     * @param CollectionFactory $mapperCollectionFactory
      * @param array $dependents
      */
     public function __construct(
@@ -63,7 +69,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
+        CollectionFactory $mapperCollectionFactory,
         array $dependents = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $lookup]));
@@ -119,9 +125,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Process
      *
-     * @throws \OutOfBoundsException
-     * @throws \InvalidArgumentException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws OutOfBoundsException
+     * @throws InvalidArgumentException
+     * @throws LocalizedException
      */
     public function process()
     {
@@ -163,11 +169,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Generate Object
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param Model\ResourceModel\Mapper\Collection $mappers
      * @return array
-     * @throws \OutOfBoundsException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws OutOfBoundsException
+     * @throws LocalizedException
      */
     public function generateObject($entity, Model\ResourceModel\Mapper\Collection $mappers)
     {
@@ -185,6 +191,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract
         $salesforce = $this->findSalesforce($entity);
         if (!empty($salesforce)) {
             $object['Id'] = $salesforce;
+        } else {
+            unset($object['Id']);
         }
 
         return $object;
@@ -193,7 +201,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Value
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param Model\Mapper $mapper
      * @return mixed|null
      */
@@ -207,7 +215,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 
             default:
                 $subEntity = $this->objectByEntityType($entity, $mapper->getMagentoEntityType());
-                if (!$subEntity instanceof \Magento\Framework\DataObject) {
+                if (!$subEntity instanceof DataObject) {
                     $this->group()->messageDebug(
                         'Object type "%s" not found. Entity: %s.',
                         $mapper->getMagentoEntityType(),
@@ -232,9 +240,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Find Salesforce
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return mixed
-     * @throws \OutOfBoundsException
+     * @throws OutOfBoundsException
      */
     public function findSalesforce($entity)
     {
@@ -253,7 +261,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Mappers
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return Model\ResourceModel\Mapper\Collection
      */
     public function mappers($entity)
@@ -273,8 +281,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Entities
      *
-     * @return \Magento\Framework\Model\AbstractModel[]
-     * @throws \OutOfBoundsException
+     * @return AbstractModel[]
+     * @throws OutOfBoundsException
      */
     protected function entities()
     {
@@ -284,9 +292,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Filter
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
-     * @throws \OutOfBoundsException
+     * @throws OutOfBoundsException
      */
     protected function filter($entity)
     {
@@ -298,9 +306,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Object By Entity Type
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param string $magentoEntityType
-     * @return \Magento\Framework\Model\AbstractModel
+     * @return AbstractModel
      */
     protected function objectByEntityType($entity, $magentoEntityType)
     {
@@ -310,7 +318,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Prepare Value
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param string $attributeCode
      * @return mixed
      */
@@ -349,7 +357,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Default Value
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param Model\Mapper $mapper
      * @return mixed
      */
