@@ -400,7 +400,7 @@ class Add
             $this->saveQueue($queueDataToSave);
             $this->saveDependency($dependencies);
 
-            $this->buildGraph($queueDataToSave, $dependencies);
+//            $this->buildGraph($queueDataToSave, $dependencies);
 
             $connection->commit();
         } catch (Exception $e) {
