@@ -2,6 +2,7 @@
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use InvalidArgumentException;
+use Magento\Eav\Model\Entity\AbstractEntity;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
@@ -324,6 +325,14 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function prepareValue($entity, $attributeCode)
     {
+        if (
+            $entity->getResource() instanceof AbstractEntity &&
+            $entity->getResource()->getAttribute($attributeCode)
+        ) {
+            $value = $entity->getResource()->getAttribute($attributeCode)->getFrontend()->getValue($entity);
+            return $value;
+        }
+
         $value = $entity->getData($attributeCode);
         if (null === $value) {
             $method = 'get' . str_replace(' ', '', ucwords(str_replace('_', ' ', $attributeCode)));
