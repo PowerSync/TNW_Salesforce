@@ -1,5 +1,11 @@
 <?php
+
 namespace TNW\Salesforce\Synchronize\Unit;
+
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Phrase;
+use TNW\Salesforce\Model\Config;
+use TNW\Salesforce\Model\Queue;
 
 /**
  * Processing Upsert Output
@@ -18,14 +24,14 @@ class ProcessingUpsertOutput extends ProcessingAbstract
     /**
      * Analize
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
-     * @return bool|\Magento\Framework\Phrase
+     * @param AbstractModel $entity
+     * @return bool|Phrase
      */
     public function analize($entity)
     {
-        /** @var \TNW\Salesforce\Model\Queue $queue */
+        /** @var Queue $queue */
         $queue = $this->load()->get('%s/queue', $entity);
-        if ($queue->isProcessInputUpsert() || $queue->isProcessOutputUpsert()) {
+        if (($queue->isProcessInputUpsert() && (int)$queue->getSyncType() === Config::DIRECT_SYNC_TYPE_REALTIME) || $queue->isProcessOutputUpsert()) {
             return true;
         }
 

@@ -144,7 +144,7 @@ class Synchronize
      * @param int $websiteId
      * @throws Exception
      */
-    public function synchronizeToWebsite($websiteId, $syncJobs)
+    public function synchronizeToWebsite($websiteId, $syncJobs = [])
     {
         $collection = $this->collectionQueueFactory->create()
             ->addFilterToSyncType($this->type);
