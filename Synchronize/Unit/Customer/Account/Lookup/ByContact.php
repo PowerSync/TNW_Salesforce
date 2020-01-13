@@ -1,14 +1,17 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup;
 
-use TNW\Salesforce\Synchronize;
+use Magento\Customer\Model\Customer;
+use TNW\Salesforce\Model\ResourceModel\Mapper\Collection;
+use TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup;
+use TNW\Salesforce\Synchronize\Unit\Upsert\Input;
 
 /**
  * Lookup By Contact
  *
- * @method \Magento\Customer\Model\Customer[] entities()
+ * @method Customer[] entities()
  */
-class ByContact extends \TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup
+class ByContact extends Lookup
 {
 
     /**
@@ -68,14 +71,14 @@ class ByContact extends \TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup
         $this->unit('lookup')->forceStatus(self::COMPLETE);
         $mapping = [];
 
-        /** @var \TNW\Salesforce\Synchronize\Unit\Upsert\Input $upsertInput */
+        /** @var Input $upsertInput */
         $upsertInput = $this->unit('upsertInput');
 
         foreach ($this->entities() as $entity) {
             $entity->setForceUpdateOnly(true);
 
             if ($this->getMappingUnit()) {
-                /** @var \TNW\Salesforce\Model\ResourceModel\Mapper\Collection $mapping */
+                /** @var Collection $mapping */
                 $mapping = $this->getMappingUnit()->mappers($entity);
             }
             $entity->setForceUpdateOnly(false);
@@ -104,7 +107,6 @@ class ByContact extends \TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup
             if (!in_array(strtolower('Account.' . $map->getSalesforceAttributeName()), $definedColumns)) {
                 $this->input->columns[] = 'Account.' . $map->getSalesforceAttributeName();
                 $definedColumns[] = strtolower('Account.' . $map->getSalesforceAttributeName());
-
             }
         }
     }
