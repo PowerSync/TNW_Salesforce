@@ -115,6 +115,11 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->cache['entities'] = $index = [];
         foreach ($this->queues as $queue) {
             $entity = $this->loadEntity($queue);
+            if (empty($entity)) {
+                $message[] = __('QueueId item %1 is not available anymore', $queue->getId());
+                continue;
+            }
+
             $entity->setData('_queue', $queue);
 
             $this->cache[$entity]['queue'] = $queue;
@@ -200,9 +205,14 @@ class Load extends Synchronize\Unit\UnitAbstract
      */
     public function loadEntity($queue)
     {
-        return $this->loaderBy($queue->getEntityLoad())
-            ->load($queue->getEntityId(), $queue->getEntityLoadAdditional())
-            ->setData('config_website', $queue->getWebsiteId());
+        $entity = $this->loaderBy($queue->getEntityLoad())
+            ->load($queue->getEntityId(), $queue->getEntityLoadAdditional());
+
+        if (!empty($entity)) {
+            $entity->setData('config_website', $queue->getWebsiteId());
+        }
+
+        return $entity;
     }
 
     /**

@@ -1,6 +1,8 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use OutOfBoundsException;
+use RuntimeException;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -8,7 +10,6 @@ use TNW\Salesforce\Synchronize;
  */
 abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
 {
-
     const MIN_LEN_SF_ID = 15;
 
     /**
@@ -116,11 +117,35 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      *
      * @param string $name
      * @return UnitInterface
-     * @throws \OutOfBoundsException
+     * @throws OutOfBoundsException
      */
     public function unit($name)
     {
         return $this->units->get($name);
+    }
+
+    /**
+     * @param $entity
+     * @return array
+     */
+    public function getAllEntityError($entity)
+    {
+        $errors = [];
+
+        /**
+         * @var string $key
+        * @var UnitAbstract $unit
+        */
+        foreach ($this->units() as $key => $unit) {
+            if (!$unit->isComplete()) {
+                continue;
+            }
+
+            $errors[] = $unit->get('error/%s', $entity);
+        }
+
+        /** remove empty items */
+        return array_filter($errors);
     }
 
     /**
@@ -129,12 +154,12 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      * @param string|null $path
      * @param array ...$objects
      * @return mixed
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function get($path = null, ...$objects)
     {
         if (!$this->isComplete()) {
-            throw new \RuntimeException(__('Unit "%1" not complete', $this->name()));
+            throw new RuntimeException(__('Unit "%1" not complete', $this->name()));
         }
 
         return $this->cache->get($path, ...$objects);
