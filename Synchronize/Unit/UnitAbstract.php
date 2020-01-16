@@ -10,7 +10,6 @@ use TNW\Salesforce\Synchronize;
  */
 abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
 {
-
     const MIN_LEN_SF_ID = 15;
 
     /**
@@ -128,6 +127,30 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     public function unit($name)
     {
         return $this->units->get($name);
+    }
+
+    /**
+     * @param $entity
+     * @return array
+     */
+    public function getAllEntityError($entity)
+    {
+        $errors = [];
+
+        /**
+         * @var string $key
+        * @var UnitAbstract $unit
+        */
+        foreach ($this->units() as $key => $unit) {
+            if (!$unit->isComplete()) {
+                continue;
+            }
+
+            $errors[] = $unit->get('error/%s', $entity);
+        }
+
+        /** remove empty items */
+        return array_filter($errors);
     }
 
     /**

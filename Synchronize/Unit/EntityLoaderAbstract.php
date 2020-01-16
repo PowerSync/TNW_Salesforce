@@ -1,22 +1,26 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
+use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
+
 /**
  * Mapping Entity Loader
  */
 abstract class EntityLoaderAbstract
 {
     /**
-     * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage
+     * @var SalesforceIdStorage
      */
     protected $salesforceIdStorage;
 
     /**
      * MappingEntityLoaderAbstract constructor.
-     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage $salesforceIdStorage
+     * @param SalesforceIdStorage $salesforceIdStorage
      */
     public function __construct(
-        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $salesforceIdStorage = null
+        SalesforceIdStorage $salesforceIdStorage = null
     ) {
         $this->salesforceIdStorage = $salesforceIdStorage;
     }
@@ -24,14 +28,14 @@ abstract class EntityLoaderAbstract
     /**
      * Load
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
-     * @return \Magento\Framework\Model\AbstractModel
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @param AbstractModel $entity
+     * @return AbstractModel
+     * @throws LocalizedException
      */
     public function get($entity)
     {
         $subEntity = $this->load($entity);
-        if (null !== $this->salesforceIdStorage && null !== $subEntity->getId()) {
+        if (!empty($subEntity) && null !== $this->salesforceIdStorage && null !== $subEntity->getId()) {
             $this->salesforceIdStorage->load($subEntity, $entity->getData('config_website'));
         }
 
@@ -41,8 +45,8 @@ abstract class EntityLoaderAbstract
     /**
      * Load
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
-     * @return \Magento\Framework\Model\AbstractModel
+     * @param AbstractModel $entity
+     * @return AbstractModel
      */
     abstract public function load($entity);
 }
