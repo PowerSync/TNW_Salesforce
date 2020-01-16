@@ -2,6 +2,9 @@
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
+use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
+use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -15,7 +18,7 @@ class Load extends Synchronize\Unit\UnitAbstract
     private $magentoType;
 
     /**
-     * @var \TNW\Salesforce\Model\Queue[]
+     * @var Queue[]
      */
     protected $queues;
 
@@ -35,7 +38,7 @@ class Load extends Synchronize\Unit\UnitAbstract
     private $hash;
 
     /**
-     * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage
+     * @var SalesforceIdStorage
      */
     private $entityObject;
 
@@ -53,13 +56,13 @@ class Load extends Synchronize\Unit\UnitAbstract
      * Load constructor.
      * @param string $name
      * @param string $magentoType
-     * @param \TNW\Salesforce\Model\Queue[] $queues
+     * @param Queue[] $queues
      * @param LoadLoaderInterface[] $loaders
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Unit\HashInterface $hash
-     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage|null $entityObject
+     * @param SalesforceIdStorage|null $entityObject
      * @param EntityLoaderAbstract[] $entityLoaders
      * @param array $entityTypeMapping
      */
@@ -72,7 +75,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Unit\HashInterface $hash,
-        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject = null,
+        SalesforceIdStorage $entityObject = null,
         array $entityLoaders = [],
         array $entityTypeMapping = []
     ) {
@@ -108,7 +111,7 @@ class Load extends Synchronize\Unit\UnitAbstract
     /**
      * Process
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function process()
     {
@@ -126,11 +129,13 @@ class Load extends Synchronize\Unit\UnitAbstract
 
             foreach ($this->entityLoaders as $entityType => $entityLoader) {
                 $subEntity = $entityLoader->get($entity);
-                foreach ($queue->dependenciesByEntityType($this->entityTypeMap($entityType)) as $_queue) {
-                    $subEntity->addData($_queue->getAdditional());
-                }
+                if (!empty($subEntity)) {
+                    foreach ($queue->dependenciesByEntityType($this->entityTypeMap($entityType)) as $_queue) {
+                        $subEntity->addData($_queue->getAdditional());
+                    }
 
-                $this->cache[$entity]['entities'][$entityType] = $subEntity;
+                    $this->cache[$entity]['entities'][$entityType] = $subEntity;
+                }
             }
 
             if (null !== $this->entityObject && null !== $entity->getId()) {
@@ -156,7 +161,7 @@ class Load extends Synchronize\Unit\UnitAbstract
     /**
      * Website Id
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return int
      */
     public function websiteId($entity)
@@ -182,9 +187,9 @@ class Load extends Synchronize\Unit\UnitAbstract
     /**
      * Object By Entity Type
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param string $entityType
-     * @return \Magento\Framework\Model\AbstractModel|null
+     * @return AbstractModel|null
      */
     public function entityByType($entity, $entityType)
     {
@@ -199,8 +204,8 @@ class Load extends Synchronize\Unit\UnitAbstract
     /**
      * Load Entity
      *
-     * @param \TNW\Salesforce\Model\Queue $queue
-     * @return \Magento\Framework\Model\AbstractModel
+     * @param Queue $queue
+     * @return AbstractModel
      * @throws LocalizedException
      */
     public function loadEntity($queue)
@@ -248,7 +253,7 @@ class Load extends Synchronize\Unit\UnitAbstract
     /**
      * Skipped
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
     public function skipped($entity)
