@@ -66,7 +66,12 @@ class Status extends Synchronize\Unit\UnitAbstract
     {
         $upsertOutput = $this->upsertOutput();
         foreach ($this->entities() as $entity) {
+
             switch (true) {
+                case !empty($this->getAllEntityError($entity)):
+                    $this->cache[$entity]['status'] = Queue::STATUS_ERROR;
+                    $this->cache[$entity]['message'] = implode("<br />\n", $this->getAllEntityError($entity));
+                    continue 2;
                 case $upsertOutput->get('%s', $entity) === null:
                     $this->cache[$entity]['status'] = Queue::STATUS_SKIPPED;
                     continue 2;
