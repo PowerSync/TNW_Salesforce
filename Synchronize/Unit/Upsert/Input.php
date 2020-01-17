@@ -373,6 +373,6 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function skipped($entity)
     {
-        return (bool)$this->cache[$entity]['updated'];
+        return false;
     }
 }
