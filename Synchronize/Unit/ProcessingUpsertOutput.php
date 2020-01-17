@@ -4,7 +4,6 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Phrase;
-use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Queue;
 
 /**
@@ -31,7 +30,8 @@ class ProcessingUpsertOutput extends ProcessingAbstract
     {
         /** @var Queue $queue */
         $queue = $this->load()->get('%s/queue', $entity);
-        if (($queue->isProcessInputUpsert() && (int)$queue->getSyncType() === Config::DIRECT_SYNC_TYPE_REALTIME) || $queue->isProcessOutputUpsert()) {
+
+        if (($queue->isProcessInputUpsert()) || $queue->isProcessOutputUpsert()) {
             return true;
         }
 
