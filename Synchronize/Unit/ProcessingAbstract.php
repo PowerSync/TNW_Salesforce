@@ -1,4 +1,5 @@
 <?php
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Synchronize;
@@ -34,7 +35,8 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         array $dependents = []
-    ) {
+    )
+    {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
         $this->load = $load;
         $this->identification = $identification;
@@ -107,25 +109,31 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
     public function process()
     {
         foreach ($this->entities() as $entity) {
-            $processing = $this->analize($entity);
-            switch (true) {
-                case $processing instanceof \Magento\Framework\Phrase:
-                    $this->cache[$entity] = false;
-                    $this->cache['message'][$entity] =
-                        __('Entity %1 skipped because %2', $this->identification->printEntity($entity), $processing);
-                    break;
+            try {
+                $processing = $this->analize($entity);
+                switch (true) {
+                    case $processing instanceof \Magento\Framework\Phrase:
+                        $this->cache[$entity] = false;
+                        $this->cache['message'][$entity] =
+                            __('Entity %1 skipped because %2', $this->identification->printEntity($entity), $processing);
+                        break;
 
-                case !$processing:
-                    $this->cache[$entity] = false;
-                    $this->cache['message'][$entity]
-                        = __('Entity %1 skipped', $this->identification->printEntity($entity));
-                    break;
+                    case !$processing:
+                        $this->cache[$entity] = false;
+                        $this->cache['message'][$entity]
+                            = __('Entity %1 skipped', $this->identification->printEntity($entity));
+                        break;
 
-                default:
-                    $this->cache[$entity] = true;
-                    $this->cache['message'][$entity]
-                        =  __('Entity %1 processed', $this->identification->printEntity($entity));
-                    break;
+                    default:
+                        $this->cache[$entity] = true;
+                        $this->cache['message'][$entity]
+                            = __('Entity %1 processed', $this->identification->printEntity($entity));
+                        break;
+                }
+            } catch (\Exception $e) {
+                $this->cache[$entity] = false;
+                $this->cache['message'][$entity] = $e->getMessage();
+                $this->cache['error'][$entity] = $e->getMessage();
             }
         }
 
