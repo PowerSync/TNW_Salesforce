@@ -74,7 +74,7 @@ class Queue
      *
      * @param $collection
      * @param $websiteId
-     * @param null $syncJobs
+     * @param array $syncJobs
      */
     public function synchronize($collection, $websiteId, $syncJobs = [])
     {
