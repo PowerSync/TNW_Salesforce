@@ -2,7 +2,19 @@
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
+use Exception;
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Message\ManagerInterface;
+use Magento\Store\Api\Data\WebsiteInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Model\Config;
+use TNW\Salesforce\Model\Config\WebsiteEmulator;
+use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Model\ResourceModel\PreQueue;
+use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool;
 
 /**
  * Class Entity
@@ -21,22 +33,22 @@ class Add
     public $resolves;
 
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var StoreManagerInterface
      */
     private $storeManager;
 
     /**
-     * @var \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool
+     * @var Pool
      */
     private $dividerPool;
 
     /**
-     * @var \TNW\Salesforce\Model\Config\WebsiteEmulator
+     * @var WebsiteEmulator
      */
     private $websiteEmulator;
 
     /**
-     * @var \TNW\Salesforce\Synchronize\Queue\Synchronize
+     * @var Synchronize
      */
     private $synchronizeEntity;
 
@@ -46,40 +58,40 @@ class Add
     private $resourceQueue;
 
     /**
-     * @var \TNW\Salesforce\Model\ResourceModel\PreQueue
+     * @var PreQueue
      */
     private $resourcePreQueue;
 
     /**
-     * @var \Magento\Framework\Message\ManagerInterface
+     * @var ManagerInterface
      */
     private $messageManager;
 
-    /** @var \Magento\Framework\App\State  */
+    /** @var State */
     private $state;
 
     /**
      * Entity constructor.
      * @param string $entityType
      * @param Unit[] $resolves
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
-     * @param \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool $dividerPool
-     * @param \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
-     * @param \TNW\Salesforce\Synchronize\Queue\Synchronize $synchronizeEntity
+     * @param StoreManagerInterface $storeManager
+     * @param Pool $dividerPool
+     * @param WebsiteEmulator $websiteEmulator
+     * @param Synchronize $synchronizeEntity
      * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
-     * @param \Magento\Framework\Message\ManagerInterface $messageManager
+     * @param ManagerInterface $messageManager
      */
     public function __construct(
         $entityType,
         array $resolves,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool $dividerPool,
-        \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator,
-        \TNW\Salesforce\Synchronize\Queue\Synchronize $synchronizeEntity,
+        StoreManagerInterface $storeManager,
+        Pool $dividerPool,
+        WebsiteEmulator $websiteEmulator,
+        Synchronize $synchronizeEntity,
         \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
-        \TNW\Salesforce\Model\ResourceModel\PreQueue $resourcePreQueue,
-        \Magento\Framework\Message\ManagerInterface $messageManager,
-        \Magento\Framework\App\State $state
+        PreQueue $resourcePreQueue,
+        ManagerInterface $messageManager,
+        State $state
     )
     {
         $this->resolves = $resolves;
@@ -98,7 +110,7 @@ class Add
      * Add To Queue
      *
      * @param int[] $entityIds
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function addToQueue(array $entityIds)
     {
@@ -115,14 +127,14 @@ class Add
             $this->resourcePreQueue->saveEntityIds($ids, $this->entityType, $syncType);
         }
 
-        if ($this->state->getAreaCode() == \Magento\Framework\App\Area::AREA_ADMINHTML ) {
+        if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
             $this->messageManager->addSuccessMessage('Records were scheduled to be added to the sync queue');
         }
     }
 
     /**
      * @param array $entityIds
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function addToQueueDirectly(array $entityIds, $syncType = null)
     {
@@ -137,9 +149,9 @@ class Add
      * Add To Queue By Website
      *
      * @param int[] $entityIds
-     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Exception
+     * @param null|bool|int|string|WebsiteInterface $website
+     * @throws LocalizedException
+     * @throws Exception
      */
     public function addToQueueByWebsite(array $entityIds, $website = null, $syncType = null)
     {
@@ -160,7 +172,7 @@ class Add
             return;
         }
 
-        if ($this->state->getAreaCode() == \Magento\Framework\App\Area::AREA_ADMINHTML ) {
+        if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
             $this->messageManager->addSuccessMessage('All records were added to the synchronization queue');
         }
     }
@@ -192,14 +204,14 @@ class Add
     }
 
     /**
-     * @param $unitsList \TNW\Salesforce\Synchronize\Queue\Unit[]
+     * @param $unitsList Unit[]
      * @param $loadBy
      * @param $entityIds
      * @param $loadAdditional
      * @param $websiteId
      * @param $dependencies
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function generateQueueObjects(
         $unitsList,
@@ -260,7 +272,7 @@ class Add
                 }
 
                 foreach ($currentByEntityLoad as $baseEntityLoad => $itemByEntityLoad) {
-                    /** @var \TNW\Salesforce\Model\Queue */
+                    /** @var Queue */
                     $currentItem = reset($itemByEntityLoad);
                     $baseEntityLoadAdditional = $currentItem->getEntityLoadAdditional();
 
@@ -322,7 +334,7 @@ class Add
     /**
      * @param $queues
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function getInsertArray($queues, $syncType, $websiteId)
     {
@@ -340,14 +352,14 @@ class Add
     /**
      * Create
      *
-     * @param $unitsList \TNW\Salesforce\Synchronize\Queue\Unit[]
+     * @param $unitsList Unit[]
      * @param $loadBy
      * @param $entityIds
      * @param array $loadAdditional
      * @param $websiteId
      * @param $syncType
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function create(
         $unitsList,
@@ -377,7 +389,7 @@ class Add
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function saveData($queueDataToSave, $dependencies)
     {
@@ -388,16 +400,45 @@ class Add
             $this->saveQueue($queueDataToSave);
             $this->saveDependency($dependencies);
 
+//            $this->buildGraph($queueDataToSave, $dependencies);
+
             $connection->commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $connection->rollBack();
-            throw new \Exception($e->getMessage());
+            throw new Exception($e->getMessage());
         }
     }
 
     /**
      * @param $queueDataToSave
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @param $dependencies
+     */
+    public function buildGraph($queueDataToSave, $dependencies)
+    {
+        $graph = [
+            '@startdot',
+            sprintf('digraph %s {', $this->entityType),
+            sprintf("label = <<font color='green'><b>%s</b></font>>;", $this->entityType),
+            'labelloc = "t";'
+        ];
+
+        foreach ($queueDataToSave as $queue) {
+            $graph[] = sprintf('a%s [label="%s"];', str_replace('.', '', $queue['queue_id']), $queue['code']);
+        }
+
+        foreach ($dependencies as $queue) {
+            $graph[] = sprintf('a%s -> a%s ;', str_replace('.', '', $queue['parent_id']), str_replace('.', '', $queue['queue_id']));
+        }
+
+        $graph[] = '}';
+        $graph[] = '@enddot';
+
+        file_put_contents($this->entityType . '.dot', implode("\n", $graph));
+    }
+
+    /**
+     * @param $queueDataToSave
+     * @throws LocalizedException
      */
     public function saveQueue($queueDataToSave)
     {
@@ -417,7 +458,7 @@ class Add
 
     /**
      * @param $dependencies
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function saveDependency($dependencies)
     {
@@ -429,7 +470,7 @@ class Add
                     $this->resourceQueue->getTable('tnw_salesforce_entity_queue_relation'),
                     array_keys(reset($dependencies)),
                     $dependencies,
-                    \Magento\Framework\DB\Adapter\AdapterInterface::INSERT_IGNORE
+                    AdapterInterface::INSERT_IGNORE
                 );
         }
     }
