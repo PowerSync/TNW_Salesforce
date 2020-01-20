@@ -3,6 +3,7 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use InvalidArgumentException;
 use Magento\Eav\Model\Entity\AbstractEntity;
+use Magento\Framework\Data\Collection;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
@@ -273,7 +274,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 
             $this->collectionCache[$upsertInsertFlag][$this->objectType][$websiteId] = $this->mapperCollectionFactory->create()
                 ->addObjectToFilter($this->objectType)
-                ->applyUniquenessByWebsite($websiteId);
+                ->applyUniquenessByWebsite($websiteId)
+                ->setOrder('is_default', Collection::SORT_ORDER_DESC);
         }
 
         return $this->collectionCache[$upsertInsertFlag][$this->objectType][$websiteId];
