@@ -2,16 +2,6 @@
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
-use Exception;
-use Magento\Framework\App\Area;
-use Magento\Framework\App\State;
-use Magento\Framework\Message\ManagerInterface;
-use Magento\Store\Api\WebsiteRepositoryInterface;
-use TNW\Salesforce\Model\Config;
-use TNW\Salesforce\Model\Config\WebsiteEmulator;
-use TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory;
-use TNW\Salesforce\Synchronize\Queue;
-
 /**
  * Entity Synchronize
  */
@@ -28,56 +18,56 @@ class Synchronize
     private $isCheck = false;
 
     /**
-     * @var Queue
+     * @var \TNW\Salesforce\Synchronize\Queue
      */
     private $synchronizeQueue;
 
     /**
-     * @var CollectionFactory
+     * @var \TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory
      */
     private $collectionQueueFactory;
 
     /**
-     * @var WebsiteRepositoryInterface
+     * @var \Magento\Store\Api\WebsiteRepositoryInterface
      */
     private $websiteRepository;
 
     /**
-     * @var WebsiteEmulator
+     * @var \TNW\Salesforce\Model\Config\WebsiteEmulator
      */
     private $websiteEmulator;
 
     /**
-     * @var ManagerInterface
+     * @var \Magento\Framework\Message\ManagerInterface
      */
     private $messageManager;
 
     /**
-     * @var Config
+     * @var \TNW\Salesforce\Model\Config
      */
     private $salesforceConfig;
 
-    /** @var State */
+    /** @var \Magento\Framework\App\State  */
     private $state;
 
     /**
      * Queue constructor.
      * @param int $type
-     * @param Queue $synchronizeQueue
-     * @param CollectionFactory $collectionQueueFactory
-     * @param WebsiteRepositoryInterface $websiteRepository
-     * @param WebsiteEmulator $websiteEmulator
-     * @param ManagerInterface $messageManager
+     * @param \TNW\Salesforce\Synchronize\Queue $synchronizeQueue
+     * @param \TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory $collectionQueueFactory
+     * @param \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository
+     * @param \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
+     * @param \Magento\Framework\Message\ManagerInterface $messageManager
      */
     public function __construct(
         $type,
-        Queue $synchronizeQueue,
-        CollectionFactory $collectionQueueFactory,
-        WebsiteRepositoryInterface $websiteRepository,
-        WebsiteEmulator $websiteEmulator,
-        ManagerInterface $messageManager,
-        Config $salesforceConfig,
-        State $state,
+        \TNW\Salesforce\Synchronize\Queue $synchronizeQueue,
+        \TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory $collectionQueueFactory,
+        \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
+        \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator,
+        \Magento\Framework\Message\ManagerInterface $messageManager,
+        \TNW\Salesforce\Model\Config $salesforceConfig,
+        \Magento\Framework\App\State $state,
         $isCheck = false
     )
     {
@@ -90,14 +80,6 @@ class Synchronize
         $this->salesforceConfig = $salesforceConfig;
         $this->state = $state;
         $this->setIsCheck($isCheck);
-    }
-
-    /**
-     * @return Queue
-     */
-    public function getSynchronizeQueue()
-    {
-        return $this->synchronizeQueue;
     }
 
     /**
@@ -129,12 +111,12 @@ class Synchronize
     /**
      * Synchronize
      *
-     * @throws Exception
+     * @throws \Exception
      */
-    public function synchronize($syncJobs = [])
+    public function synchronize()
     {
         foreach ($this->websiteRepository->getList() as $website) {
-            $this->websiteEmulator->wrapEmulationWebsite([$this, 'synchronizeToWebsite'], $website->getId(), ['syncJobs' => $syncJobs]);
+            $this->websiteEmulator->wrapEmulationWebsite([$this, 'synchronizeToWebsite'], $website->getId());
         }
     }
 
@@ -142,9 +124,9 @@ class Synchronize
      * Synchronize To Website
      *
      * @param int $websiteId
-     * @throws Exception
+     * @throws \Exception
      */
-    public function synchronizeToWebsite($websiteId, $syncJobs = [])
+    public function synchronizeToWebsite($websiteId)
     {
         $collection = $this->collectionQueueFactory->create()
             ->addFilterToSyncType($this->type);
@@ -152,19 +134,19 @@ class Synchronize
         $collection->addFieldToFilter('main_table.sync_attempt', ['lt' => $this->salesforceConfig->getSyncMaxAttemptsCount()]);
 
         try {
-            $this->synchronizeQueue->synchronize($collection, $websiteId, $syncJobs);
-        } catch (Exception $e) {
-            if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
+            $this->synchronizeQueue->synchronize($collection, $websiteId);
+        } catch (\Exception $e) {
+            if ($this->state->getAreaCode() == \Magento\Framework\App\Area::AREA_ADMINHTML) {
                 $this->messageManager->addErrorMessage($e->getMessage());
             }
         } finally {
             if ($collection->count() > 0 && !in_array(false, $collection->walk('isSuccess'), true)) {
-                if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
+                if ($this->state->getAreaCode() == \Magento\Framework\App\Area::AREA_ADMINHTML) {
                     $this->messageManager->addSuccessMessage('All records were successfully synchronized with Salesforce.');
                 }
             }
 
-            if ($this->type === Config::DIRECT_SYNC_TYPE_REALTIME) {
+            if ($this->type === \TNW\Salesforce\Model\Config::DIRECT_SYNC_TYPE_REALTIME) {
                 foreach ($collection as $queue) {
                     $collection->getResource()->delete($queue);
                 }

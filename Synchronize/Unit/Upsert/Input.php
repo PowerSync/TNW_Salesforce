@@ -6,10 +6,7 @@ use DateTime;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
-use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
-use OutOfBoundsException;
 use TNW\Salesforce\Synchronize;
-use TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory;
 use Tnw\SoapClient\Result\DescribeSObjectResult\Field;
 
 /**
@@ -28,7 +25,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     private $process;
 
     /**
-     * @var ClientFactory
+     * @var \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory
      */
     protected $factory;
 
@@ -71,8 +68,8 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory
      * @param Synchronize\Transport\Calls\Upsert\InputInterface $process
-     * @param ClientFactory $factory
-     * @param TimezoneInterface $localeDate
+     * @param Synchronize\Transport\Soap\ClientFactory $factory
+     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
      */
 
     public function __construct(
@@ -85,8 +82,8 @@ class Input extends Synchronize\Unit\UnitAbstract
         Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
-        ClientFactory $factory,
-        TimezoneInterface $localeDate
+        \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
+        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
     )
     {
         parent::__construct($name, $units, $group, [$load, $mapping]);
@@ -99,14 +96,6 @@ class Input extends Synchronize\Unit\UnitAbstract
 
         $this->factory = $factory;
         $this->localeDate = $localeDate;
-    }
-
-    /**
-     * @return Synchronize\Transport\Calls\Upsert\InputInterface
-     */
-    public function getProcess()
-    {
-        return $this->process;
     }
 
     /**
@@ -188,7 +177,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * Entities
      *
      * @return array
-     * @throws OutOfBoundsException
+     * @throws \OutOfBoundsException
      */
     public function entities()
     {
