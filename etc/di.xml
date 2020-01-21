@@ -14,6 +14,8 @@
     </type>
 
     <preference for="Magento\Framework\Interception\Code\Generator\Interceptor" type="TNW\Salesforce\Code\Generator\Interceptor" />
+    <!-- Workaround for Magento bug, see https://github.com/magento/magento2/pull/26475 -->
+    <preference for="Magento\Customer\Model\Customer\Attribute\Source\Store" type="TNW\Salesforce\Model\Customer\Attribute\Source\Store" />
 
     <preference for="TNW\Salesforce\Synchronize\Unit\IdentificationInterface" type="TNW\Salesforce\Synchronize\Unit\Identification" />
     <preference for="TNW\Salesforce\Synchronize\Unit\HashInterface" type="TNW\Salesforce\Synchronize\Unit\Hash" />

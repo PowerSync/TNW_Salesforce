@@ -329,10 +329,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     {
         if (
             $entity->getResource() instanceof AbstractEntity &&
-            $entity->getResource()->getAttribute($attributeCode)
+            $entity->getResource()->getAttribute($attributeCode) &&
+            $entity->getResource()->getAttribute($attributeCode)->getFrontend()->getConfigField('input') != 'boolean'
         ) {
             $value = $entity->getResource()->getAttribute($attributeCode)->getFrontend()->getValue($entity);
-            return $value;
+            return (string)$value;
         }
 
         $value = $entity->getData($attributeCode);
