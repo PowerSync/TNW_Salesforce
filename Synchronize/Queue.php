@@ -1,8 +1,10 @@
 <?php
 namespace TNW\Salesforce\Synchronize;
 
+use Magento\Framework\Stdlib\DateTime\Timezone;
 use TNW\Salesforce\Model;
-use \TNW\Salesforce\Synchronize\Exception as SalesforceException;
+use TNW\Salesforce\Synchronize\Exception as SalesforceException;
+use Zend_Db_Expr;
 
 /**
  * Queue
@@ -35,9 +37,12 @@ class Queue
     private $uidProcessor;
 
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\Timezone
+     * @var Timezone
      */
     private $timezone;
+
+    /** @var [] */
+    private $sortGroups;
 
     /**
      * Queue constructor.
@@ -46,7 +51,7 @@ class Queue
      * @param Model\Config $salesforceConfig
      * @param Model\ResourceModel\Queue $resourceQueue
      * @param Model\Logger\Processor\UidProcessor $uidProcessor
-     * @param \Magento\Framework\Stdlib\DateTime\Timezone $timezone
+     * @param Timezone $timezone
      */
     public function __construct(
         array $groups,
@@ -54,7 +59,7 @@ class Queue
         Model\Config $salesforceConfig,
         Model\ResourceModel\Queue $resourceQueue,
         Model\Logger\Processor\UidProcessor $uidProcessor,
-        \Magento\Framework\Stdlib\DateTime\Timezone $timezone
+        Timezone $timezone
     ) {
         $this->groups = $groups;
         $this->phases = array_filter($phases);
@@ -67,11 +72,11 @@ class Queue
     /**
      * Synchronize
      *
-     * @param \TNW\Salesforce\Model\ResourceModel\Queue\Collection $collection
-     * @param int $websiteId
-     * @throws \Exception
+     * @param $collection
+     * @param $websiteId
+     * @param array $syncJobs
      */
-    public function synchronize($collection, $websiteId)
+    public function synchronize($collection, $websiteId, $syncJobs = [])
     {
         // Collection Clear
         $collection->clear();
@@ -89,7 +94,7 @@ class Queue
 
         ksort($this->phases);
 
-        foreach ($this->sortGroup() as $groupKey => $group) {
+        foreach ($this->sortGroup($syncJobs) as $groupKey => $group) {
             // refresh uid
             $this->uidProcessor->refresh();
 
@@ -105,7 +110,7 @@ class Queue
                     'status' => $phase['processStatus'],
                     'transaction_uid' => $this->uidProcessor->uid(),
                     'sync_at' => $this->timezone->date()->format('c'),
-                    'identify' => new \Zend_Db_Expr('queue_id')
+                    'identify' => new Zend_Db_Expr('queue_id')
                 ]);
 
                 if (0 === $countUpdate) {
@@ -182,13 +187,16 @@ class Queue
      *
      * @return Group[]
      */
-    public function sortGroup()
+    public function sortGroup($syncJobs = null)
     {
-        $addGroup = function (array &$sortGroups, Group $group) use (&$addGroup) {
-            foreach ($this->resourceQueue->getDependenceByCode($group->code()) as $dependent) {
+        $addGroup = function (array &$sortGroups, Group $group) use (&$addGroup, &$description) {
+            $description[] = sprintf('%s;', $group->code());
+            foreach ($this->resourceQueue->getDependenceByCode($group->code()) as $type => $dependent) {
                 if (empty($this->groups[$dependent])) {
                     continue;
                 }
+
+                $description[] = sprintf('%s <- %s;', $group->code(), $dependent);
 
                 if (isset($sortGroups[$dependent])) {
                     continue;
@@ -200,9 +208,34 @@ class Queue
             $sortGroups[$group->code()] = $group;
         };
 
-        $sortGroups = [];
-        foreach ($this->groups as $unit) {
-            $addGroup($sortGroups, $unit);
+        if (empty($this->sortGroups)) {
+
+            $sortGroups = [];
+//        $i=0;
+
+            foreach ($this->groups as $unit) {
+                $description = [
+                    sprintf('digraph %s {', $unit->code())
+                ];
+
+                $description[] = sprintf('label = "process %s";', $unit->code());
+
+                $addGroup($sortGroups, $unit);
+
+                $description[] = '}';
+//            file_put_contents( 'dot/' . $unit->code() . '.dot', implode("\n", $description));
+            }
+            $this->sortGroups = $sortGroups;
+        } else {
+            $sortGroups = $this->sortGroups;
+        }
+
+        if (!empty($syncJobs)) {
+            foreach ($sortGroups as $key => $group) {
+                if (!in_array($key, $syncJobs)) {
+                    unset($sortGroups[$key]);
+                }
+            }
         }
 
         return $sortGroups;
