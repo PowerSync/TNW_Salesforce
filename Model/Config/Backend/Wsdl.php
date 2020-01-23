@@ -118,35 +118,12 @@ class Wsdl extends File
                 $uploader->addValidateCallback('size', $this, 'validateMaxSize');
                 $result = $uploader->save($uploadDir);
 
-                $loadedxmlfile = $result['path'] . '/' . $result['file'];
-
-                /** Disable external entity loading to prevent possible vulnerability */
-                $previousLoaderState = libxml_disable_entity_loader(true);
-
-                libxml_disable_entity_loader($previousLoaderState);
-
-                $parsedXMLData = $this->xmlParser->load($loadedxmlfile)->xmlToArray();
-
-                if (isset($parsedXMLData['definitions']['_value']['service'])) {
-                    $serviceNode = $parsedXMLData['definitions']['_value']['service'];
-                    $apiVersion = $this->getAPIVersion($serviceNode);
-
-                    if ($apiVersion) {
-                        $this->resourceConfig->saveConfig(
-                            'tnwsforce_general/synchronization/use_bulk_api_version',
-                            $apiVersion,
-                            'default',
-                            0
-                        );
-                        $websiteId = $this->websiteDetector->detectCurrentWebsite();
-                        $this->saveCache($apiVersion, self::USE_BULK_API_VERSION_CACHE_IDENTIFIER, $websiteId);
-                    }
-                }
+                $this->saveApiVersion($result);
             } catch (Exception $e) {
                 throw new LocalizedException(__('%1', $e->getMessage()));
             }
 
-            $filename = $this->_mediaDirectory->getRelativePath("{$result['path']}/{$result['file']}");
+            $filename = $this->getFilePath($result);
 
             $this->setValue("{var}/$filename");
         } else {
@@ -154,6 +131,49 @@ class Wsdl extends File
         }
 
         return $this;
+    }
+
+    /**
+     * @param $result
+     * @return string
+     */
+    public function getFilePath($result)
+    {
+        return $this->_mediaDirectory->getRelativePath("{$result['path']}/{$result['file']}");
+
+    }
+
+    /**
+     * @param $filePathInfo
+     * @throws LocalizedException
+     */
+    public function saveApiVersion($filePathInfo)
+    {
+
+        $loadedxmlfile = $filePathInfo['path'] . '/' . $filePathInfo['file'];
+
+        /** Disable external entity loading to prevent possible vulnerability */
+        $previousLoaderState = libxml_disable_entity_loader(true);
+
+        libxml_disable_entity_loader($previousLoaderState);
+
+        $parsedXMLData = $this->xmlParser->load($loadedxmlfile)->xmlToArray();
+
+        if (isset($parsedXMLData['definitions']['_value']['service'])) {
+            $serviceNode = $parsedXMLData['definitions']['_value']['service'];
+            $apiVersion = $this->getAPIVersion($serviceNode);
+
+            if ($apiVersion) {
+                $this->resourceConfig->saveConfig(
+                    'tnwsforce_general/synchronization/use_bulk_api_version',
+                    $apiVersion,
+                    'default',
+                    0
+                );
+                $websiteId = $this->websiteDetector->detectCurrentWebsite();
+                $this->saveCache($apiVersion, self::USE_BULK_API_VERSION_CACHE_IDENTIFIER, $websiteId);
+            }
+        }
     }
 
     /**
@@ -165,6 +185,17 @@ class Wsdl extends File
     protected function _getUploadDir()
     {
         return $this->_mediaDirectory->getAbsolutePath($this->_appendScopeInfo(self::UPLOAD_DIR));
+    }
+
+    /**
+     * Return path to directory for upload file
+     *
+     * @return string
+     * @throw \Magento\Framework\Exception\LocalizedException
+     */
+    public function getUploadDir()
+    {
+        return $this->_getUploadDir();
     }
 
     /**
