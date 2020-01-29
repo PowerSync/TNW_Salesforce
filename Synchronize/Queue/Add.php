@@ -114,6 +114,10 @@ class Add
      */
     public function addToQueue(array $entityIds)
     {
+        $entityIds = array_filter($entityIds);
+        if (empty($entityIds)) {
+            return;
+        }
         $this->addToQueueDirectly($entityIds);
     }
 
