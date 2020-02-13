@@ -22,11 +22,11 @@ class StoreManager extends \Magento\Store\Model\StoreManager
     {
         $currentStoreId = $subject->currentStoreId;
 
-//        if (!isset($storeId) || '' === $storeId || $storeId === true) {
-//            if (null !== $currentStoreId) {
-//                $storeId = $currentStoreId;
-//            }
-//        }
+        if (!isset($storeId) || '' === $storeId || $storeId === true) {
+            if (null !== $currentStoreId) {
+                $storeId = $currentStoreId;
+            }
+        }
 
         return $callback($storeId);
     }
