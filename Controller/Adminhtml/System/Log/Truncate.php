@@ -38,6 +38,6 @@ class Truncate extends \Magento\Backend\App\Action
         }
 
         return $this->resultRedirectFactory->create()
-            ->setRefererUrl();
+            ->setPath('tnw_salesforce/system_log/view');
     }
 }
