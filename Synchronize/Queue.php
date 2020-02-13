@@ -72,7 +72,7 @@ class Queue
     /**
      * Synchronize
      *
-     * @param $collection
+     * @param $collection \TNW\Salesforce\Model\ResourceModel\Queue\Collection
      * @param $websiteId
      * @param array $syncJobs
      */
