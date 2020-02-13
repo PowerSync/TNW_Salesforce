@@ -158,12 +158,6 @@ class Synchronize
                 $this->messageManager->addErrorMessage($e->getMessage());
             }
         } finally {
-            if ($collection->count() > 0 && !in_array(false, $collection->walk('isSuccess'), true)) {
-                if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
-                    $this->messageManager->addSuccessMessage('All records were successfully synchronized with Salesforce.');
-                }
-            }
-
             if ($this->type === Config::DIRECT_SYNC_TYPE_REALTIME) {
                 foreach ($collection as $queue) {
                     $collection->getResource()->delete($queue);
