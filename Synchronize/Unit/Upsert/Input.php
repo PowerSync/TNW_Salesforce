@@ -286,8 +286,8 @@ class Input extends Synchronize\Unit\UnitAbstract
 
                     if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
                         /** @var DateTime $value */
-                        $object[$fieldName]->setTime(0, 0, 0);
-                        //->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
+                        $object[$fieldName]
+                            ->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
                     }
 
                     if ($object[$fieldName]->getTimestamp() <= 0) {
