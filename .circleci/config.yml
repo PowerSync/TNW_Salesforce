@@ -62,9 +62,8 @@ jobs:
               set -e
 
               COMPOSER_BRANCH="dev-"
-              if [[ "$CIRCLE_BRANCH" == "master" ]]; then
-                COMPOSER_BRANCH=$CIRCLE_BRANCH
-              elif test -z "$branchExists"
+
+              if test -z "$branchExists"
               then
                 COMPOSER_BRANCH="${COMPOSER_BRANCH}develop"
               else
