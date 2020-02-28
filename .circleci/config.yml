@@ -132,34 +132,34 @@ jobs:
           MYSQL_USER: mage
           MYSQL_DATABASE: magento
           MYSQL_ROOT_PASSWORD: docker
-
-  m2210-commerce-php72:
-    <<: *base-image
-    docker:
-      - image: powersync/magento-builds:m2210-commerce-php72
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASS
-      - image: circleci/mysql:5.7
-        environment:
-          MYSQL_PASSWORD: mage
-          MYSQL_USER: mage
-          MYSQL_DATABASE: magento
-          MYSQL_ROOT_PASSWORD: docker
-
-  m2210-open_source-php71:
-    <<: *base-image
-    docker:
-      - image: powersync/magento-builds:m2210-open_source-php71
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASS
-      - image: circleci/mysql:5.7
-        environment:
-          MYSQL_PASSWORD: mage
-          MYSQL_USER: mage
-          MYSQL_DATABASE: magento
-          MYSQL_ROOT_PASSWORD: docker
+  #
+  #  m2210-commerce-php72:
+  #    <<: *base-image
+  #    docker:
+  #      - image: powersync/magento-builds:m2210-commerce-php72
+  #        auth:
+  #          username: $DOCKER_USER
+  #          password: $DOCKER_PASS
+  #      - image: circleci/mysql:5.7
+  #        environment:
+  #          MYSQL_PASSWORD: mage
+  #          MYSQL_USER: mage
+  #          MYSQL_DATABASE: magento
+  #          MYSQL_ROOT_PASSWORD: docker
+  #
+  #  m2210-open_source-php71:
+  #    <<: *base-image
+  #    docker:
+  #      - image: powersync/magento-builds:m2210-open_source-php71
+  #        auth:
+  #          username: $DOCKER_USER
+  #          password: $DOCKER_PASS
+  #      - image: circleci/mysql:5.7
+  #        environment:
+  #          MYSQL_PASSWORD: mage
+  #          MYSQL_USER: mage
+  #          MYSQL_DATABASE: magento
+  #          MYSQL_ROOT_PASSWORD: docker
 
   magento-coding-standard:
     docker:
@@ -345,8 +345,8 @@ workflows:
       - deploy:
           context: powersync
           requires:
-            - m2210-commerce-php72
-            - m2210-open_source-php71
+            #            - m2210-commerce-php72
+            #            - m2210-open_source-php71
             - m233-commerce-php72
             - m233-open_source-php71
             - m234-commerce-php72
