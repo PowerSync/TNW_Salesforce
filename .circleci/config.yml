@@ -233,22 +233,16 @@ workflows:
             branches:
               only: /.*/
 
-      #      - m233-open_source-php72:
-      #          context: powersync
-      #          filters:
-      #            branches:
-      #              only: /.*/
-
       - magento-coding-standard:
           context: powersync
             filters:
               branches:
-                only: master
+                only: /.*/
+
       - deploy:
           context: powersync
           requires:
             - m233-commerce-php72
-            #            - m233-open_source-php72
             - magento-coding-standard
           filters:
             branches:
@@ -258,10 +252,11 @@ workflows:
           context: powersync
           requires:
             - deploy
+
       - check-composer-installation:
           context: powersync
           requires:
-            - only: /.*/
+            - deploy
 
       - update-wiki:
           context: powersync
