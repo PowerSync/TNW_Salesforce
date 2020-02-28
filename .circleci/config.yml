@@ -91,10 +91,66 @@ jobs:
             cd /var/www/html/magento
             php bin/magento setup:di:compile
             php bin/magento deploy:mode:set developer
-  m233-open_source-php72:
+  m233-open_source-php71:
     <<: *base-image
     docker:
-      - image: powersync/magento-builds:m233-open_source-php72
+      - image: powersync/magento-builds:m233-open_source-php71
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_PASSWORD: mage
+          MYSQL_USER: mage
+          MYSQL_DATABASE: magento
+          MYSQL_ROOT_PASSWORD: docker
+
+  m234-commerce-php72:
+    <<: *base-image
+    docker:
+      - image: powersync/magento-builds:m234-commerce-php72
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_PASSWORD: mage
+          MYSQL_USER: mage
+          MYSQL_DATABASE: magento
+          MYSQL_ROOT_PASSWORD: docker
+
+  m234-open_source-php72:
+    <<: *base-image
+    docker:
+      - image: powersync/magento-builds:m234-open_source-php72
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_PASSWORD: mage
+          MYSQL_USER: mage
+          MYSQL_DATABASE: magento
+          MYSQL_ROOT_PASSWORD: docker
+
+  m2210-commerce-php72:
+    <<: *base-image
+    docker:
+      - image: powersync/magento-builds:m2210-commerce-php72
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_PASSWORD: mage
+          MYSQL_USER: mage
+          MYSQL_DATABASE: magento
+          MYSQL_ROOT_PASSWORD: docker
+
+  m2210-open_source-php71:
+    <<: *base-image
+    docker:
+      - image: powersync/magento-builds:m2210-open_source-php71
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
@@ -107,7 +163,7 @@ jobs:
 
   magento-coding-standard:
     docker:
-      - image: powersync/magento-builds:m233-commerce-php72
+      - image: powersync/magento-builds:m234-commerce-php72
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
@@ -244,17 +300,41 @@ workflows:
 
   test-deploy-wiki:
     jobs:
-      - m233-commerce-php72:
+      - m234-commerce-php72:
           context: powersync
           filters:
             branches:
               only: /.*/
 
-      - m233-open_source-php72:
+      - m234-open_source-php72:
           context: powersync
           filters:
             branches:
               only: /.*/
+
+      - m233-commerce-php72:
+          context: powersync
+          filters:
+            branches:
+              only: master
+
+      - m233-open_source-php71:
+          context: powersync
+          filters:
+            branches:
+              only: master
+
+      - m2210-commerce-php72:
+          context: powersync
+          filters:
+            branches:
+              only: master
+
+      - m2210-open_source-php71:
+          context: powersync
+          filters:
+            branches:
+              only: master
 
       - magento-coding-standard:
           context: powersync
@@ -265,7 +345,12 @@ workflows:
       - deploy:
           context: powersync
           requires:
+            - m2210-commerce-php72
+            - m2210-open_source-php71
             - m233-commerce-php72
+            - m233-open_source-php71
+            - m234-commerce-php72
+            - m234-open_source-php72
             - magento-coding-standard
           filters:
             branches:
