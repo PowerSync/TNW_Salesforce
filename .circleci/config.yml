@@ -57,9 +57,10 @@ jobs:
                 echo $branchExists;
               set -e
 
-              if [ "$CIRCLE_BRANCH" -eq "master"] then
+              if [ "$CIRCLE_BRANCH" -eq "master"]; then
                 COMPOSER-BRANCH=$CIRCLE_BRANCH
-              elif test -z "$branchExists" then
+              elif test -z "$branchExists"
+              then
                 COMPOSER-BRANCH="dev-develop"
               else
                 COMPOSER-BRANCH="dev-$CIRCLE_BRANCH"
@@ -230,7 +231,7 @@ workflows:
           context: powersync
           filters:
             branches:
-              only: /.*/
+              only: master
 
       - deploy:
           context: powersync
@@ -248,8 +249,8 @@ workflows:
 
       - check-composer-installation:
           context: powersync
-          requires:
-            - deploy
+      #          requires:
+      #            - deploy
 
       - update-wiki:
           context: powersync
