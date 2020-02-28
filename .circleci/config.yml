@@ -112,13 +112,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Get Magento Code Quality Tool
-          command: |
-            cd /var/www/html/
-            git clone https://github.com/magento/marketplace-eqp  magento-coding-standard
-            cd magento-coding-standard && git checkout "2.0.1"
-            composer install
-      - run:
           name: Run Magento Coding Standard
           command: |
             /var/www/html/magento-coding-standard/vendor/bin/phpcs $CIRCLE_WORKING_DIRECTORY --standard=MEQP2 --severity=10 --extensions=php,phtml
