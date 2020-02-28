@@ -22,86 +22,163 @@ jobs:
             cd .circleci
             chmod +x git_release.sh
             ./git_release.sh
-  check-composer-installation:
+
+  m233-commerce-php72: &base-image
     docker:
-      - image: circleci/php:7.2-apache-stretch-node-browsers-legacy
+      - image: powersync/magento-builds:m233-commerce-php72
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
       - image: circleci/mysql:5.7
         environment:
           MYSQL_PASSWORD: mage
           MYSQL_USER: mage
           MYSQL_DATABASE: magento
           MYSQL_ROOT_PASSWORD: docker
-    environment:
-      MAGENTO_VERSION: "2.3.3"
     working_directory: ~/tnw_extension
     steps:
-      - run:
-          name: Install System Package
-          command: |
-            sudo apt-get update
-            sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
-      - run:
-          name: Install PHP extension
-          command: |
-            sudo pecl install mcrypt-1.0.1
-            sudo docker-php-ext-enable mcrypt
-            sudo docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
-            sudo -E docker-php-ext-install -j$(nproc) intl soap xsl zip pdo pdo_mysql gd gettext mbstring bcmath
-      - run:
-          name: Configure PHP
-          command: |
-            echo "memory_limit = 2G" | sudo tee --append /usr/local/etc/php/conf.d/memory.ini
-            php -i
-      - run:
-          name: Permissions
-          command: |
-            cd /var/www/
-            sudo chown -R circleci:circleci html
-      - run:
-          name: Get Magento Code Quality Tool
-          command: |
-            cd /var/www/html/
-            git clone https://github.com/magento/marketplace-eqp  magento-coding-standard
-            cd magento-coding-standard && git checkout "2.0.1"
-            composer install
+      - checkout
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
       - run:
-          name: Installing Magento CE
+          name: Installing Magento
           command: |
-            cd /var/www/html/
+            cd /var/www/html/magento/
             composer config -g http-basic.repo.magento.com $MAGENTO_REPO_LOGIN $MAGENTO_REPO_PASSWORD
-            composer create-project -s RC --repository-url=https://repo.magento.com/ magento/project-community-edition magento2-$MAGENTO_VERSION $MAGENTO_VERSION
-            cd magento2-$MAGENTO_VERSION
+            ./bin/magento setup:install --backend-frontname admin --db-host 127.0.0.1 --db-prefix tnwc_ --db-name magento --db-user mage --db-password mage --base-url http://magento-qa.box/ --language en_US --timezone America/Chicago --currency USD --admin-lastname Admin --admin-firstname Admin --admin-email admin@example.com --admin-user admin --admin-password admin123 --cleanup-database --use-rewrites 1
+            ./bin/magento --version
+      - run:
+          name: Checkout related modules
+          command: |
+            cd /var/www/html/magento/
+            for moduleName in $MODULES_NAME; do
+              composer config repositories.TNW_$moduleName git git@github.com:PowerSync/TNW_$moduleName.git
+
+              moduleNameLower=(`echo $moduleName| tr '[:upper:]' '[:lower:]'`)
+
+              set +e
+                branchExists=(`composer info -a tnw/$moduleNameLower|grep "versions : .*dev-$CIRCLE_BRANCH"`)
+              set -e
+
+              COMPOSER_BRANCH="dev-"
+              if [[ "$CIRCLE_BRANCH" == "master" ]]; then
+                COMPOSER_BRANCH=$CIRCLE_BRANCH
+              elif test -z "$branchExists"
+              then
+                COMPOSER_BRANCH="${COMPOSER_BRANCH}develop"
+              else
+                COMPOSER_BRANCH="${COMPOSER_BRANCH}${CIRCLE_BRANCH}"
+              fi
+
+              composer require --prefer-source tnw/${moduleNameLower}:"${COMPOSER_BRANCH}"
+
+              COMPOSER_TAG=$(grep -o '^ *"version": *"[0-9\.]*"' vendor/tnw/${moduleNameLower}/composer.json|awk '{print $2}'|sed -e 's/"\(.*\)"/\1/g')
+
+              composer require --no-update --prefer-source tnw/${moduleNameLower}:"${COMPOSER_BRANCH} as ${COMPOSER_TAG}"
+            done
+
+      - run:
+          name: Install the Extension
+          command: |
+            cd /var/www/html/magento
+            rm -rf ./generated/*
+            ./bin/magento module:status
+            ./bin/magento module:enable --all
+            ./bin/magento setup:upgrade
+      - run:
+          name: Compile the Code
+          command: |
+            cd /var/www/html/magento
+            php bin/magento setup:di:compile
+            php bin/magento deploy:mode:set developer
+  m233-open_source-php72:
+    <<: *base-image
+    docker:
+      - image: powersync/magento-builds:m233-open_source-php72
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_PASSWORD: mage
+          MYSQL_USER: mage
+          MYSQL_DATABASE: magento
+          MYSQL_ROOT_PASSWORD: docker
+
+  magento-coding-standard:
+    docker:
+      - image: powersync/magento-builds:m233-commerce-php72
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_PASSWORD: mage
+          MYSQL_USER: mage
+          MYSQL_DATABASE: magento
+          MYSQL_ROOT_PASSWORD: docker
+    working_directory: ~/tnw_extension
+    steps:
+      - checkout
+      - run:
+          name: Run Magento Coding Standard
+          command: |
+            /var/www/html/magento-coding-standard/vendor/bin/phpcs $CIRCLE_WORKING_DIRECTORY --standard=MEQP2 --severity=10 --extensions=php,phtml
+
+  check-composer-installation:
+    <<: *base-image
+    docker:
+      - image: powersync/magento-builds:m233-open_source-php72
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_PASSWORD: mage
+          MYSQL_USER: mage
+          MYSQL_DATABASE: magento
+          MYSQL_ROOT_PASSWORD: docker
+
+    steps:
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
+      - run:
+          name: Installing Magento
+          command: |
+            cd /var/www/html/magento/
+            composer config -g http-basic.repo.magento.com $MAGENTO_REPO_LOGIN $MAGENTO_REPO_PASSWORD
             ./bin/magento setup:install --backend-frontname admin --db-host 127.0.0.1 --db-prefix tnwc_ --db-name magento --db-user mage --db-password mage --base-url http://magento-qa.box/ --language en_US --timezone America/Chicago --currency USD --admin-lastname Admin --admin-firstname Admin --admin-email admin@example.com --admin-user admin --admin-password admin123 --cleanup-database --use-rewrites 1
             ./bin/magento --version
       - run:
           name: Configure our repository
           command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
+            cd /var/www/html/magento/
             composer config -g http-basic.dist.powersync.biz $TECHWEB_REPO_LOGIN $TECHNWEB_REPO_PASSWORD
             composer config --global repositories.powersync composer https://dist.powersync.biz
 
       - run:
-          name: Install the Extension
+          name: Checkout related modules
           command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
+            cd /var/www/html/magento/
             for package in $PACKAGES_NAME; do
               NEW_MODULE_VERSION=(`composer show -al $package |grep '^latest '|awk '{print $3}'|sed 's/,//'`);
               composer require $package=$NEW_MODULE_VERSION
             done
 
       - run:
-          name: Upgrade the Extension
+          name: Install the Extension
           command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
+            cd /var/www/html/magento
             rm -rf ./generated/*
+            ./bin/magento module:status
+            ./bin/magento module:enable --all
             ./bin/magento setup:upgrade
       - run:
           name: Compile the Code
           command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
+            cd /var/www/html/magento
             php bin/magento setup:di:compile
             php bin/magento deploy:mode:set developer
 
@@ -162,482 +239,44 @@ jobs:
 
             done
 
-  m225_php71: &php71-base
-    docker:
-      - image: circleci/php:7.1-apache-stretch-node-browsers
-      - image: circleci/mysql:5.7
-        environment:
-          MYSQL_PASSWORD: mage
-          MYSQL_USER: mage
-          MYSQL_DATABASE: magento
-          MYSQL_ROOT_PASSWORD: docker
-    environment:
-      MAGENTO_VERSION: "2.2.5"
-    working_directory: ~/tnw_extension/
-    steps:
-      - checkout
-      - run:
-          name: Checkout related modules
-          command: |
-            mkdir -p ~/tnw_extension/modules
-            cd ~/tnw_extension/modules
-            for moduleName in $MODULES_NAME; do
-              git clone git@github.com:PowerSync/TNW_$moduleName.git $moduleName
-              cd ~/tnw_extension/modules/$moduleName
-              set +e
-              branchExists=(`git branch -a|grep $CIRCLE_BRANCH`)
-              set -e
-              if test -z "$branchExists"
-              then
-                git checkout develop;
-              else
-                git checkout $CIRCLE_BRANCH;
-              fi
-              cd ~/tnw_extension/modules
-            done
-
-      - run:
-          name: Install System Package
-          command: |
-            sudo apt-get update
-            sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
-      - run:
-          name: Install PHP extension
-          command: |
-            sudo docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
-            sudo -E docker-php-ext-install -j$(nproc) intl soap xsl zip mcrypt pdo pdo_mysql gd gettext mbstring bcmath
-      - run:
-          name: Configure PHP
-          command: |
-            echo "memory_limit = 2G" | sudo tee --append /usr/local/etc/php/conf.d/memory.ini
-            php -i
-      - run:
-          name: Permissions
-          command: |
-            cd /var/www/
-            sudo chown -R circleci:circleci html
-      - run:
-          name: Get Magento Code Quality Tool
-          command: |
-            cd /var/www/html/
-            git clone https://github.com/magento/marketplace-eqp  magento-coding-standard
-            cd magento-coding-standard && git checkout -q "2.0.1"
-            composer install
-      - run:
-          name: Wait for DB
-          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
-      - run:
-          name: Installing Magento CE
-          command: |
-            cd /var/www/html/
-            wget https://github.com/magento/magento2/archive/$MAGENTO_VERSION.tar.gz -O - | tar -xz
-            cd magento2-$MAGENTO_VERSION
-            composer install --prefer-dist
-            ./bin/magento setup:install --backend-frontname admin --db-host 127.0.0.1 --db-prefix tnwc_ --db-name magento --db-user mage --db-password mage --base-url http://magento-qa.box/ --language en_US --timezone America/Chicago --currency USD --admin-lastname Admin --admin-firstname Admin --admin-email admin@example.com --admin-user admin --admin-password admin123 --cleanup-database --use-rewrites 1
-            ./bin/magento --version
-      - run:
-          name: Copy the Extension Files
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            mkdir -p ./app/code/TNW
-            cp -R ~/tnw_extension/modules/* ./app/code/TNW
-            ls -la ./app/code/TNW
-      - run:
-          name: Install the Extension
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            rm -rf ./generated/*
-            composer require tnw/soap-client
-            ./bin/magento module:status
-            ./bin/magento module:enable --all
-            ./bin/magento setup:upgrade
-      - run:
-          name: Compile the Code
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            ./bin/magento setup:di:compile
-            php bin/magento deploy:mode:set developer
-      - run:
-          name: Installing Magento EE
-          command: |
-            cd /var/www/html/
-            composer config -g http-basic.repo.magento.com $MAGENTO_REPO_LOGIN $MAGENTO_REPO_PASSWORD
-            composer create-project -s RC --repository-url=https://repo.magento.com/ magento/project-enterprise-edition magento2-ee-$MAGENTO_VERSION $MAGENTO_VERSION
-            cd magento2-ee-$MAGENTO_VERSION
-            ./bin/magento setup:install --backend-frontname admin --db-host 127.0.0.1   --db-name magento --db-user mage --db-password mage --base-url http://magento-qa.box/ --language en_US --timezone America/Chicago --currency USD --admin-lastname Admin --admin-firstname Admin --admin-email admin@example.com --admin-user admin --admin-password admin123 --cleanup-database --use-rewrites 1
-            ./bin/magento --version
-      - run:
-          name: Copy the Extension Files
-          command: |
-            cd /var/www/html/magento2-ee-$MAGENTO_VERSION
-            mkdir -p ./app/code/TNW
-            cp -R ~/tnw_extension/modules/* ./app/code/TNW
-            ls -la ./app/code/TNW
-      - run:
-          name: Install the Extension
-          command: |
-            cd /var/www/html/magento2-ee-$MAGENTO_VERSION
-            rm -rf ./generated/*
-            composer require tnw/soap-client
-            ./bin/magento module:status
-            ./bin/magento module:enable --all
-            ./bin/magento setup:upgrade
-      - run:
-          name: Compile the Code
-          command: |
-            cd /var/www/html/magento2-ee-$MAGENTO_VERSION
-            ./bin/magento setup:di:compile
-            php bin/magento deploy:mode:set developer
-      - run:
-          name: Run Magento Coding Standard
-          command: |
-            /var/www/html/magento-coding-standard/vendor/bin/phpcs $CIRCLE_WORKING_DIRECTORY --standard=MEQP2 --severity=10 --extensions=php,phtml
-
-  m230_php72:
-    docker:
-      - image: circleci/php:7.2-apache-stretch-node-browsers-legacy
-      - image: circleci/mysql:5.7
-        environment:
-          MYSQL_PASSWORD: mage
-          MYSQL_USER: mage
-          MYSQL_DATABASE: magento
-          MYSQL_ROOT_PASSWORD: docker
-    environment:
-      MAGENTO_VERSION: "2.3.3"
-    working_directory: ~/tnw_extension/
-    steps:
-      - checkout
-      - run:
-          name: Checkout related modules
-          command: |
-            mkdir -p ~/tnw_extension/modules
-            cd ~/tnw_extension/modules
-            for moduleName in $MODULES_NAME; do
-              git clone git@github.com:PowerSync/TNW_$moduleName.git $moduleName
-              cd ~/tnw_extension/modules/$moduleName
-              set +e
-              branchExists=(`git branch -a|grep $CIRCLE_BRANCH`)
-              set -e
-              if test -z "$branchExists"
-              then
-                git checkout develop;
-              else
-                git checkout $CIRCLE_BRANCH;
-              fi
-              cd ~/tnw_extension/modules
-            done
-
-      - run:
-          name: Install System Package
-          command: |
-            sudo apt-get update
-            sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
-      - run:
-          name: Install PHP extension
-          command: |
-            sudo pecl install mcrypt-1.0.1
-            sudo docker-php-ext-enable mcrypt
-            sudo docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
-            sudo -E docker-php-ext-install -j$(nproc) intl soap xsl zip pdo pdo_mysql gd gettext mbstring bcmath
-      - run:
-          name: Configure PHP
-          command: |
-            echo "memory_limit = 2G" | sudo tee --append /usr/local/etc/php/conf.d/memory.ini
-            php -i
-      - run:
-          name: Permissions
-          command: |
-            cd /var/www/
-            sudo chown -R circleci:circleci html
-      - run:
-          name: Get Magento Code Quality Tool
-          command: |
-            cd /var/www/html/
-            git clone https://github.com/magento/marketplace-eqp  magento-coding-standard
-            cd magento-coding-standard && git checkout -q "2.0.1"
-            composer install
-      - run:
-          name: Wait for DB
-          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
-      - run:
-          name: Installing Magento CE
-          command: |
-            cd /var/www/html/
-            composer config -g http-basic.repo.magento.com $MAGENTO_REPO_LOGIN $MAGENTO_REPO_PASSWORD
-            composer create-project -s RC --repository-url=https://repo.magento.com/ magento/project-community-edition magento2-$MAGENTO_VERSION $MAGENTO_VERSION
-            cd magento2-$MAGENTO_VERSION
-            ./bin/magento setup:install --backend-frontname admin --db-host 127.0.0.1 --db-prefix tnwc_ --db-name magento --db-user mage --db-password mage --base-url http://magento-qa.box/ --language en_US --timezone America/Chicago --currency USD --admin-lastname Admin --admin-firstname Admin --admin-email admin@example.com --admin-user admin --admin-password admin123 --cleanup-database --use-rewrites 1
-            ./bin/magento --version
-      - run:
-          name: Copy the Extension Files
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            mkdir -p ./app/code/TNW
-            cp -R ~/tnw_extension/modules/* ./app/code/TNW
-            ls -la ./app/code/TNW
-      - run:
-          name: Install the Extension
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            rm -rf ./generated/*
-            composer require tnw/soap-client
-            ./bin/magento module:status
-            ./bin/magento module:enable --all
-            ./bin/magento setup:upgrade
-      - run:
-          name: Compile the Code
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            ./bin/magento setup:di:compile
-            php bin/magento deploy:mode:set developer
-      #
-      #        DISABLED by the "check summ" issue reason
-      #        https://github.com/magento/magento2/issues/19934
-      #    - run:
-      #        name: Installing Magento EE
-      #        command: |
-      #          cd /var/www/html/
-      #          composer config -g http-basic.repo.magento.com $MAGENTO_REPO_LOGIN $MAGENTO_REPO_PASSWORD
-      #          composer create-project -s RC --repository-url=https://repo.magento.com/ magento/project-enterprise-edition magento2-ee-$MAGENTO_VERSION $MAGENTO_VERSION
-      #          cd magento2-ee-$MAGENTO_VERSION
-      #          ./bin/magento setup:install --backend-frontname admin --db-host 127.0.0.1   --db-name magento --db-user mage --db-password mage --base-url http://magento-qa.box/ --language en_US --timezone America/Chicago --currency USD --admin-lastname Admin --admin-firstname Admin --admin-email admin@example.com --admin-user admin --admin-password admin123 --cleanup-database --use-rewrites 1
-      #          ./bin/magento --version
-      #    - run:
-      #        name: Copy the Extension Files
-      #        command: |
-      #          cd /var/www/html/magento2-ee-$MAGENTO_VERSION
-      #          mkdir -p ./app/code/TNW
-      #          cp -R ~/tnw_extension/modules/* ./app/code/TNW
-      #          ls -la ./app/code/TNW
-      #    - run:
-      #        name: Install the Extension
-      #        command: |
-      #          cd /var/www/html/magento2-ee-$MAGENTO_VERSION
-      #          rm -rf ./generated/*
-      #          composer require tnw/soap-client
-      #          ./bin/magento module:status
-      #          ./bin/magento module:enable --all
-      #          ./bin/magento setup:upgrade
-      #    - run:
-      #        name: Compile the Code
-      #        command: |
-      #          cd /var/www/html/magento2-ee-$MAGENTO_VERSION
-      #          ./bin/magento setup:di:compile
-      #          php bin/magento deploy:mode:set developer
-      - run:
-          name: Run Magento Coding Standard
-          command: |
-            /var/www/html/magento-coding-standard/vendor/bin/phpcs $CIRCLE_WORKING_DIRECTORY --standard=MEQP2 --severity=10 --extensions=php,phtml
-  m234_php72:
-    docker:
-      - image: circleci/php:7.2-apache-stretch-node-browsers-legacy
-      - image: circleci/mysql:5.7
-        environment:
-          MYSQL_PASSWORD: mage
-          MYSQL_USER: mage
-          MYSQL_DATABASE: magento
-          MYSQL_ROOT_PASSWORD: docker
-    environment:
-      MAGENTO_VERSION: "2.3.4"
-    working_directory: ~/tnw_extension/
-    steps:
-      - checkout
-      - run:
-          name: Checkout related modules
-          command: |
-            mkdir -p ~/tnw_extension/modules
-            cd ~/tnw_extension/modules
-            for moduleName in $MODULES_NAME; do
-              git clone git@github.com:PowerSync/TNW_$moduleName.git $moduleName
-              cd ~/tnw_extension/modules/$moduleName
-              set +e
-              branchExists=(`git branch -a|grep $CIRCLE_BRANCH`)
-              set -e
-              if test -z "$branchExists"
-              then
-                git checkout develop;
-              else
-                git checkout $CIRCLE_BRANCH;
-              fi
-              cd ~/tnw_extension/modules
-            done
-
-      - run:
-          name: Install System Package
-          command: |
-            sudo apt-get update
-            sudo apt install -y libicu-dev libxml2-dev libxslt1-dev zlib1g-dev libmcrypt-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
-      - run:
-          name: Install PHP extension
-          command: |
-            sudo pecl install mcrypt-1.0.1
-            sudo docker-php-ext-enable mcrypt
-            sudo docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
-            sudo -E docker-php-ext-install -j$(nproc) intl soap xsl zip pdo pdo_mysql gd gettext mbstring bcmath
-      - run:
-          name: Configure PHP
-          command: |
-            echo "memory_limit = 2G" | sudo tee --append /usr/local/etc/php/conf.d/memory.ini
-            php -i
-      - run:
-          name: Permissions
-          command: |
-            cd /var/www/
-            sudo chown -R circleci:circleci html
-      - run:
-          name: Get Magento Code Quality Tool
-          command: |
-            cd /var/www/html/
-            git clone https://github.com/magento/marketplace-eqp  magento-coding-standard
-            cd magento-coding-standard && git checkout -q "2.0.1"
-            composer install
-      - run:
-          name: Wait for DB
-          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
-      - run:
-          name: Installing Magento CE
-          command: |
-            cd /var/www/html/
-            composer config -g http-basic.repo.magento.com $MAGENTO_REPO_LOGIN $MAGENTO_REPO_PASSWORD
-            composer create-project -s RC --repository-url=https://repo.magento.com/ magento/project-community-edition magento2-$MAGENTO_VERSION $MAGENTO_VERSION
-            cd magento2-$MAGENTO_VERSION
-            ./bin/magento setup:install --backend-frontname admin --db-host 127.0.0.1 --db-prefix tnwc_ --db-name magento --db-user mage --db-password mage --base-url http://magento-qa.box/ --language en_US --timezone America/Chicago --currency USD --admin-lastname Admin --admin-firstname Admin --admin-email admin@example.com --admin-user admin --admin-password admin123 --cleanup-database --use-rewrites 1
-            ./bin/magento --version
-      - run:
-          name: Copy the Extension Files
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            mkdir -p ./app/code/TNW
-            cp -R ~/tnw_extension/modules/* ./app/code/TNW
-            ls -la ./app/code/TNW
-      - run:
-          name: Install the Extension
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            rm -rf ./generated/*
-            composer require tnw/soap-client
-            ./bin/magento module:status
-            ./bin/magento module:enable --all
-            ./bin/magento setup:upgrade
-      - run:
-          name: Compile the Code
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            ./bin/magento setup:di:compile
-            php bin/magento deploy:mode:set developer
-      #
-      #        DISABLED by the "check summ" issue reason
-      #        https://github.com/magento/magento2/issues/19934
-      #    - run:
-      #        name: Installing Magento EE
-      #        command: |
-      #          cd /var/www/html/
-      #          composer config -g http-basic.repo.magento.com $MAGENTO_REPO_LOGIN $MAGENTO_REPO_PASSWORD
-      #          composer create-project -s RC --repository-url=https://repo.magento.com/ magento/project-enterprise-edition magento2-ee-$MAGENTO_VERSION $MAGENTO_VERSION
-      #          cd magento2-ee-$MAGENTO_VERSION
-      #          ./bin/magento setup:install --backend-frontname admin --db-host 127.0.0.1   --db-name magento --db-user mage --db-password mage --base-url http://magento-qa.box/ --language en_US --timezone America/Chicago --currency USD --admin-lastname Admin --admin-firstname Admin --admin-email admin@example.com --admin-user admin --admin-password admin123 --cleanup-database --use-rewrites 1
-      #          ./bin/magento --version
-      #    - run:
-      #        name: Copy the Extension Files
-      #        command: |
-      #          cd /var/www/html/magento2-ee-$MAGENTO_VERSION
-      #          mkdir -p ./app/code/TNW
-      #          cp -R ~/tnw_extension/modules/* ./app/code/TNW
-      #          ls -la ./app/code/TNW
-      #    - run:
-      #        name: Install the Extension
-      #        command: |
-      #          cd /var/www/html/magento2-ee-$MAGENTO_VERSION
-      #          rm -rf ./generated/*
-      #          composer require tnw/soap-client
-      #          ./bin/magento module:status
-      #          ./bin/magento module:enable --all
-      #          ./bin/magento setup:upgrade
-      #    - run:
-      #        name: Compile the Code
-      #        command: |
-      #          cd /var/www/html/magento2-ee-$MAGENTO_VERSION
-      #          ./bin/magento setup:di:compile
-      #          php bin/magento deploy:mode:set developer
-      - run:
-          name: Run Magento Coding Standard
-          command: |
-            /var/www/html/magento-coding-standard/vendor/bin/phpcs $CIRCLE_WORKING_DIRECTORY --standard=MEQP2 --severity=10 --extensions=php,phtml
-  m224_php71:
-    <<: *php71-base
-    environment:
-      MAGENTO_VERSION: "2.2.4"
-  m226_php71:
-    <<: *php71-base
-    environment:
-      MAGENTO_VERSION: "2.2.6"
-  m223_php71:
-    <<: *php71-base
-    environment:
-      MAGENTO_VERSION: "2.2.3"
-  m222_php71:
-    <<: *php71-base
-    environment:
-      MAGENTO_VERSION: "2.2.2"
-  m221_php71:
-    <<: *php71-base
-    environment:
-      MAGENTO_VERSION: "2.2.1"
-  m224_php70: &php70-base
-    <<: *php71-base
-    docker:
-      - image: circleci/php:7.0-apache-node-browsers
-      - image: circleci/mysql:5.7
-        environment:
-          MYSQL_PASSWORD: mage
-          MYSQL_USER: mage
-          MYSQL_DATABASE: magento
-          MYSQL_ROOT_PASSWORD: docker
-    environment:
-      MAGENTO_VERSION: "2.2.4"
-  m223_php70:
-    <<: *php70-base
-    environment:
-      MAGENTO_VERSION: "2.2.3"
-  m222_php70:
-    <<: *php70-base
-    environment:
-      MAGENTO_VERSION: "2.2.2"
-  m221_php70:
-    <<: *php70-base
-    environment:
-      MAGENTO_VERSION: "2.2.1"
-  m225_php70:
-    <<: *php70-base
-    environment:
-      MAGENTO_VERSION: "2.2.5"
 
 workflows:
   version: 2
 
   test-deploy-wiki:
     jobs:
-      - m230_php72:
+      - m233-commerce-php72:
           context: powersync
           filters:
             branches:
               only: /.*/
-      - m234_php72:
+
+      - m233-open_source-php72:
           context: powersync
           filters:
             branches:
               only: /.*/
-      - deploy:
+
+      - magento-coding-standard:
           context: powersync
-          requires:
-            - m230_php72
           filters:
             branches:
               only: master
+
+      - deploy:
+          context: powersync
+          requires:
+            - m233-commerce-php72
+            - magento-coding-standard
+          filters:
+            branches:
+              only: master
+
       - tag-release:
           context: powersync
           requires:
             - deploy
+
       - check-composer-installation:
           context: powersync
           requires:
@@ -647,3 +286,6 @@ workflows:
           context: powersync
           requires:
             - check-composer-installation
+          filters:
+            branches:
+              only: master
