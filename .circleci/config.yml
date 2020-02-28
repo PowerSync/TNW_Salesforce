@@ -235,9 +235,9 @@ workflows:
 
       - magento-coding-standard:
           context: powersync
-            filters:
-              branches:
-                only: /.*/
+          filters:
+            branches:
+              only: /.*/
 
       - deploy:
           context: powersync
