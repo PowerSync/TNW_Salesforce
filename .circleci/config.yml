@@ -37,6 +37,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: docker
     working_directory: ~/tnw_extension
     steps:
+      - checkout
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
@@ -163,6 +164,21 @@ jobs:
               composer require $package=$NEW_MODULE_VERSION
             done
 
+      - run:
+          name: Install the Extension
+          command: |
+            cd /var/www/html/magento
+            rm -rf ./generated/*
+            ./bin/magento module:status
+            ./bin/magento module:enable --all
+            ./bin/magento setup:upgrade
+      - run:
+          name: Compile the Code
+          command: |
+            cd /var/www/html/magento
+            php bin/magento setup:di:compile
+            php bin/magento deploy:mode:set developer
+
   update-wiki:
     docker:
       - image: circleci/php:7.1-apache-stretch-node-browsers
@@ -254,8 +270,8 @@ workflows:
 
       - check-composer-installation:
           context: powersync
-      #          requires:
-      #            - deploy
+          requires:
+            - deploy
 
       - update-wiki:
           context: powersync
