@@ -324,17 +324,17 @@ workflows:
             branches:
               only: master
 
-      - m2210-commerce-php72:
-          context: powersync
-          filters:
-            branches:
-              only: master
-
-      - m2210-open_source-php71:
-          context: powersync
-          filters:
-            branches:
-              only: master
+#      - m2210-commerce-php72:
+#          context: powersync
+#          filters:
+#            branches:
+#              only: master
+#
+#      - m2210-open_source-php71:
+#          context: powersync
+#          filters:
+#            branches:
+#              only: master
 
       - magento-coding-standard:
           context: powersync
