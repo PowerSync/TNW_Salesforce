@@ -37,26 +37,6 @@ jobs:
           MYSQL_ROOT_PASSWORD: docker
     working_directory: ~/tnw_extension
     steps:
-      #      - checkout
-      #      - run:
-      #          name: Checkout related modules
-      #          command: |
-      #            mkdir -p ~/tnw_extension/modules
-      #            cd ~/tnw_extension/modules
-      #            for moduleName in $MODULES_NAME; do
-      #              git clone git@github.com:PowerSync/TNW_$moduleName.git $moduleName
-      #              cd ~/tnw_extension/modules/$moduleName
-      #              set +e
-      #              branchExists=(`git branch -a|grep $CIRCLE_BRANCH`)
-      #              set -e
-      #              if test -z "$branchExists"
-      #              then
-      #                git checkout develop;
-      #              else
-      #                git checkout $CIRCLE_BRANCH;
-      #              fi
-      #              cd ~/tnw_extension/modules
-      #            done
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
@@ -156,35 +136,33 @@ jobs:
           MYSQL_USER: mage
           MYSQL_DATABASE: magento
           MYSQL_ROOT_PASSWORD: docker
+
     steps:
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
+      - run:
+          name: Installing Magento
+          command: |
+            cd /var/www/html/magento/
+            composer config -g http-basic.repo.magento.com $MAGENTO_REPO_LOGIN $MAGENTO_REPO_PASSWORD
+            ./bin/magento setup:install --backend-frontname admin --db-host 127.0.0.1 --db-prefix tnwc_ --db-name magento --db-user mage --db-password mage --base-url http://magento-qa.box/ --language en_US --timezone America/Chicago --currency USD --admin-lastname Admin --admin-firstname Admin --admin-email admin@example.com --admin-user admin --admin-password admin123 --cleanup-database --use-rewrites 1
+            ./bin/magento --version
       - run:
           name: Configure our repository
           command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
+            cd /var/www/html/magento/
             composer config -g http-basic.dist.powersync.biz $TECHWEB_REPO_LOGIN $TECHNWEB_REPO_PASSWORD
             composer config --global repositories.powersync composer https://dist.powersync.biz
 
       - run:
-          name: Install the Extension
+          name: Checkout related modules
           command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
+            cd /var/www/html/magento/
             for package in $PACKAGES_NAME; do
               NEW_MODULE_VERSION=(`composer show -al $package |grep '^latest '|awk '{print $3}'|sed 's/,//'`);
               composer require $package=$NEW_MODULE_VERSION
             done
-
-      - run:
-          name: Upgrade the Extension
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            rm -rf ./generated/*
-            ./bin/magento setup:upgrade
-      - run:
-          name: Compile the Code
-          command: |
-            cd /var/www/html/magento2-$MAGENTO_VERSION
-            php bin/magento setup:di:compile
-            php bin/magento deploy:mode:set developer
 
   update-wiki:
     docker:
