@@ -52,7 +52,6 @@ jobs:
           name: Checkout related modules
           command: |
             cd /var/www/html/magento/
-#            ssh -o "StrictHostKeyChecking no" git@github.com
             for moduleName in $MODULES_NAME; do
               composer config repositories.TNW_$moduleName git git@github.com:PowerSync/TNW_$moduleName.git
 
