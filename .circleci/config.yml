@@ -247,6 +247,12 @@ workflows:
             branches:
               only: /.*/
 
+      - m233-open_source-php72:
+          context: powersync
+          filters:
+            branches:
+              only: /.*/
+
       - magento-coding-standard:
           context: powersync
           filters:
