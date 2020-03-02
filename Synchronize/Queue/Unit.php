@@ -371,14 +371,14 @@ class Unit
     /**
      * @param \TNW\Salesforce\Model\Queue[] $queues
      */
-    public function setQueues(array $queues): void
+    public function setQueues(array $queues)
     {
         $this->queues = $queues;
     }
     /**
      * @param \TNW\Salesforce\Model\Queue[] $queues
      */
-    public function addQueues(array $queues): void
+    public function addQueues(array $queues)
     {
         foreach ($queues as $queue) {
             $this->queues[$queue->getIdentify()] = $queue;

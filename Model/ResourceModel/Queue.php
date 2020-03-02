@@ -156,7 +156,7 @@ class Queue extends AbstractDb
      * @param array $elements
      * @param bool $isParent
      */
-    public function addDependency(string $element, array $elements, $isParent = false): void
+    public function addDependency(string $element, array $elements, $isParent = false)
     {
         foreach ($elements as $el) {
             $parent = $element;
@@ -174,7 +174,7 @@ class Queue extends AbstractDb
     /**
      * @param $elements
      */
-    private function buildDependencies(iterable $elements): void
+    private function buildDependencies($elements)
     {
         foreach ($elements as $resolveEntity) {
             $currentCode = $resolveEntity->code();
