@@ -1,9 +1,13 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Contact;
 
-use TNW\Salesforce\Model\Config\Source\Customer\ContactAssignee;
-use TNW\Salesforce\Synchronize;
+use Magento\Customer\Model\Customer;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Model;
+use TNW\Salesforce\Model\Config\Source\Customer\ContactAssignee;
+use TNW\Salesforce\Model\Customer\Config;
+use TNW\Salesforce\Synchronize;
 
 /**
  * Customer Contact Mapping
@@ -11,7 +15,7 @@ use TNW\Salesforce\Model;
 class Mapping extends Synchronize\Unit\Mapping
 {
     /**
-     * @var \TNW\Salesforce\Model\Customer\Config
+     * @var Config
      */
     private $customerConfig;
 
@@ -26,7 +30,7 @@ class Mapping extends Synchronize\Unit\Mapping
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
-     * @param Model\Customer\Config $customerConfig
+     * @param Config $customerConfig
      * @param array $dependents
      */
     public function __construct(
@@ -38,7 +42,7 @@ class Mapping extends Synchronize\Unit\Mapping
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
-        Model\Customer\Config $customerConfig,
+        Config $customerConfig,
         array $dependents = []
     ) {
         parent::__construct(
@@ -59,12 +63,12 @@ class Mapping extends Synchronize\Unit\Mapping
     /**
      * Object By Entity Type
      *
-     * @param \Magento\Customer\Model\Customer $entity
+     * @param Customer $entity
      * @param string $magentoEntityType
      * @return mixed
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    protected function objectByEntityType($entity, $magentoEntityType)
+    public function objectByEntityType($entity, $magentoEntityType)
     {
         switch ($magentoEntityType) {
             case 'customer':
@@ -84,18 +88,18 @@ class Mapping extends Synchronize\Unit\Mapping
     /**
      * Prepare Value
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param string $attributeCode
      * @return mixed|string
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function prepareValue($entity, $attributeCode)
     {
-        if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'sforce_id') === 0) {
+        if ($entity instanceof Customer && strcasecmp($attributeCode, 'sforce_id') === 0) {
             return $this->lookup()->get('%s/record/Id', $entity);
         }
 
-        if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'website_id') === 0) {
+        if ($entity instanceof Customer && strcasecmp($attributeCode, 'website_id') === 0) {
             return $this->objectByEntityType($entity, 'website')->getData('salesforce_id');
         }
 
@@ -105,13 +109,13 @@ class Mapping extends Synchronize\Unit\Mapping
     /**
      * Default Value
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param Model\Mapper $mapper
      * @return mixed
      */
     protected function defaultValue($entity, $mapper)
     {
-        if ($entity instanceof \Magento\Customer\Model\Customer &&
+        if ($entity instanceof Customer &&
             strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0
         ) {
             if ($this->customerConfig->contactAssignee($entity->getData('config_website')) === ContactAssignee::DEFAULT_OWNER ||

@@ -313,7 +313,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @param string $magentoEntityType
      * @return AbstractModel
      */
-    protected function objectByEntityType($entity, $magentoEntityType)
+    public function objectByEntityType($entity, $magentoEntityType)
     {
         return $this->load()->entityByType($entity, $magentoEntityType);
     }
