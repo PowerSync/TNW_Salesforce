@@ -2,8 +2,13 @@
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account;
 
 use Magento\Customer\Model\Address;
-use TNW\Salesforce\Synchronize;
+use Magento\Customer\Model\Customer;
+use Magento\Framework\Model\AbstractModel;
+use RuntimeException;
 use TNW\Salesforce\Model;
+use TNW\Salesforce\Model\Customer\Config;
+use TNW\Salesforce\Model\Mapper;
+use TNW\Salesforce\Synchronize;
 
 /**
  * Customer Account Mapping
@@ -11,7 +16,7 @@ use TNW\Salesforce\Model;
 class Mapping extends Synchronize\Unit\Mapping
 {
     /**
-     * @var \TNW\Salesforce\Model\Customer\Config
+     * @var Config
      */
     private $customerConfig;
 
@@ -26,7 +31,7 @@ class Mapping extends Synchronize\Unit\Mapping
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
-     * @param Model\Customer\Config $customerConfig
+     * @param Config $customerConfig
      * @param array $dependents
      */
     public function __construct(
@@ -38,7 +43,7 @@ class Mapping extends Synchronize\Unit\Mapping
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
-        Model\Customer\Config $customerConfig,
+        Config $customerConfig,
         array $dependents = []
     ) {
         parent::__construct(
@@ -59,7 +64,7 @@ class Mapping extends Synchronize\Unit\Mapping
     /**
      * Object By Entity Type
      *
-     * @param \Magento\Customer\Model\Customer $entity
+     * @param Customer $entity
      * @param string $magentoEntityType
      * @return mixed
      */
@@ -83,15 +88,33 @@ class Mapping extends Synchronize\Unit\Mapping
     /**
      * Prepare Value
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param string $attributeCode
      * @return mixed
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function prepareValue($entity, $attributeCode)
     {
-        if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'sforce_id') === 0) {
+        if ($entity instanceof Customer && strcasecmp($attributeCode, 'sforce_id') === 0) {
             return $this->units()->get('lookup')->get('%s/record/Id', $entity);
+        }
+
+        if ($entity instanceof Customer && strcasecmp($attributeCode, 'sf_company') === 0) {
+            switch (true) {
+                case (!empty($entity->getCompany())):
+                    $company = $entity->getCompany();
+                    break;
+                case (!empty($entity->getDefaultBillingAddress()) && !empty($entity->getDefaultBillingAddress()->getCompany())):
+                    $company = $entity->getDefaultBillingAddress()->getCompany();
+                    break;
+                case (!empty($entity->getDefaultShippingAddress()) && !empty($entity->getDefaultShippingAddress()->getCompany())):
+                    $company = $entity->getDefaultShippingAddress()->getCompany();
+                    break;
+                default:
+                    $company = self::generateCompanyByCustomer($entity);
+                    break;
+            }
+            return $company;
         }
 
         return parent::prepareValue($entity, $attributeCode);
@@ -100,8 +123,8 @@ class Mapping extends Synchronize\Unit\Mapping
     /**
      * Default Value
      *
-     * @param \Magento\Customer\Model\Customer $entity
-     * @param \TNW\Salesforce\Model\Mapper $mapper
+     * @param Customer $entity
+     * @param Mapper $mapper
      * @return mixed
      */
     protected function defaultValue($entity, $mapper)
@@ -122,7 +145,7 @@ class Mapping extends Synchronize\Unit\Mapping
     /**
      * Company By Customer
      *
-     * @param \Magento\Customer\Model\Customer $entity
+     * @param Customer $entity
      * @return string
      */
     public static function companyByCustomer($entity)
@@ -138,7 +161,7 @@ class Mapping extends Synchronize\Unit\Mapping
     /**
      * Get Company By Customer
      *
-     * @param \Magento\Customer\Model\Customer $entity
+     * @param Customer $entity
      * @return string
      */
     public static function getCompanyByCustomer($entity)
@@ -156,7 +179,7 @@ class Mapping extends Synchronize\Unit\Mapping
     /**
      * Generate Company By Customer
      *
-     * @param \Magento\Customer\Model\Customer $entity
+     * @param Customer $entity
      * @return string
      */
     public static function generateCompanyByCustomer($entity)
