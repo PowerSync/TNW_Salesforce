@@ -1,7 +1,13 @@
 <?php
 namespace TNW\Salesforce\Model\Entity;
 
+use Exception;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
+use Magento\Store\Api\Data\WebsiteInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Model\Config;
+use TNW\Salesforce\Model\ResourceModel\Objects;
 
 class SalesforceIdStorage
 {
@@ -32,17 +38,17 @@ class SalesforceIdStorage
     private $mappingAttribute;
 
     /**
-     * @var \TNW\Salesforce\Model\ResourceModel\Objects
+     * @var Objects
      */
     private $resourceObjects;
 
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var StoreManagerInterface
      */
     private $storeManager;
 
     /**
-     * @var \TNW\Salesforce\Model\Config
+     * @var Config
      */
     private $config;
 
@@ -51,17 +57,18 @@ class SalesforceIdStorage
      *
      * @param string $magentoType
      * @param array $mappingAttribute
-     * @param \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
-     * @param \TNW\Salesforce\Model\Config $config
+     * @param Objects $resourceObjects
+     * @param StoreManagerInterface $storeManager
+     * @param Config $config
      */
     public function __construct(
         $magentoType,
         array $mappingAttribute,
-        \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \TNW\Salesforce\Model\Config $config
-    ) {
+        Objects $resourceObjects,
+        StoreManagerInterface $storeManager,
+        Config $config
+    )
+    {
         $this->resourceObjects = $resourceObjects;
         $this->magentoType = $magentoType;
         $this->mappingAttribute = $mappingAttribute;
@@ -70,17 +77,25 @@ class SalesforceIdStorage
     }
 
     /**
+     * @return array
+     */
+    public function getMappingAttribute()
+    {
+        return $this->mappingAttribute;
+    }
+
+    /**
      * Load
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
-     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
+     * @param AbstractModel $entity
+     * @param null|bool|int|string|WebsiteInterface $website
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function load($entity, $website = null)
     {
         if (empty($this->magentoType)) {
-            throw new \Exception('magentoType was not defined!');
+            throw new Exception('magentoType was not defined!');
         }
 
         $objectIds = $this->resourceObjects
@@ -102,10 +117,10 @@ class SalesforceIdStorage
     /**
      * Save
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
-     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
+     * @param AbstractModel $entity
+     * @param null|bool|int|string|WebsiteInterface $website
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function save($entity, $website = null)
     {
@@ -126,9 +141,9 @@ class SalesforceIdStorage
     /**
      * Save By Attribute
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param string $attributeName
-     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
+     * @param null|bool|int|string|WebsiteInterface $website
      *
      * @throws LocalizedException
      */
@@ -141,10 +156,10 @@ class SalesforceIdStorage
     /**
      * Save Value By Attribute
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param string $value
      * @param string $attributeName
-     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
+     * @param null|bool|int|string|WebsiteInterface $website
      *
      * @throws LocalizedException
      */
@@ -168,9 +183,9 @@ class SalesforceIdStorage
     /**
      * Save Status
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param bool $status
-     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
+     * @param null|bool|int|string|WebsiteInterface $website
      *
      * @throws LocalizedException
      */
@@ -192,7 +207,7 @@ class SalesforceIdStorage
     /**
      * Value By Attribute
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @param string $attributeName
      *
      * @return mixed
@@ -222,10 +237,10 @@ class SalesforceIdStorage
     /**
      * Prepare Website Id
      *
-     * @param null|bool|int|string|\Magento\Store\Api\Data\WebsiteInterface $website
+     * @param null|bool|int|string|WebsiteInterface $website
      *
      * @return int
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function prepareWebsiteId($website)
     {
