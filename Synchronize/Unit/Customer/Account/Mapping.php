@@ -99,6 +99,24 @@ class Mapping extends Synchronize\Unit\Mapping
             return $this->units()->get('lookup')->get('%s/record/Id', $entity);
         }
 
+        if ($entity instanceof Customer && strcasecmp($attributeCode, 'sf_company') === 0) {
+            switch (true) {
+                case (!empty($entity->getCompany())):
+                    $company = $entity->getCompany();
+                    break;
+                case (!empty($entity->getDefaultBillingAddress()) && !empty($entity->getDefaultBillingAddress()->getCompany())):
+                    $company = $entity->getDefaultBillingAddress()->getCompany();
+                    break;
+                case (!empty($entity->getDefaultShippingAddress()) && !empty($entity->getDefaultShippingAddress()->getCompany())):
+                    $company = $entity->getDefaultShippingAddress()->getCompany();
+                    break;
+                default:
+                    $company = self::generateCompanyByCustomer($entity);
+                    break;
+            }
+            return $company;
+        }
+
         return parent::prepareValue($entity, $attributeCode);
     }
 

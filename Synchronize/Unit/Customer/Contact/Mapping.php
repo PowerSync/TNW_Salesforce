@@ -103,6 +103,24 @@ class Mapping extends Synchronize\Unit\Mapping
             return $this->objectByEntityType($entity, 'website')->getData('salesforce_id');
         }
 
+        if ($entity instanceof Customer && strcasecmp($attributeCode, 'sf_company') === 0) {
+            switch (true) {
+                case (!empty($entity->getCompany())):
+                    $company = $entity->getCompany();
+                    break;
+                case (!empty($entity->getDefaultBillingAddress()) && !empty($entity->getDefaultBillingAddress()->getCompany())):
+                    $company = $entity->getDefaultBillingAddress()->getCompany();
+                    break;
+                case (!empty($entity->getDefaultShippingAddress()) && !empty($entity->getDefaultShippingAddress()->getCompany())):
+                    $company = $entity->getDefaultShippingAddress()->getCompany();
+                    break;
+                default:
+                    $company = Synchronize\Unit\Customer\Account\Mapping::generateCompanyByCustomer($entity);
+                    break;
+            }
+            return $company;
+        }
+
         return parent::prepareValue($entity, $attributeCode);
     }
 
