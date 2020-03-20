@@ -68,7 +68,7 @@ class Mapping extends Synchronize\Unit\Mapping
      * @return mixed
      * @throws LocalizedException
      */
-    protected function objectByEntityType($entity, $magentoEntityType)
+    public function objectByEntityType($entity, $magentoEntityType)
     {
         switch ($magentoEntityType) {
             case 'customer':
