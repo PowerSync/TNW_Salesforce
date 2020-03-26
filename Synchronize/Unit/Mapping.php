@@ -20,6 +20,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     const PARENT_ENTITY = '__parent_entity';
 
     /**
+     * @deprecated
      * @var string
      */
     private $load;
