@@ -1,6 +1,9 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Query;
 
+use function count;
+use TNW\Salesforce\Synchronize;
+
 class Input extends \SplObjectStorage
 {
     /**
@@ -17,6 +20,35 @@ class Input extends \SplObjectStorage
      * @var array
      */
     protected $conditions = [];
+
+    /**
+     * @var Synchronize\Group
+     */
+    protected $group;
+
+    /**
+     * @return Synchronize\Group
+     */
+    public function group()
+    {
+        return $this->getGroup();
+    }
+
+    /**
+     * @return Synchronize\Group
+     */
+    public function getGroup()
+    {
+        return $this->group;
+    }
+
+    /**
+     * @param Synchronize\Group $group
+     */
+    public function setGroup(Synchronize\Group $group)
+    {
+        $this->group = $group;
+    }
 
     /**
      * @param array $entities
@@ -83,23 +115,23 @@ class Input extends \SplObjectStorage
             foreach ($group as $fieldName => &$condition) {
                 switch (true) {
                     case array_key_exists('=', $condition):
-                        $value = $this->soqlQuote($condition['=']);
+                        $value = $this->soqlQuote($condition['='], $fieldName);
                         $condition = "$fieldName={$value}";
                         break;
 
                     case array_key_exists('!=', $condition):
-                        $value = $this->soqlQuote($condition['!=']);
+                        $value = $this->soqlQuote($condition['!='], $fieldName);
                         $condition = "$fieldName!={$value}";
                         break;
 
                     case array_key_exists('LIKE', $condition):
-                        $value = $this->soqlQuote($condition['LIKE']);
+                        $value = $this->soqlQuote($condition['LIKE'], $fieldName);
                         $condition = "$fieldName LIKE {$value}";
                         break;
 
                     case array_key_exists('IN', $condition):
                         $in = is_array($condition['IN'])
-                            ? implode(',', array_map(array($this, 'soqlQuote'), array_unique($condition['IN'])))
+                            ? implode(',', array_map([$this, 'soqlQuote'], array_unique($condition['IN'])))
                             : $condition['IN'];
 
                         $condition = "$fieldName IN ({$in})";
@@ -119,14 +151,29 @@ class Input extends \SplObjectStorage
      * @param $value
      * @return string
      */
-    protected function soqlQuote($value)
+    protected function soqlQuote($value, $fieldName = null)
     {
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
         }
 
+        if ($fieldName) {
+            return $this->convertValueToSalesforceType($value, $fieldName);
+        }
+
         $value = addslashes($value);
         return "'$value'";
+    }
+
+    /**
+     * @param $value
+     * @param $fieldName
+     * @return mixed
+     */
+    public function convertValueToSalesforceType($value, $fieldName)
+    {
+        $this->group()->unit('upsertInput');
+        return $value;
     }
 
     /**
@@ -139,7 +186,7 @@ class Input extends \SplObjectStorage
         $first = true;
         foreach ($groups as $key => $group) {
             foreach ($group as $fieldName => $condition) {
-                $sql .= ($first ? '': " $key ");
+                $sql .= ($first ? '' : " $key ");
 
                 if (!is_array($condition)) {
                     $sql .= $condition;
@@ -160,7 +207,7 @@ class Input extends \SplObjectStorage
      */
     public function offsetSet($object, $data = null)
     {
-        $index = \count($this->conditions);
+        $index = count($this->conditions);
         parent::offsetSet($object, $index);
         $this->conditions[$index] = $data;
     }
@@ -171,7 +218,7 @@ class Input extends \SplObjectStorage
      */
     public function &offsetGet($object)
     {
-        if(!$this->contains($object)) {
+        if (!$this->contains($object)) {
             $this->offsetSet($object, []);
         }
 
@@ -191,7 +238,7 @@ class Input extends \SplObjectStorage
      */
     public function setInfo($data)
     {
-        $index = \count($this->conditions);
+        $index = count($this->conditions);
         parent::setInfo($index);
         $this->conditions[$index] = $data;
     }
