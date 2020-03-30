@@ -2,9 +2,10 @@
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Query;
 
 use function count;
-use TNW\Salesforce\Synchronize;
+use RuntimeException;
+use SplObjectStorage;
 
-class Input extends \SplObjectStorage
+class Input extends SplObjectStorage
 {
     /**
      * @var string
@@ -22,46 +23,17 @@ class Input extends \SplObjectStorage
     protected $conditions = [];
 
     /**
-     * @var Synchronize\Group
-     */
-    protected $group;
-
-    /**
-     * @return Synchronize\Group
-     */
-    public function group()
-    {
-        return $this->getGroup();
-    }
-
-    /**
-     * @return Synchronize\Group
-     */
-    public function getGroup()
-    {
-        return $this->group;
-    }
-
-    /**
-     * @param Synchronize\Group $group
-     */
-    public function setGroup(Synchronize\Group $group)
-    {
-        $this->group = $group;
-    }
-
-    /**
      * @param array $entities
      * @return string
      */
     public function query(array $entities = [])
     {
         if (empty($this->from)) {
-            throw new \RuntimeException('SOQL part "from" is Empty');
+            throw new RuntimeException('SOQL part "from" is Empty');
         }
 
         if (empty($this->columns)) {
-            throw new \RuntimeException('SOQL part "columns" is Empty');
+            throw new RuntimeException('SOQL part "columns" is Empty');
         }
 
         if (empty($entities)) {
@@ -115,17 +87,17 @@ class Input extends \SplObjectStorage
             foreach ($group as $fieldName => &$condition) {
                 switch (true) {
                     case array_key_exists('=', $condition):
-                        $value = $this->soqlQuote($condition['='], $fieldName);
+                        $value = $this->soqlQuote($condition['=']);
                         $condition = "$fieldName={$value}";
                         break;
 
                     case array_key_exists('!=', $condition):
-                        $value = $this->soqlQuote($condition['!='], $fieldName);
+                        $value = $this->soqlQuote($condition['!=']);
                         $condition = "$fieldName!={$value}";
                         break;
 
                     case array_key_exists('LIKE', $condition):
-                        $value = $this->soqlQuote($condition['LIKE'], $fieldName);
+                        $value = $this->soqlQuote($condition['LIKE']);
                         $condition = "$fieldName LIKE {$value}";
                         break;
 
@@ -151,29 +123,14 @@ class Input extends \SplObjectStorage
      * @param $value
      * @return string
      */
-    protected function soqlQuote($value, $fieldName = null)
+    protected function soqlQuote($value)
     {
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
         }
 
-        if ($fieldName) {
-            return $this->convertValueToSalesforceType($value, $fieldName);
-        }
-
         $value = addslashes($value);
         return "'$value'";
-    }
-
-    /**
-     * @param $value
-     * @param $fieldName
-     * @return mixed
-     */
-    public function convertValueToSalesforceType($value, $fieldName)
-    {
-        $this->group()->unit('upsertInput');
-        return $value;
     }
 
     /**
