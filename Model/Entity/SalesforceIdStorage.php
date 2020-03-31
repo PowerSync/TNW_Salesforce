@@ -67,13 +67,28 @@ class SalesforceIdStorage
         Objects $resourceObjects,
         StoreManagerInterface $storeManager,
         Config $config
-    )
-    {
+    ) {
         $this->resourceObjects = $resourceObjects;
         $this->magentoType = $magentoType;
         $this->mappingAttribute = $mappingAttribute;
         $this->storeManager = $storeManager;
         $this->config = $config;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMagentoType()
+    {
+        return $this->magentoType;
+    }
+
+    /**
+     * @param string $magentoType
+     */
+    public function setMagentoType(string $magentoType)
+    {
+        $this->magentoType = $magentoType;
     }
 
     /**
