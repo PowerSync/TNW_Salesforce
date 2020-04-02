@@ -389,4 +389,13 @@ class Mapping extends Synchronize\Unit\UnitAbstract
             'tnw_mage_basic__Sort_Order__c'
         ];
     }
+
+    /**
+     * @param $id
+     * @return string
+     */
+    public static function getPrepareId($id)
+    {
+        return $id;
+    }
 }
