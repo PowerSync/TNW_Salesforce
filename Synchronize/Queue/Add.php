@@ -92,8 +92,7 @@ class Add
         PreQueue $resourcePreQueue,
         ManagerInterface $messageManager,
         State $state
-    )
-    {
+    ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
         $this->storeManager = $storeManager;
@@ -114,7 +113,7 @@ class Add
      */
     public function addToQueue(array $entityIds)
     {
-        $entityIds = array_filter($entityIds);
+//        $entityIds = array_filter($entityIds);
         if (empty($entityIds)) {
             return;
         }
@@ -226,9 +225,7 @@ class Add
         &$dependencies,
         &$queuesUnique = [],
         $relatedUnitCode = null
-    )
-    {
-
+    ) {
         $queues = [];
         $parents = $children = [];
 
@@ -264,7 +261,6 @@ class Add
                     }
                 }
             } else {
-
                 $currentEntityIds = [];
                 $currentByEntityLoad = [];
                 foreach ([$current] as $relation) {
@@ -372,8 +368,7 @@ class Add
         array $loadAdditional,
         $websiteId,
         $syncType
-    )
-    {
+    ) {
         $dependencies = [];
         /**
          * collect all queue objects and build dependencies
@@ -446,9 +441,7 @@ class Add
      */
     public function saveQueue($queueDataToSave)
     {
-
         if (!empty($queueDataToSave)) {
-
             $this
                 ->resourceQueue
                 ->getConnection()
