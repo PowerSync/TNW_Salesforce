@@ -3,6 +3,7 @@ namespace TNW\Salesforce\Synchronize;
 
 use Magento\Framework\Stdlib\DateTime\Timezone;
 use TNW\Salesforce\Model;
+use TNW\Salesforce\Model\ResourceModel\Queue\Collection;
 use TNW\Salesforce\Synchronize\Exception as SalesforceException;
 use Zend_Db_Expr;
 
@@ -72,7 +73,7 @@ class Queue
     /**
      * Synchronize
      *
-     * @param $collection \TNW\Salesforce\Model\ResourceModel\Queue\Collection
+     * @param $collection Collection
      * @param $websiteId
      * @param array $syncJobs
      */
@@ -142,7 +143,7 @@ class Queue
                             $group->synchronize($groupCollection->getItems());
 
                         } catch (SalesforceException $e) {
-                            $groupCollection->each('decrSyncAttempt');
+//                            $groupCollection->each('decrSyncAttempt');
 
                             $status = $phase[$e->getQueueStatus()];
 
@@ -154,7 +155,7 @@ class Queue
                             $group->messageError($e);
                         }
                     } catch (\Exception $e) {
-                        $groupCollection->each('decrSyncAttempt');
+//                        $groupCollection->each('decrSyncAttempt');
 
                         $groupCollection->each('addData', [[
                             'status' => $phase['errorStatus'],
