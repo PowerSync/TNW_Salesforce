@@ -92,7 +92,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function description()
     {
-        return __('Delete entity');
+        return __('Delete entity: %s', $this->salesforceType);
     }
 
     /**
