@@ -33,10 +33,17 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      * @var string
      */
     protected $load;
+
     /**
      * @var
      */
     protected $fieldSalesforceId;
+
+    /**
+     * @var string
+     */
+    private $salesforceType;
+
     /**
      * @var string
      */
@@ -58,6 +65,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     public function __construct(
         $name,
         $load,
+        $salesforceType,
         $deleteInput,
         $fieldSalesforceId,
         Synchronize\Units $units,
@@ -71,6 +79,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
         parent::__construct($name, $units, $group, $dependents);
 
         $this->load = $load;
+        $this->salesforceType = $salesforceType;
         $this->deleteInput = $deleteInput;
         $this->fieldSalesforceId = $fieldSalesforceId;
         $this->identification = $identification;
@@ -136,7 +145,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function createTransport()
     {
-        $output = $this->outputFactory->create();
+        $output = $this->outputFactory->create(['type' => $this->salesforceType()]);
         $output->setUnit($this);
 
         foreach ($this->entities() as $entity) {
@@ -191,7 +200,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
             }
 
             $this->cache[$entity] = $output[$entity];
-            $this->prepare($entity);
+//            $this->prepare($entity);
         }
     }
 
@@ -231,5 +240,15 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     public function skipped($entity)
     {
         return empty($this->cache[$entity]['success']);
+    }
+
+    /**
+     * Salesforce Type
+     *
+     * @return string
+     */
+    public function salesforceType()
+    {
+        return $this->salesforceType;
     }
 }

@@ -59,7 +59,7 @@ class Output implements Transport\Calls\Delete\OutputInterface
     public function process(Transport\Calls\Delete\Transport\Output $output)
     {
         for ($output->rewind(); $output->valid(); $output->next()) {
-            $result = $this->storage->searchResult($output->current());
+            $result = $this->storage->searchResult($output->current()->getData('_queue'));
             if (null === $result) {
                 $output->setInfo([
                     'skipped' => true,

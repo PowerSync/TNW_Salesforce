@@ -2,7 +2,6 @@
 
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Delete;
 
-use TNW\Salesforce\Synchronize\Transport;
 use Tnw\SoapClient\Result\DeleteResult;
 use function spl_object_hash;
 
@@ -26,7 +25,7 @@ class Storage
     {
         // hack, actually different objects could have the same hash
         $classType = get_class($entity);
-        $this->results[spl_object_hash($entity) . $classType] = $result;
+        $this->results[spl_object_hash($entity) . $classType][] = $result;
     }
 
     /**
@@ -44,6 +43,13 @@ class Storage
             return null;
         }
 
-        return $this->results[$hash];
+        $result = null;
+        foreach ($this->results[$hash] as $item) {
+            if (empty($result) || !$item->isSuccess()) {
+                $result = $item;
+            }
+        }
+
+        return $result;
     }
 }

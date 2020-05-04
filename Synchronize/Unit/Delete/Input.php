@@ -28,6 +28,11 @@ class Input extends Synchronize\Unit\UnitAbstract
     protected $inputFactory;
 
     /**
+     * @var string
+     */
+    private $salesforceType;
+
+    /**
      * @var DeleteInterface
      */
     protected $process;
@@ -49,6 +54,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     public function __construct(
         $name,
         $load,
+        $salesforceType,
         array $dependents,
         Units $units,
         Group $group,
@@ -62,6 +68,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         $this->inputFactory = $inputFactory;
         $this->process = $process;
         $this->identification = $identification;
+        $this->salesforceType = $salesforceType;
     }
 
     /**
@@ -89,18 +96,8 @@ class Input extends Synchronize\Unit\UnitAbstract
             return;
         }
 
-        $this->group()->messageDebug(implode("\n", array_map(function ($entity) use ($input) {
-            return __(
-                "Entity %1 request data:\n%2",
-                $this->identification->printEntity($entity),
-                print_r($input->offsetGet($entity), true)
-            );
-        }, $this->entities())));
         $this->group()->messageDebug("Delete. Data:\n%s", $input);
 
-        /**
-         *
-         */
         $this->process->process($input);
     }
 
@@ -111,7 +108,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function createTransport()
     {
-        return $this->inputFactory->create();
+        return $this->inputFactory->create(['type' => $this->salesforceType()]);
     }
 
     /**
@@ -169,5 +166,15 @@ class Input extends Synchronize\Unit\UnitAbstract
     protected function filter($entity)
     {
         return !$this->unit('mapping')->skipped($entity);
+    }
+
+    /**
+     * Salesforce Type
+     *
+     * @return string
+     */
+    public function salesforceType()
+    {
+        return $this->salesforceType;
     }
 }

@@ -29,7 +29,7 @@ class Input extends SplObjectStorage
      * @param string $type
      * @param string $externalIdFieldName
      */
-    public function __construct($type, $externalIdFieldName = 'Id')
+    public function __construct($type = '', $externalIdFieldName = 'Id')
     {
         $this->type = $type;
         $this->externalIdFieldName = $externalIdFieldName;

@@ -28,7 +28,7 @@ class Output extends SplObjectStorage
      *
      * @param string $type
      */
-    public function __construct($type)
+    public function __construct($type = '')
     {
         $this->type = $type;
     }

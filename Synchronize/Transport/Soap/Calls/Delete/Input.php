@@ -84,10 +84,7 @@ class Input implements Transport\Calls\Delete\InputInterface
                     continue;
                 }
 
-                $this->storage->saveResult($entity, $results[$key]);
-                foreach ($duplicates[spl_object_hash($entity)] as $duplicate) {
-                    $this->storage->saveResult($duplicate, $results[$key]);
-                }
+                $this->storage->saveResult($entity->getData('_queue'), $results[$key]);
             }
         }
     }
