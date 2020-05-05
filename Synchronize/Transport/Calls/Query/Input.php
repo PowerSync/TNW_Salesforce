@@ -1,7 +1,11 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Query;
 
-class Input extends \SplObjectStorage
+use function count;
+use RuntimeException;
+use SplObjectStorage;
+
+class Input extends SplObjectStorage
 {
     /**
      * @var string
@@ -25,11 +29,11 @@ class Input extends \SplObjectStorage
     public function query(array $entities = [])
     {
         if (empty($this->from)) {
-            throw new \RuntimeException('SOQL part "from" is Empty');
+            throw new RuntimeException('SOQL part "from" is Empty');
         }
 
         if (empty($this->columns)) {
-            throw new \RuntimeException('SOQL part "columns" is Empty');
+            throw new RuntimeException('SOQL part "columns" is Empty');
         }
 
         if (empty($entities)) {
@@ -99,7 +103,7 @@ class Input extends \SplObjectStorage
 
                     case array_key_exists('IN', $condition):
                         $in = is_array($condition['IN'])
-                            ? implode(',', array_map(array($this, 'soqlQuote'), array_unique($condition['IN'])))
+                            ? implode(',', array_map([$this, 'soqlQuote'], array_unique($condition['IN'])))
                             : $condition['IN'];
 
                         $condition = "$fieldName IN ({$in})";
@@ -139,7 +143,7 @@ class Input extends \SplObjectStorage
         $first = true;
         foreach ($groups as $key => $group) {
             foreach ($group as $fieldName => $condition) {
-                $sql .= ($first ? '': " $key ");
+                $sql .= ($first ? '' : " $key ");
 
                 if (!is_array($condition)) {
                     $sql .= $condition;
@@ -160,7 +164,7 @@ class Input extends \SplObjectStorage
      */
     public function offsetSet($object, $data = null)
     {
-        $index = \count($this->conditions);
+        $index = count($this->conditions);
         parent::offsetSet($object, $index);
         $this->conditions[$index] = $data;
     }
@@ -171,7 +175,7 @@ class Input extends \SplObjectStorage
      */
     public function &offsetGet($object)
     {
-        if(!$this->contains($object)) {
+        if (!$this->contains($object)) {
             $this->offsetSet($object, []);
         }
 
@@ -191,7 +195,7 @@ class Input extends \SplObjectStorage
      */
     public function setInfo($data)
     {
-        $index = \count($this->conditions);
+        $index = count($this->conditions);
         parent::setInfo($index);
         $this->conditions[$index] = $data;
     }
