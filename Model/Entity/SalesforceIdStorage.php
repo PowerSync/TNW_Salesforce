@@ -67,13 +67,28 @@ class SalesforceIdStorage
         Objects $resourceObjects,
         StoreManagerInterface $storeManager,
         Config $config
-    )
-    {
+    ) {
         $this->resourceObjects = $resourceObjects;
         $this->magentoType = $magentoType;
         $this->mappingAttribute = $mappingAttribute;
         $this->storeManager = $storeManager;
         $this->config = $config;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMagentoType()
+    {
+        return $this->magentoType;
+    }
+
+    /**
+     * @param string $magentoType
+     */
+    public function setMagentoType(string $magentoType)
+    {
+        $this->magentoType = $magentoType;
     }
 
     /**
@@ -214,7 +229,16 @@ class SalesforceIdStorage
      */
     public function valueByAttribute($entity, $attributeName)
     {
-        return $entity->getData($attributeName);
+        $method = 'get' . str_replace(' ', '', ucwords(str_replace('_', ' ', $attributeName)));
+        if (method_exists($entity, $method)) {
+            return $entity->{$method}();
+        } elseif (method_exists($entity, 'getData')) {
+            return $entity->getData($attributeName);
+        } else {
+            $dump = $entity->__toArray();
+            return $dump[$attributeName];
+        }
+        return null;
     }
 
     /**

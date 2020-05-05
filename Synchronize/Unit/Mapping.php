@@ -20,6 +20,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     const PARENT_ENTITY = '__parent_entity';
 
     /**
+     * @deprecated
      * @var string
      */
     private $load;
@@ -387,5 +388,14 @@ class Mapping extends Synchronize\Unit\UnitAbstract
             'tnw_mage_enterp__disableMagentoSync__c',
             'tnw_mage_basic__Sort_Order__c'
         ];
+    }
+
+    /**
+     * @param $id
+     * @return string
+     */
+    public static function getPrepareId($id)
+    {
+        return $id;
     }
 }
