@@ -170,16 +170,16 @@ jobs:
           -   image: circleci/mysql:5.7
               environment:
                   MYSQL_PASSWORD: mage
-          MYSQL_USER: mage
-          MYSQL_DATABASE: magento
-          MYSQL_ROOT_PASSWORD: docker
-    working_directory: ~/tnw_extension
-    steps:
-      - checkout
-      - run:
-          name: Run Magento Coding Standard
-          command: |
-            /var/www/html/magento-coding-standard/vendor/bin/phpcs $CIRCLE_WORKING_DIRECTORY --standard=MEQP2 --severity=10 --extensions=php,phtml
+                  MYSQL_USER: mage
+                  MYSQL_DATABASE: magento
+                  MYSQL_ROOT_PASSWORD: docker
+      working_directory: ~/tnw_extension
+      steps:
+          - checkout
+          -   run:
+                  name: Run Magento Coding Standard
+                  command: |
+                      /var/www/html/magento-coding-standard/vendor/bin/phpcs $CIRCLE_WORKING_DIRECTORY --standard=MEQP2 --severity=10 --extensions=php,phtml
 
   check-composer-installation:
     <<: *base-image
