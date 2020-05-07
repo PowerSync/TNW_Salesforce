@@ -300,23 +300,35 @@ workflows:
 
   test-deploy-wiki:
     jobs:
-      - m234-commerce-php72:
-          context: powersync
-          filters:
-            branches:
-              only: /.*/
+      -   m234-commerce-php72:
+              context: powersync
+              filters:
+                  branches:
+                      only: /.*/
 
-      - m234-open_source-php72:
-          context: powersync
-          filters:
-            branches:
-              only: /.*/
+      -   m234-open_source-php72:
+              context: powersync
+              filters:
+                  branches:
+                      only: master
 
-      - m233-commerce-php72:
-          context: powersync
-          filters:
-            branches:
-              only: master
+      -   m235-commerce-php73:
+              context: powersync
+              filters:
+                  branches:
+                      only: master
+
+      -   m235-open_source-php73:
+              context: powersync
+              filters:
+                  branches:
+                      only: /.*/
+
+      -   m233-commerce-php72:
+              context: powersync
+              filters:
+                  branches:
+                      only: master
 
       - m233-open_source-php71:
           context: powersync
