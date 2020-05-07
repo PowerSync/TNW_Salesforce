@@ -310,7 +310,7 @@ workflows:
               context: powersync
               filters:
                   branches:
-                      only: master
+                      only: /.*/
 
       -   m235-commerce-php73:
               context: powersync
@@ -322,7 +322,7 @@ workflows:
               context: powersync
               filters:
                   branches:
-                      only: /.*/
+                      only: master
 
       -   m233-commerce-php72:
               context: powersync
