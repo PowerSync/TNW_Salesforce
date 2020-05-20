@@ -1,7 +1,12 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use InvalidArgumentException;
+use Magento\Framework\Model\AbstractModel;
+use OutOfBoundsException;
+use TNW\Salesforce\Model\ResourceModel\Mapper\Collection;
 use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Synchronize\Unit\Upsert\Input;
 
 /**
  * Lookup Abstract
@@ -106,8 +111,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Process
      *
-     * @throws \InvalidArgumentException
-     * @throws \OutOfBoundsException
+     * @throws InvalidArgumentException
+     * @throws OutOfBoundsException
      */
     public function process()
     {
@@ -134,6 +139,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * Process Input
      */
     abstract public function processInput();
+
     /**
      * @return Synchronize\Unit\UnitInterface
      */
@@ -151,14 +157,14 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         $this->unit('lookup')->forceStatus(self::COMPLETE);
         $mapping = [];
 
-        /** @var \TNW\Salesforce\Synchronize\Unit\Upsert\Input $upsertInput */
+        /** @var Input $upsertInput */
         $upsertInput = $this->unit('upsertInput');
 
         foreach ($this->entities() as $entity) {
             $entity->setForceUpdateOnly(true);
 
             if ($this->getMappingUnit()) {
-                /** @var \TNW\Salesforce\Model\ResourceModel\Mapper\Collection $mapping */
+                /** @var Collection $mapping */
                 $mapping = $this->getMappingUnit()->mappers($entity);
             }
             $entity->setForceUpdateOnly(false);
@@ -195,10 +201,10 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Process Output
      *
-     * @throws \InvalidArgumentException
-     * @throws \OutOfBoundsException
+     * @throws InvalidArgumentException
+     * @throws OutOfBoundsException
      */
-    protected function processOutput()
+    public function processOutput()
     {
         $searchIndex = $this->collectIndex();
         foreach ($this->entities() as $entity) {
@@ -258,7 +264,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * @param array $record
      * @return array
      */
-    protected function prepareRecord(array $record)
+    public function prepareRecord(array $record)
     {
         return $record;
     }
@@ -276,7 +282,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Entities
      *
-     * @return \Magento\Framework\Model\AbstractModel[]
+     * @return AbstractModel[]
      */
     public function entities()
     {
@@ -286,9 +292,9 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Filter
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
-     * @throws \OutOfBoundsException
+     * @throws OutOfBoundsException
      */
     public function filter($entity)
     {
@@ -308,7 +314,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * Search PriorityOrder
      *
      * @param array $searchIndex
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return array
      */
     abstract public function searchPriorityOrder(array $searchIndex, $entity);
@@ -317,7 +323,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * Filter By Priority
      *
      * @param array $recordsPriority
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return array
      */
     public function filterByPriority(array $recordsPriority, $entity)

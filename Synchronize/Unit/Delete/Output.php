@@ -74,8 +74,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
         Synchronize\Transport\Calls\Delete\Transport\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\Delete\OutputInterface $process,
         array $dependents = []
-    )
-    {
+    ) {
         parent::__construct($name, $units, $group, $dependents);
 
         $this->load = $load;
@@ -185,7 +184,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      * @throws InvalidArgumentException
      * @throws OutOfBoundsException
      */
-    protected function processOutput(Synchronize\Transport\Calls\Delete\Transport\Output $output)
+    public function processOutput(Synchronize\Transport\Calls\Delete\Transport\Output $output)
     {
         foreach ($this->entities() as $entity) {
             if (empty($output[$entity]['skipped']) &&

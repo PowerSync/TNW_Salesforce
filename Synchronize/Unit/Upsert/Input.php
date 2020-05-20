@@ -87,8 +87,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         ClientFactory $factory,
         TimezoneInterface $localeDate
-    )
-    {
+    ) {
         parent::__construct($name, $units, $group, [$load, $mapping]);
         $this->process = $process;
         $this->load = $load;
@@ -177,7 +176,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Transport\Calls\Upsert\Transport\Input $input
      * @throws LocalizedException
      */
-    protected function processInput(Synchronize\Transport\Calls\Upsert\Transport\Input $input)
+    public function processInput(Synchronize\Transport\Calls\Upsert\Transport\Input $input)
     {
         foreach ($this->entities() as $entity) {
             $input->offsetSet($entity, $this->prepareObject($entity, $this->unit($this->mapping)->get('%s', $entity)));
@@ -319,10 +318,9 @@ class Input extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * actual
-     *
-     * @param AbstractModel $entity
+     * @param $entity
      * @return bool
+     * @throws LocalizedException
      */
     public function needUpdate($entity)
     {

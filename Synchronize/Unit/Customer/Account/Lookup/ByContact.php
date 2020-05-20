@@ -56,7 +56,7 @@ class ByContact extends Lookup
      * @param array $record
      * @return mixed
      */
-    protected function prepareRecord(array $record)
+    public function prepareRecord(array $record)
     {
         return $record['Account'];
     }
