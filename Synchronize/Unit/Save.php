@@ -1,7 +1,14 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Exception;
+use Magento\Catalog\Model\Product;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
+use OutOfBoundsException;
+use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Synchronize;
+use function implode;
 
 /**
  * Unit Save
@@ -24,7 +31,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     protected $identification;
 
     /**
-     * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage
+     * @var SalesforceIdStorage
      */
     protected $entityObject;
 
@@ -37,7 +44,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param IdentificationInterface $identification
-     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject
+     * @param SalesforceIdStorage $entityObject
      * @param array $dependents
      */
     public function __construct(
@@ -47,7 +54,7 @@ class Save extends Synchronize\Unit\UnitAbstract
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $entityObject,
+        SalesforceIdStorage $entityObject,
         array $dependents = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $fieldModifier]));
@@ -68,7 +75,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * Process
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function process()
     {
@@ -79,7 +86,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * Process skipped
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function processEntities($entities)
     {
@@ -119,7 +126,7 @@ class Save extends Synchronize\Unit\UnitAbstract
                         $salesforceId
                     );
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->group()->messageError($e->getMessage(), $entity->getId());
                 $this->cache[$entity]['message'] = $e->getMessage();
             }
@@ -129,7 +136,7 @@ class Save extends Synchronize\Unit\UnitAbstract
             $message[] = __('Nothing to save');
         }
 
-        $this->group()->messageDebug(\implode("\n", $message));
+        $this->group()->messageDebug(implode("\n", $message));
     }
 
     /**
@@ -155,10 +162,10 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * Entities
      *
-     * @return \Magento\Catalog\Model\Product[]
-     * @throws \OutOfBoundsException
+     * @return Product[]
+     * @throws OutOfBoundsException
      */
-    protected function entities()
+    public function entities()
     {
         return array_filter($this->load()->get('entities'), [$this, 'filter']);
     }
@@ -166,7 +173,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * Filter
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
     public function filter($entity)
@@ -178,10 +185,10 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * Entities
      *
-     * @return \Magento\Catalog\Model\Product[]
-     * @throws \OutOfBoundsException
+     * @return Product[]
+     * @throws OutOfBoundsException
      */
-    protected function skippedEntities()
+    public function skippedEntities()
     {
         return array_filter($this->load()->get('entities'), [$this, 'skipped']);
     }
@@ -189,7 +196,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * Filter
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
     public function skipped($entity)

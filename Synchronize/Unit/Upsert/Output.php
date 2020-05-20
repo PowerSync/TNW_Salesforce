@@ -1,6 +1,11 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
+use InvalidArgumentException;
+use Magento\Framework\DataObject;
+use Magento\Framework\Model\AbstractModel;
+use OutOfBoundsException;
+use RuntimeException;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -131,9 +136,9 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     /**
      * Process
      *
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
-     * @throws \OutOfBoundsException
+     * @throws RuntimeException
+     * @throws InvalidArgumentException
+     * @throws OutOfBoundsException
      */
     public function process()
     {
@@ -176,7 +181,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      * Entities
      *
      * @return array
-     * @throws \OutOfBoundsException
+     * @throws OutOfBoundsException
      */
     public function entities()
     {
@@ -186,7 +191,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     /**
      * Filter
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
     public function filter($entity)
@@ -200,10 +205,10 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      * Process Output
      *
      * @param Synchronize\Transport\Calls\Upsert\Transport\Output $output
-     * @throws \InvalidArgumentException
-     * @throws \OutOfBoundsException
+     * @throws InvalidArgumentException
+     * @throws OutOfBoundsException
      */
-    protected function processOutput(Synchronize\Transport\Calls\Upsert\Transport\Output $output)
+    public function processOutput(Synchronize\Transport\Calls\Upsert\Transport\Output $output)
     {
         foreach ($this->entities() as $entity) {
             if (empty($output[$entity]['skipped']) &&
@@ -226,7 +231,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     /**
      * Prepare
      *
-     * @param \Magento\Framework\DataObject $entity
+     * @param DataObject $entity
      */
     public function prepare($entity)
     {
@@ -240,7 +245,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     /**
      * Skipped
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
+     * @param AbstractModel $entity
      * @return bool
      */
     public function skipped($entity)
