@@ -1,13 +1,19 @@
 <?php
 namespace TNW\Salesforce\Model;
 
-use Magento\Framework\DataObject;
-use Magento\Store\Model\ScopeInterface;
-use Magento\Framework\App\Request\Http;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\DataObject;
+use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Filesystem;
+use Magento\Store\Api\Data\WebsiteInterface;
+use Magento\Store\Api\WebsiteRepositoryInterface;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Model\Config\WebsiteDetector;
 
 /**
  * Class Config
@@ -49,7 +55,7 @@ class Config extends DataObject
     /** @var StoreManagerInterface  */
     protected $storeManager;
 
-    /** @var \Magento\Store\Api\WebsiteRepositoryInterface  */
+    /** @var WebsiteRepositoryInterface */
     protected $websiteRepository;
 
     /** @var array  */
@@ -64,7 +70,7 @@ class Config extends DataObject
     protected $request;
 
     /**
-     * @var \Magento\Framework\Filesystem
+     * @var Filesystem
      */
     private $filesystem;
 
@@ -87,19 +93,19 @@ class Config extends DataObject
      * @param DirectoryList $directoryList
      * @param EncryptorInterface $encryptor
      * @param StoreManagerInterface $storeManager
-     * @param \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository
+     * @param WebsiteRepositoryInterface $websiteRepository
      * @param Http $request
-     * @param \Magento\Framework\Filesystem $filesystem
+     * @param Filesystem $filesystem
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         DirectoryList $directoryList,
         EncryptorInterface $encryptor,
         StoreManagerInterface $storeManager,
-        \Magento\Store\Api\WebsiteRepositoryInterface $websiteRepository,
+        WebsiteRepositoryInterface $websiteRepository,
         Http $request,
-        \Magento\Framework\Filesystem $filesystem,
-        \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector
+        Filesystem $filesystem,
+        WebsiteDetector $websiteDetector
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->directoryList = $directoryList;
@@ -208,7 +214,7 @@ class Config extends DataObject
      * @param int|null $websiteId
      *
      * @return string
-     * @throws \Magento\Framework\Exception\FileSystemException
+     * @throws FileSystemException
      */
     public function getSalesforceWsdl($websiteId = null)
     {
@@ -221,7 +227,7 @@ class Config extends DataObject
 
         $root = $this->directoryList->getPath(DirectoryList::ROOT);
 
-        return $root.DIRECTORY_SEPARATOR.$dir;
+        return $root . DIRECTORY_SEPARATOR . $dir;
     }
 
     /**
@@ -239,7 +245,7 @@ class Config extends DataObject
     }
 
     /**
-     * @return \Magento\Store\Api\Data\WebsiteInterface[]
+     * @return WebsiteInterface[]
      */
     public function getWebsites()
     {
@@ -250,7 +256,6 @@ class Config extends DataObject
         $result = $adminWebsite + $result;
 
         return $result;
-
     }
 
     /**
@@ -262,7 +267,6 @@ class Config extends DataObject
             $websites = $this->getWebsites();
             foreach ($websites as $website) {
                 foreach ($websites as $websiteToCompare) {
-
                     $isSame = true;
                     foreach ($this->credentialsConfigPaths as $configPath) {
                         if ($this->scopeConfig->getValue($configPath, ScopeInterface::SCOPE_WEBSITE, $websiteToCompare->getId()) != $this->scopeConfig->getValue($configPath, ScopeInterface::SCOPE_WEBSITE, $website->getId())) {
@@ -330,7 +334,7 @@ class Config extends DataObject
 
     /**
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      * @deprecated
      * @see getOrgWebsites
      */
@@ -435,9 +439,8 @@ class Config extends DataObject
      */
     public function getClearSystemLogs($websiteId = null)
     {
-       return (int)$this->getStoreConfig('tnwsforce_general/debug/clearsystemlogs', $websiteId);
+        return (int)$this->getStoreConfig('tnwsforce_general/debug/clearsystemlogs', $websiteId);
     }
-
 
     /**
      * Get Clear System Logs
@@ -454,7 +457,7 @@ class Config extends DataObject
      * Get log path
      *
      * @return string
-     * @throws \Magento\Framework\Exception\FileSystemException
+     * @throws FileSystemException
      */
     public function getLogDir()
     {
@@ -468,14 +471,14 @@ class Config extends DataObject
      *
      * @return mixed|null|string
      */
-    protected function getStoreConfig($path, $websiteId = null)
+    public function getStoreConfig($path, $websiteId = null)
     {
         $scopeType = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
         $scopeCode = null;
 
         try {
             $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
-        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+        } catch (LocalizedException $e) {
             $websiteId = null;
         }
 
@@ -493,11 +496,9 @@ class Config extends DataObject
     public function isSalesForceIntegrationActive()
     {
         if ($this->isIntegrationActive === null) {
-
             $this->isIntegrationActive = false;
 
             foreach ($this->storeManager->getWebsites() as $website) {
-
                 if ($this->getSalesforceStatus($website->getId())) {
                     $this->isIntegrationActive = true;
                 }
