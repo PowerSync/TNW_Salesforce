@@ -1,7 +1,14 @@
 <?php
 namespace TNW\Salesforce\Synchronize;
 
+use BadMethodCallException;
+use Iterator;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Phrase;
+use Psr\Log\LoggerInterface;
+use RuntimeException;
+use SplObjectStorage;
 
 /**
  * Group
@@ -20,7 +27,7 @@ class Group
     protected $units;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     protected $systemLogger;
 
@@ -35,7 +42,7 @@ class Group
     protected $errorMessages = [];
 
     /**
-     * @var \Magento\Framework\ObjectManagerInterface
+     * @var ObjectManagerInterface
      */
     protected $objectManager;
 
@@ -49,15 +56,15 @@ class Group
      * @param string $groupCode
      * @param string[] $units
      * @param UnitsFactory $unitsFactory
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param \Psr\Log\LoggerInterface $systemLogger
+     * @param ObjectManagerInterface $objectManager
+     * @param LoggerInterface $systemLogger
      */
     public function __construct(
         $groupCode,
         array $units,
         UnitsFactory $unitsFactory,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Psr\Log\LoggerInterface $systemLogger
+        ObjectManagerInterface $objectManager,
+        LoggerInterface $systemLogger
     ) {
         $this->groupCode = $groupCode;
         $this->units = array_filter($units);
@@ -124,7 +131,37 @@ class Group
             ]));
         }
 
+//        $this->buildUnitGraph($units);
         return $units;
+    }
+
+    /**
+     *
+     */
+    public function buildUnitGraph($units)
+    {
+        $graph = [
+//            '@startdot',
+            sprintf('digraph %s {', $this->code()),
+            "node [shape=box];",
+            'labelloc = "t";'
+        ];
+
+//        [shape=box]
+        $parent = null;
+        foreach ($units as $unit) {
+            if (!$parent) {
+                $graph[] = sprintf('%s [label="%s"];', $unit->name(), $unit->name());
+            } else {
+                $graph[] = sprintf('%s -> %s ;', $parent, $unit->name());
+            }
+            $parent = $unit->name();
+        }
+
+        $graph[] = '}';
+//        $graph[] = '@enddot';
+
+        file_put_contents($this->code() . '.dot', implode("\n", $graph));
     }
 
     /**
@@ -132,17 +169,17 @@ class Group
      *
      * @param string $name
      * @param array $arguments
-     * @throws \BadMethodCallException
-     * @throws \RuntimeException
+     * @throws BadMethodCallException
+     * @throws RuntimeException
      */
     public function __call($name, $arguments)
     {
         if (stripos($name, 'message') !== 0) {
-            throw new \BadMethodCallException('Unknown method');
+            throw new BadMethodCallException('Unknown method');
         }
 
         if (count($arguments) === 0) {
-            throw new \BadMethodCallException('Missed argument "$format"');
+            throw new BadMethodCallException('Missed argument "$format"');
         }
 
         //Prepare arguments
@@ -192,7 +229,7 @@ class Group
      */
     public function prepareArgument($argument)
     {
-        if ($argument instanceof \Magento\Framework\Phrase) {
+        if ($argument instanceof Phrase) {
             $argument = $argument->render();
         }
 
@@ -204,13 +241,13 @@ class Group
             $argument = $argument->query();
         }
 
-        if ($argument instanceof \SplObjectStorage) {
+        if ($argument instanceof SplObjectStorage) {
             $argument = array_map(function ($entity) use ($argument) {
                 return $argument[$entity];
             }, iterator_to_array($argument));
         }
 
-        if ($argument instanceof \Iterator) {
+        if ($argument instanceof Iterator) {
             $argument = iterator_to_array($argument);
         }
 
