@@ -283,14 +283,18 @@ class Input extends Synchronize\Unit\UnitAbstract
                         $object[$fieldName] = date_create($object[$fieldName]);
                     }
 
-                    if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
-                        /** @var DateTime $value */
-                        $object[$fieldName]
-                            ->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
-                    }
+                    if ($object[$fieldName] instanceof DateTime) {
+                        if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
+                            /** @var DateTime $value */
+                            $object[$fieldName]
+                                ->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
+                        }
 
-                    if ($object[$fieldName]->getTimestamp() <= 0) {
-                        $this->group()->messageDebug('Date field "%s" is empty', $fieldName);
+                        if ($object[$fieldName]->getTimestamp() <= 0) {
+                            $this->group()->messageDebug('Date field "%s" is empty', $fieldName);
+                            unset($object[$fieldName]);
+                        }
+                    } else {
                         unset($object[$fieldName]);
                     }
                 } catch (Exception $e) {
