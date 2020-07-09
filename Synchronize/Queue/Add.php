@@ -240,6 +240,7 @@ class Add
             $relatedUnitCode = $relatedUnitCode ?? $unit->code();
 
             $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId, $relatedUnitCode);
+//            $this->appendGraph($current);
 
             if (empty($current)) {
                 continue;
@@ -370,6 +371,8 @@ class Add
         $syncType
     ) {
         $dependencies = [];
+
+//        $this->openGraph();
         /**
          * collect all queue objects and build dependencies
          */
@@ -385,6 +388,8 @@ class Add
         $queueDataToSave = $this->getInsertArray($queues, $syncType, $websiteId);
 
         $this->saveData($queueDataToSave, $dependencies);
+
+//        $this->closeGraph();
     }
 
     /**
@@ -409,30 +414,73 @@ class Add
     }
 
     /**
+     *
+     */
+    public function openGraph()
+    {
+        $this->relation = [];
+        $graph = [
+            '@startdot',
+            sprintf('strict digraph %s {', $this->entityType),
+            sprintf("label = <<font color='green'><b>%s</b></font>>;", $this->entityType),
+            'labelloc = "t";'
+        ];
+
+        file_put_contents('dot/' . $this->entityType . '.dot', implode("\n", $graph));
+    }
+
+    protected $relation = [];
+
+    /**
+     * @param $current
+     */
+    public function appendGraph($current)
+    {
+        $fillcolor = 'green';
+        if (!empty($this->relation)) {
+            $fillcolor = 'white';
+        }
+
+        $graph = [];
+        foreach ($current as $queue) {
+            if (!in_array($queue['code'], $this->relation)) {
+                $graph[] = sprintf('%s [label="%s", style=filled, fillcolor=%s];', $queue['code'], $queue['code'], $fillcolor);
+            }
+            $this->relation[$queue['queue_id']] = $queue['code'];
+        }
+
+        file_put_contents('dot/' . $this->entityType . '.dot', implode("\n", $graph) . "\n", FILE_APPEND);
+
+        $first = false;
+    }
+
+    /**
+     *
+     */
+    public function closeGraph()
+    {
+        $graph[] = '}';
+        $graph[] = '@enddot';
+
+        file_put_contents('dot/' . $this->entityType . '.dot', implode("\n", $graph) . "\n", FILE_APPEND);
+    }
+
+    /**
      * @param $queueDataToSave
      * @param $dependencies
      */
     public function buildGraph($queueDataToSave, $dependencies)
     {
-        $graph = [
-            '@startdot',
-            sprintf('digraph %s {', $this->entityType),
-            sprintf("label = <<font color='green'><b>%s</b></font>>;", $this->entityType),
-            'labelloc = "t";'
-        ];
-
-        foreach ($queueDataToSave as $queue) {
-            $graph[] = sprintf('a%s [label="%s"];', str_replace('.', '', $queue['queue_id']), $queue['code']);
-        }
+        $graph = [];
 
         foreach ($dependencies as $queue) {
-            $graph[] = sprintf('a%s -> a%s ;', str_replace('.', '', $queue['parent_id']), str_replace('.', '', $queue['queue_id']));
+            $parent_id = $this->relation[$queue['parent_id']];
+            $queue_id = $this->relation[$queue['queue_id']];
+
+            $graph[] = sprintf('%s -> %s ;', $parent_id, $queue_id);
         }
 
-        $graph[] = '}';
-        $graph[] = '@enddot';
-
-        file_put_contents($this->entityType . '.dot', implode("\n", $graph));
+        file_put_contents('dot/' . $this->entityType . '.dot', implode("\n", $graph) . "\n", FILE_APPEND);
     }
 
     /**

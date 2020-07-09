@@ -158,6 +158,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
             );
 
             $this->cache[$entity] = $this->generateObject($entity, $mappers);
+            $message[] = __(
+                "Entity %1 mapping result:\n%2",
+                $this->identification->printEntity($entity),
+                print_r($this->cache[$entity], true)
+            );
         }
 
         if ($this->cache->count() === 0) {
