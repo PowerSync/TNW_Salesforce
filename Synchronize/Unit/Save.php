@@ -1,14 +1,15 @@
 <?php
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use Exception;
+use function implode;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use OutOfBoundsException;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Synchronize;
-use function implode;
 
 /**
  * Unit Save
@@ -92,43 +93,49 @@ class Save extends Synchronize\Unit\UnitAbstract
     {
         $message = [];
 
-        $attributeName = $this->fieldModifier()->fieldSalesforceId();
-        foreach ($entities as $entity) {
-            try {
-                $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
+        $attributeNames = $this->fieldModifier()->fieldSalesforceId();
+        if (!is_array($attributeNames)) {
+            $attributeNames = ['Id' => $attributeNames];
+        }
 
-                // Save Salesforce Id
-                $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
-                $this->load()->get('%s/queue', $entity)->setAdditionalByCode($attributeName, $salesforceId);
+        foreach ($attributeNames as $attributeName) {
+            foreach ($entities as $entity) {
+                try {
+                    $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
 
-                $message[] = __(
-                    "Updating %1 attribute:\n\t\"%2\": %3",
-                    $this->identification->printEntity($entity),
-                    $attributeName,
-                    $salesforceId
-                );
-
-                // Save Salesforce Id from duplicates
-                foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
-                    $this->entityObject->saveValueByAttribute(
-                        $duplicate,
-                        $salesforceId,
-                        $attributeName,
-                        $entity->getData('config_website')
-                    );
-
-                    $this->load()->get('%s/queue', $duplicate)->setAdditionalByCode($attributeName, $salesforceId);
+                    // Save Salesforce Id
+                    $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
+                    $this->load()->get('%s/queue', $entity)->setAdditionalByCode($attributeName, $salesforceId);
 
                     $message[] = __(
                         "Updating %1 attribute:\n\t\"%2\": %3",
-                        $this->identification->printEntity($duplicate),
+                        $this->identification->printEntity($entity),
                         $attributeName,
                         $salesforceId
                     );
+
+                    // Save Salesforce Id from duplicates
+                    foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
+                        $this->entityObject->saveValueByAttribute(
+                            $duplicate,
+                            $salesforceId,
+                            $attributeName,
+                            $entity->getData('config_website')
+                        );
+
+                        $this->load()->get('%s/queue', $duplicate)->setAdditionalByCode($attributeName, $salesforceId);
+
+                        $message[] = __(
+                            "Updating %1 attribute:\n\t\"%2\": %3",
+                            $this->identification->printEntity($duplicate),
+                            $attributeName,
+                            $salesforceId
+                        );
+                    }
+                } catch (Exception $e) {
+                    $this->group()->messageError($e->getMessage(), $entity->getId());
+                    $this->cache[$entity]['message'] = $e->getMessage();
                 }
-            } catch (Exception $e) {
-                $this->group()->messageError($e->getMessage(), $entity->getId());
-                $this->cache[$entity]['message'] = $e->getMessage();
             }
         }
 
@@ -179,7 +186,16 @@ class Save extends Synchronize\Unit\UnitAbstract
     public function filter($entity)
     {
         $attributeName = $this->fieldModifier()->fieldSalesforceId();
-        return $this->fieldModifier()->get('%s/success', $entity) && $this->entityObject->valueByAttribute($entity, $attributeName);
+        if (!is_array($attributeName)) {
+            $attributeName = ['Id' => $attributeName];
+        }
+
+        $result = false;
+        foreach ($attributeName as $attribute) {
+            $result = $result || $this->entityObject->valueByAttribute($entity, $attribute);
+        }
+
+        return $this->fieldModifier()->get('%s/success', $entity) && $result;
     }
 
     /**
@@ -202,6 +218,15 @@ class Save extends Synchronize\Unit\UnitAbstract
     public function skipped($entity)
     {
         $attributeName = $this->fieldModifier()->fieldSalesforceId();
-        return $this->fieldModifier()->get('%s/skipped', $entity) && $this->entityObject->valueByAttribute($entity, $attributeName);
+        if (!is_array($attributeName)) {
+            $attributeName = ['Id' => $attributeName];
+        }
+
+        $result = false;
+        foreach ($attributeName as $attribute) {
+            $result = $result || $this->entityObject->valueByAttribute($entity, $attribute);
+        }
+
+        return $this->fieldModifier()->get('%s/skipped', $entity) && $result;
     }
 }
