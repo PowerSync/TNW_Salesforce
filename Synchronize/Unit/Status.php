@@ -1,6 +1,10 @@
 <?php
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Magento\Framework\Exception\LocalizedException;
+use OutOfBoundsException;
+use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
 
@@ -20,7 +24,7 @@ class Status extends Synchronize\Unit\UnitAbstract
     private $upsertOutput;
 
     /**
-     * @var \TNW\Salesforce\Model\Entity\SalesforceIdStorage|null
+     * @var SalesforceIdStorage|null
      */
     private $salesforceIdStorage;
 
@@ -31,7 +35,7 @@ class Status extends Synchronize\Unit\UnitAbstract
      * @param string $upsertOutput
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage $salesforceIdStorage
+     * @param SalesforceIdStorage $salesforceIdStorage
      * @param array $dependents
      */
     public function __construct(
@@ -40,7 +44,7 @@ class Status extends Synchronize\Unit\UnitAbstract
         $upsertOutput,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $salesforceIdStorage = null,
+        SalesforceIdStorage $salesforceIdStorage = null,
         array $dependents = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsertOutput]));
@@ -60,51 +64,75 @@ class Status extends Synchronize\Unit\UnitAbstract
     /**
      * Process
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function process()
     {
         $upsertOutput = $this->upsertOutput();
         foreach ($this->entities() as $entity) {
-
             switch (true) {
                 case !empty($this->getAllEntityError($entity)):
                     $this->cache[$entity]['status'] = Queue::STATUS_ERROR;
                     $this->cache[$entity]['message'] = implode("<br />\n", $this->getAllEntityError($entity));
-                    continue 2;
+                    break;
+
                 case $upsertOutput->get('%s', $entity) === null:
                     $this->cache[$entity]['status'] = Queue::STATUS_SKIPPED;
-                    continue 2;
+                    break;
 
                 case $upsertOutput->get('%s/skipped', $entity) === true:
-                    $this->cache[$entity]['status'] = $upsertOutput->upsertInput()->get('%s/updated', $entity)? Queue::STATUS_COMPLETE: Queue::STATUS_SKIPPED;
+                    $this->cache[$entity]['status'] = $upsertOutput->upsertInput()->get('%s/updated', $entity) ? Queue::STATUS_COMPLETE : Queue::STATUS_SKIPPED;
                     $this->cache[$entity]['message'] = $upsertOutput->upsertInput()->get('%s/message', $entity);
-                    continue 2;
+                    break;
 
                 case $upsertOutput->get('%s/waiting', $entity) === true:
                     $this->cache[$entity]['status'] = Queue::STATUS_WAITING_UPSERT;
                     $this->cache[$entity]['message'] = $upsertOutput->upsertInput()->get('%s/message', $entity);
-                    continue 2;
+                    break;
 
                 case $upsertOutput->get('%s/success', $entity) === true:
-                    if (null !== $this->salesforceIdStorage) {
-                        $this->salesforceIdStorage->saveStatus($entity, 1, $entity->getData('config_website'));
-                    }
+
                     $this->cache[$entity]['status'] = Queue::STATUS_COMPLETE;
                     $this->cache[$entity]['message'] = $upsertOutput->upsertInput()->get('%s/message', $entity);
-                    continue 2;
+                    break;
 
                 default:
-                    if (null !== $this->salesforceIdStorage) {
-                        $this->salesforceIdStorage->saveStatus($entity, 0, $entity->getData('config_website'));
-                    }
 
                     $this->cache[$entity]['status'] = Queue::STATUS_ERROR;
                     $this->cache[$entity]['message'] = $upsertOutput->get('%s/message', $entity);
-                    continue 2;
+                    break;
             }
+
+            $this->saveStatus($entity);
         }
 
+        $this->updateQueue();
+    }
+
+    /**
+     * @param $entity
+     * @throws LocalizedException
+     */
+    public function saveStatus($entity)
+    {
+        if (null !== $this->salesforceIdStorage) {
+            switch ($this->cache[$entity]['status']) {
+                case Queue::STATUS_COMPLETE:
+                    $this->salesforceIdStorage->saveStatus($entity, 1, $entity->getData('config_website'));
+                    break;
+
+                case Queue::STATUS_ERROR:
+                    $this->salesforceIdStorage->saveStatus($entity, 0, $entity->getData('config_website'));
+                    break;
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    public function updateQueue()
+    {
         foreach ($this->entities() as $entity) {
             $this->load()->get('%s/queue', $entity)
                 ->addData(iterator_to_array($this->cache[$entity]));
@@ -140,7 +168,7 @@ class Status extends Synchronize\Unit\UnitAbstract
      * Entities
      *
      * @return object[]
-     * @throws \OutOfBoundsException
+     * @throws OutOfBoundsException
      */
     protected function entities()
     {
