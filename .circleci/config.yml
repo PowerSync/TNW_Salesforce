@@ -346,9 +346,6 @@ workflows:
           context: powersync
           requires:
               - tag-release
-          filters:
-            branches:
-              only: master
 
       - tag-release:
           context: powersync
@@ -360,6 +357,9 @@ workflows:
             - m235-commerce-php73
             - m235-open_source-php73
             - magento-coding-standard
+          filters:
+            branches:
+              only: master
 
       - check-composer-installation:
           context: powersync
