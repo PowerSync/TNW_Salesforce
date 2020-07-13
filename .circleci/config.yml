@@ -330,11 +330,11 @@ workflows:
                   branches:
                       only: master
 
-      - m233-open_source-php71:
-          context: powersync
-          filters:
-              branches:
-                  only: master
+      -   m233-open_source-php71:
+              context: powersync
+              filters:
+                  branches:
+                      only: master
 
       -   magento-coding-standard:
               context: powersync
@@ -362,14 +362,14 @@ workflows:
                       only: master
 
       -   check-composer-installation:
-          context: powersync
-          requires:
-            - deploy
+              context: powersync
+              requires:
+                  - deploy
 
-      - update-wiki:
-          context: powersync
-          requires:
-            - check-composer-installation
+      -   update-wiki:
+              context: powersync
+              requires:
+                  - check-composer-installation
           filters:
             branches:
               only: master
