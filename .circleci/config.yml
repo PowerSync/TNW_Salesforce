@@ -345,21 +345,21 @@ workflows:
       - deploy:
           context: powersync
           requires:
-              - m233-commerce-php72
-              - m233-open_source-php71
-              - m234-commerce-php72
-              - m234-open_source-php72
-              - m235-commerce-php73
-              - m235-open_source-php73
-              - magento-coding-standard
-          filters:
-            branches:
-              only: master
+              - tag-release
 
       - tag-release:
           context: powersync
           requires:
-            - deploy
+            - m233-commerce-php72
+            - m233-open_source-php71
+            - m234-commerce-php72
+            - m234-open_source-php72
+            - m235-commerce-php73
+            - m235-open_source-php73
+            - magento-coding-standard
+          filters:
+            branches:
+              only: master
 
       - check-composer-installation:
           context: powersync
