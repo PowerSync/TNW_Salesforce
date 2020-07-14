@@ -58,7 +58,7 @@ jobs:
               moduleNameLower=(`echo $moduleName| tr '[:upper:]' '[:lower:]'`)
 
               set +e
-                branchExists=(`composer info -a tnw/$moduleNameLower|grep "versions : .*dev-$CIRCLE_BRANCH"`)
+                branchExists=(`composer info -a tnw/$moduleNameLower|grep "versions : .*dev-$CIRCLE_BRANCH[^0-9a-zA-Z-]"`)
               set -e
 
               COMPOSER_BRANCH="dev-"
