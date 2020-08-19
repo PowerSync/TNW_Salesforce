@@ -16,7 +16,9 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * @var string
      */
-    private $load;
+    protected $load;
+
+    protected $skipMappingFields = false;
 
     /**
      * @var Synchronize\Transport\Calls\Query\InputFactory
@@ -58,6 +60,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
      * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
      * @param Synchronize\Transport\Calls\QueryInterface $process
+     * @param bool $skipMappingFields
      * @param array $dependents
      */
     public function __construct(
@@ -69,7 +72,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         Synchronize\Transport\Calls\Query\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Query\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\QueryInterface $process,
-        array $dependents = []
+        array $dependents = [],
+        $skipMappingFields = false
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
 
@@ -78,6 +82,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         $this->outputFactory = $outputFactory;
         $this->process = $process;
         $this->identification = $identification;
+        $this->skipMappingFields = $skipMappingFields;
     }
 
     /**
@@ -149,30 +154,36 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function addMappingFieldsToSelect()
     {
-        /** emulate lookup complete to load Update/Upsert mapping */
-        $this->unit('lookup')->forceStatus(self::COMPLETE);
-        $mapping = [];
+        if ($this->skipMappingFields) {
+            return;
+        }
 
         /** @var Input $upsertInput */
         $upsertInput = $this->unit('upsertInput');
+        $mapping = [];
 
-        foreach ($this->entities() as $entity) {
-            $entity->setForceUpdateOnly(true);
+        if ($this->getMappingUnit()) {
 
-            if ($this->getMappingUnit()) {
+            /** emulate lookup complete to load Update/Upsert mapping */
+            $this->unit('lookup')->forceStatus(self::COMPLETE);
+
+            foreach ($this->entities() as $entity) {
+                $entity->setForceUpdateOnly(true);
+
                 /** @var Collection $mapping */
                 $mapping = $this->getMappingUnit()->mappers($entity);
-            }
-            $entity->setForceUpdateOnly(false);
-            break;
-        }
 
-        /** stop lookup complete emulation */
-        $this->unit('lookup')->restoreStatus();
+                $entity->setForceUpdateOnly(false);
+                break;
+            }
+
+            /** stop lookup complete emulation */
+            $this->unit('lookup')->restoreStatus();
+        }
 
         $definedColumns = $this->input->columns;
         // TODO : change it to the compareIgnoreFields as defined for \TNW\Salesforce\Synchronize\Unit\Upsert\Input
