@@ -3,7 +3,6 @@ namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert;
 
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
-use TNW\SForceEnterprise\SForceBusiness\Model\Config;
 
 /**
  * Upsert Input
@@ -59,31 +58,5 @@ class Input extends Synchronize\Unit\Upsert\Input
         );
 
         $this->customerConfig = $customerConfig;
-    }
-
-    /**
-     * Prepare Object
-     *
-     * @param \Magento\Customer\Model\Customer $entity
-     * @param array $object
-     * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function prepareObject($entity, array $object)
-    {
-        $item = $this->unit('mapping')->mappers($entity)
-            ->getItemByColumnValue('magento_attribute_name', 'sf_company');
-
-        if (isset($item)) {
-            if (
-                !empty($object['Id'])
-                && ($item->getMagentoToSfWhen() !== Config::MAPPING_WHEN_INSERT_ONLY
-                || $item->getMagentoToSfWhen() !== Config::MAPPING_WHEN_UPSERT)
-            ) {
-                unset($object['Name']);
-            }
-        }
-
-        return parent::prepareObject($entity, $object);
     }
 }
