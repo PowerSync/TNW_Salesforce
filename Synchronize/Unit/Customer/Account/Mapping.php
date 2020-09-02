@@ -21,6 +21,11 @@ class Mapping extends Synchronize\Unit\Mapping
     private $customerConfig;
 
     /**
+     * @var Model\ResourceModel\Mapper\CollectionFactory
+     */
+    protected $mapperCollectionFactory;
+
+    /**
      * Mapping constructor.
      *
      * @param string $name
@@ -59,6 +64,7 @@ class Mapping extends Synchronize\Unit\Mapping
         );
 
         $this->customerConfig = $customerConfig;
+        $this->mapperCollectionFactory = $mapperCollectionFactory;
     }
 
     /**
@@ -99,7 +105,11 @@ class Mapping extends Synchronize\Unit\Mapping
             return $this->units()->get('lookup')->get('%s/record/Id', $entity);
         }
 
-        if ($entity instanceof Customer && strcasecmp($attributeCode, 'sf_company') === 0) {
+        if (
+            $entity instanceof Customer
+            && strcasecmp($attributeCode, 'sf_company') === 0
+            && ($this->needUpdateCompany($entity) || $this->allowToUpdate())
+        ) {
             switch (true) {
                 case (!empty($entity->getCompany())):
                     $company = $entity->getCompany();
@@ -118,6 +128,37 @@ class Mapping extends Synchronize\Unit\Mapping
         }
 
         return parent::prepareValue($entity, $attributeCode);
+    }
+
+    public function allowToUpdate()
+    {
+        $mapper = $this->mapperCollectionFactory->create();
+        $mapperData = $mapper->addFieldToSelect('magento_to_sf_when')
+            ->addFieldToFilter('salesforce_attribute_name', ['eq' => ['Name']])
+            ->addFieldToFilter('object_type', ['eq' => 'Account'])
+            ->fetchItem();
+
+        return $mapperData->getMagentoToSfWhen() != 'InsertOnly';
+    }
+
+    public function needUpdateCompany($entity)
+    {
+
+        $lookup = $this->units()->get('lookup');
+        $result = $lookup->isComplete();
+        try{
+            $lookupObject = $lookup->get('%s/record', $entity);
+        } catch (\Exception $e) {
+            return true;
+        }
+        if (!isset($lookupObject)) {
+            $result = false;
+        }
+        $company = self::generateCompanyByCustomer($entity);
+        if (key_exists('Name', (array) $lookupObject) && $lookupObject['Name'] == $company) {
+            $result = true;
+        }
+        return $result;
     }
 
     /**
