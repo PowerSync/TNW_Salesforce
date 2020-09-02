@@ -119,6 +119,8 @@
                 type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\Customer\Group" />
         <plugin name="tnw_salesforce_check_owner_field"
                 type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" />
+        <plugin name="tnw_salesforce_mapping_customer_account"
+                type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\Customer\Account" />
     </type>
 
     <virtualType name="TNW\Unit\Customer\BusinessAccount\Mapping" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping">

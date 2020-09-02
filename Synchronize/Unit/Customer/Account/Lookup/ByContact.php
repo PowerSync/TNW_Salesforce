@@ -80,9 +80,6 @@ class ByContact extends Lookup
             if ($this->getMappingUnit()) {
                 /** @var Collection $mapping */
                 $mapping = $this->getMappingUnit()->mappers($entity);
-                $mapping->getSelect()
-                    ->orWhere('object_type =?', $entity->getData('_queue')->getObjectType())
-                    ->where('magento_to_sf_when =?', 'InsertOnly');
             }
             $entity->setForceUpdateOnly(false);
             break;
