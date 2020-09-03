@@ -111,7 +111,7 @@ class Mapping extends Synchronize\Unit\Mapping
         }
 
         if ($entity instanceof Customer && strcasecmp($attributeCode, 'sf_company') === 0) {
-            if ($this->needUpdateCompany($entity) || $this->allowToUpdate()) {
+            if ($this->needUpdateCompany($entity) || $this->allowToUpdateName()) {
                 switch (true) {
                     case (!empty($entity->getCompany())):
                         $company = $entity->getCompany();
@@ -141,15 +141,18 @@ class Mapping extends Synchronize\Unit\Mapping
      *
      * @return bool
      */
-    public function allowToUpdate()
+    public function allowToUpdateName()
     {
-        $mapper = $this->mapperCollectionFactory->create();
-        $mapperData = $mapper->addFieldToSelect('magento_to_sf_when')
-            ->addFieldToFilter('salesforce_attribute_name', ['eq' => ['Name']])
-            ->addFieldToFilter('object_type', ['eq' => 'Account'])
-            ->fetchItem();
+        if (!isset($this->cache['allow_magento_to_sf_when']['Name'])) {
+            $mapper = $this->mapperCollectionFactory->create();
+            $mapperData = $mapper->addFieldToSelect('magento_to_sf_when')
+                ->addFieldToFilter('salesforce_attribute_name', ['eq' => ['Name']])
+                ->addFieldToFilter('object_type', ['eq' => 'Account'])
+                ->fetchItem();
+            $this->cache['allow_magento_to_sf_when']['Name'] = $mapperData->getMagentoToSfWhen() != 'InsertOnly';
+        }
 
-        return $mapperData->getMagentoToSfWhen() != 'InsertOnly';
+        return $this->cache['allow_magento_to_sf_when']['Name'];
     }
 
     public function needUpdateCompany($entity)
@@ -164,7 +167,7 @@ class Mapping extends Synchronize\Unit\Mapping
             $result = false;
         }
         $company = self::generateCompanyByCustomer($entity);
-        if ($this->lookupObjectName == $company) {
+        if ($this->lookupObjectName == $company || $this->lookupObjectName == null) {
             $result = true;
         }
         return $result;
