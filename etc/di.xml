@@ -107,10 +107,10 @@
                 <item name="10" xsi:type="string">customerBusinessAccountLookupByContact</item>
                 <item name="20" xsi:type="string">customerBusinessAccountLookupByName</item>
             </argument>
-<!--            <argument name="units" xsi:type="array">-->
-<!--                <item name="customerBusinessAccountLookupByContact" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup\ByContact</item>-->
-<!--                <item name="customerBusinessAccountLookupByName" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup\ByName</item>-->
-<!--            </argument>-->
+            <argument name="collectUnits" xsi:type="array">
+                <item name="lookupByContact" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup\ByContact</item>
+                <item name="lookupByName" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup\ByName</item>
+            </argument>
         </arguments>
     </virtualType>
 
@@ -191,9 +191,6 @@
             <argument name="units" xsi:type="array">
                 <item name="load" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Load</item>
                 <item name="processingUpsertInput" xsi:type="string">TNW\Unit\Customer\BusinessAccount\ProcessingUpsertInput</item>
-<!--                -->
-                <item name="lookupByContact" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup\ByContact</item>
-                <item name="lookupByName" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup\ByName</item>
                 <item name="lookup" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup</item>
                 <item name="mapping" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Mapping</item>
                 <item name="upsertInput" xsi:type="string">TNW\Unit\Customer\BusinessAccount\UpsertInput</item>

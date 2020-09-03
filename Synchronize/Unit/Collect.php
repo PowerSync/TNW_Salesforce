@@ -1,6 +1,7 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Magento\Framework\ObjectManagerInterface;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -19,13 +20,21 @@ class Collect extends Synchronize\Unit\UnitAbstract
      * @param string[] $collect
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
+     * @param ObjectManagerInterface $objectManager
+     * @param string[] $collectUnits
      */
     public function __construct(
         $name,
         array $collect,
         Synchronize\Units $units,
-        Synchronize\Group $group
+        Synchronize\Group $group,
+        ObjectManagerInterface $objectManager,
+        array $collectUnits
     ) {
+        $collectUnits = array_filter($collectUnits);
+        foreach ($collectUnits as $instanceName) {
+            $units->add($objectManager->create($instanceName, ['group' => $group, 'units' => $units]));
+        }
         parent::__construct($name, $units, $group, $collect);
         ksort($collect, SORT_NUMERIC);
         $this->collect = $collect;
