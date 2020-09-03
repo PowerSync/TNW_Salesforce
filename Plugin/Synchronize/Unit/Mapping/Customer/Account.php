@@ -19,7 +19,10 @@ class Account
     public function afterMappers(\TNW\Salesforce\Synchronize\Unit\Mapping $subject, $mappers)
     {
         if ($subject instanceof \TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping) {
-            return $mappers->addFieldToFilter('salesforce_attribute_name', ['eq' => ['Name']]);
+            $mappers->getSelect()
+                ->orWhere('object_type =?', 'Account')
+                ->where('salesforce_attribute_name =?', 'Name');
+            return $mappers;
         }
         return $mappers;
     }

@@ -26,6 +26,11 @@ class Mapping extends Synchronize\Unit\Mapping
     protected $mapperCollectionFactory;
 
     /**
+     * @var string $lookupObjectName
+     */
+    protected $lookupObjectName;
+
+    /**
      * Mapping constructor.
      *
      * @param string $name
@@ -105,31 +110,37 @@ class Mapping extends Synchronize\Unit\Mapping
             return $this->units()->get('lookup')->get('%s/record/Id', $entity);
         }
 
-        if (
-            $entity instanceof Customer
-            && strcasecmp($attributeCode, 'sf_company') === 0
-            && ($this->needUpdateCompany($entity) || $this->allowToUpdate())
-        ) {
-            switch (true) {
-                case (!empty($entity->getCompany())):
-                    $company = $entity->getCompany();
-                    break;
-                case (!empty($entity->getDefaultBillingAddress()) && !empty($entity->getDefaultBillingAddress()->getCompany())):
-                    $company = $entity->getDefaultBillingAddress()->getCompany();
-                    break;
-                case (!empty($entity->getDefaultShippingAddress()) && !empty($entity->getDefaultShippingAddress()->getCompany())):
-                    $company = $entity->getDefaultShippingAddress()->getCompany();
-                    break;
-                default:
-                    $company = self::generateCompanyByCustomer($entity);
-                    break;
+        if ($entity instanceof Customer && strcasecmp($attributeCode, 'sf_company') === 0) {
+            if ($this->needUpdateCompany($entity) || $this->allowToUpdate()) {
+                switch (true) {
+                    case (!empty($entity->getCompany())):
+                        $company = $entity->getCompany();
+                        break;
+                    case (!empty($entity->getDefaultBillingAddress()) && !empty($entity->getDefaultBillingAddress()->getCompany())):
+                        $company = $entity->getDefaultBillingAddress()->getCompany();
+                        break;
+                    case (!empty($entity->getDefaultShippingAddress()) && !empty($entity->getDefaultShippingAddress()->getCompany())):
+                        $company = $entity->getDefaultShippingAddress()->getCompany();
+                        break;
+                    default:
+                        $company = self::generateCompanyByCustomer($entity);
+                        break;
+                }
+                return $company;
+
+            } elseif (isset($this->lookupObjectName)) {
+                return $this->lookupObjectName;
             }
-            return $company;
         }
 
         return parent::prepareValue($entity, $attributeCode);
     }
 
+    /**
+     * Get "Name" field status for Update
+     *
+     * @return bool
+     */
     public function allowToUpdate()
     {
         $mapper = $this->mapperCollectionFactory->create();
@@ -143,19 +154,17 @@ class Mapping extends Synchronize\Unit\Mapping
 
     public function needUpdateCompany($entity)
     {
-
+        $result = false;
         $lookup = $this->units()->get('lookup');
-        $result = $lookup->isComplete();
-        try{
-            $lookupObject = $lookup->get('%s/record', $entity);
-        } catch (\Exception $e) {
+        if (!$lookup->isComplete()) {
             return true;
         }
-        if (!isset($lookupObject)) {
+        $this->lookupObjectName = $lookup->get('%s/record/Name', $entity);
+        if (!isset($this->lookupObjectName)) {
             $result = false;
         }
         $company = self::generateCompanyByCustomer($entity);
-        if (key_exists('Name', (array) $lookupObject) && $lookupObject['Name'] == $company) {
+        if ($this->lookupObjectName == $company) {
             $result = true;
         }
         return $result;
