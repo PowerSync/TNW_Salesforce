@@ -43,6 +43,14 @@ class Config extends DataObject
     /** @comment Base batch limit for simple sync */
     const REALTIME_MAX_SYNC = 30;
 
+    const SFORCE_DEBUG_LOGGING_PATH_XML = 'tnwsforce_general/debug/logging';
+
+    /** Debug log statuses */
+    const SFORCE_DEBUG_DISABLE = 0;
+    const SFORCE_DEBUG_FILE_LOG_ONLY = 1;
+    const SFORCE_DEBUG_DATABASE_ONLY = 2;
+    const SFORCE_DEBUG_DATABASE_AND_FILE = 3;
+
     /** @var ScopeConfigInterface  */
     protected $scopeConfig;
 
@@ -379,7 +387,9 @@ class Config extends DataObject
      */
     public function getLogStatus($websiteId = null)
     {
-        return (int)$this->getStoreConfig('tnwsforce_general/debug/logstatus', $websiteId);
+        $loggingStatus = $this->getLoggingStatus();
+        return $loggingStatus == self::SFORCE_DEBUG_FILE_LOG_ONLY
+            || $loggingStatus == self::SFORCE_DEBUG_DATABASE_AND_FILE;
     }
 
     /**
@@ -406,7 +416,9 @@ class Config extends DataObject
      */
     public function getDbLogStatus($websiteId = null)
     {
-        return (int)$this->getStoreConfig('tnwsforce_general/debug/dblogstatus', $websiteId);
+        $loggingStatus = $this->getLoggingStatus();
+        return $loggingStatus == self::SFORCE_DEBUG_DATABASE_ONLY
+            || $loggingStatus == self::SFORCE_DEBUG_DATABASE_AND_FILE;
     }
 
     /**
@@ -418,7 +430,10 @@ class Config extends DataObject
      */
     public function getLogDebug($websiteId = null)
     {
-        return (int)$this->getStoreConfig('tnwsforce_general/debug/logdebug', $websiteId);
+        $loggingStatus = $this->getLoggingStatus();
+        return $loggingStatus == self::SFORCE_DEBUG_FILE_LOG_ONLY
+            || $loggingStatus == self::SFORCE_DEBUG_DATABASE_AND_FILE;
+
     }
 
     /**
@@ -520,5 +535,15 @@ class Config extends DataObject
         }
 
         return $value;
+    }
+
+    /**
+     * Get Logging status
+     *
+     * @return int
+     */
+    public function getLoggingStatus()
+    {
+        return (int)$this->getStoreConfig(self::SFORCE_DEBUG_LOGGING_PATH_XML);
     }
 }
