@@ -8,6 +8,7 @@ use Magento\Framework\App\State;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\Message\MessageInterface;
 use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Model\Config;
@@ -131,7 +132,13 @@ class Add
         }
 
         if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
-            $this->messageManager->addSuccessMessage('Records were scheduled to be added to the sync queue');
+
+            /** @var MessageInterface $message */
+            $message = $this->messageManager
+                ->createMessage(MessageInterface::TYPE_SUCCESS)
+                ->setText('Records are being added to the synchronization queue');
+
+            $this->messageManager->addUniqueMessages([$message]);
         }
     }
 
