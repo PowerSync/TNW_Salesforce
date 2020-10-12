@@ -103,6 +103,10 @@ class Mapping extends Synchronize\Unit\Mapping
             return $this->objectByEntityType($entity, 'website')->getData('salesforce_id');
         }
 
+        if (strcasecmp($attributeCode, 'country_id') === 0) {
+            return $entity->getData($attributeCode);
+        }
+
         if ($entity instanceof Customer && strcasecmp($attributeCode, 'sf_company') === 0) {
             switch (true) {
                 case (!empty($entity->getCompany())):
