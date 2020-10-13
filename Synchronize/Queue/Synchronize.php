@@ -149,10 +149,9 @@ class Synchronize
         $collection = $this->collectionQueueFactory->create()
             ->addFilterToSyncType($this->type);
 
-        $counter = $this->salesforceConfig->getSyncMaxAttemptsCount();
         $collection->addFieldToFilter(
             'main_table.sync_attempt',
-            ['lt' => $this->getSynchronizeQueue()->isCheck() ? $counter * 2 : $counter]
+            ['lt' => $this->salesforceConfig->getMaxAdditionalAttemptsCount($this->getSynchronizeQueue()->isCheck())]
         );
 
         try {
