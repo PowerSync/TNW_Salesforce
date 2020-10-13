@@ -46,6 +46,11 @@ class Queue
     private $sortGroups;
 
     /**
+     * @var boolean
+     */
+    private $isCheck = false;
+
+    /**
      * Queue constructor.
      * @param Group[] $groups
      * @param array $phases
@@ -53,6 +58,7 @@ class Queue
      * @param Model\ResourceModel\Queue $resourceQueue
      * @param Model\Logger\Processor\UidProcessor $uidProcessor
      * @param Timezone $timezone
+     * @param bool $isCheck
      */
     public function __construct(
         array $groups,
@@ -60,7 +66,8 @@ class Queue
         Model\Config $salesforceConfig,
         Model\ResourceModel\Queue $resourceQueue,
         Model\Logger\Processor\UidProcessor $uidProcessor,
-        Timezone $timezone
+        Timezone $timezone,
+        $isCheck = false
     ) {
         $this->groups = $groups;
         $this->phases = array_filter($phases);
@@ -68,6 +75,7 @@ class Queue
         $this->resourceQueue = $resourceQueue;
         $this->uidProcessor = $uidProcessor;
         $this->timezone = $timezone;
+        $this->setIsCheck($isCheck);
     }
 
     /**
@@ -240,5 +248,21 @@ class Queue
         }
 
         return $sortGroups;
+    }
+
+    /**
+     * @param bool $isCheck
+     */
+    public function setIsCheck(bool $isCheck)
+    {
+        $this->isCheck = $isCheck;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCheck()
+    {
+        return $this->isCheck;
     }
 }
