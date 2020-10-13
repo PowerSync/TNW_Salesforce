@@ -82,18 +82,27 @@ class Status extends Synchronize\Unit\UnitAbstract
 
                 case $upsertOutput->get('%s/skipped', $entity) === true:
                     $this->cache[$entity]['status'] = $upsertOutput->upsertInput()->get('%s/updated', $entity) ? Queue::STATUS_COMPLETE : Queue::STATUS_SKIPPED;
-                    $this->cache[$entity]['message'] = $upsertOutput->upsertInput()->get('%s/message', $entity);
+                    $message = $this->upsertOutput()->upsertInput()->get('%s/message', $entity);
+                    if ($message) {
+                        $this->cache[$entity]['message'] = $message;
+                    }
                     break;
 
                 case $upsertOutput->get('%s/waiting', $entity) === true:
                     $this->cache[$entity]['status'] = Queue::STATUS_WAITING_UPSERT;
-                    $this->cache[$entity]['message'] = $upsertOutput->upsertInput()->get('%s/message', $entity);
+                    $message = $this->upsertOutput()->upsertInput()->get('%s/message', $entity);
+                    if ($message) {
+                        $this->cache[$entity]['message'] = $message;
+                    }
                     break;
 
                 case $upsertOutput->get('%s/success', $entity) === true:
 
                     $this->cache[$entity]['status'] = Queue::STATUS_COMPLETE;
-                    $this->cache[$entity]['message'] = $upsertOutput->upsertInput()->get('%s/message', $entity);
+                    $message = $this->upsertOutput()->upsertInput()->get('%s/message', $entity);
+                    if ($message) {
+                        $this->cache[$entity]['message'] = $message;
+                    }
                     break;
 
                 default:
