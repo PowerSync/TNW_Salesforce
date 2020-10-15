@@ -70,7 +70,18 @@ class Status extends Synchronize\Unit\UnitAbstract
     {
         $upsertOutput = $this->upsertOutput();
         foreach ($this->entities() as $entity) {
+            $maxAdditionalAttemptsCount = $this->salesforceIdStorage->getConfig()->getMaxAdditionalAttemptsCount(true);
             switch (true) {
+                case $maxAdditionalAttemptsCount == $entity->getData('_queue')->getSyncAttempt():
+                    $this->cache[$entity]['status'] = Queue::STATUS_ERROR;
+                    $message = $this->load()->get('%s/queue', $entity)->getMessage();
+                    if ($message) {
+                        $this->cache[$entity]['message'] = $message;
+                    } else {
+                        $this->cache[$entity]['message'] = __('Sync attempts count exceeded');
+                    }
+                    break;
+
                 case !empty($this->getAllEntityError($entity)):
                     $this->cache[$entity]['status'] = Queue::STATUS_ERROR;
                     $this->cache[$entity]['message'] = implode("<br />\n", $this->getAllEntityError($entity));
