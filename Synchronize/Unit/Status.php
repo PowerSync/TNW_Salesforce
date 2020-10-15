@@ -72,7 +72,8 @@ class Status extends Synchronize\Unit\UnitAbstract
         foreach ($this->entities() as $entity) {
             $maxAdditionalAttemptsCount = $this->salesforceIdStorage->getConfig()->getMaxAdditionalAttemptsCount(true);
             switch (true) {
-                case $maxAdditionalAttemptsCount == $entity->getData('_queue')->getSyncAttempt():
+                case $maxAdditionalAttemptsCount == $entity->getData('_queue')->getSyncAttempt()
+                    && $upsertOutput->get('%s/waiting', $entity) === true:
                     $this->cache[$entity]['status'] = Queue::STATUS_ERROR;
                     $message = $this->load()->get('%s/queue', $entity)->getMessage();
                     if ($message) {
