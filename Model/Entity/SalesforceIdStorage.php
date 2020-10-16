@@ -271,4 +271,12 @@ class SalesforceIdStorage
         $websiteId = $this->storeManager->getWebsite($website)->getId();
         return $this->config->baseWebsiteIdLogin($websiteId);
     }
+
+    /**
+     * @return \TNW\Salesforce\Model\Config
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
 }
