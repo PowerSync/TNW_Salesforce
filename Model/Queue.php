@@ -1,14 +1,19 @@
 <?php
 namespace TNW\Salesforce\Model;
 
-use TNW\Salesforce\Model\ResourceModel;
+use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Model\Context;
+use Magento\Framework\Model\ResourceModel\AbstractResource;
+use Magento\Framework\Registry;
 
 /**
  * Class Queue
  *
- * @method \TNW\Salesforce\Model\ResourceModel\Queue _getResource()
+ * @method ResourceModel\Queue _getResource()
  */
-class Queue extends \Magento\Framework\Model\AbstractModel
+class Queue extends AbstractModel
 {
     const STATUS_NEW = 'new';
     const STATUS_ERROR = 'error';
@@ -28,7 +33,22 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     /**
      * @var Queue[]
      */
-    private $dependence = [];
+    protected $dependence = [];
+
+    protected $salesforceConfig = [];
+
+    public function __construct(
+        Context $context,
+        Registry $registry,
+        AbstractResource $resource = null,
+        AbstractDb $resourceCollection = null,
+        Config $salesforceConfig,
+        array $data = []
+    ) {
+        $this->salesforceConfig = $salesforceConfig;
+
+        parent::__construct($context, $registry, $resource, $resourceCollection, $data);
+    }
 
     /**
      * Construct
@@ -182,7 +202,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     public function incSyncAttempt()
     {
         // To restrict incrementing sync attempt upon processing from "In Progress: Salesforce Update" (waiting_upsert)
-        if($this->isProcessOutputUpsert() === false){
+        if($this->isProcessOutputUpsert() === false || $this->getSyncAttempt() > $this->salesforceConfig->getMaxAdditionalAttemptsCount()) {
             $this->setData('sync_attempt', $this->getSyncAttempt() + 1);
         }
         return $this;
@@ -319,7 +339,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      *
      * @param string $code
      * @return Queue
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function dependenceByCode($code)
     {
@@ -331,7 +351,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      *
      * @param string $entityType
      * @return Queue[]
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function dependenciesByEntityType($entityType)
     {
@@ -346,7 +366,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      *
      * @param string $entityType
      * @return Queue[]
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function childByEntityType($entityType)
     {
@@ -361,7 +381,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      *
      * @param int $queueId
      * @return Queue
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function loadById($queueId)
     {
@@ -378,7 +398,7 @@ class Queue extends \Magento\Framework\Model\AbstractModel
      *
      * @param string $code
      * @return bool
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function existsChildByCode($code)
     {

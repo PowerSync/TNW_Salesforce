@@ -521,4 +521,14 @@ class Config extends DataObject
 
         return $value;
     }
+
+    /**
+     * Get cron maximum attempt count to take response given the flag for additional attempts
+     * @param bool $additionalAttempts
+     * @return int
+     */
+    public function getMaxAdditionalAttemptsCount($additionalAttempts = false)
+    {
+        return !$additionalAttempts ? $this->getSyncMaxAttemptsCount() : $this->getSyncMaxAttemptsCount() * 2;
+    }
 }
