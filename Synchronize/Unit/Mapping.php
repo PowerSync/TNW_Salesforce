@@ -338,8 +338,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
             $entity->getResource()->getAttribute($attributeCode) &&
             $entity->getResource()->getAttribute($attributeCode)->getFrontend()->getConfigField('input') != 'boolean'
         ) {
-            $value = $entity->getResource()->getAttribute($attributeCode)->getFrontend()->getValue($entity);
-            return (string)$value;
+            $value = (string)$entity->getResource()->getAttribute($attributeCode)->getFrontend()->getValue($entity);
+
+            if (!empty($value)) {
+                return (string)$value;
+            }
         }
 
         $value = $entity->getData($attributeCode);
