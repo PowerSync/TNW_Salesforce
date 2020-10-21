@@ -4,6 +4,7 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use Magento\Framework\Exception\LocalizedException;
 use OutOfBoundsException;
+use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
@@ -28,6 +29,9 @@ class Status extends Synchronize\Unit\UnitAbstract
      */
     private $salesforceIdStorage;
 
+    /** @var Config  */
+    protected $config;
+
     /**
      * Status constructor.
      * @param string $name
@@ -44,13 +48,23 @@ class Status extends Synchronize\Unit\UnitAbstract
         $upsertOutput,
         Synchronize\Units $units,
         Synchronize\Group $group,
+        Config $config,
         SalesforceIdStorage $salesforceIdStorage = null,
         array $dependents = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsertOutput]));
         $this->load = $load;
         $this->upsertOutput = $upsertOutput;
+        $this->config = $config;
         $this->salesforceIdStorage = $salesforceIdStorage;
+    }
+
+    /**
+     * @return Config
+     */
+    public function getConfig()
+    {
+        return !empty($this->salesforceIdStorage) ? $this->salesforceIdStorage->getConfig() : $this->config;
     }
 
     /**
@@ -70,9 +84,9 @@ class Status extends Synchronize\Unit\UnitAbstract
     {
         $upsertOutput = $this->upsertOutput();
         foreach ($this->entities() as $entity) {
-            $maxAdditionalAttemptsCount = $this->salesforceIdStorage->getConfig()->getMaxAdditionalAttemptsCount(true);
+            $maxAdditionalAttemptsCount = $this->getConfig()->getMaxAdditionalAttemptsCount(true);
             switch (true) {
-                case $maxAdditionalAttemptsCount == $entity->getData('_queue')->getSyncAttempt()
+                case $maxAdditionalAttemptsCount == $this->load()->get('%s/queue', $entity)->getSyncAttempt()
                     && $upsertOutput->get('%s/waiting', $entity) === true:
                     $this->cache[$entity]['status'] = Queue::STATUS_ERROR;
                     $message = $this->load()->get('%s/queue', $entity)->getMessage();
