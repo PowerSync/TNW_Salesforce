@@ -23,6 +23,8 @@ use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool;
 class Add
 {
     const DIRECT_ADD_TO_QUEUE_COUNT_LIMIT = 200;
+
+    const TOPIC_NAME = 'tnw_salesforce.sync.realtime';
     /**
      * @var string
      */
@@ -71,6 +73,10 @@ class Add
     /** @var State */
     private $state;
 
+    private $publisher;
+
+    private $json;
+
     /**
      * Entity constructor.
      * @param string $entityType
@@ -80,7 +86,11 @@ class Add
      * @param WebsiteEmulator $websiteEmulator
      * @param Synchronize $synchronizeEntity
      * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
+     * @param PreQueue $resourcePreQueue
      * @param ManagerInterface $messageManager
+     * @param State $state
+     * @param \Magento\Framework\MessageQueue\PublisherInterface $publisher
+     * @param \Magento\Framework\Serialize\Serializer\Json $json
      */
     public function __construct(
         $entityType,
@@ -92,7 +102,9 @@ class Add
         \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
         PreQueue $resourcePreQueue,
         ManagerInterface $messageManager,
-        State $state
+        State $state,
+        \Magento\Framework\MessageQueue\PublisherInterface $publisher,
+        \Magento\Framework\Serialize\Serializer\Json $json
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -104,6 +116,8 @@ class Add
         $this->resourcePreQueue = $resourcePreQueue;
         $this->messageManager = $messageManager;
         $this->state = $state;
+        $this->publisher = $publisher;
+        $this->json = $json;
     }
 
     /**
@@ -175,10 +189,12 @@ class Add
 
         if ($syncType === Config::DIRECT_SYNC_TYPE_REALTIME) {
             // Sync realtime type
-            $this->websiteEmulator->wrapEmulationWebsite(
-                [$this->synchronizeEntity, 'synchronizeToWebsite'],
-                $websiteId
-            );
+//            $this->websiteEmulator->wrapEmulationWebsite(
+//                [$this->synchronizeEntity, 'synchronizeToWebsite'],
+//                $websiteId
+//            );
+
+            $this->publisher->publish(self::TOPIC_NAME, (string) $websiteId);
             return;
         }
 
