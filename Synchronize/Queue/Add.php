@@ -73,9 +73,10 @@ class Add
     /** @var State */
     private $state;
 
+    /**
+     * @var \Magento\Framework\MessageQueue\PublisherInterface
+     */
     private $publisher;
-
-    private $json;
 
     /**
      * Entity constructor.
@@ -103,8 +104,7 @@ class Add
         PreQueue $resourcePreQueue,
         ManagerInterface $messageManager,
         State $state,
-        \Magento\Framework\MessageQueue\PublisherInterface $publisher,
-        \Magento\Framework\Serialize\Serializer\Json $json
+        \Magento\Framework\MessageQueue\PublisherInterface $publisher
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -117,7 +117,6 @@ class Add
         $this->messageManager = $messageManager;
         $this->state = $state;
         $this->publisher = $publisher;
-        $this->json = $json;
     }
 
     /**
@@ -189,11 +188,6 @@ class Add
 
         if ($syncType === Config::DIRECT_SYNC_TYPE_REALTIME) {
             // Sync realtime type
-//            $this->websiteEmulator->wrapEmulationWebsite(
-//                [$this->synchronizeEntity, 'synchronizeToWebsite'],
-//                $websiteId
-//            );
-
             $this->publisher->publish(self::TOPIC_NAME, (string) $websiteId);
             return;
         }

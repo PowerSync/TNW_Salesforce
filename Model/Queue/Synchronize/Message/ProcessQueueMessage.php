@@ -6,46 +6,41 @@ use TNW\Salesforce\Synchronize\Queue\Synchronize;
 
 class ProcessQueueMessage
 {
-    protected $directoryList;
-
+    /**
+     * @var Synchronize
+     */
     protected $synchronizeEntity;
 
+    /**
+     * @var \TNW\Salesforce\Model\Config\WebsiteEmulator
+     */
     protected $websiteEmulator;
 
+    /**
+     * ProcessQueueMessage constructor.
+     * @param Synchronize $synchronizeEntity
+     * @param \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
+     */
     public function __construct(
-        \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
         Synchronize $synchronizeEntity,
         \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
     )
     {
         $this->synchronizeEntity = $synchronizeEntity;
         $this->websiteEmulator = $websiteEmulator;
-        $this->directoryList = $directoryList;
-        $logDir = $directoryList->getPath('log');
-        $writer = new \Laminas\Log\Writer\Stream($logDir . DIRECTORY_SEPARATOR . 'realtime-consumer.log');
-        $logger = new \Laminas\Log\Logger();
-        $logger->addWriter($writer);
-        $this->logger = $logger;
     }
 
     /**
      * process
      * @param $message
-     * @return
+     * @return void
      * @throws \Exception
      */
-    public function process($message)
+    public function process($websiteId)
     {
-        try{
-//            $this->synchronize->synchronizeToWebsite($message);
-            $this->websiteEmulator->wrapEmulationWebsite(
-                [$this->synchronizeEntity, 'synchronizeToWebsite'],
-                $message
-            );
-            $this->logger->info('SF process -' . serialize($this->synchronizeEntity));
-        }catch (\Exception $e) {
-            $this->logger->info('SF process Error ' . $e->getMessage());
-        }
-        return $message;
+        $this->websiteEmulator->wrapEmulationWebsite(
+            [$this->synchronizeEntity, 'synchronizeToWebsite'],
+            $websiteId
+        );
     }
 }
