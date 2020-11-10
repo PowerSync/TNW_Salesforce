@@ -3,14 +3,14 @@
     "description": "Integration between Magento 2 and Salesforce",
     "require": {
         "magento/framework": ">102",
-        "tnw/soap-client": "~1",
+        "tnw/soap-client": "1.1.2",
         "tnw/marketing": "2.0.5"
     },
     "license": [
         "gpl-3.0"
     ],
     "type": "magento2-module",
-    "version": "2.6.39",
+    "version": "2.6.40",
     "autoload": {
         "files": [
             "registration.php"
