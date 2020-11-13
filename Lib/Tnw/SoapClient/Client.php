@@ -2,9 +2,13 @@
 
 namespace TNW\Salesforce\Lib\Tnw\SoapClient;
 
+use Exception;
 use Magento\Framework\App\Cache\State;
 use Magento\Framework\App\Cache\Type\Collection;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Store\Model\StoreManagerInterface;
+use SoapHeader;
 use Tnw\SoapClient\Event\RequestEvent;
 use Tnw\SoapClient\Event\ResponseEvent;
 use Tnw\SoapClient\Events;
@@ -27,8 +31,10 @@ class Client extends \Tnw\SoapClient\Client
     /** @var State  */
     protected $cacheState;
 
-    /** @var \Magento\Store\Model\StoreManagerInterface  */
+    /** @var StoreManagerInterface  */
     protected $storeManager;
+
+    protected $expirationTime;
 
     /**
      * Client constructors.
@@ -44,78 +50,18 @@ class Client extends \Tnw\SoapClient\Client
         $username,
         $password,
         $token
-//        , Collection $cacheCollection,
-//        State $cacheState,
-//        \Magento\Store\Model\StoreManagerInterface $storeManager
     ) {
-//        $this->cacheCollection = $cacheCollection;
-//        $this->cacheState = $cacheState;
-//        $this->storeManager = $storeManager;
 
         parent::__construct($soapClient, $username, $password, $token);
     }
 
     /**
      * @return int
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     public function getWebsiteId()
     {
         return $this->storeManager->getStore()->getWebsiteId();
-    }
-
-    /**
-     * Save cache
-     *
-     * @param String $value
-     * @param String $identifier
-     * @param int|null $websiteId
-     *
-     * @throws LocalizedException
-     */
-    protected function saveCache($value, $identifier, $lifeTime)
-    {
-        $websiteId = $this->getWebsiteId();
-        if ($this->cacheState->isEnabled(Collection::TYPE_IDENTIFIER)) {
-
-            /** @var mixed $serialized */
-            $serialized = serialize($value);
-
-            $this->cacheCollection->save(
-                $serialized,
-                self::CACHE_TAG . $identifier . '_' . $websiteId,
-                [],
-                $lifeTime
-            );
-        }
-    }
-
-    /**
-     * @param $identifier
-     *
-     * @param int|null $websiteId
-     *
-     * @return mixed
-     * @throws LocalizedException
-     */
-    protected function loadCache($identifier)
-    {
-        $websiteId = $this->getWebsiteId();
-        /** @var mixed $result */
-        $result = null;
-
-        if ($this->cacheState->isEnabled(Collection::TYPE_IDENTIFIER)) {
-            /** @var mixed $cachedData */
-            $cachedData = $this->cacheCollection->load(
-                self::CACHE_TAG . $identifier . '_' . $websiteId
-            );
-
-            if ($cachedData) {
-                $result = unserialize($cachedData);
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -187,24 +133,56 @@ class Client extends \Tnw\SoapClient\Client
     }
 
     /**
+     * @return bool
+     */
+    public function sessionExpired()
+    {
+        $currentTime = time();
+
+        /** need skip this condition to allow fill the timeout at the first time */
+        return !empty($this->expirationTime) && $currentTime > $this->expirationTime;
+    }
+
+    /**
+     *
+     */
+    public function setExpirationTime()
+    {
+        $currentTime = time();
+        $timeout = (int)$this->getUserInfo()->getSessionSecondsValid();
+        $timeout -= self::TIMEOUT_RESERVE;
+
+        $this->expirationTime = $currentTime + $timeout;
+    }
+
+    /**
+     * @param LoginResult $loginResult
+     */
+    protected function setLoginResult(LoginResult $loginResult)
+    {
+        parent::setLoginResult($loginResult);
+        $this->setExpirationTime();
+    }
+
+    /**
+     *
+     */
+    public function resetSession()
+    {
+        $this->sessionHeader = null;
+    }
+
+    /**
      * @param $method
      * @param array $params
      * @return mixed
      * @throws LocalizedException
      */
-    protected function processLoginRequest($method, array $params = []) {
-//        if ($this->loadCache(self::CACHE_TAG)) {
-//            return $this->loadCache(self::CACHE_TAG);
-//        }
-
+    protected function processLoginRequest($method, array $params = [])
+    {
         try {
-            $this->sessionHeader = null;
-            $this->setSessionId(null);
             $result = $this->soapClient->$method($params);
-            $timeout = (int)$this->getUserInfo()->getSessionSecondsValid();
-            $timeout -= self::TIMEOUT_RESERVE;
 
-//            $this->saveCache($result, self::CACHE_TAG, $timeout);
         } finally {
             $this->logLogin();
         }
@@ -222,12 +200,12 @@ class Client extends \Tnw\SoapClient\Client
 
         $patterns = [
             "/<ns1:password>.*<\/ns1:password>/",
-//                "/<sessionId>.*<\/sessionId>/"
+            "/<sessionId>.*<\/sessionId>/"
         ];
 
         $replace = [
             "<ns1:password>***</ns1:password>",
-//                "<sessionId>***</sessionId>"
+            "<sessionId>***</sessionId>"
         ];
 
         $request = preg_replace($patterns, $replace, $request);
