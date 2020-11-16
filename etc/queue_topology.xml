@@ -1,0 +1,5 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
+    <exchange name="tnw_salesforce.sync" type="topic" connection="amqp">
+        <binding id="tnwSalesforceSyncRealtime" topic="tnw_salesforce.sync.realtime" destinationType="queue" destination="tnw_salesforce_sync_realtime"/>
+    </exchange>
+</config>

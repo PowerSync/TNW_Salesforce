@@ -56,7 +56,10 @@ class ClientFactory
     public function client($websiteId = null)
     {
         $websiteId = (int)$this->websiteDetector->detectCurrentWebsite($websiteId);
-        if (empty(self::$clients[$websiteId])) {
+
+        /** @var \TNW\Salesforce\Lib\Tnw\SoapClient\Client $client */
+        $client = !empty(self::$clients[$websiteId])? self::$clients[$websiteId]:null;
+        if (!$client || $client->sessionExpired()) {
             self::$clients[$websiteId] = $this->create($websiteId);
         }
 
