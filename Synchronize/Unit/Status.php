@@ -3,6 +3,7 @@
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\MessageQueue\Publisher;
 use OutOfBoundsException;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
@@ -32,6 +33,9 @@ class Status extends Synchronize\Unit\UnitAbstract
     /** @var Config  */
     protected $config;
 
+    /** @var Publisher  */
+    protected $publisher;
+
     /**
      * Status constructor.
      * @param string $name
@@ -39,7 +43,9 @@ class Status extends Synchronize\Unit\UnitAbstract
      * @param string $upsertOutput
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param SalesforceIdStorage $salesforceIdStorage
+     * @param Config $config
+     * @param Publisher $publisher
+     * @param SalesforceIdStorage|null $salesforceIdStorage
      * @param array $dependents
      */
     public function __construct(
@@ -49,6 +55,7 @@ class Status extends Synchronize\Unit\UnitAbstract
         Synchronize\Units $units,
         Synchronize\Group $group,
         Config $config,
+        Publisher $publisher,
         SalesforceIdStorage $salesforceIdStorage = null,
         array $dependents = []
     ) {
@@ -56,6 +63,7 @@ class Status extends Synchronize\Unit\UnitAbstract
         $this->load = $load;
         $this->upsertOutput = $upsertOutput;
         $this->config = $config;
+        $this->publisher = $publisher;
         $this->salesforceIdStorage = $salesforceIdStorage;
     }
 
@@ -83,6 +91,7 @@ class Status extends Synchronize\Unit\UnitAbstract
     public function process()
     {
         $upsertOutput = $this->upsertOutput();
+        $hasWaiting = false;
         foreach ($this->entities() as $entity) {
             $maxAdditionalAttemptsCount = $this->getConfig()->getMaxAdditionalAttemptsCount(true);
             switch (true) {
@@ -117,6 +126,7 @@ class Status extends Synchronize\Unit\UnitAbstract
                 case $upsertOutput->get('%s/waiting', $entity) === true:
                     $this->cache[$entity]['status'] = Queue::STATUS_WAITING_UPSERT;
                     $message = $this->upsertOutput()->upsertInput()->get('%s/message', $entity);
+                    $hasWaiting = true;
                     if ($message) {
                         $this->cache[$entity]['message'] = $message;
                     }
@@ -141,7 +151,37 @@ class Status extends Synchronize\Unit\UnitAbstract
             $this->saveStatus($entity);
         }
 
+        if (!empty($this->entities()) && $this->getQueueType()) {
+            if ($hasWaiting) {
+                $this->publisher->publish(\TNW\SForceEnterprise\Model\Queue\Process::MQ_TOPIC_NAME, $this->getQueueType($hasWaiting));
+            }
+
+            $this->publisher->publish(\TNW\SForceEnterprise\Model\Queue\Process::MQ_TOPIC_NAME, $this->getQueueType());
+        }
+
         $this->updateQueue();
+    }
+
+    /**  */
+    public function getQueueType($isCheck = false)
+    {
+        $entities = $this->entities();
+        $entity = reset($entities);
+        $queueItem = $this->load()->get('%s/queue', $entity)
+            ->addData(iterator_to_array($this->cache[$entity]));
+        switch ($queueItem->getSyncType()) {
+            case \TNW\SForceEnterprise\Model\Synchronization\Config::DIRECT_SYNC_TYPE_NORMAL:
+                $type = $isCheck ? 'synchronizeQueueNormalOnlyCheck' : 'synchronizeQueueNormal';
+                break;
+
+            case \TNW\SForceEnterprise\Model\Synchronization\Config::DIRECT_SYNC_TYPE_BACKGROUND:
+                $type = $isCheck ? 'synchronizeQueueBackground' : 'synchronizeQueueBackgroundOnlyCheck';
+                break;
+            default:
+                $type = null;
+                break;
+        }
+        return $type;
     }
 
     /**
