@@ -114,13 +114,18 @@ class Queue
                 $lockCollection->addFilterToNotTransactionUid($this->uidProcessor->uid());
                 $lockCollection->addFilterDependent();
 
-                // Mark work
-                $countUpdate = $lockCollection->updateLock([
+                $lockData = [
                     'status' => $phase['processStatus'],
                     'transaction_uid' => $this->uidProcessor->uid(),
-                    'sync_at' => $this->timezone->date()->format('c'),
                     'identify' => new Zend_Db_Expr('queue_id')
-                ]);
+                ];
+
+                if ($phase['startStatus'] == Model\Queue::STATUS_NEW) {
+                    $lockData['sync_at'] = $this->timezone->date()->format('c');
+                }
+
+                // Mark work
+                $countUpdate = $lockCollection->updateLock($lockData);
 
                 if (0 === $countUpdate) {
                     continue;
