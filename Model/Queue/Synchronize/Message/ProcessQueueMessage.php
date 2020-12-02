@@ -2,6 +2,8 @@
 
 namespace TNW\Salesforce\Model\Queue\Synchronize\Message;
 
+use Exception;
+use TNW\Salesforce\Model\Config\WebsiteEmulator;
 use TNW\Salesforce\Synchronize\Queue\Synchronize;
 
 class ProcessQueueMessage
@@ -12,20 +14,19 @@ class ProcessQueueMessage
     protected $synchronizeEntity;
 
     /**
-     * @var \TNW\Salesforce\Model\Config\WebsiteEmulator
+     * @var WebsiteEmulator
      */
     protected $websiteEmulator;
 
     /**
      * ProcessQueueMessage constructor.
      * @param Synchronize $synchronizeEntity
-     * @param \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
+     * @param WebsiteEmulator $websiteEmulator
      */
     public function __construct(
         Synchronize $synchronizeEntity,
-        \TNW\Salesforce\Model\Config\WebsiteEmulator $websiteEmulator
-    )
-    {
+        WebsiteEmulator $websiteEmulator
+    ) {
         $this->synchronizeEntity = $synchronizeEntity;
         $this->websiteEmulator = $websiteEmulator;
     }
@@ -34,7 +35,7 @@ class ProcessQueueMessage
      * process
      * @param $message
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function process($websiteId)
     {

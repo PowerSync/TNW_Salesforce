@@ -1,4 +1,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
-    <consumer name="tnwSalesforceSyncRealtime" queue="tnw_salesforce_sync_realtime" connection="amqp"
+    <consumer name="tnwSalesforceSyncRealtimeAmqp" queue="tnw_salesforce_sync_realtime" connection="amqp"
+              handler="TNW\Salesforce\Model\Queue\Synchronize\Message\ProcessQueueMessage::process"/>
+
+    <consumer name="tnwSalesforceSyncRealtimeDb" queue="tnw_salesforce_sync_realtime" connection="db"
               handler="TNW\Salesforce\Model\Queue\Synchronize\Message\ProcessQueueMessage::process"/>
 </config>

@@ -11,6 +11,7 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Message\MessageInterface;
 use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\MessageQueue\PublisherAdapter;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteEmulator;
 use TNW\Salesforce\Model\Queue;
@@ -28,7 +29,7 @@ class Add
     /**
      * @var string
      */
-    private $entityType;
+    protected $entityType;
 
     /**
      * @var Unit[]
@@ -38,50 +39,50 @@ class Add
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    protected $storeManager;
 
     /**
      * @var Pool
      */
-    private $dividerPool;
+    protected $dividerPool;
 
     /**
      * @var WebsiteEmulator
      */
-    private $websiteEmulator;
+    protected $websiteEmulator;
 
     /**
      * @var Synchronize
      */
-    private $synchronizeEntity;
+    protected $synchronizeEntity;
 
     /**
      * @var \TNW\Salesforce\Model\ResourceModel\Queue
      */
-    private $resourceQueue;
+    protected $resourceQueue;
 
     /**
      * @var PreQueue
      */
-    private $resourcePreQueue;
+    protected $resourcePreQueue;
 
     /**
      * @var ManagerInterface
      */
-    private $messageManager;
+    protected $messageManager;
 
     /** @var State */
-    private $state;
+    protected $state;
 
     /**
-     * @var \Magento\Framework\MessageQueue\PublisherInterface
+     * @var PublisherAdapter
      */
-    private $publisher;
+    protected $publisher;
 
     /**
-     * Entity constructor.
-     * @param string $entityType
-     * @param Unit[] $resolves
+     * Add constructor.
+     * @param $entityType
+     * @param array $resolves
      * @param StoreManagerInterface $storeManager
      * @param Pool $dividerPool
      * @param WebsiteEmulator $websiteEmulator
@@ -90,8 +91,7 @@ class Add
      * @param PreQueue $resourcePreQueue
      * @param ManagerInterface $messageManager
      * @param State $state
-     * @param \Magento\Framework\MessageQueue\PublisherInterface $publisher
-     * @param \Magento\Framework\Serialize\Serializer\Json $json
+     * @param PublisherAdapter $publisher
      */
     public function __construct(
         $entityType,
@@ -104,7 +104,7 @@ class Add
         PreQueue $resourcePreQueue,
         ManagerInterface $messageManager,
         State $state,
-        \Magento\Framework\MessageQueue\PublisherInterface $publisher
+        PublisherAdapter $publisher
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -127,7 +127,6 @@ class Add
      */
     public function addToQueue(array $entityIds)
     {
-//        $entityIds = array_filter($entityIds);
         if (empty($entityIds)) {
             return;
         }
