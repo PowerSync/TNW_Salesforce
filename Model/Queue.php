@@ -30,6 +30,32 @@ class Queue extends AbstractModel
     const STATUS_PROCESS_OUTPUT_UPSERT = 'process_output_upsert';
     const STATUS_PROCESS_OUTPUT_LOOKUP = 'process_output_lookup';
 
+    const STATUS_PROCESS = 'process';
+    const STATUS_BLOCKED = 'blocked';
+    const STATUS_PARTIAL = 'partial';
+
+    const SUCCESS_STATUSES = [
+        self::STATUS_COMPLETE,
+        self::STATUS_SKIPPED,
+    ];
+
+    const PROCESS_STATUSES = [
+        self::STATUS_WAITING_UPSERT,
+        self::STATUS_WAITING_LOOKUP,
+        self::STATUS_PROCESS_INPUT_UPSERT,
+        self::STATUS_PROCESS_INPUT_LOOKUP,
+        self::STATUS_PROCESS_OUTPUT_UPSERT,
+        self::STATUS_PROCESS_OUTPUT_LOOKUP,
+    ];
+
+    const ERROR_STATUSES = [
+        self::STATUS_ERROR,
+        self::STATUS_ERROR_INPUT_UPSERT,
+        self::STATUS_ERROR_INPUT_LOOKUP,
+        self::STATUS_ERROR_OUTPUT_UPSERT,
+        self::STATUS_ERROR_OUTPUT_LOOKUP,
+    ];
+
     /**
      * @var Queue[]
      */
