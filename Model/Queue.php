@@ -40,6 +40,7 @@ class Queue extends AbstractModel
     ];
 
     const PROCESS_STATUSES = [
+        self::STATUS_PROCESS,
         self::STATUS_WAITING_UPSERT,
         self::STATUS_WAITING_LOOKUP,
         self::STATUS_PROCESS_INPUT_UPSERT,
