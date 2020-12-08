@@ -82,11 +82,12 @@ class PublisherAdapter
     }
 
     /**
-     * @param $topicName
+     * @param $initTopicName
      * @return string
      */
-    public function detectConnectionName($topicName)
+    public function detectConnectionName($initTopicName)
     {
+        $topicName = $initTopicName . '.amqp';
         try {
             $connectionName = $this->getPublisherConfig()->getPublisher($topicName)->getConnection()->getName();
             $connectionName = ($connectionName === 'amqp' && !$this->isAmqpConfigured()) ? 'db' : $connectionName;
