@@ -205,7 +205,7 @@ class Status extends Synchronize\Unit\UnitAbstract
      * @return object[]
      * @throws OutOfBoundsException
      */
-    protected function entities()
+    public function entities()
     {
         return $this->load()->get('entities');
     }

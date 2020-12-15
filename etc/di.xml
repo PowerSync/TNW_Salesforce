@@ -543,6 +543,12 @@
         </arguments>
     </type>
 
+    <type name="TNW\Salesforce\Model\Queue\Synchronize\Message\ProcessQueueMessage">
+        <arguments>
+            <argument name="synchronizeEntity" xsi:type="object">TNW\Synchronize\Queue\Realtime</argument>
+        </arguments>
+    </type>
+
     <virtualType name="TNW\Synchronize\Queue\Realtime" type="TNW\Salesforce\Synchronize\Queue\Synchronize">
         <arguments>
             <argument name="type" xsi:type="const">TNW\Salesforce\Model\Config::DIRECT_SYNC_TYPE_REALTIME</argument>
@@ -648,4 +654,5 @@
             </argument>
         </arguments>
     </type>
+
 </config>

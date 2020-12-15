@@ -1,0 +1,9 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/publisher.xsd">
+    <publisher topic="tnw_salesforce.sync.realtime.amqp">
+        <connection name="amqp" exchange="tnw_salesforce.sync.amqp" />
+    </publisher>
+
+    <publisher topic="tnw_salesforce.sync.realtime.db">
+        <connection name="db" exchange="tnw_salesforce.sync.db" />
+    </publisher>
+</config>
