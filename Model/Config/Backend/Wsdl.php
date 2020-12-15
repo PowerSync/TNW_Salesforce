@@ -2,26 +2,27 @@
 namespace TNW\Salesforce\Model\Config\Backend;
 
 use Exception;
-use Magento\Config\Model\Config\Backend\File;
 use Magento\Config\Model\Config\Backend\File\RequestData\RequestDataInterface;
 use Magento\Config\Model\ResourceModel\Config;
 use Magento\Framework\App\Cache\State;
 use Magento\Framework\App\Cache\Type\Collection;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Config\Value;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\File\Uploader;
+use Magento\Framework\File\UploaderFactory;
 use Magento\Framework\Filesystem;
+use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
 use Magento\Framework\Xml\Parser;
-use Magento\MediaStorage\Model\File\Uploader;
-use Magento\MediaStorage\Model\File\UploaderFactory;
 use TNW\Salesforce\Model\Config\WebsiteDetector;
 
-class Wsdl extends File
+class Wsdl extends Value
 {
     const CACHE_TAG = 'tnw_salesforce_client';
 
@@ -50,6 +51,33 @@ class Wsdl extends File
     protected $handCache = [];
 
     /**
+     * @var RequestDataInterface
+     */
+    protected $_requestData;
+
+    /**
+     * Upload max file size in kilobytes
+     *
+     * @var int
+     */
+    protected $_maxFileSize = 0;
+
+    /**
+     * @var Filesystem
+     */
+    protected $_filesystem;
+
+    /**
+     * @var WriteInterface
+     */
+    protected $_mediaDirectory;
+
+    /**
+     * @var UploaderFactory
+     */
+    protected $_uploaderFactory;
+
+    /**
      * The tail part of directory path for uploading
      *
      */
@@ -72,18 +100,12 @@ class Wsdl extends File
         State $cacheState,
         array $data = []
     ) {
-        parent::__construct(
-            $context,
-            $registry,
-            $config,
-            $cacheTypeList,
-            $uploaderFactory,
-            $requestData,
-            $filesystem,
-            $resource,
-            $resourceCollection,
-            $data
-        );
+        $this->_uploaderFactory = $uploaderFactory;
+        $this->_requestData = $requestData;
+        $this->_filesystem = $filesystem;
+        $this->_mediaDirectory = $filesystem->getDirectoryWrite(DirectoryList::MEDIA);
+
+        parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
 
         $this->_mediaDirectory = $filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
 
@@ -239,5 +261,103 @@ class Wsdl extends File
         } else {
             $this->handCache[$identifier] = $value;
         }
+    }
+
+    /**
+     * Receiving uploaded file data
+     *
+     * @return array
+     * @since 100.1.0
+     */
+    protected function getFileData()
+    {
+        $file = [];
+        $value = $this->getValue();
+        $tmpName = $this->_requestData->getTmpName($this->getPath());
+        if ($tmpName) {
+            $file['tmp_name'] = $tmpName;
+            $file['name'] = $this->_requestData->getName($this->getPath());
+        } elseif (!empty($value['tmp_name'])) {
+            $file['tmp_name'] = $value['tmp_name'];
+            $file['name'] = isset($value['value']) ? $value['value'] : $value['name'];
+        }
+
+        return $file;
+    }
+
+    /**
+     * Validation callback for checking max file size
+     *
+     * @param  string $filePath Path to temporary uploaded file
+     * @return void
+     * @throws LocalizedException
+     */
+    public function validateMaxSize($filePath)
+    {
+        $directory = $this->_filesystem->getDirectoryRead(DirectoryList::SYS_TMP);
+        if ($this->_maxFileSize > 0 && $directory->stat(
+            $directory->getRelativePath($filePath)
+        )['size'] > $this->_maxFileSize * 1024
+        ) {
+            throw new LocalizedException(
+                __('The file you\'re uploading exceeds the server size limit of %1 kilobytes.', $this->_maxFileSize)
+            );
+        }
+    }
+
+    /**
+     * Retrieve upload directory path
+     *
+     * @param string $uploadDir
+     * @return string
+     * @since 100.1.0
+     */
+    protected function getUploadDirPath($uploadDir)
+    {
+        return $this->_mediaDirectory->getAbsolutePath($uploadDir);
+    }
+
+    /**
+     * Prepend path with scope info
+     *
+     * E.g. 'stores/2/path' , 'websites/3/path', 'default/path'
+     *
+     * @param string $path
+     * @return string
+     */
+    protected function _prependScopeInfo($path)
+    {
+        $scopeInfo = $this->getScope();
+        if (ScopeConfigInterface::SCOPE_TYPE_DEFAULT != $this->getScope()) {
+            $scopeInfo .= '/' . $this->getScopeId();
+        }
+        return $scopeInfo . '/' . $path;
+    }
+
+    /**
+     * Add scope info to path
+     *
+     * E.g. 'path/stores/2' , 'path/websites/3', 'path/default'
+     *
+     * @param string $path
+     * @return string
+     */
+    protected function _appendScopeInfo($path)
+    {
+        $path .= '/' . $this->getScope();
+        if (ScopeConfigInterface::SCOPE_TYPE_DEFAULT != $this->getScope()) {
+            $path .= '/' . $this->getScopeId();
+        }
+        return $path;
+    }
+
+    /**
+     * Getter for allowed extensions of uploaded files
+     *
+     * @return array
+     */
+    protected function _getAllowedExtensions()
+    {
+        return [];
     }
 }

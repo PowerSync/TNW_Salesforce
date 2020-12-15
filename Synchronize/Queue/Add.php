@@ -11,6 +11,7 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Message\MessageInterface;
 use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\MessageQueue\PublisherAdapter;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteEmulator;
 use TNW\Salesforce\Model\Queue;
@@ -23,10 +24,12 @@ use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool;
 class Add
 {
     const DIRECT_ADD_TO_QUEUE_COUNT_LIMIT = 200;
+
+    const TOPIC_NAME = 'tnw_salesforce.sync.realtime';
     /**
      * @var string
      */
-    private $entityType;
+    protected $entityType;
 
     /**
      * @var Unit[]
@@ -36,51 +39,59 @@ class Add
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    protected $storeManager;
 
     /**
      * @var Pool
      */
-    private $dividerPool;
+    protected $dividerPool;
 
     /**
      * @var WebsiteEmulator
      */
-    private $websiteEmulator;
+    protected $websiteEmulator;
 
     /**
      * @var Synchronize
      */
-    private $synchronizeEntity;
+    protected $synchronizeEntity;
 
     /**
      * @var \TNW\Salesforce\Model\ResourceModel\Queue
      */
-    private $resourceQueue;
+    protected $resourceQueue;
 
     /**
      * @var PreQueue
      */
-    private $resourcePreQueue;
+    protected $resourcePreQueue;
 
     /**
      * @var ManagerInterface
      */
-    private $messageManager;
+    protected $messageManager;
 
     /** @var State */
-    private $state;
+    protected $state;
 
     /**
-     * Entity constructor.
-     * @param string $entityType
-     * @param Unit[] $resolves
+     * @var PublisherAdapter
+     */
+    protected $publisher;
+
+    /**
+     * Add constructor.
+     * @param $entityType
+     * @param array $resolves
      * @param StoreManagerInterface $storeManager
      * @param Pool $dividerPool
      * @param WebsiteEmulator $websiteEmulator
      * @param Synchronize $synchronizeEntity
      * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
+     * @param PreQueue $resourcePreQueue
      * @param ManagerInterface $messageManager
+     * @param State $state
+     * @param PublisherAdapter $publisher
      */
     public function __construct(
         $entityType,
@@ -92,7 +103,8 @@ class Add
         \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue,
         PreQueue $resourcePreQueue,
         ManagerInterface $messageManager,
-        State $state
+        State $state,
+        PublisherAdapter $publisher
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -104,6 +116,7 @@ class Add
         $this->resourcePreQueue = $resourcePreQueue;
         $this->messageManager = $messageManager;
         $this->state = $state;
+        $this->publisher = $publisher;
     }
 
     /**
@@ -114,7 +127,6 @@ class Add
      */
     public function addToQueue(array $entityIds)
     {
-//        $entityIds = array_filter($entityIds);
         if (empty($entityIds)) {
             return;
         }
@@ -175,10 +187,7 @@ class Add
 
         if ($syncType === Config::DIRECT_SYNC_TYPE_REALTIME) {
             // Sync realtime type
-            $this->websiteEmulator->wrapEmulationWebsite(
-                [$this->synchronizeEntity, 'synchronizeToWebsite'],
-                $websiteId
-            );
+            $this->publisher->publish(self::TOPIC_NAME, (string) $websiteId);
             return;
         }
 
