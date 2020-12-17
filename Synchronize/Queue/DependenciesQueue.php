@@ -31,6 +31,11 @@ class DependenciesQueue
     private $config;
 
     /**
+     * @var string[][]
+     */
+    protected $childrenList = [];
+
+    /**
      * PreQueueCommand constructor.
      * @param array $queueAddPool
      * @param PreQueue $resourcePreQueue
@@ -51,5 +56,52 @@ class DependenciesQueue
         $this->state = $state;
         $this->timezone = $timezone;
         $this->config = $config;
+    }
+
+    /**
+     * Retrieve children codes grouped by resolve codes
+     *
+     * @return string[][]
+     */
+    public function getChildrenList()
+    {
+        if (!$this->childrenList) {
+            $childrenList = [];
+            if (isset($this->queueAddPool)) {
+                foreach ($this->queueAddPool as $entity) {
+                    if (isset($entity->resolves)) {
+                        foreach ($entity->resolves as $resolve) {
+                            foreach ($resolve->children() as $child) {
+                                $this->childrenList[$resolve->code()][] = $child->code();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $this->childrenList;
+    }
+
+    /**
+     * Retrieve resolves code array by entity type
+     *
+     * @param string $entityType
+     * @return string[]
+     */
+    public function getResolvesCodes(string $entityType)
+    {
+        $resolves = [];
+        if (
+            isset($this->queueAddPool)
+            && isset($this->queueAddPool[$entityType])
+            && isset($this->queueAddPool[$entityType]->resolves)
+        ) {
+            foreach ($this->queueAddPool[$entityType]->resolves as $item) {
+                $resolves[] = $item->code();
+            }
+        }
+
+        return $resolves;
     }
 }

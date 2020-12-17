@@ -253,13 +253,7 @@ class Queue extends AbstractModel
      */
     public function isError()
     {
-        return in_array($this->_getData('status'), [
-            self::STATUS_ERROR,
-            self::STATUS_ERROR_INPUT_UPSERT,
-            self::STATUS_ERROR_INPUT_LOOKUP,
-            self::STATUS_ERROR_OUTPUT_UPSERT,
-            self::STATUS_ERROR_OUTPUT_LOOKUP,
-        ], true);
+        return in_array($this->_getData('status'), self::ERROR_STATUSES, true);
     }
 
     /**
@@ -269,14 +263,21 @@ class Queue extends AbstractModel
      */
     public function isSuccess()
     {
-        return in_array($this->_getData('status'), [
-            self::STATUS_SKIPPED,
-            self::STATUS_COMPLETE
-        ], true);
+        return in_array($this->_getData('status'), self::SUCCESS_STATUSES, true);
     }
 
     /**
-     * Is Error
+     * Is Process
+     *
+     * @return bool
+     */
+    public function isProcess()
+    {
+        return in_array($this->_getData('status'), self::PROCESS_STATUSES, true);
+    }
+
+    /**
+     * Is Skipped
      *
      * @return bool
      */
@@ -286,7 +287,7 @@ class Queue extends AbstractModel
     }
 
     /**
-     * Is Error
+     * Is Complete
      *
      * @return bool
      */
