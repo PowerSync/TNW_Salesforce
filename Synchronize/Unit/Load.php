@@ -117,40 +117,44 @@ class Load extends Synchronize\Unit\UnitAbstract
     {
         $this->cache['entities'] = $index = [];
         foreach ($this->queues as $queue) {
-            $entity = $this->loadEntity($queue);
-            if (empty($entity)) {
-                $message[] = __('QueueId item %1 is not available anymore', $queue->getId());
-                continue;
-            }
-
-            $entity->setData('_queue', $queue);
-
-            $this->cache[$entity]['queue'] = $queue;
-
-            foreach ($this->entityLoaders as $entityType => $entityLoader) {
-                $subEntity = $entityLoader->get($entity);
-                if (!empty($subEntity)) {
-                    foreach ($queue->dependenciesByEntityType($this->entityTypeMap($entityType)) as $_queue) {
-                        $subEntity->addData($_queue->getAdditional());
-                    }
-
-                    $this->cache[$entity]['entities'][$entityType] = $subEntity;
+            try {
+                $entity = $this->loadEntity($queue);
+                if (empty($entity)) {
+                    $message[] = __('QueueId item %1 is not available anymore', $queue->getId());
+                    continue;
                 }
-            }
 
-            if (null !== $this->entityObject && null !== $entity->getId()) {
-                $this->entityObject->load($entity, $entity->getData('config_website'));
-            }
+                $entity->setData('_queue', $queue);
 
-            $hash = $this->hash->calculateEntity($entity);
-            if (isset($index[$hash])) {
-                $this->cache['duplicates'][$index[$hash]][] = $entity;
-                $entity = $index[$hash];
-            }
+                $this->cache[$entity]['queue'] = $queue;
 
-            $index[$hash] = $this->cache['entities'][$entity] = $entity;
-            $this->cache['websiteIds'][$entity] = $this->websiteId($entity);
-            $message[] = __('Entity %1 loaded', $this->identification->printEntity($entity));
+                foreach ($this->entityLoaders as $entityType => $entityLoader) {
+                    $subEntity = $entityLoader->get($entity);
+                    if (!empty($subEntity)) {
+                        foreach ($queue->dependenciesByEntityType($this->entityTypeMap($entityType)) as $_queue) {
+                            $subEntity->addData($_queue->getAdditional());
+                        }
+
+                        $this->cache[$entity]['entities'][$entityType] = $subEntity;
+                    }
+                }
+
+                if (null !== $this->entityObject && null !== $entity->getId()) {
+                    $this->entityObject->load($entity, $entity->getData('config_website'));
+                }
+
+                $hash = $this->hash->calculateEntity($entity);
+                if (isset($index[$hash])) {
+                    $this->cache['duplicates'][$index[$hash]][] = $entity;
+                    $entity = $index[$hash];
+                }
+
+                $index[$hash] = $this->cache['entities'][$entity] = $entity;
+                $this->cache['websiteIds'][$entity] = $this->websiteId($entity);
+                $message[] = __('Entity %1 loaded', $this->identification->printEntity($entity));
+            } catch (\Exception $e) {
+                $this->group()->messageError('Magento entity loading error, queueId: %s. Error: %s', $queue->getId(), $e->getMessage());
+            }
         }
 
         if (!empty($message)) {
