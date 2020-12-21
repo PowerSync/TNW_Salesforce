@@ -188,12 +188,16 @@ class Mapping extends Synchronize\Unit\UnitAbstract
         $object = [];
 
         foreach ($mappers as $mapper) {
-            $value = $this->value($entity, $mapper);
-            if (null === $value) {
-                continue;
-            }
+            try {
+                $value = $this->value($entity, $mapper);
+                if (null === $value) {
+                    continue;
+                }
 
-            $object[$mapper->getSalesforceAttributeName()] = $value;
+                $object[$mapper->getSalesforceAttributeName()] = $value;
+            } catch (\Exception $e) {
+                $this->group()->messageError('The "%s" field mapping error: %s', $mapper->getSalesforceAttributeName(), $e->getMessage());
+            }
         }
 
         $salesforce = $this->findSalesforce($entity);
