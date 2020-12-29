@@ -57,7 +57,7 @@ class ProcessingUpsertInput extends ProcessingAbstract
         $queue = $this->load()->get('%s/queue', $entity);
 
         if ($this->isEntityEmpty($entity)) {
-            throw new Exception(__('The entity related to the queue record #%1 is not available anymore', $queue->getId()));
+            return __('The entity related to the queue record #%1 is not available anymore', $queue->getId());
         }
 
         if ($queue->isProcessInputUpsert()) {
