@@ -8,6 +8,7 @@
             </general>
             <salesforce>
                 <wsdl>var/enterprise.wsdl.xml</wsdl>
+                <mq_mode>0</mq_mode>
             </salesforce>
             <synchronization>
                 <page_size_from_magento>500</page_size_from_magento>

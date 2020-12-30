@@ -6,6 +6,8 @@ use Magento\Framework\Amqp\Config as AmqpConfig;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\MessageQueue\Publisher\ConfigInterface as PublisherConfig;
 use Magento\Framework\MessageQueue\PublisherInterface;
+use TNW\Salesforce\Model\Config;
+use TNW\Salesforce\Model\Config\Source\MQ\Mode;
 
 /**
  * Created for the Plugin only
@@ -30,14 +32,19 @@ class PublisherAdapter
      */
     protected $amqpConfig;
 
+    /** @var Config  */
+    protected $config;
+
     /**
      * Publisher constructor.
      * @param PublisherInterface $publisher
      */
     public function __construct(
-        PublisherInterface $publisher
+        PublisherInterface $publisher,
+        Config $config
     ) {
         $this->publisher = $publisher;
+        $this->config = $config;
     }
 
     /**
@@ -87,6 +94,10 @@ class PublisherAdapter
      */
     public function detectConnectionName($initTopicName)
     {
+        if (!empty($this->config->getMQMode()) && $this->config->getMQMode() !== Mode::AUTOMATIC) {
+            return $this->config->getMQMode();
+        }
+
         $topicName = $initTopicName . '.amqp';
         try {
             $connectionName = $this->getPublisherConfig()->getPublisher($topicName)->getConnection()->getName();
