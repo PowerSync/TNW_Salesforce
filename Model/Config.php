@@ -531,4 +531,15 @@ class Config extends DataObject
     {
         return !$additionalAttempts ? $this->getSyncMaxAttemptsCount() : $this->getSyncMaxAttemptsCount() * 2;
     }
+
+    /**
+     * Get Page Size
+     *
+     * @param int|null $websiteId
+     * @return int
+     */
+    public function getMQMode($websiteId = null)
+    {
+        return $this->getStoreConfig('tnwsforce_general/salesforce/mq_mode', $websiteId);
+    }
 }
