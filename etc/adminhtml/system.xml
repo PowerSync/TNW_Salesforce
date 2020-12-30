@@ -59,6 +59,11 @@
                     <button_label>Test Connection</button_label>
                     <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Salesforce\TestConnection</frontend_model>
                 </field>
+
+                <field id="mq_mode" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="0">
+                    <label>Prefer MQ mode</label>
+                    <source_model>TNW\Salesforce\Model\Config\Source\MQ\Mode</source_model>
+                </field>
             </group>
 
             <group id="synchronization" translate="label" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
@@ -125,7 +130,7 @@
                     <label>Log clean up</label>
                     <comment>Automatically clean up old log files older than X number of days</comment>
                 </field>
-                
+
             </group>
         </section>
 
