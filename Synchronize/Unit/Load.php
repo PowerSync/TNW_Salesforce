@@ -5,6 +5,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Model\ResourceModel\Objects;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -53,6 +54,11 @@ class Load extends Synchronize\Unit\UnitAbstract
     private $entityTypeMapping;
 
     /**
+     * @var Objects
+     */
+    protected $objects;
+
+    /**
      * Load constructor.
      * @param string $name
      * @param string $magentoType
@@ -62,6 +68,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Unit\HashInterface $hash
+     * @param Objects $objects
      * @param SalesforceIdStorage|null $entityObject
      * @param EntityLoaderAbstract[] $entityLoaders
      * @param array $entityTypeMapping
@@ -75,6 +82,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Unit\HashInterface $hash,
+        Objects $objects,
         SalesforceIdStorage $entityObject = null,
         array $entityLoaders = [],
         array $entityTypeMapping = []
@@ -85,6 +93,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->loaders = $loaders;
         $this->identification = $identification;
         $this->hash = $hash;
+        $this->objects = $objects;
         $this->entityObject = $entityObject;
         $this->entityLoaders = $entityLoaders;
         $this->entityTypeMapping = $entityTypeMapping;
@@ -131,6 +140,25 @@ class Load extends Synchronize\Unit\UnitAbstract
                 foreach ($this->entityLoaders as $entityType => $entityLoader) {
                     $subEntity = $entityLoader->get($entity);
                     if (!empty($subEntity)) {
+                        if (!$subEntity->getData($subEntity->getIdFieldName())) {
+                            $salesforceIds = $this->objects->loadObjectIds(
+                                $queue->getEntityId(),
+                                $queue->getEntityType(),
+                                $queue->getWebsiteId()
+                            );
+                            if ($salesforceIds) {
+                                foreach (
+                                    $entityLoader->getSalesforceIdStorage()->getMappingAttribute()
+                                    as $salesforceIdName => $salesforceType
+                                ) {
+                                    if (isset($salesforceIds[$salesforceType])) {
+                                        $subEntity->addData([$salesforceIdName => $salesforceIds[$salesforceType]]);
+                                    }
+                                }
+
+                            }
+                        }
+
                         foreach ($queue->dependenciesByEntityType($this->entityTypeMap($entityType)) as $_queue) {
                             $subEntity->addData($_queue->getAdditional());
                         }

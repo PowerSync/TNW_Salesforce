@@ -43,6 +43,14 @@ abstract class EntityLoaderAbstract
     }
 
     /**
+     * @return SalesforceIdStorage|null
+     */
+    public function getSalesforceIdStorage()
+    {
+        return $this->salesforceIdStorage;
+    }
+
+    /**
      * Load
      *
      * @param AbstractModel $entity
