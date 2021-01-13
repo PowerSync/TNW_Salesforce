@@ -1,10 +1,11 @@
 <?php
 namespace TNW\Salesforce\Ui\Component\Listing\Columns;
 
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
+use Magento\Framework\View\Element\UiComponentFactory;
+use Magento\Store\Model\StoreManagerInterface;
 use Magento\Ui\Component\Listing\Columns\Column;
+use TNW\Salesforce\Model\ResourceModel\Objects;
 
 /**
  * Class SyncStatus
@@ -42,33 +43,36 @@ class SyncStatus extends Column
      */
     public function prepareDataSource(array $dataSource)
     {
-        /** @var string $syncStatusName */
         $syncStatusName = 'sforce_sync_status';
 
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
 
-                /** @var string $type */
                 $type = '-warning error';
                 $title = __('Out of Sync');
 
                 if (key_exists($syncStatusName, $item)) {
                     $value = $item[$syncStatusName];
                     if (is_array($value) && !empty($value)) {
-                        $value = reset($value) ? true : false;
-                    } else {
-                        $value = $value ? true : false;
+                        $value = reset($value);
                     }
-                    if ($value) {
-                        /** @var string $html */
-                        $type = '-success success';
-                        $title = __('In Sync');
+                    switch ($value) {
+                        case Objects::SYNC_STATUS_IN_SYNC:
+                            $type = '-success success';
+                            $title = __('In Sync');
+                            break;
+                        case Objects::SYNC_STATUS_IN_SYNC_PENDING:
+                        case Objects::SYNC_STATUS_OUT_OF_SYNC_PENDING:
+                            $type = '-pending pending';
+                            $title = __('Pending');
+                            break;
+                        default:
+                            break;
                     }
                 }
 
                 $item[$syncStatusName . '_html'] =
-                    '<div class="message message' . $type .
-                    ' sync-status-salesforce" title="'.$title.'"></div>';
+                    '<div class="message message' . $type . ' sync-status-salesforce" title="' . $title . '"></div>';
             }
         }
 
@@ -81,7 +85,7 @@ class SyncStatus extends Column
     protected function applySorting()
     {
         $dataProdider = $this->getContext()->getDataProvider();
-        if(!$dataProdider instanceof \Magento\Ui\DataProvider\AbstractDataProvider) {
+        if (!$dataProdider instanceof \Magento\Ui\DataProvider\AbstractDataProvider) {
             parent::applySorting();
             return;
         }
