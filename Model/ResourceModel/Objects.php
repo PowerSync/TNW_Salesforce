@@ -6,11 +6,6 @@ use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 class Objects extends AbstractDb
 {
-    public const SYNC_STATUS_OUT_OF_SYNC = 0;
-    public const SYNC_STATUS_IN_SYNC = 1;
-    public const SYNC_STATUS_IN_SYNC_PENDING = 10;
-    public const SYNC_STATUS_OUT_OF_SYNC_PENDING = 11;
-
     /**
      * @var \Magento\Framework\DB\Select
      */

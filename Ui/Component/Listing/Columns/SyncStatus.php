@@ -5,7 +5,8 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Ui\Component\Listing\Columns\Column;
-use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Model\Objects\Status\Options;
+use TNW\Salesforce\ViewModel\SyncStatus as ViewSyncStatus;
 
 /**
  * Class SyncStatus
@@ -17,10 +18,16 @@ class SyncStatus extends Column
     protected $storeManager;
 
     /**
+     * @var ViewSyncStatus
+     */
+    protected $viewSyncStatus;
+
+    /**
      * SyncStatus constructor.
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
      * @param StoreManagerInterface $storeManagerInterface
+     * @param ViewSyncStatus $viewSyncStatus
      * @param array $components
      * @param array $data
      */
@@ -28,10 +35,12 @@ class SyncStatus extends Column
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
         StoreManagerInterface $storeManagerInterface,
+        ViewSyncStatus $viewSyncStatus,
         array $components,
         array $data
     ) {
         $this->storeManager = $storeManagerInterface;
+        $this->viewSyncStatus = $viewSyncStatus;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 
@@ -47,32 +56,16 @@ class SyncStatus extends Column
 
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
-
-                $type = '-warning error';
-                $title = __('Out of Sync');
+                $value = Options::STATUS_OUT_OF_SYNC;
 
                 if (key_exists($syncStatusName, $item)) {
                     $value = $item[$syncStatusName];
                     if (is_array($value) && !empty($value)) {
                         $value = reset($value);
                     }
-                    switch ($value) {
-                        case Objects::SYNC_STATUS_IN_SYNC:
-                            $type = '-success success';
-                            $title = __('In Sync');
-                            break;
-                        case Objects::SYNC_STATUS_IN_SYNC_PENDING:
-                        case Objects::SYNC_STATUS_OUT_OF_SYNC_PENDING:
-                            $type = '-pending pending';
-                            $title = __('Pending');
-                            break;
-                        default:
-                            break;
-                    }
                 }
 
-                $item[$syncStatusName . '_html'] =
-                    '<div class="message message' . $type . ' sync-status-salesforce" title="' . $title . '"></div>';
+                $item[$syncStatusName . '_html'] = $this->viewSyncStatus->getStatusHtml((int) $value);
             }
         }
 
