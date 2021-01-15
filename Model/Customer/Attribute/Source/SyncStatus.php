@@ -4,6 +4,7 @@ namespace TNW\Salesforce\Model\Customer\Attribute\Source;
 /**
  * Class SyncStatus
  * @package TNW\Salesforce\Model\Customer\Attribute\Source
+ * @deprecated use TNW\Salesforce\Model\Objects\Status\Options instead
  */
 class SyncStatus extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSource
 {
