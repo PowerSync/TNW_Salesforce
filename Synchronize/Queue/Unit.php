@@ -2,7 +2,10 @@
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Model\ResourceModel\Objects;
 
 /**
  * Sync Unit
@@ -70,6 +73,21 @@ class Unit
     private $queues = [];
 
     /**
+     * @var Objects
+     */
+    protected $resourceObjects;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
+
+    /**
+     * @var RequestInterface
+     */
+    protected $request;
+
+    /**
      * Queue constructor.
      * @param string $code
      * @param string $description
@@ -78,6 +96,9 @@ class Unit
      * @param array $generators
      * @param \TNW\Salesforce\Model\QueueFactory $queueFactory
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param Objects $resourceObjects
+     * @param StoreManagerInterface $storeManager
+     * @param RequestInterface $request
      * @param SkipInterface[] $skipRules
      * @param string[] $parents
      * @param string[] $children
@@ -91,12 +112,14 @@ class Unit
         array $generators,
         \TNW\Salesforce\Model\QueueFactory $queueFactory,
         \Magento\Framework\ObjectManagerInterface $objectManager,
+        Objects $resourceObjects,
+        StoreManagerInterface $storeManager,
+        RequestInterface $request,
         array $skipRules = [],
         array $parents = [],
         array $children = [],
         $ignoreFindGeneratorException = false
-    )
-    {
+    ) {
         $this->code = $code;
         $this->entityType = $entityType;
         $this->objectType = $objectType;
@@ -104,6 +127,9 @@ class Unit
         $this->generators = $generators;
         $this->queueFactory = $queueFactory;
         $this->objectManager = $objectManager;
+        $this->resourceObjects = $resourceObjects;
+        $this->storeManager = $storeManager;
+        $this->request = $request;
         $this->skipRules = $skipRules;
         $this->parents = $parents;
         $this->children = $children;
@@ -128,6 +154,16 @@ class Unit
     public function entityType()
     {
         return $this->entityType;
+    }
+
+    /**
+     * Get object type
+     *
+     * @return string
+     */
+    public function objectType()
+    {
+        return $this->objectType;
     }
 
     /**
@@ -202,9 +238,17 @@ class Unit
             ))
         ]]);
 
-         if ($this->skipQueue($queue)){
-             return [];
-         }
+        if ($this->skipQueue($queue)) {
+            $storeId = (int) $this->request->getParam('store', 0);
+            $store = $this->storeManager->getStore($storeId);
+            $websiteId = $store->getWebsiteId();
+            if (count($this->resourceObjects->loadObjectIds($entityId, $this->entityType, $websiteId))) {
+                $this->resourceObjects->unsetPendingStatus($entityId, $this->entityType, $websiteId);
+            }
+
+            return [];
+        }
+
         return $queue;
     }
 
