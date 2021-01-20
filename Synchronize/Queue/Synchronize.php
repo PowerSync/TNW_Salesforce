@@ -79,8 +79,7 @@ class Synchronize
         Config $salesforceConfig,
         State $state,
         $isCheck = false
-    )
-    {
+    ) {
         $this->type = $type;
         $this->synchronizeQueue = $synchronizeQueue;
         $this->collectionQueueFactory = $collectionQueueFactory;
@@ -159,12 +158,6 @@ class Synchronize
         } catch (Exception $e) {
             if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
                 $this->messageManager->addErrorMessage($e->getMessage());
-            }
-        } finally {
-            if ($this->type === Config::DIRECT_SYNC_TYPE_REALTIME) {
-                foreach ($collection as $queue) {
-                    $collection->getResource()->delete($queue);
-                }
             }
         }
     }
