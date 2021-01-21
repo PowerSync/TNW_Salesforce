@@ -305,7 +305,7 @@ class Objects extends AbstractDb
     {
         $whereCondition = 'entity_id = %d AND magento_type = \'%s\' AND website_id = %d AND status > 9';
         if ($salesforceType) {
-            $whereCondition .= ' AND magento_type = \'%s\'';
+            $whereCondition .= ' AND salesforce_type = \'%s\'';
             $where = new \Zend_Db_Expr(sprintf($whereCondition, $entityId, $magentoType, $websiteId, $salesforceType));
         } else {
             $where = new \Zend_Db_Expr(sprintf($whereCondition, $entityId, $magentoType, $websiteId));
