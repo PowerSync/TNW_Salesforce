@@ -297,21 +297,24 @@ class Objects extends AbstractDb
      * @param int $entityId
      * @param string $magentoType
      * @param int $websiteId
+     * @param string|null $salesforceType
      *
      * @throws LocalizedException
      */
-    public function unsetPendingStatus($entityId, $magentoType, $websiteId)
+    public function unsetPendingStatus($entityId, $magentoType, $websiteId, $salesforceType = null)
     {
-        $this->getConnection()
-            ->update(
-                $this->getMainTable(),
-                ['status' => new \Zend_Db_Expr('status - 10')],
-                new \Zend_Db_Expr(sprintf(
-                    'entity_id = %d AND magento_type = \'%s\' AND website_id = %d AND status > 9',
-                    $entityId,
-                    $magentoType,
-                    $websiteId
-                ))
-            );
+        $whereCondition = 'entity_id = %d AND magento_type = \'%s\' AND website_id = %d AND status > 9';
+        if ($salesforceType) {
+            $whereCondition .= ' AND magento_type = \'%s\'';
+            $where = new \Zend_Db_Expr(sprintf($whereCondition, $entityId, $magentoType, $websiteId, $salesforceType));
+        } else {
+            $where = new \Zend_Db_Expr(sprintf($whereCondition, $entityId, $magentoType, $websiteId));
+        }
+
+        $this->getConnection()->update(
+            $this->getMainTable(),
+            ['status' => new \Zend_Db_Expr('status - 10')],
+            $where
+        );
     }
 }

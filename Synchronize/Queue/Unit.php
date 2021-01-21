@@ -212,10 +212,11 @@ class Unit
      * @param array $identifiers
      * @param array $additionalLoad
      * @return \TNW\Salesforce\Model\Queue
+     * @throws LocalizedException
      */
     public function createQueue($loadBy, $entityId, $baseEntityId, array $identifiers, array $additionalLoad = [])
     {
-         $queue = $this->queueFactory->create(['data' => [
+        $queue = $this->queueFactory->create(['data' => [
             'queue_id' => uniqid('', true),
             'code' => $this->code,
             'description' => $this->description($identifiers),
@@ -243,7 +244,8 @@ class Unit
             $store = $this->storeManager->getStore($storeId);
             $websiteId = $store->getWebsiteId();
             if (count($this->resourceObjects->loadObjectIds($entityId, $this->entityType, $websiteId))) {
-                $this->resourceObjects->unsetPendingStatus($entityId, $this->entityType, $websiteId);
+                $this->resourceObjects
+                    ->unsetPendingStatus($entityId, $this->entityType, $websiteId, $this->objectType);
             }
 
             return [];
@@ -276,7 +278,7 @@ class Unit
      * @param int[] $entityIds
      * @param array $additional
      * @param int $websiteId
-     * @return \TNW\Salesforce\Model\Queue[]
+     * @return Queue[]
      * @throws LocalizedException
      */
     public function generateQueues($loadBy, $entityIds, array $additional, $websiteId, $relatedUnitCode)
