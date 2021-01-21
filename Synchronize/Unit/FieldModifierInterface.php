@@ -9,4 +9,11 @@ interface FieldModifierInterface extends UnitInterface
      * @return string
      */
     public function fieldSalesforceId();
+
+    /**
+     * Additional Salesforce Ids
+     *
+     * @return array
+     */
+    public function additionalSalesforceId();
 }

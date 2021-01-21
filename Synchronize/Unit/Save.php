@@ -93,15 +93,17 @@ class Save extends Synchronize\Unit\UnitAbstract
     {
         $message = [];
 
-        $attributeNames = $this->fieldModifier()->fieldSalesforceId();
-        if (!is_array($attributeNames)) {
-            $attributeNames = ['Id' => $attributeNames];
-        }
+        $attributeNames = $this->fieldModifier()->additionalSalesforceId();
+        $attributeNames['Id'] = $this->fieldModifier()->fieldSalesforceId();
 
         foreach ($attributeNames as $attributeName) {
             foreach ($entities as $entity) {
                 try {
                     $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
+
+                    if (!$salesforceId) {
+                        continue;
+                    }
 
                     // Save Salesforce Id
                     $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
