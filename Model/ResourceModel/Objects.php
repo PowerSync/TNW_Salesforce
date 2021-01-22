@@ -1,6 +1,7 @@
 <?php
 namespace TNW\Salesforce\Model\ResourceModel;
 
+use Magento\Framework\Exception\LocalizedException;
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 class Objects extends AbstractDb
@@ -57,7 +58,7 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function _construct()
     {
@@ -228,7 +229,7 @@ class Objects extends AbstractDb
     /**
      * @param array $records
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function saveRecords(array $records)
     {
@@ -258,7 +259,7 @@ class Objects extends AbstractDb
      * @param int $status
      * @param int $websiteId
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function saveStatus($entityId, $magentoType, $status, $websiteId)
     {
@@ -268,5 +269,52 @@ class Objects extends AbstractDb
                 ['status' => (int)$status],
                 "entity_id = $entityId AND magento_type = '$magentoType' AND website_id = {$websiteId}"
             );
+    }
+
+    /**
+     * @param int $entityId
+     * @param string $magentoType
+     * @param int $websiteId
+     *
+     * @throws LocalizedException
+     */
+    public function setPendingStatus($entityId, $magentoType, $websiteId)
+    {
+        $this->getConnection()
+            ->update(
+                $this->getMainTable(),
+                ['status' => new \Zend_Db_Expr('(status + 10)')],
+                new \Zend_Db_Expr(sprintf(
+                    'entity_id = %d AND magento_type = \'%s\' AND website_id = %d AND status < 10',
+                    $entityId,
+                    $magentoType,
+                    $websiteId
+                ))
+            );
+    }
+
+    /**
+     * @param int $entityId
+     * @param string $magentoType
+     * @param int $websiteId
+     * @param string|null $salesforceType
+     *
+     * @throws LocalizedException
+     */
+    public function unsetPendingStatus($entityId, $magentoType, $websiteId, $salesforceType = null)
+    {
+        $whereCondition = 'entity_id = %d AND magento_type = \'%s\' AND website_id = %d AND status > 9';
+        if ($salesforceType) {
+            $whereCondition .= ' AND salesforce_type = \'%s\'';
+            $where = new \Zend_Db_Expr(sprintf($whereCondition, $entityId, $magentoType, $websiteId, $salesforceType));
+        } else {
+            $where = new \Zend_Db_Expr(sprintf($whereCondition, $entityId, $magentoType, $websiteId));
+        }
+
+        $this->getConnection()->update(
+            $this->getMainTable(),
+            ['status' => new \Zend_Db_Expr('status - 10')],
+            $where
+        );
     }
 }

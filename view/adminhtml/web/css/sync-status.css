@@ -1,4 +1,6 @@
 div.sync-status-salesforce{
     background:transparent;
+}
+.data-grid-cell-content div.sync-status-salesforce{
     margin-left: 20%;
 }
