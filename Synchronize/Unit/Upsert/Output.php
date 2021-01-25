@@ -49,6 +49,11 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     private $fieldSalesforceId;
 
     /**
+     * @var array
+     */
+    protected $additionalSalesforceId;
+
+    /**
      * Upsert constructor.
      *
      * @param string $name
@@ -62,6 +67,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      * @param Synchronize\Transport\Calls\Upsert\Transport\OutputFactory $outputFactory
      * @param Synchronize\Transport\Calls\Upsert\OutputInterface $process
      * @param array $dependents
+     * @param array $additionalSalesforceId
      */
     public function __construct(
         $name,
@@ -74,13 +80,15 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
         Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Upsert\Transport\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\Upsert\OutputInterface $process,
-        array $dependents = []
+        array $dependents = [],
+        array $additionalSalesforceId = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsertInput]));
 
         $this->load = $load;
         $this->salesforceType = $salesforceType;
         $this->fieldSalesforceId = $fieldSalesforceId;
+        $this->additionalSalesforceId = $additionalSalesforceId;
         $this->identification = $identification;
         $this->outputFactory = $outputFactory;
         $this->process = $process;
@@ -131,6 +139,14 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     public function fieldSalesforceId()
     {
         return $this->fieldSalesforceId;
+    }
+
+    /**
+     * @inheridoc
+     */
+    public function additionalSalesforceId()
+    {
+        return $this->additionalSalesforceId;
     }
 
     /**

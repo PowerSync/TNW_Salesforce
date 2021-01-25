@@ -250,4 +250,12 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     {
         return $this->salesforceType;
     }
+
+    /**
+     * @inheridoc
+     */
+    public function additionalSalesforceId()
+    {
+        return [];
+    }
 }

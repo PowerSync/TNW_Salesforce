@@ -140,13 +140,12 @@ class Mapping extends Synchronize\Unit\Mapping
         if ($entity instanceof Customer &&
             strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0
         ) {
-            if ($this->customerConfig->contactAssignee($entity->getData('config_website')) === ContactAssignee::DEFAULT_OWNER ||
-                !$this->unit('lookup')->get('%s/record/OwnerId', $entity)
-            ) {
+            if ($this->customerConfig->contactAssignee($entity->getData('config_website')) === ContactAssignee::DEFAULT_OWNER) {
                 return $this->customerConfig->defaultOwner($entity->getData('config_website'));
             }
 
-            return $this->unit('lookup')->get('%s/record/OwnerId', $entity);
+            $owner = $this->objectByEntityType($entity, 'customer')->getSforceAccountOwnerId();
+            return $owner ?: $this->customerConfig->getDefaultOwner($entity->getData('config_website'));
         }
 
         return parent::defaultValue($entity, $mapper);

@@ -354,10 +354,8 @@ class Input extends Synchronize\Unit\UnitAbstract
             }
         }
 
-        $fieldName = $this->unit('upsertOutput')->fieldSalesforceId();
-        if (!is_array($fieldName)) {
-            $fieldName = ['Id' => $fieldName];
-        }
+        $fieldName = $this->unit('upsertOutput')->additionalSalesforceId();
+        $fieldName['Id'] = $this->unit('upsertOutput')->fieldSalesforceId();
 
         foreach ($fieldName as $sfkey => $mKey) {
             $entity->setData($mKey, $lookupObject[$sfkey]);

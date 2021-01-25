@@ -541,6 +541,7 @@
         <arguments>
             <argument name="synchronizeEntity" xsi:type="object">TNW\Synchronize\Queue\Realtime</argument>
         </arguments>
+        <plugin name="tnw_salesforce_pending_status" type="TNW\Salesforce\Plugin\Synchronize\Queue\Add" />
     </type>
 
     <type name="TNW\Salesforce\Model\Queue\Synchronize\Message\ProcessQueueMessage">
@@ -653,6 +654,10 @@
                 <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer</item>
             </argument>
         </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\ProcessingAbstract">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\ProcessingAbstract" />
     </type>
 
 </config>

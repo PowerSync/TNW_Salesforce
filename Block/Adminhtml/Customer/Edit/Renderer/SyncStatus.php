@@ -2,29 +2,30 @@
 
 namespace TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer;
 
+use TNW\Salesforce\ViewModel\SyncStatus as ViewSyncStatus;
 
 class SyncStatus extends \Magento\Framework\Data\Form\Element\Label
 {
-    /** @var \TNW\Salesforce\Model\Customer\Attribute\Source\SyncStatus */
-    private $syncStatus;
+    /**
+     * @var ViewSyncStatus
+     */
+    protected $viewSyncStatus;
 
     public function __construct(
         \Magento\Framework\Data\Form\Element\Factory $factoryElement,
         \Magento\Framework\Data\Form\Element\CollectionFactory $factoryCollection,
         \Magento\Framework\Escaper $escaper,
-        \TNW\Salesforce\Model\Customer\Attribute\Source\SyncStatus $syncStatus,
+        ViewSyncStatus $viewSyncStatus,
         array $data
     ) {
-        parent::__construct($factoryElement, $factoryCollection, $escaper,
-            $data);
-        $this->syncStatus = $syncStatus;
+        parent::__construct($factoryElement, $factoryCollection, $escaper, $data);
+        $this->viewSyncStatus = $viewSyncStatus;
     }
 
     public function getElementHtml()
     {
-        $value = $this->getValue() ? 1 : 0;
-        $this->setValue($this->syncStatus->getOptionText($value));
-
-        return parent::getElementHtml();
+        return '<div class="control-value">'
+            . $this->viewSyncStatus->getStatusHtml((int) $this->getValue())
+            . '</div>';
     }
 }
