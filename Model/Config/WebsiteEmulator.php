@@ -98,7 +98,6 @@ class WebsiteEmulator
      * @param int $websiteId
      * @param array $params
      * @return mixed
-     * @deprecated
      * @see execInWebsite
      * @throws \Magento\Framework\Exception\LocalizedException
      */
