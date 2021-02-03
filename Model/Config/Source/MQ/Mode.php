@@ -8,6 +8,7 @@ class Mode implements \Magento\Framework\Data\OptionSourceInterface
 {
     const RABBIT_MQ = 'amqp';
     const MYSQL_MQ = 'db';
+    const AUTOMATIC = '1000';
 
     /**
      * Return array of options as value-label pairs
