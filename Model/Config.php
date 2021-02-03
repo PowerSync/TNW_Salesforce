@@ -14,6 +14,7 @@ use Magento\Store\Api\WebsiteRepositoryInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Model\Config\WebsiteDetector;
+use TNW\SForceEnterprise\Model\Config\Source\Synchronization\Mode;
 
 /**
  * Class Config
@@ -158,6 +159,18 @@ class Config extends DataObject
     public function getSalesforceStatus($websiteId = null)
     {
         return (bool)$this->getStoreConfig('tnwsforce_general/salesforce/active', $websiteId);
+    }
+
+
+    /**
+     * Get Product Integration status
+     *
+     * @param int|null $websiteId
+     * @return bool
+     */
+    public function getReverseSyncEnabled($websiteId = null)
+    {
+        return $this->getStoreConfig('tnwsforce_general/salesforce/active', $websiteId) == Mode::SYNC_MODE_BOTH;
     }
 
     /**
@@ -540,6 +553,6 @@ class Config extends DataObject
      */
     public function getMQMode($websiteId = null)
     {
-        return $this->getStoreConfig('tnwsforce_general/salesforce/mq_mode', $websiteId);
+        return $this->getStoreConfig('tnwsforce_general/synchronization/mq_mode', $websiteId);
     }
 }

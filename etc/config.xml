@@ -5,12 +5,14 @@
         <tnwsforce_general>
             <general>
                 <active>0</active>
+                <mq_mode>db</mq_mode>
             </general>
             <salesforce>
                 <wsdl>var/enterprise.wsdl.xml</wsdl>
-                <mq_mode>db</mq_mode>
             </salesforce>
             <synchronization>
+                <sync_mode>0</sync_mode>
+                <sync_type_realtime>sync_type_realtime</sync_type_realtime>
                 <page_size_from_magento>500</page_size_from_magento>
                 <max_attempt_count>5</max_attempt_count>
             </synchronization>
