@@ -639,14 +639,6 @@
         </arguments>
     </virtualType>
 
-    <type name="Magento\Framework\Console\CommandList">
-        <arguments>
-            <argument name="commands" xsi:type="array">
-                <item name="tnw_salesforce_clean_system_logs_command" xsi:type="object">TNW\Salesforce\Console\Command\CleanSystemLogsCommand</item>
-            </argument>
-        </arguments>
-    </type>
-
     <type name="TNW\Salesforce\Synchronize\Queue\DependenciesQueue">
         <arguments>
             <argument name="queueAddPool" xsi:type="array">
