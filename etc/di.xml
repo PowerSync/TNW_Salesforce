@@ -660,4 +660,5 @@
         <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Synchronize\Unit\ProcessingAbstract" />
     </type>
 
+    <preference for="TNW\Salesforce\Api\MessageQueue\PublisherAdapter" type="TNW\Salesforce\MessageQueue\PublisherAdapter"/>
 </config>

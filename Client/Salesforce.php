@@ -153,6 +153,17 @@ class Salesforce extends DataObject
     {
         return (bool) $this->salesforceConfig->getSalesforceStatus($websiteId);
     }
+    /**
+     * Get Client Status
+     *
+     * @param  int|null $websiteId
+     *
+     * @return bool
+     */
+    public function getReverseSyncEnabled($websiteId = null)
+    {
+        return (bool) $this->salesforceConfig->getReverseSyncEnabled($websiteId);
+    }
 
     /**
      * Save cache

@@ -12,25 +12,13 @@ use TNW\Salesforce\Model\Config\Source\MQ\Mode;
 /**
  * Created for the Plugin only
  */
-class PublisherAdapter
+class PublisherAdapter implements \TNW\Salesforce\Api\MessageQueue\PublisherAdapter
 {
 
     /**
      * @var PublisherInterface
      */
     protected $publisher;
-
-    /**
-     * @var PublisherConfig
-     */
-    protected $publisherConfig;
-
-    /**
-     * Help check whether Amqp is configured.
-     *
-     * @var AmqpConfig
-     */
-    protected $amqpConfig;
 
     /** @var Config  */
     protected $config;
@@ -48,63 +36,17 @@ class PublisherAdapter
     }
 
     /**
-     * Get publisher config.
-     *
-     * @return PublisherConfig
-     *
-     * @deprecated 102.0.5
-     */
-    protected function getPublisherConfig()
-    {
-        if ($this->publisherConfig === null) {
-            $this->publisherConfig = ObjectManager::getInstance()->get(PublisherConfig::class);
-        }
-        return $this->publisherConfig;
-    }
-
-    /**
-     * Get Amqp config instance.
-     *
-     * @return AmqpConfig
-     *
-     * @deprecated 102.0.5
-     */
-    protected function getAmqpConfig()
-    {
-        if ($this->amqpConfig === null) {
-            $this->amqpConfig = ObjectManager::getInstance()->get(AmqpConfig::class);
-        }
-
-        return $this->amqpConfig;
-    }
-
-    /**
-     * Check Amqp is configured.
-     *
-     * @return bool
-     */
-    protected function isAmqpConfigured()
-    {
-        return $this->getAmqpConfig()->getValue(AmqpConfig::HOST) ? true : false;
-    }
-
-    /**
      * @param $initTopicName
      * @return string
      */
     public function detectConnectionName($initTopicName)
     {
-        if (!empty($this->config->getMQMode()) && $this->config->getMQMode() !== Mode::AUTOMATIC) {
-            return $this->config->getMQMode();
-        }
-
-        $topicName = $initTopicName . '.amqp';
-        try {
-            $connectionName = $this->getPublisherConfig()->getPublisher($topicName)->getConnection()->getName();
-            $connectionName = ($connectionName === 'amqp' && !$this->isAmqpConfigured()) ? 'db' : $connectionName;
-        } catch (Exception $e) {
+        if (!empty($this->config->getMQMode())) {
+            $connectionName = $this->config->getMQMode();
+        } else {
             $connectionName = 'db';
         }
+
         return $connectionName;
     }
 

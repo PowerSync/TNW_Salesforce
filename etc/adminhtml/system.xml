@@ -13,21 +13,25 @@
 
             <resource>TNW_Salesforce::config_general</resource>
 
-            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                <label>General</label>
+            <group id="extension_information" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Extensions &amp; Information</label>
                 <comment><![CDATA[<div class="message message-info">For installation &amp; configuration instructions visit our <a href="https://technweb.atlassian.net/wiki/spaces/IWS/pages/590839809/Starter+Package" target="_blank">online documentation</a>.</div>]]></comment>
                 <field id="version" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Base Version</label>
                     <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Extension\Version</frontend_model>
                 </field>
+                <depends>
+                    <field id="tnwsforce_general/synchronization/developer_mode">1</field>
+                </depends>
             </group>
 
-            <group id="salesforce" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+            <group id="salesforce" translate="label" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>Salesforce API</label>
 
                 <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1">
                     <label>Enable Saleseforce Integration</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <source_model>TNW\Salesforce\Model\Config\Source\Synchronization\Mode</source_model>
+
                 </field>
 
                 <field id="username" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -51,40 +55,40 @@
                     <comment><![CDATA[
                         An Enterprise WSDL file is required. <br />
                         After uploading the file, click on <strong>Save Config</strong> in the upper right-hand corner.
-                        You will be able to <strong>Test Connection</strong> after the configuration is saved.
+                        When <strong>Test Connection &amp; Apply Salesforce changes</strong> after the configuration is saved.
                     ]]></comment>
                 </field>
 
                 <field id="validate_vat_number" translate="button_label" sortOrder="62" showInDefault="1" showInWebsite="1">
-                    <button_label>Test Connection</button_label>
+                    <button_label>Test Connection &amp; Apply changes</button_label>
                     <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\Salesforce\TestConnection</frontend_model>
                 </field>
 
-                <field id="mq_mode" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="0">
-                    <label>Message Queue</label>
-                    <source_model>TNW\Salesforce\Model\Config\Source\MQ\Mode</source_model>
-                </field>
             </group>
 
             <group id="synchronization" translate="label" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
-                <label>Synchronization</label>
+                <label>Advanced</label>
+
+                <field id="developer_mode" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="0">
+                    <label>Developer Mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Enabling the developer mode exposes some additional system features. <strong style='color: red'>Use at your own risk.<strong>]]></comment>
+                </field>
+
                 <field id="page_size_from_magento" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Batch size</label>
                     <comment>The number of objects to include into a single batch. This a global setting for ALL objects.</comment>
                     <depends>
-                        <field id="tnwsforce_general/debug/developer_mode">1</field>
+                        <field id="tnwsforce_general/synchronization/developer_mode">1</field>
                     </depends>
                 </field>
             </group>
 
             <group id="debug" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>Debug and Logging</label>
-
-                <field id="developer_mode" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0">
-                    <label>Developer Mode</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Enabling the developer mode exposes some additional system features. <strong style='color: red'>Use at your own risk.<strong>]]></comment>
-                </field>
+                <depends>
+                    <field id="tnwsforce_general/synchronization/developer_mode">1</field>
+                </depends>
 
                 <field id="logstatus" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0">
                     <label>Enable Log</label>

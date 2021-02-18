@@ -68,7 +68,6 @@ class Testconnection extends Action
 
         $file = $this->getRequest()->getFiles('file');
         if (!empty($file)) {
-            $fileName = ($file && array_key_exists('name', $file)) ? $file['name'] : null;
 
             $uploadDir = $this->_getUploadDir();
             try {
