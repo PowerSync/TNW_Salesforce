@@ -23,8 +23,6 @@ class Mapping extends Synchronize\Unit\Mapping
      * Mapping constructor.
      *
      * @param string $name
-     * @param string $load
-     * @param string $lookup
      * @param string $objectType
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
@@ -35,8 +33,6 @@ class Mapping extends Synchronize\Unit\Mapping
      */
     public function __construct(
         $name,
-        $load,
-        $lookup,
         $objectType,
         Synchronize\Units $units,
         Synchronize\Group $group,
@@ -47,8 +43,6 @@ class Mapping extends Synchronize\Unit\Mapping
     ) {
         parent::__construct(
             $name,
-            $load,
-            $lookup,
             $objectType,
             $units,
             $group,

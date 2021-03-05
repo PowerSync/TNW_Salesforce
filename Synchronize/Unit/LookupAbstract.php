@@ -13,11 +13,6 @@ use TNW\Salesforce\Synchronize\Unit\Upsert\Input;
  */
 abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
 {
-    /**
-     * @var string
-     */
-    protected $load;
-
     protected $skipMappingFields = false;
 
     /**
@@ -53,7 +48,6 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * LookupAbstract constructor.
      * @param string $name
-     * @param string $load
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param IdentificationInterface $identification
@@ -65,7 +59,6 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      */
     public function __construct(
         $name,
-        $load,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
@@ -75,9 +68,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         array $dependents = [],
         $skipMappingFields = false
     ) {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
+        parent::__construct($name, $units, $group, array_merge($dependents, ['load']));
 
-        $this->load = $load;
         $this->inputFactory = $inputFactory;
         $this->outputFactory = $outputFactory;
         $this->process = $process;
@@ -287,7 +279,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      */
     public function load()
     {
-        return $this->unit($this->load);
+        return $this->unit('load');
     }
 
     /**

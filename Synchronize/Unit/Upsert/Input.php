@@ -35,16 +35,6 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * @var string
      */
-    private $load;
-
-    /**
-     * @var string
-     */
-    private $mapping;
-
-    /**
-     * @var string
-     */
     private $salesforceType;
 
     /**
@@ -63,8 +53,6 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * Input constructor.
      * @param string $name
-     * @param string $load
-     * @param string $mapping
      * @param string $salesforceType
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
@@ -77,8 +65,6 @@ class Input extends Synchronize\Unit\UnitAbstract
 
     public function __construct(
         $name,
-        $load,
-        $mapping,
         $salesforceType,
         Synchronize\Units $units,
         Synchronize\Group $group,
@@ -88,10 +74,8 @@ class Input extends Synchronize\Unit\UnitAbstract
         ClientFactory $factory,
         TimezoneInterface $localeDate
     ) {
-        parent::__construct($name, $units, $group, [$load, $mapping]);
+        parent::__construct($name, $units, $group, ['load', 'mapping']);
         $this->process = $process;
-        $this->load = $load;
-        $this->mapping = $mapping;
         $this->salesforceType = $salesforceType;
         $this->identification = $identification;
         $this->inputFactory = $inputFactory;
@@ -121,7 +105,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function load()
     {
-        return $this->unit($this->load);
+        return $this->unit('load');
     }
 
     /**
@@ -179,7 +163,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     public function processInput(Synchronize\Transport\Calls\Upsert\Transport\Input $input)
     {
         foreach ($this->entities() as $entity) {
-            $input->offsetSet($entity, $this->prepareObject($entity, $this->unit($this->mapping)->get('%s', $entity)));
+            $input->offsetSet($entity, $this->prepareObject($entity, $this->unit('mapping')->get('%s', $entity)));
         }
     }
 
@@ -205,7 +189,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function filter($entity)
     {
-        return !$this->unit($this->mapping)->skipped($entity);
+        return !$this->unit('mapping')->skipped($entity);
     }
 
     /**
@@ -334,7 +318,7 @@ class Input extends Synchronize\Unit\UnitAbstract
             return true;
         }
 
-        $mappedObject = $this->unit($this->mapping)->get('%s', $entity);
+        $mappedObject = $this->unit('mapping')->get('%s', $entity);
         $mappedObject = (object)$this->prepareObject($entity, (array)$mappedObject);
 
         $lookupObject = $lookup->get('%s/record', $entity);
@@ -344,7 +328,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         }
 
         foreach ($mappedObject as $compareField => $compareValue) {
-            if (in_array($compareField, $this->unit($this->mapping)->getCompareIgnoreFields())) {
+            if (in_array($compareField, $this->unit('mapping')->getCompareIgnoreFields())) {
                 continue;
             }
 

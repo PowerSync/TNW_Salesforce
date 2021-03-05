@@ -19,7 +19,6 @@ class ByName extends Synchronize\Unit\LookupAbstract
     /**
      * ByName constructor.
      * @param string $name
-     * @param string $load
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
@@ -31,7 +30,6 @@ class ByName extends Synchronize\Unit\LookupAbstract
      */
     public function __construct(
         $name,
-        $load,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
@@ -43,7 +41,6 @@ class ByName extends Synchronize\Unit\LookupAbstract
     ) {
         parent::__construct(
             $name,
-            $load,
             $units,
             $group,
             $identification,

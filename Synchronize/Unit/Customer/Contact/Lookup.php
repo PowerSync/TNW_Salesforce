@@ -20,7 +20,6 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      * Lookup constructor.
      *
      * @param string $name
-     * @param string $load
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
@@ -32,7 +31,6 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      */
     public function __construct(
         $name,
-        $load,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
@@ -44,7 +42,6 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     ) {
         parent::__construct(
             $name,
-            $load,
             $units,
             $group,
             $identification,

@@ -15,46 +15,33 @@ use TNW\Salesforce\Synchronize;
 class Status extends Synchronize\Unit\UnitAbstract
 {
     /**
-     * @var string
-     */
-    private $load;
-
-    /**
-     * @var string
-     */
-    private $upsertOutput;
-
-    /**
      * @var SalesforceIdStorage|null
      */
     private $salesforceIdStorage;
 
-    /** @var Config  */
+    /**
+     * @var Config
+     */
     protected $config;
 
     /**
      * Status constructor.
      * @param string $name
-     * @param string $load
-     * @param string $upsertOutput
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param SalesforceIdStorage $salesforceIdStorage
+     * @param Config $config
+     * @param SalesforceIdStorage|null $salesforceIdStorage
      * @param array $dependents
      */
     public function __construct(
         $name,
-        $load,
-        $upsertOutput,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Config $config,
         SalesforceIdStorage $salesforceIdStorage = null,
         array $dependents = []
     ) {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsertOutput]));
-        $this->load = $load;
-        $this->upsertOutput = $upsertOutput;
+        parent::__construct($name, $units, $group, array_merge($dependents, ['load', 'upsertOutput']));
         $this->config = $config;
         $this->salesforceIdStorage = $salesforceIdStorage;
     }
@@ -186,7 +173,7 @@ class Status extends Synchronize\Unit\UnitAbstract
      */
     public function load()
     {
-        return $this->unit($this->load);
+        return $this->unit('load');
     }
 
     /**
@@ -196,7 +183,7 @@ class Status extends Synchronize\Unit\UnitAbstract
      */
     public function upsertOutput()
     {
-        return $this->unit($this->upsertOutput);
+        return $this->unit('upsertOutput');
     }
 
     /**

@@ -19,11 +19,6 @@ use TNW\Salesforce\Synchronize\Units;
  */
 class Input extends Synchronize\Unit\UnitAbstract
 {
-    /**
-     * @var string
-     */
-    protected $load;
-
     /** @var InputFactory */
     protected $inputFactory;
 
@@ -43,7 +38,6 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * Delete constructor.
      * @param $name
-     * @param $load
      * @param array $dependents
      * @param Units $units
      * @param Group $group
@@ -53,7 +47,6 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function __construct(
         $name,
-        $load,
         $salesforceType,
         array $dependents,
         Units $units,
@@ -63,8 +56,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         IdentificationInterface $identification
     )
     {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
-        $this->load = $load;
+        parent::__construct($name, $units, $group, array_merge($dependents, ['load']));
         $this->inputFactory = $inputFactory;
         $this->process = $process;
         $this->identification = $identification;
@@ -142,7 +134,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function load()
     {
-        return $this->unit($this->load);
+        return $this->unit('load');
     }
 
     /**

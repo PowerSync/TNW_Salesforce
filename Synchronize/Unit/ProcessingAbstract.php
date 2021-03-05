@@ -10,11 +10,6 @@ use TNW\Salesforce\Synchronize;
 abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
 {
     /**
-     * @var string
-     */
-    private $load;
-
-    /**
      * @var Synchronize\Unit\IdentificationInterface
      */
     protected $identification;
@@ -22,7 +17,6 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * ProcessingAbstract constructor.
      * @param string $name
-     * @param string $load
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param IdentificationInterface $identification
@@ -30,15 +24,13 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
      */
     public function __construct(
         $name,
-        $load,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         array $dependents = []
     )
     {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
-        $this->load = $load;
+        parent::__construct($name, $units, $group, array_merge($dependents, ['load']));
         $this->identification = $identification;
     }
 
@@ -73,7 +65,7 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
      */
     public function load()
     {
-        return $this->unit($this->load);
+        return $this->unit('load');
     }
 
     /**
