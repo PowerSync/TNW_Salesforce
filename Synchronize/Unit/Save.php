@@ -16,10 +16,6 @@ use TNW\Salesforce\Synchronize;
  */
 class Save extends Synchronize\Unit\UnitAbstract
 {
-    /**
-     * @var string
-     */
-    protected $load;
 
     /**
      * @var string
@@ -40,7 +36,6 @@ class Save extends Synchronize\Unit\UnitAbstract
      * Save constructor.
      *
      * @param string $name
-     * @param string $load
      * @param string $fieldModifier
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
@@ -50,7 +45,6 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function __construct(
         $name,
-        $load,
         $fieldModifier,
         Synchronize\Units $units,
         Synchronize\Group $group,
@@ -58,9 +52,8 @@ class Save extends Synchronize\Unit\UnitAbstract
         SalesforceIdStorage $entityObject,
         array $dependents = []
     ) {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $fieldModifier]));
-        $this->load = $load;
         $this->fieldModifier = $fieldModifier;
+        parent::__construct($name, $units, $group, array_merge($dependents, ['load', $fieldModifier]));
         $this->identification = $identification;
         $this->entityObject = $entityObject;
     }
@@ -155,7 +148,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function load()
     {
-        return $this->unit($this->load);
+        return $this->unit('load');
     }
 
     /**

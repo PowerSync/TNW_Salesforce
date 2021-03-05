@@ -20,17 +20,6 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     const PARENT_ENTITY = '__parent_entity';
 
     /**
-     * @deprecated
-     * @var string
-     */
-    private $load;
-
-    /**
-     * @var string
-     */
-    private $lookup;
-
-    /**
      * @var string
      */
     private $objectType;
@@ -55,8 +44,6 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * Mapping constructor.
      *
      * @param string $name
-     * @param string $load
-     * @param string $lookup
      * @param string $objectType
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
@@ -66,8 +53,6 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function __construct(
         $name,
-        $load,
-        $lookup,
         $objectType,
         Synchronize\Units $units,
         Synchronize\Group $group,
@@ -75,12 +60,10 @@ class Mapping extends Synchronize\Unit\UnitAbstract
         CollectionFactory $mapperCollectionFactory,
         array $dependents = []
     ) {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $lookup]));
-        $this->load = $load;
+        parent::__construct($name, $units, $group, array_merge($dependents, ['load', 'lookup']));
         $this->objectType = $objectType;
         $this->identification = $identification;
         $this->mapperCollectionFactory = $mapperCollectionFactory;
-        $this->lookup = $lookup;
     }
 
     /**
@@ -102,7 +85,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function lookup()
     {
-        return $this->unit($this->lookup);
+        return $this->unit('lookup');
     }
 
     /**
@@ -112,7 +95,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function load()
     {
-        return $this->unit($this->load);
+        return $this->unit('load');
     }
 
     /**

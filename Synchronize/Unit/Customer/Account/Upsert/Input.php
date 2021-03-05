@@ -17,8 +17,6 @@ class Input extends Synchronize\Unit\Upsert\Input
     /**
      * Input constructor.
      * @param string $name
-     * @param string $load
-     * @param string $mapping
      * @param string $salesforceType
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
@@ -31,8 +29,6 @@ class Input extends Synchronize\Unit\Upsert\Input
      */
     public function __construct(
         $name,
-        $load,
-        $mapping,
         $salesforceType,
         Synchronize\Units $units,
         Synchronize\Group $group,
@@ -45,8 +41,6 @@ class Input extends Synchronize\Unit\Upsert\Input
     ) {
         parent::__construct(
             $name,
-            $load,
-            $mapping,
             $salesforceType,
             $units,
             $group,

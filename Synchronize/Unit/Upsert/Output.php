@@ -31,16 +31,6 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     /**
      * @var string
      */
-    private $load;
-
-    /**
-     * @var string
-     */
-    private $upsertInput;
-
-    /**
-     * @var string
-     */
     private $salesforceType;
 
     /**
@@ -57,8 +47,6 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      * Upsert constructor.
      *
      * @param string $name
-     * @param string $load
-     * @param string $upsertInput
      * @param string $salesforceType
      * @param string $fieldSalesforceId
      * @param Synchronize\Units $units
@@ -71,8 +59,6 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function __construct(
         $name,
-        $load,
-        $upsertInput,
         $salesforceType,
         $fieldSalesforceId,
         Synchronize\Units $units,
@@ -83,16 +69,14 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
         array $dependents = [],
         array $additionalSalesforceId = []
     ) {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $upsertInput]));
+        parent::__construct($name, $units, $group, array_merge($dependents, ['load', 'upsertInput']));
 
-        $this->load = $load;
         $this->salesforceType = $salesforceType;
         $this->fieldSalesforceId = $fieldSalesforceId;
         $this->additionalSalesforceId = $additionalSalesforceId;
         $this->identification = $identification;
         $this->outputFactory = $outputFactory;
         $this->process = $process;
-        $this->upsertInput = $upsertInput;
     }
 
     /**
@@ -108,7 +92,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function load()
     {
-        return $this->unit($this->load);
+        return $this->unit('load');
     }
 
     /**
@@ -118,7 +102,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function upsertInput()
     {
-        return $this->unit($this->upsertInput);
+        return $this->unit('upsertInput');
     }
 
     /**

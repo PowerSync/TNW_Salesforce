@@ -30,11 +30,6 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     protected $process;
 
     /**
-     * @var string
-     */
-    protected $load;
-
-    /**
      * @var
      */
     protected $fieldSalesforceId;
@@ -45,15 +40,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     private $salesforceType;
 
     /**
-     * @var string
-     */
-    private $deleteInput;
-
-    /**
      * Output constructor.
      * @param string $name
-     * @param string $load
-     * @param string $deleteInput
      * @param string $fieldSalesforceId
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
@@ -64,9 +52,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function __construct(
         $name,
-        $load,
         $salesforceType,
-        $deleteInput,
         $fieldSalesforceId,
         Synchronize\Units $units,
         Synchronize\Group $group,
@@ -77,9 +63,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     ) {
         parent::__construct($name, $units, $group, $dependents);
 
-        $this->load = $load;
         $this->salesforceType = $salesforceType;
-        $this->deleteInput = $deleteInput;
         $this->fieldSalesforceId = $fieldSalesforceId;
         $this->identification = $identification;
         $this->outputFactory = $outputFactory;
@@ -101,7 +85,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function deleteInput()
     {
-        return $this->unit($this->deleteInput);
+        return $this->unit('deleteInput');
     }
 
     /**
@@ -174,7 +158,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function load()
     {
-        return $this->unit($this->load);
+        return $this->unit('load');
     }
 
     /**
