@@ -23,7 +23,7 @@ class Storage
     {
         // hack, actually different objects could have the same hash
         $classType = get_class($entity);
-        $this->results[\spl_object_hash($entity) . $classType] = $result;
+        $this->results[\spl_object_hash($entity->getData('_queue')) . $classType] = $result;
     }
 
     /**
@@ -36,7 +36,7 @@ class Storage
     {
         // hack, actually different objects could have the same hash
         $classType = get_class($entity);
-        $hash = \spl_object_hash($entity) . $classType;
+        $hash = \spl_object_hash($entity->getData('_queue')) . $classType;
         if (empty($this->results[$hash])) {
             return null;
         }
