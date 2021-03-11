@@ -18,9 +18,9 @@ class Save extends Synchronize\Unit\UnitAbstract
 {
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected $fieldModifier;
+    protected $fieldModifier = null;
 
     /**
      * @var IdentificationInterface
@@ -36,23 +36,23 @@ class Save extends Synchronize\Unit\UnitAbstract
      * Save constructor.
      *
      * @param string $name
-     * @param string $fieldModifier
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param IdentificationInterface $identification
      * @param SalesforceIdStorage $entityObject
+     * @param string $fieldModifier
      * @param array $dependents
      */
     public function __construct(
         $name,
-        $fieldModifier,
         Synchronize\Units $units,
         Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
         SalesforceIdStorage $entityObject,
+        $fieldModifier = null,
         array $dependents = []
     ) {
-        $this->fieldModifier = $fieldModifier;
+        $this->fieldModifier = $fieldModifier ?: 'upsertOutput';
         parent::__construct($name, $units, $group, array_merge($dependents, ['load', $fieldModifier]));
         $this->identification = $identification;
         $this->entityObject = $entityObject;
