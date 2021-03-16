@@ -560,6 +560,12 @@
     <virtualType name="TNW\Soap\Synchronize\Queue" type="TNW\Salesforce\Synchronize\Queue">
         <arguments>
             <argument name="phases" xsi:type="array">
+                <item name="-1" xsi:type="array">
+                    <item name="phaseName" xsi:type="string" translatable="true">Output error records</item>
+                    <item name="startStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_ERROR</item>
+                    <item name="processStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_PROCESS_INPUT_UPSERT</item>
+                    <item name="errorStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_ERROR</item>
+                </item>
                 <item name="0" xsi:type="array">
                     <item name="phaseName" xsi:type="string" translatable="true">Upsert</item>
                     <item name="startStatus" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_NEW</item>

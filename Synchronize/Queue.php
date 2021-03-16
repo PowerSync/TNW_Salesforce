@@ -45,6 +45,9 @@ class Queue
     /** @var [] */
     private $sortGroups;
 
+    /** @var Queue\PushMqMessage  */
+    private $pushMqMessage;
+
     /**
      * @var boolean
      */
@@ -67,6 +70,7 @@ class Queue
         Model\ResourceModel\Queue $resourceQueue,
         Model\Logger\Processor\UidProcessor $uidProcessor,
         Timezone $timezone,
+        \TNW\Salesforce\Synchronize\Queue\PushMqMessage $pushMqMessage,
         $isCheck = false
     ) {
         $this->groups = $groups;
@@ -75,6 +79,7 @@ class Queue
         $this->resourceQueue = $resourceQueue;
         $this->uidProcessor = $uidProcessor;
         $this->timezone = $timezone;
+        $this->pushMqMessage = $pushMqMessage;
         $this->setIsCheck($isCheck);
     }
 
@@ -150,32 +155,28 @@ class Queue
                     );
 
                     try {
-                        try {
                             $groupCollection->each('incSyncAttempt');
                             $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
                             $group->synchronize($groupCollection->getItems());
 
-                        } catch (SalesforceException $e) {
-//                            $groupCollection->each('decrSyncAttempt');
-
-                            $status = $phase[$e->getQueueStatus()];
-
-                            $groupCollection->each('addData', [[
-                                'status' => $status,
-                                'message' => $e->getMessage()
-                            ]]);
-
-                            $group->messageError($e);
-                        }
                     } catch (\Exception $e) {
-//                        $groupCollection->each('decrSyncAttempt');
+
+                        if ($e instanceof SalesforceException) {
+                            $status = $e->getQueueStatus();
+                        } else {
+                            $status = $phase['errorStatus'];
+                        }
 
                         $groupCollection->each('addData', [[
-                            'status' => $phase['errorStatus'],
+                            'status' => $status,
                             'message' => $e->getMessage()
                         ]]);
 
                         $group->messageError($e);
+
+                        if (!empty($groupCollection->getFirstItem())) {
+                            $this->pushMqMessage->sendMessage($groupCollection->getFirstItem()->getSyncType());
+                        }
                     }
 
                     $group->messageDebug(
