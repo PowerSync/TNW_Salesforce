@@ -133,6 +133,15 @@ class Load extends Synchronize\Unit\UnitAbstract
                     continue;
                 }
 
+                $entity_id = $entity->getData($entity->getIdFieldName());
+                if (!isset($entity_id) && !$entity->getData('generated')) {
+                    $syncDetails = __('The related Magento record is not available');
+                    $message[] = $syncDetails;
+                    $queue->setData('status', Queue::STATUS_SKIPPED);
+                    $queue->setData('message', $syncDetails);
+                    continue;
+                }
+
                 $entity->setData('_queue', $queue);
 
                 $this->cache[$entity]['queue'] = $queue;
