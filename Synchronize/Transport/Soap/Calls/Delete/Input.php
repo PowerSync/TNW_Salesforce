@@ -58,7 +58,7 @@ class Input implements Transport\Calls\Delete\InputInterface
         $maxPage = ceil($input->count() / self::BATCH_LIMIT);
         for ($input->rewind(), $i = 1; $i <= $maxPage; $i++) {
             $batch = $entities = $upsertIds = $duplicates = [];
-            for (; $input->valid() && count($batch) <= self::BATCH_LIMIT; $input->next()) {
+            for (; $input->valid() && count($batch) < self::BATCH_LIMIT; $input->next()) {
                 $data = $input->getInfo();
                 $entity = $input->current();
 
