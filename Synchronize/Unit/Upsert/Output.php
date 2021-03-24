@@ -19,24 +19,9 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     private $outputFactory;
 
     /**
-     * @var Synchronize\Unit\IdentificationInterface
-     */
-    protected $identification;
-
-    /**
      * @var Synchronize\Transport\Calls\Upsert\OutputInterface
      */
     private $process;
-
-    /**
-     * @var string
-     */
-    private $salesforceType;
-
-    /**
-     * @var
-     */
-    private $fieldSalesforceId;
 
     /**
      * @var array
@@ -47,11 +32,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      * Upsert constructor.
      *
      * @param string $name
-     * @param string $salesforceType
-     * @param string $fieldSalesforceId
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Transport\Calls\Upsert\Transport\OutputFactory $outputFactory
      * @param Synchronize\Transport\Calls\Upsert\OutputInterface $process
      * @param array $dependents
@@ -59,11 +41,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function __construct(
         $name,
-        $salesforceType,
-        $fieldSalesforceId,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Upsert\Transport\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\Upsert\OutputInterface $process,
         array $dependents = [],
@@ -71,10 +50,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, ['load', 'upsertInput']));
 
-        $this->salesforceType = $salesforceType;
-        $this->fieldSalesforceId = $fieldSalesforceId;
         $this->additionalSalesforceId = $additionalSalesforceId;
-        $this->identification = $identification;
         $this->outputFactory = $outputFactory;
         $this->process = $process;
     }
@@ -84,7 +60,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function description()
     {
-        return __('Upserting "%1" entity', $this->salesforceType);
+        return __('Upserting "%1" entity', $this->units()->get('context')->getSalesforceType());
     }
 
     /**
@@ -106,23 +82,13 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     }
 
     /**
-     * Salesforce Type
-     *
-     * @return string
-     */
-    public function salesforceType()
-    {
-        return $this->salesforceType;
-    }
-
-    /**
      * Field Salesforce Id
      *
      * @return string
      */
     public function fieldSalesforceId()
     {
-        return $this->fieldSalesforceId;
+        return $this->units()->get('context')->getFieldSalesforceId();
     }
 
     /**
@@ -148,7 +114,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
         $this->group()->messageDebug(implode("\n", array_map(function ($entity) use ($output) {
             return __(
                 "Entity %1 response data:\n%2",
-                $this->identification->printEntity($entity),
+                $this->units()->get('context')->getIdentification()->printEntity($entity),
                 print_r($output->offsetGet($entity), true)
             );
         }, $this->entities())));
@@ -163,7 +129,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function createTransport()
     {
-        $output = $this->outputFactory->create(['type' => $this->salesforceType()]);
+        $output = $this->outputFactory->create(['type' => $this->units()->get('context')->getSalesforceType()]);
         $output->setUnit($this);
 
         foreach ($this->entities() as $entity) {
@@ -217,8 +183,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
             ) {
                 $this->group()->messageError(
                     'Upsert object "%s". Entity: %s. Message: "%s".',
-                    $this->salesforceType,
-                    $this->identification->printEntity($entity),
+                    $this->units()->get('context')->getSalesforceType(),
+                    $this->units()->get('context')->getIdentification()->printEntity($entity),
                     $output[$entity]['message']
                 );
             }
@@ -239,7 +205,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
             return;
         }
 
-        $entity->setData($this->fieldSalesforceId, $this->cache->get('%s/salesforce', $entity));
+        $entity->setData($this->fieldSalesforceId(), $this->cache->get('%s/salesforce', $entity));
     }
 
     /**

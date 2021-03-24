@@ -18,11 +18,6 @@ use Tnw\SoapClient\Result\DescribeSObjectResult\Field;
 class Input extends Synchronize\Unit\UnitAbstract
 {
     /**
-     * @var Synchronize\Unit\IdentificationInterface
-     */
-    protected $identification;
-
-    /**
      * @var Synchronize\Transport\Calls\Upsert\InputInterface
      */
     private $process;
@@ -31,11 +26,6 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @var ClientFactory
      */
     protected $factory;
-
-    /**
-     * @var string
-     */
-    private $salesforceType;
 
     /**
      * @var array
@@ -53,10 +43,8 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * Input constructor.
      * @param string $name
-     * @param string $salesforceType
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory
      * @param Synchronize\Transport\Calls\Upsert\InputInterface $process
      * @param ClientFactory $factory
@@ -65,10 +53,8 @@ class Input extends Synchronize\Unit\UnitAbstract
 
     public function __construct(
         $name,
-        $salesforceType,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         ClientFactory $factory,
@@ -76,8 +62,6 @@ class Input extends Synchronize\Unit\UnitAbstract
     ) {
         parent::__construct($name, $units, $group, ['load', 'mapping']);
         $this->process = $process;
-        $this->salesforceType = $salesforceType;
-        $this->identification = $identification;
         $this->inputFactory = $inputFactory;
 
         $this->factory = $factory;
@@ -97,7 +81,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function description()
     {
-        return __('Upserting "%1" entity', $this->salesforceType);
+        return __('Upserting "%1" entity', $this->units()->get('context')->getSalesforceType());
     }
 
     /**
@@ -106,16 +90,6 @@ class Input extends Synchronize\Unit\UnitAbstract
     public function load()
     {
         return $this->unit('load');
-    }
-
-    /**
-     * Salesforce Type
-     *
-     * @return string
-     */
-    public function salesforceType()
-    {
-        return $this->salesforceType;
     }
 
     /**
@@ -136,7 +110,7 @@ class Input extends Synchronize\Unit\UnitAbstract
         $this->group()->messageDebug(implode("\n", array_map(function ($entity) use ($input) {
             return __(
                 "Entity %1 request data:\n%2",
-                $this->identification->printEntity($entity),
+                $this->units()->get('context')->getIdentification()->printEntity($entity),
                 print_r($input->offsetGet($entity), true)
             );
         }, $this->entities())));
@@ -151,7 +125,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function createTransport()
     {
-        return $this->inputFactory->create(['type' => $this->salesforceType()]);
+        return $this->inputFactory->create(['type' => $this->units()->get('context')->getSalesforceType()]);
     }
 
     /**
@@ -201,13 +175,14 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function findFieldProperty($fieldName)
     {
-        if (empty($this->objectDescription[$this->salesforceType])) {
+        $salesforceType = $this->units()->get('context')->getSalesforceType();
+        if (empty($this->objectDescription[$salesforceType])) {
             //TODO: Cache Field
-            $resultObjects = $this->factory->client()->describeSObjects([$this->salesforceType]);
-            $this->objectDescription[$this->salesforceType] = $resultObjects[0];
+            $resultObjects = $this->factory->client()->describeSObjects([$salesforceType]);
+            $this->objectDescription[$salesforceType] = $resultObjects[0];
         }
 
-        return $this->objectDescription[$this->salesforceType]->getField($fieldName);
+        return $this->objectDescription[$salesforceType]->getField($fieldName);
     }
 
     /**
@@ -344,7 +319,12 @@ class Input extends Synchronize\Unit\UnitAbstract
             }
 
             if ((empty($lookupObject[$compareField]) && !empty($compareValue)) || (!empty($lookupObject[$compareField]) && $compareValue != $lookupObject[$compareField])) {
-                $this->group()->messageDebug('Entity %1 has changed field: %2 = %3', $this->identification->printEntity($entity), $compareField, $compareValue);
+                $this->group()->messageDebug(
+                    'Entity %1 has changed field: %2 = %3',
+                    $this->units()->get('context')->getIdentification()->printEntity($entity),
+                    $compareField,
+                    $compareValue
+                );
                 return true;
             }
         }
@@ -358,10 +338,15 @@ class Input extends Synchronize\Unit\UnitAbstract
 
         $this->cache[$entity]['updated'] = true;
         $this->cache[$entity]['salesforce'] = $lookupObject['Id'];
-        $this->cache[$entity]['message']
-            = __('Synchronization of the %1 was skipped, data is Salesforce matches the data in Magento.', $this->identification->printEntity($entity));
+        $this->cache[$entity]['message'] = __(
+            'Synchronization of the %1 was skipped, data is Salesforce matches the data in Magento.',
+            $this->units()->get('context')->getIdentification()->printEntity($entity)
+        );
 
-        $this->group()->messageDebug('Synchronization of the %1 was skipped, data is Salesforce matches the data in Magento.', $this->identification->printEntity($entity));
+        $this->group()->messageDebug(
+            'Synchronization of the %1 was skipped, data is Salesforce matches the data in Magento.',
+            $this->units()->get('context')->getIdentification()->printEntity($entity)
+        );
 
         return false;
     }

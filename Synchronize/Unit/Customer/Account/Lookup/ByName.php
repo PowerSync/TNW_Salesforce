@@ -21,7 +21,6 @@ class ByName extends Synchronize\Unit\LookupAbstract
      * @param string $name
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
      * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
      * @param Synchronize\Transport\Calls\QueryInterface $process
@@ -32,7 +31,6 @@ class ByName extends Synchronize\Unit\LookupAbstract
         $name,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Query\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Query\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\QueryInterface $process,
@@ -43,7 +41,6 @@ class ByName extends Synchronize\Unit\LookupAbstract
             $name,
             $units,
             $group,
-            $identification,
             $inputFactory,
             $outputFactory,
             $process,

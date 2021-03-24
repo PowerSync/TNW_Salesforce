@@ -20,52 +20,29 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     protected $outputFactory;
 
     /**
-     * @var Synchronize\Unit\IdentificationInterface
-     */
-    protected $identification;
-
-    /**
      * @var Synchronize\Transport\Calls\Delete\OutputInterface
      */
     protected $process;
 
     /**
-     * @var
-     */
-    protected $fieldSalesforceId;
-
-    /**
-     * @var string
-     */
-    private $salesforceType;
-
-    /**
      * Output constructor.
      * @param string $name
-     * @param string $fieldSalesforceId
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Transport\Calls\Delete\Transport\OutputFactory $outputFactory
      * @param Synchronize\Transport\Calls\Delete\OutputInterface $process
      * @param array $dependents
      */
     public function __construct(
         $name,
-        $salesforceType,
-        $fieldSalesforceId,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Delete\Transport\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\Delete\OutputInterface $process,
         array $dependents = []
     ) {
         parent::__construct($name, $units, $group, $dependents);
 
-        $this->salesforceType = $salesforceType;
-        $this->fieldSalesforceId = $fieldSalesforceId;
-        $this->identification = $identification;
         $this->outputFactory = $outputFactory;
         $this->process = $process;
     }
@@ -75,7 +52,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function description()
     {
-        return __('Delete entity: %s', $this->salesforceType);
+        return __('Delete entity: %s', $this->units()->get('context')->getSalesforceType());
     }
 
     /**
@@ -95,7 +72,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function fieldSalesforceId()
     {
-        return $this->fieldSalesforceId;
+        return $this->units()->get('context')->getFieldSalesforceId();
     }
 
     /**
@@ -113,7 +90,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
         $this->group()->messageDebug(implode("\n", array_map(function ($entity) use ($output) {
             return __(
                 "Entity %1 response data:\n%2",
-                $this->identification->printEntity($entity),
+                $this->units()->get('context')->getIdentification()->printEntity($entity),
                 print_r($output->offsetGet($entity), true)
             );
         }, $this->entities())));
@@ -128,7 +105,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function createTransport()
     {
-        $output = $this->outputFactory->create(['type' => $this->salesforceType()]);
+        $output = $this->outputFactory->create(['type' => $this->units()->get('context')->getSalesforceType()]);
         $output->setUnit($this);
 
         foreach ($this->entities() as $entity) {
@@ -177,7 +154,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
             ) {
                 $this->group()->messageError(
                     'Delete object. Entity: %s. Message: "%s".',
-                    $this->identification->printEntity($entity),
+                    $this->units()->get('context')->getIdentification()->printEntity($entity),
                     $output[$entity]['message']
                 );
             }
@@ -198,7 +175,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
             return;
         }
 
-        $entity->setData($this->fieldSalesforceId, $this->cache->get('%s/salesforce', $entity));
+        $entity->setData($this->fieldSalesforceId(), $this->cache->get('%s/salesforce', $entity));
     }
 
     /**
@@ -223,16 +200,6 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     public function skipped($entity)
     {
         return empty($this->cache[$entity]['success']);
-    }
-
-    /**
-     * Salesforce Type
-     *
-     * @return string
-     */
-    public function salesforceType()
-    {
-        return $this->salesforceType;
     }
 
     /**

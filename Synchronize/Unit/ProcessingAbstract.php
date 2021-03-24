@@ -10,44 +10,20 @@ use TNW\Salesforce\Synchronize;
 abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
 {
     /**
-     * @var Synchronize\Unit\IdentificationInterface
-     */
-    protected $identification;
-
-    /**
      * ProcessingAbstract constructor.
      * @param string $name
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param IdentificationInterface $identification
      * @param array $dependents
      */
     public function __construct(
         $name,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
         array $dependents = []
     )
     {
         parent::__construct($name, $units, $group, array_merge($dependents, ['load']));
-        $this->identification = $identification;
-    }
-
-    /**
-     * @return IdentificationInterface
-     */
-    public function getIdentification()
-    {
-        return $this->identification;
-    }
-
-    /**
-     * @param IdentificationInterface $identification
-     */
-    public function setIdentification(IdentificationInterface $identification)
-    {
-        $this->identification = $identification;
     }
 
     /**
@@ -106,20 +82,27 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
                 switch (true) {
                     case $processing instanceof \Magento\Framework\Phrase:
                         $this->cache[$entity] = false;
-                        $this->cache['message'][$entity] =
-                            __('Entity %1 skipped because %2', $this->identification->printEntity($entity), $processing);
+                        $this->cache['message'][$entity] = __(
+                            'Entity %1 skipped because %2',
+                            $this->units()->get('context')->getIdentification()->printEntity($entity),
+                            $processing
+                        );
                         break;
 
                     case !$processing:
                         $this->cache[$entity] = false;
-                        $this->cache['message'][$entity]
-                            = __('Entity %1 skipped', $this->identification->printEntity($entity));
+                        $this->cache['message'][$entity] = __(
+                            'Entity %1 skipped',
+                            $this->units()->get('context')->getIdentification()->printEntity($entity)
+                        );
                         break;
 
                     default:
                         $this->cache[$entity] = true;
-                        $this->cache['message'][$entity]
-                            = __('Entity %1 processed', $this->identification->printEntity($entity));
+                        $this->cache['message'][$entity] = __(
+                            'Entity %1 processed',
+                            $this->units()->get('context')->getIdentification()->printEntity($entity)
+                        );
                         break;
                 }
             } catch (\Exception $e) {

@@ -8,7 +8,6 @@ use Magento\Catalog\Model\Product;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use OutOfBoundsException;
-use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -23,23 +22,11 @@ class Save extends Synchronize\Unit\UnitAbstract
     protected $fieldModifier = null;
 
     /**
-     * @var IdentificationInterface
-     */
-    protected $identification;
-
-    /**
-     * @var SalesforceIdStorage
-     */
-    protected $entityObject;
-
-    /**
      * Save constructor.
      *
      * @param string $name
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param IdentificationInterface $identification
-     * @param SalesforceIdStorage $entityObject
      * @param string $fieldModifier
      * @param array $dependents
      */
@@ -47,15 +34,11 @@ class Save extends Synchronize\Unit\UnitAbstract
         $name,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
-        SalesforceIdStorage $entityObject,
         $fieldModifier = null,
         array $dependents = []
     ) {
         $this->fieldModifier = $fieldModifier ?: 'upsertOutput';
         parent::__construct($name, $units, $group, array_merge($dependents, ['load', $fieldModifier]));
-        $this->identification = $identification;
-        $this->entityObject = $entityObject;
     }
 
     /**
@@ -92,26 +75,28 @@ class Save extends Synchronize\Unit\UnitAbstract
         foreach ($attributeNames as $attributeName) {
             foreach ($entities as $entity) {
                 try {
-                    $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
+                    $salesforceId = $this->units()->get('context')->getSalesforceIdStorage()
+                        ->valueByAttribute($entity, $attributeName);
 
                     if (!$salesforceId) {
                         continue;
                     }
 
                     // Save Salesforce Id
-                    $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
+                    $this->units()->get('context')->getSalesforceIdStorage()
+                        ->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
                     $this->load()->get('%s/queue', $entity)->setAdditionalByCode($attributeName, $salesforceId);
 
                     $message[] = __(
                         "Updating %1 attribute:\n\t\"%2\": %3",
-                        $this->identification->printEntity($entity),
+                        $this->units()->get('context')->getIdentification()->printEntity($entity),
                         $attributeName,
                         $salesforceId
                     );
 
                     // Save Salesforce Id from duplicates
                     foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
-                        $this->entityObject->saveValueByAttribute(
+                        $this->units()->get('context')->getSalesforceIdStorage()->saveValueByAttribute(
                             $duplicate,
                             $salesforceId,
                             $attributeName,
@@ -122,7 +107,7 @@ class Save extends Synchronize\Unit\UnitAbstract
 
                         $message[] = __(
                             "Updating %1 attribute:\n\t\"%2\": %3",
-                            $this->identification->printEntity($duplicate),
+                            $this->units()->get('context')->getIdentification()->printEntity($duplicate),
                             $attributeName,
                             $salesforceId
                         );
@@ -187,7 +172,8 @@ class Save extends Synchronize\Unit\UnitAbstract
 
         $result = false;
         foreach ($attributeName as $attribute) {
-            $result = $result || $this->entityObject->valueByAttribute($entity, $attribute);
+            $result = $result
+                || $this->units()->get('context')->getSalesforceIdStorage()->valueByAttribute($entity, $attribute);
         }
 
         return $this->fieldModifier()->get('%s/success', $entity) && $result;
@@ -219,7 +205,8 @@ class Save extends Synchronize\Unit\UnitAbstract
 
         $result = false;
         foreach ($attributeName as $attribute) {
-            $result = $result || $this->entityObject->valueByAttribute($entity, $attribute);
+            $result = $result
+                || $this->units()->get('context')->getSalesforceIdStorage()->valueByAttribute($entity, $attribute);
         }
 
         return $this->fieldModifier()->get('%s/skipped', $entity) && $result;
