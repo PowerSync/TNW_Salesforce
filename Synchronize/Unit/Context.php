@@ -8,7 +8,7 @@ class Context extends Synchronize\Unit\UnitAbstract
 {
 
     /**
-     * @var IdentificationInterface
+     * @var Synchronize\Unit\IdentificationInterface
      */
     protected $identification;
 
@@ -33,7 +33,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     protected $magentoType;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $objectType;
 
@@ -52,11 +52,9 @@ class Context extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Synchronize\Unit\IdentificationInterface $identification
-     * @param SalesforceIdStorage|null $entityObject
      * @param SalesforceIdStorage $salesforceIdStorage
-     * @param HashInterface $hash
      * @param string $magentoType
-     * @param string $objectType
+     * @param string|null $objectType
      * @param string $salesforceType
      * @param string $fieldSalesforceId
      */
@@ -64,20 +62,16 @@ class Context extends Synchronize\Unit\UnitAbstract
         string $name,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        IdentificationInterface $identification,
-        SalesforceIdStorage $entityObject,
+        Synchronize\Unit\IdentificationInterface $identification,
         SalesforceIdStorage $salesforceIdStorage,
-        HashInterface $hash,
         string $magentoType,
-        string $objectType,
+        ?string $objectType,
         string $salesforceType,
         string $fieldSalesforceId
     ) {
         parent::__construct($name, $units, $group);
         $this->identification = $identification;
-        $this->entityObject = $entityObject;
         $this->salesforceIdStorage = $salesforceIdStorage;
-        $this->hash = $hash;
         $this->magentoType = $magentoType;
         $this->objectType = $objectType;
         $this->salesforceType = $salesforceType;
@@ -87,7 +81,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return IdentificationInterface
      */
-    public function identification()
+    public function getIdentification()
     {
         return $this->identification;
     }
@@ -95,15 +89,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return SalesforceIdStorage
      */
-    public function entityObject()
-    {
-        return $this->entityObject;
-    }
-
-    /**
-     * @return SalesforceIdStorage
-     */
-    public function salesforceIdStorage()
+    public function getSalesforceIdStorage()
     {
         return $this->salesforceIdStorage;
     }
@@ -111,7 +97,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return HashInterface
      */
-    public function hash()
+    public function getHash()
     {
         return $this->hash;
     }
@@ -119,15 +105,15 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return string
      */
-    public function magentoType()
+    public function getMagentoType()
     {
         return $this->magentoType;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function objectType()
+    public function getObjectType()
     {
         return $this->objectType;
     }
@@ -135,7 +121,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return string
      */
-    public function salesforceType()
+    public function getSalesforceType()
     {
         return $this->salesforceType;
     }
@@ -143,7 +129,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return string
      */
-    public function fieldSalesforceId()
+    public function getFieldSalesforceId()
     {
         return $this->fieldSalesforceId;
     }

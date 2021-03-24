@@ -9,7 +9,6 @@ use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Synchronize\Group;
 use TNW\Salesforce\Synchronize\Transport\Calls\Delete\InputInterface as DeleteInterface;
 use TNW\Salesforce\Synchronize\Transport\Calls\Delete\Transport\InputFactory;
-use TNW\Salesforce\Synchronize\Unit\IdentificationInterface;
 use TNW\Salesforce\Synchronize\Unit\Load;
 use TNW\Salesforce\Synchronize\Unit\UnitInterface;
 use TNW\Salesforce\Synchronize\Units;
@@ -23,17 +22,9 @@ class Input extends Synchronize\Unit\UnitAbstract
     protected $inputFactory;
 
     /**
-     * @var string
-     */
-    private $salesforceType;
-
-    /**
      * @var DeleteInterface
      */
     protected $process;
-
-    /** @var IdentificationInterface */
-    protected $identification;
 
     /**
      * Delete constructor.
@@ -43,24 +34,19 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @param Group $group
      * @param InputFactory $inputFactory
      * @param DeleteInterface $process
-     * @param IdentificationInterface $identification
      */
     public function __construct(
         $name,
-        $salesforceType,
         array $dependents,
         Units $units,
         Group $group,
         InputFactory $inputFactory,
-        DeleteInterface $process,
-        IdentificationInterface $identification
+        DeleteInterface $process
     )
     {
         parent::__construct($name, $units, $group, array_merge($dependents, ['load']));
         $this->inputFactory = $inputFactory;
         $this->process = $process;
-        $this->identification = $identification;
-        $this->salesforceType = $salesforceType;
     }
 
     /**
@@ -100,7 +86,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function createTransport()
     {
-        return $this->inputFactory->create(['type' => $this->salesforceType()]);
+        return $this->inputFactory->create(['type' => $this->units()->get('context')->getSalesforceType()]);
     }
 
     /**
@@ -158,15 +144,5 @@ class Input extends Synchronize\Unit\UnitAbstract
     protected function filter($entity)
     {
         return !$this->unit('mapping')->skipped($entity);
-    }
-
-    /**
-     * Salesforce Type
-     *
-     * @return string
-     */
-    public function salesforceType()
-    {
-        return $this->salesforceType;
     }
 }

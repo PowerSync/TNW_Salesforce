@@ -41,16 +41,10 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     protected $process;
 
     /**
-     * @var IdentificationInterface
-     */
-    protected $identification;
-
-    /**
      * LookupAbstract constructor.
      * @param string $name
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param IdentificationInterface $identification
      * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
      * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
      * @param Synchronize\Transport\Calls\QueryInterface $process
@@ -61,7 +55,6 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         $name,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Query\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Query\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\QueryInterface $process,
@@ -73,7 +66,6 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         $this->inputFactory = $inputFactory;
         $this->outputFactory = $outputFactory;
         $this->process = $process;
-        $this->identification = $identification;
         $this->skipMappingFields = $skipMappingFields;
     }
 
@@ -232,7 +224,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
             $this->cache[$entity]['record'] = $this->prepareRecord($record);
             $message[] = __(
                 "Found %1 entity and the following data:\n%2",
-                $this->identification->printEntity($entity),
+                $this->units()->get('context')->getIdentification()->printEntity($entity),
                 print_r($record, true)
             );
         }

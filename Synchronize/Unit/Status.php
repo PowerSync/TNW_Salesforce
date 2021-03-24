@@ -5,7 +5,6 @@ namespace TNW\Salesforce\Synchronize\Unit;
 use Magento\Framework\Exception\LocalizedException;
 use OutOfBoundsException;
 use TNW\Salesforce\Model\Config;
-use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
 
@@ -14,11 +13,6 @@ use TNW\Salesforce\Synchronize;
  */
 class Status extends Synchronize\Unit\UnitAbstract
 {
-    /**
-     * @var SalesforceIdStorage|null
-     */
-    private $salesforceIdStorage;
-
     /**
      * @var Config
      */
@@ -30,7 +24,6 @@ class Status extends Synchronize\Unit\UnitAbstract
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param Config $config
-     * @param SalesforceIdStorage|null $salesforceIdStorage
      * @param array $dependents
      */
     public function __construct(
@@ -38,12 +31,10 @@ class Status extends Synchronize\Unit\UnitAbstract
         Synchronize\Units $units,
         Synchronize\Group $group,
         Config $config,
-        SalesforceIdStorage $salesforceIdStorage = null,
         array $dependents = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, ['load', 'upsertOutput']));
         $this->config = $config;
-        $this->salesforceIdStorage = $salesforceIdStorage;
     }
 
     /**
@@ -51,7 +42,9 @@ class Status extends Synchronize\Unit\UnitAbstract
      */
     public function getConfig()
     {
-        return !empty($this->salesforceIdStorage) ? $this->salesforceIdStorage->getConfig() : $this->config;
+        return !empty($this->units()->get('context')->getSalesforceIdStorage())
+            ? $this->units()->get('context')->getSalesforceIdStorage()->getConfig()
+            : $this->config;
     }
 
     /**
@@ -137,14 +130,16 @@ class Status extends Synchronize\Unit\UnitAbstract
      */
     public function saveStatus($entity)
     {
-        if (null !== $this->salesforceIdStorage) {
+        if (null !== $this->units()->get('context')->getSalesforceIdStorage()) {
             switch ($this->cache[$entity]['status']) {
                 case Queue::STATUS_COMPLETE:
-                    $this->salesforceIdStorage->saveStatus($entity, 1, $entity->getData('config_website'));
+                    $this->units()->get('context')->getSalesforceIdStorage()
+                        ->saveStatus($entity, 1, $entity->getData('config_website'));
                     break;
 
                 case Queue::STATUS_ERROR:
-                    $this->salesforceIdStorage->saveStatus($entity, 0, $entity->getData('config_website'));
+                    $this->units()->get('context')->getSalesforceIdStorage()
+                        ->saveStatus($entity, 0, $entity->getData('config_website'));
                     break;
             }
         }

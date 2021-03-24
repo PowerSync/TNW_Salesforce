@@ -3,7 +3,6 @@ namespace TNW\Salesforce\Synchronize\Unit;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
-use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
 use TNW\Salesforce\Synchronize;
@@ -13,11 +12,6 @@ use TNW\Salesforce\Synchronize;
  */
 class Load extends Synchronize\Unit\UnitAbstract
 {
-    /**
-     * @var string
-     */
-    private $magentoType;
-
     /**
      * @var Queue[]
      */
@@ -29,19 +23,9 @@ class Load extends Synchronize\Unit\UnitAbstract
     private $loaders;
 
     /**
-     * @var IdentificationInterface
-     */
-    protected $identification;
-
-    /**
      * @var HashInterface
      */
     private $hash;
-
-    /**
-     * @var SalesforceIdStorage
-     */
-    private $entityObject;
 
     /**
      * @var EntityLoaderAbstract[]
@@ -61,52 +45,33 @@ class Load extends Synchronize\Unit\UnitAbstract
     /**
      * Load constructor.
      * @param string $name
-     * @param string $magentoType
      * @param Queue[] $queues
      * @param LoadLoaderInterface[] $loaders
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Unit\HashInterface $hash
      * @param Objects $objects
-     * @param SalesforceIdStorage|null $entityObject
      * @param EntityLoaderAbstract[] $entityLoaders
      * @param array $entityTypeMapping
      */
     public function __construct(
         $name,
-        $magentoType,
         array $queues,
         array $loaders,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Unit\HashInterface $hash,
         Objects $objects,
-        SalesforceIdStorage $entityObject = null,
         array $entityLoaders = [],
         array $entityTypeMapping = []
     ) {
         parent::__construct($name, $units, $group);
-        $this->magentoType = $magentoType;
         $this->queues = $queues;
         $this->loaders = $loaders;
-        $this->identification = $identification;
         $this->hash = $hash;
         $this->objects = $objects;
-        $this->entityObject = $entityObject;
         $this->entityLoaders = $entityLoaders;
         $this->entityTypeMapping = $entityTypeMapping;
-    }
-
-    /**
-     * Identification
-     *
-     * @return IdentificationInterface
-     */
-    public function identification()
-    {
-        return $this->identification;
     }
 
     /**
@@ -114,7 +79,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      */
     public function description()
     {
-        return __('Loading Magento %1 ...', $this->magentoType);
+        return __('Loading Magento %1 ...', $this->units()->get('context')->getMagentoType());
     }
 
     /**
@@ -167,8 +132,9 @@ class Load extends Synchronize\Unit\UnitAbstract
                     }
                 }
 
-                if (null !== $this->entityObject && null !== $entity->getId()) {
-                    $this->entityObject->load($entity, $entity->getData('config_website'));
+                if (null !== $this->units()->get('context')->getSalesforceIdStorage() && null !== $entity->getId()) {
+                    $this->units()->get('context')->getSalesforceIdStorage()
+                        ->load($entity, $entity->getData('config_website'));
                 }
 
                 $hash = $this->hash->calculateEntity($entity);
@@ -179,9 +145,16 @@ class Load extends Synchronize\Unit\UnitAbstract
 
                 $index[$hash] = $this->cache['entities'][$entity] = $entity;
                 $this->cache['websiteIds'][$entity] = $this->websiteId($entity);
-                $message[] = __('Entity %1 loaded', $this->identification->printEntity($entity));
+                $message[] = __(
+                    'Entity %1 loaded',
+                    $this->units()->get('context')->getIdentification()->printEntity($entity)
+                );
             } catch (\Exception $e) {
-                $this->group()->messageError('Magento entity loading error, queueId: %s. Error: %s', $queue->getId(), $e->getMessage());
+                $this->group()->messageError(
+                    'Magento entity loading error, queueId: %s. Error: %s',
+                    $queue->getId(),
+                    $e->getMessage()
+                );
             }
         }
 
