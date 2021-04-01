@@ -51,7 +51,7 @@ class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterfa
                 'website',
                 $entity['website_id'],
                 $entity['base_entity_id'],
-                ['website' => $entity['code']]
+                ['website' => $entity['name']]
             );
         }
 
@@ -71,7 +71,7 @@ class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterfa
         $select = $connection->select()
             ->from($this->resourceWebsite->getMainTable(), [
                 'website_id',
-                'code',
+                'name',
                 'base_entity_id' => $this->resourceWebsite->getIdFieldName()
             ])
             ->where($connection->prepareSqlCondition($this->resourceWebsite->getIdFieldName(), ['in' => $entityIds]));

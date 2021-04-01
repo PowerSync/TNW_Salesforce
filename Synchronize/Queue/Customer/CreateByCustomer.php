@@ -1,6 +1,10 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Queue\Customer;
 
+use Magento\Customer\Model\ResourceModel\Customer;
+use Magento\Framework\UrlInterface;
+use TNW\Salesforce\Model\Queue;
+
 /**
  * Create By Customer
  */
@@ -8,19 +12,29 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
 {
     const CREATE_BY = 'customer';
 
+    const LOAD_BY = 'customer';
+
     /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer
+     * @var Customer
      */
     private $resourceCustomer;
 
     /**
+     * @var UrlInterface
+     */
+    protected $urlBuilder;
+
+    /**
      * CreateByCustomer constructor.
-     * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+     * @param Customer $resourceCustomer
+     * @param UrlInterface $urlBuilder
      */
     public function __construct(
-        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+        Customer $resourceCustomer,
+        UrlInterface $urlBuilder
     ) {
         $this->resourceCustomer = $resourceCustomer;
+        $this->urlBuilder = $urlBuilder;
     }
 
     /**
@@ -30,7 +44,7 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
      */
     public function createBy()
     {
-        return self::CREATE_BY;
+        return static::CREATE_BY;
     }
 
     /**
@@ -40,17 +54,33 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
      * @param array $additional
      * @param callable $create
      * @param int $websiteId
-     * @return \TNW\Salesforce\Model\Queue[]
+     * @return Queue[]
      */
     public function process(array $entityIds, array $additional, callable $create, $websiteId)
     {
         $queues = [];
         foreach ($this->entities($entityIds) as $entity) {
+            $customer = $entity['firstname'] . ' ' . $entity['lastname'];
+            $customer_url = $this->urlBuilder->getUrl('customer/index/edit', ['id' => $entity['entity_id']]);
+
+            if (isset($entity['company'])) {
+                $company = $entity['company'];
+                $company_url = $this->urlBuilder->getUrl('company/index/edit', ['id' => $entity['company_id']]);
+            } else {
+                $company = $customer;
+                $company_url = $customer_url;
+            }
+
             $queues[] = $create(
-                'customer',
+                static::LOAD_BY,
                 $entity['entity_id'],
                 $entity['base_entity_id'],
-                ['customer' => $entity['email']]
+                [
+                    'customer' => $customer,
+                    'customer_url' => $customer_url,
+                    'company' => $company,
+                    'company_url' => $company_url,
+                ]
             );
         }
 
@@ -67,11 +97,15 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
     {
         $connection = $this->resourceCustomer->getConnection();
         $select = $connection->select()
-            ->from($this->resourceCustomer->getEntityTable(), [
-                'entity_id' => $this->resourceCustomer->getEntityIdField(),
-                'base_entity_id' => $this->resourceCustomer->getEntityIdField(),
-                'email'
-            ])
+            ->from(
+                $this->resourceCustomer->getEntityTable(),
+                [
+                    'entity_id' => $this->resourceCustomer->getEntityIdField(),
+                    'base_entity_id' => $this->resourceCustomer->getEntityIdField(),
+                    'firstname',
+                    'lastname',
+                ]
+            )
             ->where($connection->prepareSqlCondition(
                 $this->resourceCustomer->getEntityIdField(),
                 ['in' => $entityIds]
