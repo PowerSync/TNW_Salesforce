@@ -50,7 +50,7 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
                 'website',
                 $entity['website_id'],
                 $entity['base_entity_id'],
-                ['website' => $entity['email']]
+                ['website' => $entity['website']]
             );
         }
 
@@ -67,11 +67,19 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
     {
         $connection = $this->resourceCustomer->getConnection();
         $select = $connection->select()
-            ->from($this->resourceCustomer->getEntityTable(), [
-                'website_id',
-                'email',
-                'base_entity_id' => $this->resourceCustomer->getEntityIdField()
-            ])
+            ->from(
+                ['main_table' => $this->resourceCustomer->getEntityTable()],
+                [
+                    'main_table.website_id',
+                    'website' => 'website.name',
+                    'base_entity_id' => 'main_table.' . $this->resourceCustomer->getEntityIdField()
+                ]
+            )
+            ->joinLeft(
+                ['website' => $this->resourceCustomer->getTable('store_website')],
+                'main_table.website_id = website.website_id',
+                []
+            )
             ->where($connection->prepareSqlCondition(
                 $this->resourceCustomer->getEntityIdField(),
                 ['in' => $entityIds]

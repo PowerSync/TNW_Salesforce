@@ -594,7 +594,9 @@
     <virtualType name="TS\Queue\Unit\Customer\BusinessAccount" type="TNW\Salesforce\Synchronize\Queue\Unit">
         <arguments>
             <argument name="code" xsi:type="string">customerBusinessAccount</argument>
-            <argument name="description" xsi:type="string" translatable="true">Customer ({{identifier|customer}}). Synchronization of Magento customer data with Salesforce Account object.</argument>
+            <argument name="description" xsi:type="string" translatable="true">
+                <![CDATA[<div>Account synchronization for <a href="{{identifier|company_url}}" onclick="window.open(this.getAttribute('href'), '_self')">{{identifier|company}}</a>.</div>]]>
+            </argument>
             <argument name="entityType" xsi:type="string">customer</argument>
             <argument name="objectType" xsi:type="string">Account</argument>
             <argument name="generators" xsi:type="array">
@@ -609,7 +611,9 @@
     <virtualType name="TS\Queue\Unit\Customer\Contact" type="TNW\Salesforce\Synchronize\Queue\Unit">
         <arguments>
             <argument name="code" xsi:type="string">customerContact</argument>
-            <argument name="description" xsi:type="string" translatable="true">Customer ({{identifier|customer}}). Synchronization of Magento customer data with Salesforce Contact object.</argument>
+            <argument name="description" xsi:type="string" translatable="true">
+                <![CDATA[<div>Contact synchronization for <a href="{{identifier|customer_url}}" onclick="window.open(this.getAttribute('href'), '_self')">{{identifier|customer}}</a>.</div>]]>
+            </argument>
             <argument name="entityType" xsi:type="string">customer</argument>
             <argument name="objectType" xsi:type="string">Contact</argument>
             <argument name="generators" xsi:type="array">
@@ -635,7 +639,7 @@
     <virtualType name="TS\Queue\Unit\Website\Website" type="TNW\Salesforce\Synchronize\Queue\Unit">
         <arguments>
             <argument name="code" xsi:type="string">websiteWebsite</argument>
-            <argument name="description" xsi:type="string" translatable="true">Website ({{identifier|website}}). Synchronization as an Salesforce Website</argument>
+            <argument name="description" xsi:type="string" translatable="true">Synchronization of the {{identifier|website}}.</argument>
             <argument name="entityType" xsi:type="string">website</argument>
             <argument name="objectType" xsi:type="string">tnw_mage_basic__Magento_Website__c</argument>
             <argument name="generators" xsi:type="array">
