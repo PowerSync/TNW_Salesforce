@@ -294,35 +294,32 @@ class Add
                 $currentItem = reset($itemByEntityLoad);
                 $baseEntityLoadAdditional = $currentItem->getEntityLoadAdditional();
 
-                $parentsTmp = $this->generateQueueObjects(
-                    $unit->parents(),
+                $closure = function ($items, &$result) use (
+                    $unit,
                     $baseEntityLoad,
-                    $currentEntityIds[$baseEntityLoad],
+                    $currentEntityIds,
                     $baseEntityLoadAdditional,
                     $websiteId,
                     $dependencies,
-                    $queuesUnique,
-                    $unit->code()
-                );
+                    $queuesUnique
+                ) {
+                    $tmp = $this->generateQueueObjects(
+                        $items,
+                        $baseEntityLoad,
+                        $currentEntityIds[$baseEntityLoad],
+                        $baseEntityLoadAdditional,
+                        $websiteId,
+                        $dependencies,
+                        $queuesUnique,
+                        $unit->code()
+                    );
 
-                foreach ($parentsTmp as $item) {
-                    $parents[] = $item;
-                }
+                    array_push($result, ...$tmp);
+                };
 
-                $childrenTmp = $this->generateQueueObjects(
-                    $unit->children(),
-                    $baseEntityLoad,
-                    $currentEntityIds[$baseEntityLoad],
-                    $baseEntityLoadAdditional,
-                    $websiteId,
-                    $dependencies,
-                    $queuesUnique,
-                    $unit->code()
-                );
+                $closure($unit->parents(), $parents);
+                $closure($unit->children(), $children);
 
-                foreach ($childrenTmp as $item) {
-                    $children[] = $item;
-                }
             }
 
             $dependencies = $this->addDependencies($unit, $current, $dependencies);
