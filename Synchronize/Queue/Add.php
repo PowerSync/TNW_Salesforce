@@ -294,17 +294,17 @@ class Add
                 $currentItem = reset($itemByEntityLoad);
                 $baseEntityLoadAdditional = $currentItem->getEntityLoadAdditional();
 
-                $closure = function ($items, &$result) use (
+                $closure = function ($unitsList, &$result) use (
                     $unit,
                     $baseEntityLoad,
                     $currentEntityIds,
                     $baseEntityLoadAdditional,
                     $websiteId,
-                    $dependencies,
-                    $queuesUnique
+                    &$dependencies,
+                    &$queuesUnique
                 ) {
                     $tmp = $this->generateQueueObjects(
-                        $items,
+                        $unitsList,
                         $baseEntityLoad,
                         $currentEntityIds[$baseEntityLoad],
                         $baseEntityLoadAdditional,
@@ -314,7 +314,10 @@ class Add
                         $unit->code()
                     );
 
-                    array_push($result, ...$tmp);
+                    if (!empty($tmp)) {
+                        $tmp = array_values($tmp);
+                        array_push($result, ...$tmp);
+                    }
                 };
 
                 $closure($unit->parents(), $parents);
