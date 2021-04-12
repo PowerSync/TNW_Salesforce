@@ -197,7 +197,7 @@ class Add
 
         if ($syncType === Config::DIRECT_SYNC_TYPE_REALTIME) {
             // Sync realtime type
-            $this->publisher->publish(self::TOPIC_NAME, (string) $websiteId);
+            $this->publisher->publish(self::TOPIC_NAME, (string)$websiteId);
             return;
         }
 
@@ -272,79 +272,60 @@ class Add
                 continue;
             }
 
-            /**
-             * This unit already processed higher in recursion stack
-             */
+            // merge already created records
             if (isset($queuesUnique[$key])) {
                 $current = $unit->baseByUnique($queuesUnique[$key], $current);
-                $parents = $children = [];
+            }
 
-                /**
-                 * add if items were added partially (regular/guest customers for example)
-                 */
-                foreach ([$current] as $relation) {
-                    foreach ($relation as $relationItem) {
-                        $queuesUnique[$key][$relationItem->getId()] = $relationItem;
-                    }
-                }
-            } else {
-                $currentEntityIds = [];
-                $currentByEntityLoad = [];
-                foreach ([$current] as $relation) {
-                    foreach ($relation as $relationItem) {
-                        $queuesUnique[$key][$relationItem->getId()] = $relationItem;
+            $currentEntityIds = [];
+            $currentByEntityLoad = [];
+            foreach ([$current] as $relation) {
+                foreach ($relation as $relationItem) {
+                    if (empty($queuesUnique[$key][$relationItem->getId()])) {
                         $currentEntityIds[$relationItem->getEntityLoad()][] = $relationItem->getEntityId();
                         $currentByEntityLoad[$relationItem->getEntityLoad()][] = $relationItem;
-                    }
-                }
-
-                foreach ($currentByEntityLoad as $baseEntityLoad => $itemByEntityLoad) {
-                    /** @var Queue */
-                    $currentItem = reset($itemByEntityLoad);
-                    $baseEntityLoadAdditional = $currentItem->getEntityLoadAdditional();
-
-                    $parentsTmp = $this->generateQueueObjects(
-                        $unit->parents(),
-                        $baseEntityLoad,
-                        $currentEntityIds[$baseEntityLoad],
-                        $baseEntityLoadAdditional,
-                        $websiteId,
-                        $dependencies,
-                        $queuesUnique,
-                        $unit->code()
-                    );
-
-                    foreach ($parentsTmp as $item) {
-                        $parents[] = $item;
-                    }
-
-                    $childrenTmp = $this->generateQueueObjects(
-                        $unit->children(),
-                        $baseEntityLoad,
-                        $currentEntityIds[$baseEntityLoad],
-                        $baseEntityLoadAdditional,
-                        $websiteId,
-                        $dependencies,
-                        $queuesUnique,
-                        $unit->code()
-                    );
-
-                    foreach ($childrenTmp as $item) {
-                        $children[] = $item;
-                    }
-                }
-
-                /**
-                 * add parent dependency only, child has own relations
-                 * and will be created as parent dependency deeper in recursion generateQueueObjects
-                 */
-                foreach ($unit->parents() as $parent) {
-                    $newDependencies = $this->buildDependency($current, $parent->getQueues(), $unit->code());
-                    if (!empty($newDependencies)) {
-                        array_push($dependencies, ...$newDependencies);
+                        $queuesUnique[$key][$relationItem->getId()] = $relationItem;
                     }
                 }
             }
+
+            foreach ($currentByEntityLoad as $baseEntityLoad => $itemByEntityLoad) {
+                /** @var Queue */
+                $currentItem = reset($itemByEntityLoad);
+                $baseEntityLoadAdditional = $currentItem->getEntityLoadAdditional();
+
+                $parentsTmp = $this->generateQueueObjects(
+                    $unit->parents(),
+                    $baseEntityLoad,
+                    $currentEntityIds[$baseEntityLoad],
+                    $baseEntityLoadAdditional,
+                    $websiteId,
+                    $dependencies,
+                    $queuesUnique,
+                    $unit->code()
+                );
+
+                foreach ($parentsTmp as $item) {
+                    $parents[] = $item;
+                }
+
+                $childrenTmp = $this->generateQueueObjects(
+                    $unit->children(),
+                    $baseEntityLoad,
+                    $currentEntityIds[$baseEntityLoad],
+                    $baseEntityLoadAdditional,
+                    $websiteId,
+                    $dependencies,
+                    $queuesUnique,
+                    $unit->code()
+                );
+
+                foreach ($childrenTmp as $item) {
+                    $children[] = $item;
+                }
+            }
+
+            $dependencies = $this->addDependencies($unit, $current, $dependencies);
 
             $unit->addQueues($current);
 
@@ -356,6 +337,27 @@ class Add
         }
 
         return $queues;
+    }
+
+    /**
+     * @param $unit
+     * @param $current
+     * @param $dependencies
+     * @return mixed
+     */
+    public function addDependencies($unit, $current, $dependencies)
+    {
+        /**
+         * add parent dependency only, child has own relations
+         * and will be created as parent dependency deeper in recursion generateQueueObjects
+         */
+        foreach ($unit->parents() as $parent) {
+            $newDependencies = $this->buildDependency($current, $parent->getQueues(), $unit->code());
+            if (!empty($newDependencies)) {
+                array_push($dependencies, ...$newDependencies);
+            }
+        }
+        return $dependencies;
     }
 
     /**
