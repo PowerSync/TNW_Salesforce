@@ -149,7 +149,7 @@ class Load extends Synchronize\Unit\UnitAbstract
                 foreach ($this->entityLoaders as $entityType => $entityLoader) {
                     $subEntity = $entityLoader->get($entity);
                     if (!empty($subEntity)) {
-                        if (!$subEntity->getData($subEntity->getIdFieldName())) {
+                        if (!empty($entityLoader->getSalesforceIdStorage()) && !$subEntity->getData($subEntity->getIdFieldName())) {
                             $salesforceIds = $this->objects->loadObjectIds(
                                 $queue->getEntityId(),
                                 $queue->getEntityType(),
