@@ -213,6 +213,9 @@ class Queue
 
                 $description[] = sprintf('%s <- %s;', $group->code(), $dependent);
 
+                if ($group->code() == $dependent) {
+                    continue;
+                }
                 if (isset($sortGroups[$dependent])) {
                     continue;
                 }
