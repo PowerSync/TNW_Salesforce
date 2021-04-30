@@ -5,12 +5,43 @@ use Exception;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Phrase;
 use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Synchronize\Group;
+use TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert\Storage;
+use TNW\Salesforce\Synchronize\Units;
 
 /**
  * Processing Upsert Input
  */
 class ProcessingUpsertInput extends ProcessingAbstract
 {
+    /**
+     * @var Storage
+     */
+    private $storage;
+
+    /**
+     * @param string $name
+     * @param string $load
+     * @param Units $units
+     * @param Group $group
+     * @param IdentificationInterface $identification
+     * @param Storage $storage
+     * @param array $dependents
+     */
+    public function __construct(
+        $name,
+        $load,
+        Units $units,
+        Group $group,
+        IdentificationInterface $identification,
+        Storage $storage,
+        array $dependents = []
+    )
+    {
+        parent::__construct($name, $load, $units, $group, $identification, $dependents);
+        $this->storage = $storage;
+    }
+
     /**
      * @inheritdoc
      */
@@ -42,6 +73,15 @@ class ProcessingUpsertInput extends ProcessingAbstract
         }
 
         return false;
+    }
+
+    /**
+     * @inheridoc
+     */
+    public function process()
+    {
+        $this->storage->resetStorage();
+        parent::process();
     }
 
     /**
