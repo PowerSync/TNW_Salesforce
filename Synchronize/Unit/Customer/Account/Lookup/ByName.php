@@ -19,10 +19,8 @@ class ByName extends Synchronize\Unit\LookupAbstract
     /**
      * ByName constructor.
      * @param string $name
-     * @param string $load
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
      * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
      * @param Synchronize\Transport\Calls\QueryInterface $process
@@ -31,10 +29,8 @@ class ByName extends Synchronize\Unit\LookupAbstract
      */
     public function __construct(
         $name,
-        $load,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
         Synchronize\Transport\Calls\Query\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Query\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\QueryInterface $process,
@@ -43,10 +39,8 @@ class ByName extends Synchronize\Unit\LookupAbstract
     ) {
         parent::__construct(
             $name,
-            $load,
             $units,
             $group,
-            $identification,
             $inputFactory,
             $outputFactory,
             $process,

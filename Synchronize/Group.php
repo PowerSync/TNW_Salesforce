@@ -123,8 +123,9 @@ class Group
     {
         /** @var Units $units */
         $units = $this->unitsFactory->create();
-        foreach ($this->units as $instanceName) {
+        foreach ($this->units as $key => $instanceName) {
             $units->add($this->objectManager->create($instanceName, [
+                'name' => $key,
                 'group' => $this,
                 'queues' => $queues,
                 'units' => $units

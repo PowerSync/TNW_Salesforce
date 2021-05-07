@@ -13,15 +13,6 @@ use TNW\Salesforce\Synchronize;
  */
 class Status extends Synchronize\Unit\UnitAbstract
 {
-    /**
-     * @var string
-     */
-    private $load;
-
-    /**
-     * @var string
-     */
-    private $deleteOutput;
 
     /**
      * @var SalesforceIdStorage|null
@@ -31,8 +22,6 @@ class Status extends Synchronize\Unit\UnitAbstract
     /**
      * Status constructor.
      * @param string $name
-     * @param string $load
-     * @param string $deleteOutput
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
      * @param SalesforceIdStorage $salesforceIdStorage
@@ -40,17 +29,13 @@ class Status extends Synchronize\Unit\UnitAbstract
      */
     public function __construct(
         $name,
-        $load,
-        $deleteOutput,
         Synchronize\Units $units,
         Synchronize\Group $group,
         SalesforceIdStorage $salesforceIdStorage = null,
         array $dependents = []
     )
     {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $deleteOutput]));
-        $this->load = $load;
-        $this->deleteOutput = $deleteOutput;
+        parent::__construct($name, $units, $group, array_merge($dependents, ['load', 'deleteOutput']));
         $this->salesforceIdStorage = $salesforceIdStorage;
     }
 
@@ -88,7 +73,7 @@ class Status extends Synchronize\Unit\UnitAbstract
      */
     public function deleteOutput()
     {
-        return $this->unit($this->deleteOutput);
+        return $this->unit('deleteOutput');
     }
 
     /**
@@ -109,7 +94,7 @@ class Status extends Synchronize\Unit\UnitAbstract
      */
     public function load()
     {
-        return $this->unit($this->load);
+        return $this->unit('load');
     }
 
     /**

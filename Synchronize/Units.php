@@ -11,12 +11,15 @@ class Units implements \IteratorAggregate
     /**
      * Add
      *
-     * @param Unit\UnitInterface $unit
+     * @param Unit\UnitInterface|null $unit
      * @return $this
      */
     public function add(Unit\UnitInterface $unit)
     {
-        $this->units[$unit->name()] = $unit;
+        if ($unit) {
+            $this->units[$unit->name()] = $unit;
+        }
+
         return $this;
     }
 
@@ -48,7 +51,7 @@ class Units implements \IteratorAggregate
         $addUnit = function (array &$sortUnits, Unit\UnitInterface $unit) use (&$addUnit) {
             foreach ($unit->dependents() as $dependent) {
                 if (empty($this->units[$dependent])) {
-                    throw new \RuntimeException(sprintf('Not fount unit "%s"', $dependent));
+                    throw new \RuntimeException(sprintf('Not found unit "%s"', $dependent));
                 }
 
                 if (isset($sortUnits[$dependent])) {

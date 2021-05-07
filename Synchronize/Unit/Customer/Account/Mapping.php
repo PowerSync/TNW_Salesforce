@@ -24,36 +24,24 @@ class Mapping extends Synchronize\Unit\Mapping
      * Mapping constructor.
      *
      * @param string $name
-     * @param string $load
-     * @param string $lookup
-     * @param string $objectType
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
      * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
      * @param Config $customerConfig
      * @param array $dependents
      */
     public function __construct(
         $name,
-        $load,
-        $lookup,
-        $objectType,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
         Config $customerConfig,
         array $dependents = []
     ) {
         parent::__construct(
             $name,
-            $load,
-            $lookup,
-            $objectType,
             $units,
             $group,
-            $identification,
             $mapperCollectionFactory,
             $dependents
         );
