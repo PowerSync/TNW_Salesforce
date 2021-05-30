@@ -305,6 +305,8 @@ class Input extends Synchronize\Unit\UnitAbstract
                     );
                     unset($object[$fieldName]);
                 }
+            } elseif (in_array($fieldProperty->getSoapType(), ['xsd:double'])) {
+                $object[$fieldName] = (float)$object[$fieldName];
             } elseif (is_string($object[$fieldName])) {
                 $object[$fieldName] = trim($object[$fieldName]);
 
@@ -348,7 +350,16 @@ class Input extends Synchronize\Unit\UnitAbstract
                 continue;
             }
 
-            if (empty($lookupObject[$compareField]) || $compareValue != $lookupObject[$compareField]) {
+            if ($compareValue instanceof \DateTime && $lookupObject[$compareField] instanceof \DateTime) {
+                $fieldProperty = $this->findFieldProperty($compareField);
+                if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
+                    $compareValue
+                        ->setTimezone($lookupObject[$compareField]->getTimezone())
+                        ->setTime(0, 0);
+                }
+            }
+
+            if ((empty($lookupObject[$compareField]) && !empty($compareValue)) || $compareValue != $lookupObject[$compareField]) {
                 $this->group()->messageDebug('Entity %1 has changed field: %2 = %3', $this->identification->printEntity($entity), $compareField, $compareValue);
                 return true;
             }
