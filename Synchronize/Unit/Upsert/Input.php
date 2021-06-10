@@ -350,7 +350,7 @@ class Input extends Synchronize\Unit\UnitAbstract
                 continue;
             }
 
-            if ($compareValue instanceof \DateTime && $lookupObject[$compareField] instanceof \DateTime) {
+            if ($compareValue instanceof \DateTime && !empty($lookupObject[$compareField]) && $lookupObject[$compareField] instanceof \DateTime) {
                 $fieldProperty = $this->findFieldProperty($compareField);
                 if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
                     $compareValue
