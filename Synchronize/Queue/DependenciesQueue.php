@@ -104,4 +104,34 @@ class DependenciesQueue
 
         return $resolves;
     }
+
+    /**
+     * @param $descendantStr
+     * @return array
+     */
+    public function parseDependencyString($descendantStr)
+    {
+        $descendantsTmp = explode('&', $descendantStr);
+        $descendants = [];
+        foreach ($descendantsTmp as $descendantTmp) {
+
+            list($key, $value) = explode('=', $descendantTmp);
+            $descendants[$key] = $value;
+        }
+
+        return $descendants;
+    }
+
+
+    /**
+     * @param $descendantStr
+     * @return array
+     */
+    public function parseDependencyStringWithReplace($descendantStr)
+    {
+        $descendants = $this->parseDependencyString($descendantStr);
+        $descendants = str_replace('_', '.', array_keys($descendants));
+
+        return $descendants;
+    }
 }
