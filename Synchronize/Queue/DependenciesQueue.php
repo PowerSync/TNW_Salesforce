@@ -114,9 +114,12 @@ class DependenciesQueue
         $descendantsTmp = explode('&', $descendantStr);
         $descendants = [];
         foreach ($descendantsTmp as $descendantTmp) {
-
-            list($key, $value) = explode('=', $descendantTmp);
-            $descendants[$key] = $value;
+            try {
+                list($key, $value) = explode('=', $descendantTmp);
+                $descendants[$key] = $value;
+            } catch (\Exception $e) {
+                continue;
+            }
         }
 
         return $descendants;
