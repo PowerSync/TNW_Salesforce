@@ -1,24 +1,28 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Queue\Website;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Model\ResourceModel\Order;
+use Magento\Store\Model\ResourceModel\Website;
+
 /**
  * Create By Website
  */
-class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterface
+class CreateByWebsite extends CreateByBase
 {
     const CREATE_BY = 'website';
 
     /**
-     * @var \Magento\Sales\Model\ResourceModel\Order
+     * @var Order
      */
     private $resourceWebsite;
 
     /**
      * CreateByWebsite constructor.
-     * @param \Magento\Store\Model\ResourceModel\Website $resourceWebsite
+     * @param Website $resourceWebsite
      */
     public function __construct(
-        \Magento\Store\Model\ResourceModel\Website $resourceWebsite
+        Website $resourceWebsite
     ) {
         $this->resourceWebsite = $resourceWebsite;
     }
@@ -41,7 +45,7 @@ class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterfa
      * @param callable $create
      * @param int $websiteId
      * @return mixed
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function process(array $entityIds, array $additional, callable $create, $websiteId)
     {
@@ -63,7 +67,7 @@ class CreateByWebsite implements \TNW\Salesforce\Synchronize\Queue\CreateInterfa
      *
      * @param int[] $entityIds
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function entities(array $entityIds)
     {
