@@ -1,24 +1,26 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Queue\Website;
 
+use Magento\Customer\Model\ResourceModel\Customer;
+
 /**
  * Create By Customer
  */
-class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterface
+class CreateByCustomer extends CreateByBase
 {
     const CREATE_BY = 'customer';
 
     /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer
+     * @var Customer
      */
     private $resourceCustomer;
 
     /**
      * CreateByCustomer constructor.
-     * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+     * @param Customer $resourceCustomer
      */
     public function __construct(
-        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+        Customer $resourceCustomer
     ) {
         $this->resourceCustomer = $resourceCustomer;
     }
@@ -50,7 +52,7 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
                 'website',
                 $entity['website_id'],
                 $entity['base_entity_id'],
-                ['website' => $entity['email']]
+                ['website' => $entity['website_id']]
             );
         }
 
