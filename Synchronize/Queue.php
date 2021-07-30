@@ -145,7 +145,6 @@ class Queue
                 $lastPageNumber = (int)$groupCollection->getLastPageNumber();
                 for ($i = 1; $i <= $lastPageNumber; $i++) {
                     $groupCollection->clear();
-                    $groupCollection->setCurPage($i);
 
                     $group->messageDebug(
                         'Start job "%s", phase "%s" for website %s',
