@@ -359,7 +359,7 @@ class Input extends Synchronize\Unit\UnitAbstract
                 }
             }
 
-            if ((empty($lookupObject[$compareField]) && !empty($compareValue)) || $compareValue != $lookupObject[$compareField]) {
+            if ((empty($lookupObject[$compareField]) && !empty($compareValue)) || (!empty($lookupObject[$compareField]) && $compareValue != $lookupObject[$compareField])) {
                 $this->group()->messageDebug('Entity %1 has changed field: %2 = %3', $this->identification->printEntity($entity), $compareField, $compareValue);
                 return true;
             }
