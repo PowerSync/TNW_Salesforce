@@ -65,13 +65,14 @@ class InvalidConnection implements MessageInterface
 
         // read website specific configuration
         $wsdl = $this->config->getSalesforceWsdl($websiteId);
+        $location = $this->config->getSFDCLocationEndpoint($websiteId);
         $username = $this->config->getSalesforceUsername($websiteId);
         $password = $this->config->getSalesforcePassword($websiteId);
         $token = $this->config->getSalesforceToken($websiteId);
 
         try {
             if (!$this->config->getSalesforceStatus($websiteId)
-                || (file_exists($wsdl) && $this->client->checkConnection($wsdl, $username, $password, $token))
+                || (file_exists($wsdl) && $this->client->checkConnection($wsdl, $location, $username, $password, $token))
             ) {
                 $result = false;
             }
