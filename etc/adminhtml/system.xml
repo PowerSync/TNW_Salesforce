@@ -34,6 +34,10 @@
 
                 </field>
 
+                <field id="endpoint" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>SFDC Endpoint Location</label>
+                </field>
+                
                 <field id="username" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Username</label>
                 </field>
