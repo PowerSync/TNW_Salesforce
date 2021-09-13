@@ -84,6 +84,7 @@ class ClientFactory
 
         $builder = new ClientBuilder(
             $wsdl,
+            $this->salesforceConfig->getSFDCLocationEndpoint($wwebsiteId),
             $this->salesforceConfig->getSalesforceUsername($websiteId),
             $this->salesforceConfig->getSalesforcePassword($websiteId),
             $this->salesforceConfig->getSalesforceToken($websiteId)
