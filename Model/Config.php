@@ -182,7 +182,7 @@ class Config extends DataObject
      */
     public function getSFDCLocationEndpoint($websiteId = null )
     {
-	    return $this->getStoreConfig('tnswforce_general/salesforce/location', $websiteId);
+	    return $this->getStoreConfig('tnswforce_general/salesforce/endpoint', $websiteId);
     }
     
     /**
