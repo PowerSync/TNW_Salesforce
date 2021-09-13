@@ -174,6 +174,18 @@ class Config extends DataObject
     }
 
     /**
+     * Get Salesforce endpoint location from config
+     *
+     * @param int|null $websiteId
+     *
+     * @return string
+     */
+    public function getSFDCLocationEndpoint($websiteId = null )
+    {
+	    return $this->getStoreConfig('tnswforce_general/salesforce/location', $websiteId);
+    }
+    
+    /**
      * Get Salesfoce username from config
      *
      * @param int|null $websiteId
