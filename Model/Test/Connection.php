@@ -38,12 +38,13 @@ class Connection extends  \TNW\Salesforce\Model\Test
          */
         $client = $this->objectManager->get('\TNW\Salesforce\Client\Salesforce');
         $wsdl = $this->config->getSalesforceWsdl();
+        $location = $this->config->getSFDCLocationEndpoint();
         $username = $this->config->getSalesforceUsername();
         $password = $this->config->getSalesforcePassword();
         $token = $this->config->getSalesforceToken();
 
         try{
-            $client->checkConnection($wsdl, $username, $password, $token);
+            $client->checkConnection($wsdl, $location, $username, $password, $token);
         }catch (\Exception $e){
             $result = parent::STATUS_FAILED;
         }
