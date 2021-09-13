@@ -87,6 +87,7 @@ class Salesforce extends DataObject
             try {
                 $this->client[$cacheKey] = $this->buildClient(
                     $this->salesforceConfig->getSalesforceWsdl($websiteId),
+                    $this->salesforceConfig->getSFDCLocationEndpoint($websiteId),
                     $this->salesforceConfig->getSalesforceUsername($websiteId),
                     $this->salesforceConfig->getSalesforcePassword($websiteId),
                     $this->salesforceConfig->getSalesforceToken($websiteId)
@@ -104,6 +105,7 @@ class Salesforce extends DataObject
      * Check connection for credentials by sending test query
      *
      * @param String $wsdl
+     * @param String $location
      * @param String $username
      * @param String $password
      * @param String $token
@@ -111,15 +113,16 @@ class Salesforce extends DataObject
      * @return bool
      * @throws \Exception
      */
-    public function checkConnection($wsdl, $username, $password, $token)
+    public function checkConnection($wsdl, $location, $username, $password, $token)
     {
-        $client = $this->buildClient($wsdl, $username, $password, $token);
+        $client = $this->buildClient($wsdl, $location, $username, $password, $token);
         $client->getLoginResult();
         return true;
     }
 
     /**
      * @param $wsdl
+     * @param $location
      * @param $username
      * @param $password
      * @param $token
@@ -133,7 +136,7 @@ class Salesforce extends DataObject
             throw new LocalizedException(__('WSDL file is missing'));
         }
 
-        $builder = new ClientBuilder($wsdl, $username, $password, $token);
+        $builder = new ClientBuilder($wsdl, $location, $username, $password, $token);
         if ($this->salesforceConfig->getLogDebug()) {
             $builder->withLog($this->logger->getLogger());
         }
