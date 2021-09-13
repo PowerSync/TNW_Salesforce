@@ -96,19 +96,21 @@ class Testconnection extends Action
         if (strpos($wsdl, 'fakepath') === false) {
             // read website specific configuration
             $wsdl = $config->getSalesforceWsdl($websiteId);
+            $location = $config->getSFDCLocationEndpoint($websiteId);
             $username = $config->getSalesforceUsername($websiteId);
             $password = $config->getSalesforcePassword($websiteId);
             $token = $config->getSalesforceToken($websiteId);
         } else {
             // get config from current values
             $wsdl = $this->_getWsdlPath($wsdl);
+            $location = $this->getRequest()->getParam('endpoint');
             $username = $this->getRequest()->getParam('username');
             $password = $this->getRequest()->getParam('password');
             $token = $this->getRequest()->getParam('token');
         }
 
         try {
-            $result = $client->checkConnection($wsdl, $username, $password, $token);
+            $result = $client->checkConnection($wsdl, $location, $username, $password, $token);
         } catch (Exception $e) {
             $result = $e->getMessage();
         }
