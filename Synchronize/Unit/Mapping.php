@@ -20,30 +20,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     const PARENT_ENTITY = '__parent_entity';
 
     /**
-     * @deprecated
-     * @var string
-     */
-    private $load;
-
-    /**
-     * @var string
-     */
-    private $lookup;
-
-    /**
-     * @var string
-     */
-    private $objectType;
-
-    /**
      * @var CollectionFactory
      */
     private $mapperCollectionFactory;
-
-    /**
-     * @var IdentificationInterface
-     */
-    protected $identification;
 
     /**
      * ['insert/update']['entity_type']['website_id'] => Model\ResourceModel\Mapper\Collection
@@ -55,32 +34,20 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * Mapping constructor.
      *
      * @param string $name
-     * @param string $load
-     * @param string $lookup
-     * @param string $objectType
      * @param Synchronize\Units $units
      * @param Synchronize\Group $group
-     * @param IdentificationInterface $identification
      * @param CollectionFactory $mapperCollectionFactory
      * @param array $dependents
      */
     public function __construct(
         $name,
-        $load,
-        $lookup,
-        $objectType,
         Synchronize\Units $units,
         Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
         CollectionFactory $mapperCollectionFactory,
         array $dependents = []
     ) {
-        parent::__construct($name, $units, $group, array_merge($dependents, [$load, $lookup]));
-        $this->load = $load;
-        $this->objectType = $objectType;
-        $this->identification = $identification;
+        parent::__construct($name, $units, $group, array_merge($dependents, ['load', 'lookup']));
         $this->mapperCollectionFactory = $mapperCollectionFactory;
-        $this->lookup = $lookup;
     }
 
     /**
@@ -88,11 +55,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function description()
     {
-        if (empty($this->objectType)) {
+        if (empty($this->units()->get('context')->getObjectType())) {
             return __('System mapping');
         }
 
-        return __('Mapping for %1', $this->objectType);
+        return __('Mapping for %1', $this->units()->get('context')->getObjectType());
     }
 
     /**
@@ -102,7 +69,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function lookup()
     {
-        return $this->unit($this->lookup);
+        return $this->unit('lookup');
     }
 
     /**
@@ -112,17 +79,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function load()
     {
-        return $this->unit($this->load);
-    }
-
-    /**
-     * Object Type
-     *
-     * @return string
-     */
-    public function objectType()
-    {
-        return $this->objectType;
+        return $this->unit('load');
     }
 
     /**
@@ -140,7 +97,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
             $count = 0;
             $message[] = __(
                 "Entity %1 mapping:\n%2",
-                $this->identification->printEntity($entity),
+                $this->units()->get('context')->getIdentification()->printEntity($entity),
                 implode("\n", $mappers->walk(function (Model\Mapper $mapper) use (&$count) {
                     $count++;
 
@@ -160,7 +117,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
             $this->cache[$entity] = $this->generateObject($entity, $mappers);
             $message[] = __(
                 "Entity %1 mapping result:\n%2",
-                $this->identification->printEntity($entity),
+                $this->units()->get('context')->getIdentification()->printEntity($entity),
                 print_r($this->cache[$entity], true)
             );
         }
@@ -231,7 +188,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
                     $this->group()->messageDebug(
                         'Object type "%s" not found. Entity: %s.',
                         $mapper->getMagentoEntityType(),
-                        $this->identification->printEntity($entity)
+                        $this->units()->get('context')->getIdentification()->printEntity($entity)
                     );
 
                     break;
@@ -278,17 +235,18 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function mappers($entity)
     {
+        $objectType = $this->units()->get('context')->getObjectType();
         $upsertInsertFlag = $this->getUpdateInsertFlag($entity);
         $websiteId = (int)$this->load()->get('websiteIds/%s', $entity);
-        if (empty($this->collectionCache[$upsertInsertFlag][$this->objectType][$websiteId])) {
+        if (empty($this->collectionCache[$upsertInsertFlag][$objectType][$websiteId])) {
 
-            $this->collectionCache[$upsertInsertFlag][$this->objectType][$websiteId] = $this->mapperCollectionFactory->create()
-                ->addObjectToFilter($this->objectType)
+            $this->collectionCache[$upsertInsertFlag][$objectType][$websiteId] = $this->mapperCollectionFactory->create()
+                ->addObjectToFilter($objectType)
                 ->applyUniquenessByWebsite($websiteId)
                 ->setOrder('is_default', Collection::SORT_ORDER_DESC);
         }
 
-        return $this->collectionCache[$upsertInsertFlag][$this->objectType][$websiteId];
+        return $this->collectionCache[$upsertInsertFlag][$objectType][$websiteId];
     }
 
     /**

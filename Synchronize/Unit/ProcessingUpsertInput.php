@@ -21,24 +21,20 @@ class ProcessingUpsertInput extends ProcessingAbstract
 
     /**
      * @param string $name
-     * @param string $load
      * @param Units $units
      * @param Group $group
-     * @param IdentificationInterface $identification
      * @param Storage $storage
      * @param array $dependents
      */
     public function __construct(
         $name,
-        $load,
         Units $units,
         Group $group,
-        IdentificationInterface $identification,
         Storage $storage,
         array $dependents = []
     )
     {
-        parent::__construct($name, $load, $units, $group, $identification, $dependents);
+        parent::__construct($name, $units, $group, $dependents);
         $this->storage = $storage;
     }
 

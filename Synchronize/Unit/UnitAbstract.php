@@ -192,7 +192,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
-     * @return int
+     * @return void
      */
     public function forceStatus($status)
     {
@@ -201,7 +201,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
-     * @return int
+     * @return void
      */
     public function restoreStatus()
     {
@@ -224,6 +224,6 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      */
     public function correctSalesforceId($id)
     {
-        return substr($id, 0, self::MIN_LEN_SF_ID);
+        return is_string($id) ? substr($id, 0, self::MIN_LEN_SF_ID) : $id;
     }
 }
