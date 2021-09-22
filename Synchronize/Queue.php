@@ -84,6 +84,24 @@ class Queue
     }
 
     /**
+     * @param $groupCollection Collection
+     * @return mixed
+     */
+    public function getSyncType($groupCollection)
+    {
+        if ($groupCollection->isLoaded()) {
+            $tmpCollection = $groupCollection;
+        } else {
+            $tmpCollection = clone $groupCollection;
+            $tmpCollection->setPageSize(1);
+            $tmpCollection->setCurPage(1);
+        }
+
+        $item = $tmpCollection->getFirstItem();
+        return $item->getSyncType();
+    }
+
+    /**
      * Synchronize
      *
      * @param $collection Collection
@@ -139,8 +157,8 @@ class Queue
                 $groupCollection = clone $collection;
                 $groupCollection->addFilterToStatus($phase['processStatus']);
                 $groupCollection->addFilterToTransactionUid($this->uidProcessor->uid());
-
-                $groupCollection->setPageSize($this->salesforceConfig->getPageSizeFromMagento());
+                $syncType = $this->getSyncType($groupCollection);
+                $groupCollection->setPageSize($this->salesforceConfig->getPageSizeFromMagento(null, $syncType));
 
                 $lastPageNumber = (int)$groupCollection->getLastPageNumber();
                 for ($i = 1; $i <= $lastPageNumber; $i++) {
@@ -174,7 +192,8 @@ class Queue
                         $group->messageError($e);
 
                         if (!empty($groupCollection->getFirstItem())) {
-                            $this->pushMqMessage->sendMessage($groupCollection->getFirstItem()->getSyncType());
+                            $syncType = $this->getSyncType($groupCollection);
+                            $this->pushMqMessage->sendMessage($syncType);
                         }
                     }
 
