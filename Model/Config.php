@@ -73,13 +73,13 @@ class Config extends DataObject
     /**
      * @var Filesystem
      */
-    private $filesystem;
+    protected $filesystem;
 
     /** @var Config\WebsiteDetector  */
     protected $websiteDetector;
 
     /** @var array  */
-    private $credentialsConfigPaths = [
+    protected $credentialsConfigPaths = [
         /** Org credentials */
         'tnwsforce_general/salesforce/active',
         'tnwsforce_general/salesforce/username',
@@ -379,9 +379,9 @@ class Config extends DataObject
      * @param int|null $websiteId
      * @return int
      */
-    public function getPageSizeFromMagento($websiteId = null)
+    public function getPageSizeFromMagento($websiteId = null, $type = self::DIRECT_SYNC_TYPE_REALTIME)
     {
-        return (int)$this->getStoreConfig('tnwsforce_general/synchronization/page_size_from_magento', $websiteId);
+        return self::SFORCE_BASE_UPDATE_LIMIT;
     }
 
     /**
