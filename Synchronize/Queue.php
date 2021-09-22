@@ -157,7 +157,8 @@ class Queue
                 $groupCollection = clone $collection;
                 $groupCollection->addFilterToStatus($phase['processStatus']);
                 $groupCollection->addFilterToTransactionUid($this->uidProcessor->uid());
-                $groupCollection->setPageSize($this->salesforceConfig->getPageSizeFromMagento(null, $groupCollection->getSyncType()));
+                $syncType = $this->getSyncType($groupCollection);
+                $groupCollection->setPageSize($this->salesforceConfig->getPageSizeFromMagento(null, $syncType));
 
                 $lastPageNumber = (int)$groupCollection->getLastPageNumber();
                 for ($i = 1; $i <= $lastPageNumber; $i++) {
