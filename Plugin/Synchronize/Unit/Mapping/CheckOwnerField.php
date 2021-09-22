@@ -12,7 +12,7 @@ use TNW\Salesforce\Model\Mapper;
 use TNW\Salesforce\Model\ResourceModel\Mapper\Collection;
 use TNW\Salesforce\Synchronize\Unit\Mapping;
 
-class CheckOwnerField
+class CheckOwnerField extends Mapping
 {
     const OWNER_ID_FIELD = 'OwnerId';
 
@@ -51,13 +51,31 @@ class CheckOwnerField
      */
     public function checkOwner($value, $entity)
     {
+        $value = $this->correctSalesforceId($value);
         $actualOwners = $this->salesforceOwners->toOptionArray();
+        $actualOwners = $this->correctSalesforceIdKey($actualOwners);
+
         if (!isset($actualOwners[$value])) {
             $this->logger->messageDebug('The owner %s is not valid anymore, the default owner %s used instead', $value, $this->customerConfig->defaultOwner($entity->getData('config_website')));
             $value = $this->customerConfig->defaultOwner($entity->getData('config_website'));
         }
 
         return $value;
+    }
+
+    /**
+     * @param $actualOwners
+     * @return array
+     */
+    public function correctSalesforceIdKey($actualOwners)
+    {
+        $result= [];
+        foreach ($actualOwners as $salesforceId => $value) {
+            $salesforceId = $this->correctSalesforceId($salesforceId);
+            $result[$salesforceId] = $value;
+        }
+
+        return $result;
     }
 
     /**

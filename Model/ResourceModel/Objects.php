@@ -29,6 +29,11 @@ class Objects extends AbstractDb
     /**
      * @var \Magento\Framework\DB\Select
      */
+    private $selectEntityIdsByType;
+
+    /**
+     * @var \Magento\Framework\DB\Select
+     */
     private $selectStatus;
 
     /**
@@ -89,6 +94,14 @@ class Objects extends AbstractDb
 
         $this->selectEntityIds = $this->getConnection()->select()
             ->from($this->getMainTable(), ['entity_id', 'magento_type'])
+            ->where('salesforce_type = :salesforce_type')
+            ->where('object_id = :object_id')
+            ->where('website_id IN (:entity_website_id, :base_website_id)')
+            ->order(new \Zend_Db_Expr('FIELD(website_id, :base_website_id, :entity_website_id)'));
+
+        $this->selectEntityIdsByType = $this->getConnection()->select()
+            ->from($this->getMainTable(), ['entity_id'])
+            ->where('magento_type = :magento_type')
             ->where('salesforce_type = :salesforce_type')
             ->where('object_id = :object_id')
             ->where('website_id IN (:entity_website_id, :base_website_id)')
@@ -316,5 +329,24 @@ class Objects extends AbstractDb
             ['status' => new \Zend_Db_Expr('status - 10')],
             $where
         );
+    }
+
+    /**
+     * @param string $objectId
+     * @param string $magentoType
+     * @param string $salesforceType
+     * @param int $websiteId
+     *
+     * @return array
+     */
+    public function loadEntityIdsByType($objectId, $magentoType, $salesforceType, $websiteId)
+    {
+        return $this->getConnection()->fetchCol($this->selectEntityIdsByType, [
+            'magento_type' => $magentoType,
+            'salesforce_type' => $salesforceType,
+            'object_id' => $objectId,
+            'entity_website_id' => $websiteId,
+            'base_website_id' => $this->baseWebsiteId($websiteId),
+        ]);
     }
 }

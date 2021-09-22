@@ -145,7 +145,6 @@ class Queue
                 $lastPageNumber = (int)$groupCollection->getLastPageNumber();
                 for ($i = 1; $i <= $lastPageNumber; $i++) {
                     $groupCollection->clear();
-                    $groupCollection->setCurPage($i);
 
                     $group->messageDebug(
                         'Start job "%s", phase "%s" for website %s',
@@ -213,6 +212,9 @@ class Queue
 
                 $description[] = sprintf('%s <- %s;', $group->code(), $dependent);
 
+                if ($group->code() == $dependent) {
+                    continue;
+                }
                 if (isset($sortGroups[$dependent])) {
                     continue;
                 }

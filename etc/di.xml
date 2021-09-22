@@ -667,4 +667,15 @@
     </type>
 
     <preference for="TNW\Salesforce\Api\MessageQueue\PublisherAdapter" type="TNW\Salesforce\MessageQueue\PublisherAdapter"/>
+
+    <type name="\TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg">
+        <plugin name="tnw_salesforce"
+                type="TNW\Salesforce\Plugin\FixMissedWebsites"/>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Queue\Website\CreateByBase">
+        <plugin name="tnw_salesforce"
+            type="TNW\Salesforce\Plugin\Synchronize\Queue\Website\FixMissedWebsites"/>
+    </type>
+
 </config>

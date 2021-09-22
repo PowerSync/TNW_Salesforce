@@ -43,4 +43,12 @@ class Storage
 
         return $this->results[$hash];
     }
+
+    /**
+     * Reset Storage
+     */
+    public function resetStorage()
+    {
+        $this->results = [];
+    }
 }
