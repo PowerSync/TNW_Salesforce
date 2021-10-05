@@ -65,7 +65,7 @@ class QueueAddIndex implements SchemaPatchInterface
      */
     public static function getDependencies()
     {
-        return [QueueRelationForeignKeyFix::class];
+        return [];
     }
 
     /**
