@@ -96,13 +96,19 @@ class Save extends Synchronize\Unit\UnitAbstract
         $attributeNames = $this->fieldModifier()->additionalSalesforceId();
         $attributeNames['Id'] = $this->fieldModifier()->fieldSalesforceId();
 
-        foreach ($attributeNames as $attributeName) {
+        foreach ($attributeNames as $key => $attributeName) {
             foreach ($entities as $entity) {
                 try {
-                    $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
-
-                    if (!$salesforceId) {
-                        continue;
+                    switch (true) {
+                        case !(empty($this->entityObject->valueByAttribute($entity, $attributeName))):
+                            $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
+                            break;
+                        case (!empty($this->unit('mapping')) && !empty($this->unit('mapping')->get('%s/' . $key, $entity))):
+                            $salesforceId = $this->unit('mapping')->get('%s/' . $key, $entity);
+                            break;
+                        case (!empty($this->unit('lookup')) && !empty($this->unit('lookup')->get('%s/record/' . $key, $entity))):
+                            $salesforceId = $this->unit('lookup')->get('%s/record/' . $key, $entity);
+                            break;
                     }
 
                     // Save Salesforce Id
