@@ -24,7 +24,7 @@ class Uninstall implements UninstallInterface
      * @param CustomerSetupFactory $customerSetupFactory
      */
     public function __construct(
-        CustomerSetupFactory $customerSetupFactory,
+        CustomerSetupFactory $customerSetupFactory
     ) {
         $this->customerSetupFactory = $customerSetupFactory;
     }
