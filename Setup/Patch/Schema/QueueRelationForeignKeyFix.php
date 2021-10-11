@@ -2,11 +2,12 @@
 namespace TNW\Salesforce\Setup\Patch\Schema;
 
 use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\Patch\SchemaPatchInterface;
 use Zend_Db_Statement_Interface;
 
-class QueueRelationForeignKeyFix implements SchemaPatchInterface
+class QueueRelationForeignKeyFix implements SchemaPatchInterface, PatchRevertableInterface
 {
     /**
      * @var SchemaSetupInterface
@@ -146,5 +147,10 @@ class QueueRelationForeignKeyFix implements SchemaPatchInterface
     public function getAliases()
     {
         return [];
+    }
+
+    public function revert()
+    {
+        // Nothing to revert here
     }
 }
