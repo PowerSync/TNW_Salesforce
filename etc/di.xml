@@ -69,7 +69,7 @@
     <virtualType name="TNW\Unit\Customer\BusinessAccount\Lookup\ByContact" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup\ByContact">
         <arguments>
             <argument name="dependents" xsi:type="array">
-                <item name="upsertInput" xsi:type="string">processingUpsertInput</item>
+                <item name="processingUpsertInput" xsi:type="string">processingUpsertInput</item>
             </argument>
         </arguments>
     </virtualType>
@@ -77,7 +77,7 @@
     <virtualType name="TNW\Unit\Customer\BusinessAccount\Lookup\ByName" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup\ByName">
         <arguments>
             <argument name="dependents" xsi:type="array">
-                <item name="upsertInput" xsi:type="string">processingUpsertInput</item>
+                <item name="processingUpsertInput" xsi:type="string">processingUpsertInput</item>
             </argument>
         </arguments>
     </virtualType>
@@ -105,15 +105,7 @@
     <virtualType name="TNW\Unit\Customer\BusinessAccount\Mapping" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping">
         <arguments>
             <argument name="dependents" xsi:type="array">
-                <item name="upsertInput" xsi:type="string">processingUpsertInput</item>
-            </argument>
-        </arguments>
-    </virtualType>
-
-    <virtualType name="TNW\Unit\Customer\BusinessAccount\UpsertOutput" type="TNW\Salesforce\Synchronize\Unit\Upsert\Output">
-        <arguments>
-            <argument name="dependents" xsi:type="array">
-                <item name="processingUpsertOutput" xsi:type="string">processingUpsertOutput</item>
+                <item name="processingUpsertInput" xsi:type="string">processingUpsertInput</item>
             </argument>
         </arguments>
     </virtualType>
@@ -129,7 +121,6 @@
                 <item name="lookup" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Lookup</item>
                 <item name="mapping" xsi:type="string">TNW\Unit\Customer\BusinessAccount\Mapping</item>
                 <item name="upsertInput" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert\Input</item>
-                <item name="upsertOutput" xsi:type="string">TNW\Unit\Customer\BusinessAccount\UpsertOutput</item>
             </argument>
         </arguments>
     </virtualType>
@@ -166,14 +157,6 @@
         </arguments>
     </virtualType>
 
-    <virtualType name="TNW\Unit\Customer\Contact\UpsertOutput" type="TNW\Salesforce\Synchronize\Unit\Upsert\Output">
-        <arguments>
-            <argument name="dependents" xsi:type="array">
-                <item name="processingUpsertOutput" xsi:type="string">processingUpsertOutput</item>
-            </argument>
-        </arguments>
-    </virtualType>
-
     <virtualType name="TNW\Soap\Synchronize\Customer\Contact" type="TNW\Salesforce\Synchronize\GroupBase">
         <arguments>
             <argument name="groupCode" xsi:type="string">customerContact</argument>
@@ -182,7 +165,6 @@
                 <item name="load" xsi:type="string">TNW\Unit\Customer\Contact\Load</item>
                 <item name="lookup" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Customer\Contact\Lookup</item>
                 <item name="mapping" xsi:type="string">TNW\Unit\Customer\Contact\Mapping</item>
-                <item name="upsertOutput" xsi:type="string">TNW\Unit\Customer\Contact\UpsertOutput</item>
             </argument>
         </arguments>
     </virtualType>
@@ -210,18 +192,10 @@
     <type name="TNW\Salesforce\Synchronize\Unit\Website\Website\Mapping">
         <arguments>
             <argument name="dependents" xsi:type="array">
-                <item name="upsertInput" xsi:type="string">processingUpsertInput</item>
+                <item name="processingUpsertInput" xsi:type="string">processingUpsertInput</item>
             </argument>
         </arguments>
     </type>
-
-    <virtualType name="TNW\Unit\Website\Website\UpsertOutput" type="TNW\Salesforce\Synchronize\Unit\Upsert\Output">
-        <arguments>
-            <argument name="dependents" xsi:type="array">
-                <item name="upsertInput" xsi:type="string">processingUpsertOutput</item>
-            </argument>
-        </arguments>
-    </virtualType>
 
     <virtualType name="TNW\Soap\Synchronize\Website\Website" type="TNW\Salesforce\Synchronize\GroupBase">
         <arguments>
@@ -231,7 +205,6 @@
                 <item name="load" xsi:type="string">TNW\Unit\Website\Website\Load</item>
                 <item name="lookup" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Website\Lookup</item>
                 <item name="mapping" xsi:type="string">TNW\Salesforce\Synchronize\Unit\Website\Website\Mapping</item>
-                <item name="upsertOutput" xsi:type="string">TNW\Unit\Website\Website\UpsertOutput</item>
             </argument>
         </arguments>
     </virtualType>
@@ -510,6 +483,14 @@
     <type name="TNW\Salesforce\Synchronize\Unit\Context">
         <arguments>
             <argument name="identification" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Identification</argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Synchronize\Unit\Upsert\Output">
+        <arguments>
+            <argument name="dependents" xsi:type="array">
+                <item name="processingUpsertOutput" xsi:type="string">processingUpsertOutput</item>
+            </argument>
         </arguments>
     </type>
 
