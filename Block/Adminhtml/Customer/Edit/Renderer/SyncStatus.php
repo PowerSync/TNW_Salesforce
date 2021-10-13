@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer;
 
@@ -22,7 +23,7 @@ class SyncStatus extends \Magento\Framework\Data\Form\Element\Label
         $this->viewSyncStatus = $viewSyncStatus;
     }
 
-    public function getElementHtml()
+    public function getElementHtml(): string
     {
         return '<div class="control-value">'
             . $this->viewSyncStatus->getStatusHtml((int) $this->getValue())

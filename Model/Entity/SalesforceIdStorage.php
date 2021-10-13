@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Entity;
 
 use Exception;
@@ -78,7 +80,7 @@ class SalesforceIdStorage
     /**
      * @return string
      */
-    public function getMagentoType()
+    public function getMagentoType(): string
     {
         return $this->magentoType;
     }
@@ -94,7 +96,7 @@ class SalesforceIdStorage
     /**
      * @return array
      */
-    public function getMappingAttribute()
+    public function getMappingAttribute(): array
     {
         return $this->mappingAttribute;
     }
@@ -269,7 +271,7 @@ class SalesforceIdStorage
      *
      * @param null|bool|int|string|WebsiteInterface $website
      *
-     * @return int
+     * @return mixed
      * @throws LocalizedException
      */
     public function prepareWebsiteId($website)
@@ -281,7 +283,7 @@ class SalesforceIdStorage
     /**
      * @return \TNW\Salesforce\Model\Config
      */
-    public function getConfig()
+    public function getConfig(): Config
     {
         return $this->config;
     }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace  TNW\Salesforce\Model\ResourceModel\Mapper;
 
@@ -25,7 +26,7 @@ class Collection extends AbstractCollection
      * @param string $objectType
      * @return $this
      */
-    public function addObjectToFilter($objectType)
+    public function addObjectToFilter($objectType): Collection
     {
         return $this->addFieldToFilter('object_type', ['eq' => $objectType]);
     }
@@ -34,7 +35,7 @@ class Collection extends AbstractCollection
      * @param string $entityType
      * @return $this
      */
-    public function addEntityToFilter($entityType)
+    public function addEntityToFilter($entityType): Collection
     {
         return $this->addFieldToFilter('magento_entity_type', ['eq' => $entityType]);
     }
@@ -45,7 +46,7 @@ class Collection extends AbstractCollection
      * @param int $websiteId
      * @return $this
      */
-    public function applyUniquenessByWebsite($websiteId)
+    public function applyUniquenessByWebsite($websiteId): Collection
     {
         $this->uniquenessWebsite = (int)$websiteId;
         return $this;
@@ -57,7 +58,7 @@ class Collection extends AbstractCollection
      * @return array
      * @throws \Zend_Db_Select_Exception
      */
-    public function getData()
+    public function getData(): array
     {
         if ($this->_data === null) {
             $this->_renderFilters()->_renderOrders()->_renderLimit();
@@ -114,7 +115,7 @@ class Collection extends AbstractCollection
      * @return \Zend_Db_Select
      * @throws \Zend_Db_Select_Exception
      */
-    public function generateUniquenessByWebsiteSelect($baseSelect)
+    public function generateUniquenessByWebsiteSelect($baseSelect): \Zend_Db_Select
     {
         if (0 === $this->uniquenessWebsite) {
 
@@ -125,7 +126,7 @@ class Collection extends AbstractCollection
         $uniqueIdSelectByWebsite = (clone $baseSelect)
             ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
             ->order('website_id','ASC');
-           
+
         return $uniqueIdSelectByWebsite;
     }
 
@@ -147,7 +148,7 @@ class Collection extends AbstractCollection
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getIdFieldName()
+    public function getIdFieldName(): string
     {
         if ($this->_idFieldName === null) {
             $this->_setIdFieldName($this->getResource()->getIdFieldName());

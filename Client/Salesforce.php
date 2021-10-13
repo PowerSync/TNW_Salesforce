@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Client;
 
@@ -78,7 +79,7 @@ class Salesforce extends DataObject
      * @return null|Client
      * @throws \Exception
      */
-    public function getClient($websiteId = null)
+    public function getClient($websiteId = null): ?Client
     {
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
         $cacheKey = $this->salesforceConfig->baseWebsiteIdLogin($websiteId);
@@ -111,7 +112,7 @@ class Salesforce extends DataObject
      * @return bool
      * @throws \Exception
      */
-    public function checkConnection($wsdl, $username, $password, $token)
+    public function checkConnection($wsdl, $username, $password, $token): bool
     {
         $client = $this->buildClient($wsdl, $username, $password, $token);
         $client->getLoginResult();
@@ -127,7 +128,7 @@ class Salesforce extends DataObject
      * @return Client
      * @throws LocalizedException
      */
-    public function buildClient($wsdl, $username, $password, $token)
+    public function buildClient($wsdl, $username, $password, $token): Client
     {
         if (!\file_exists($wsdl)) {
             throw new LocalizedException(__('WSDL file is missing'));
@@ -148,7 +149,7 @@ class Salesforce extends DataObject
      *
      * @return bool
      */
-    public function getClientStatus($websiteId = null)
+    public function getClientStatus($websiteId = null): bool
     {
         return (bool) $this->salesforceConfig->getSalesforceStatus($websiteId);
     }
@@ -159,7 +160,7 @@ class Salesforce extends DataObject
      *
      * @return bool
      */
-    public function getReverseSyncEnabled($websiteId = null)
+    public function getReverseSyncEnabled($websiteId = null): bool
     {
         return (bool) $this->salesforceConfig->getReverseSyncEnabled($websiteId);
     }
@@ -233,7 +234,7 @@ class Salesforce extends DataObject
      * @return array
      * @throws \Exception
      */
-    public function upsertData($key, $data, $type)
+    public function upsertData($key, $data, $type): array
     {
         array_walk($data, function ($object, $key) use($type) {
             $this->prepareSObject($type, $object);
@@ -289,9 +290,9 @@ class Salesforce extends DataObject
      * @return \Tnw\SoapClient\Result\DescribeSObjectResult
      * @throws \Exception
      */
-    public function describeSObject($objectName)
+    public function describeSObject($objectName): \Tnw\SoapClient\Result\DescribeSObjectResult
     {
-        $cacheKey = sprintf(self::SFORCE_DESCRIBE_CACHE_IDENTIFIER, strtolower($objectName));
+        $cacheKey = sprintf(self::SFORCE_DESCRIBE_CACHE_IDENTIFIER, strtolower((string)$objectName));
 
         /** @var string|null $url */
         $describe = $this->loadCache($cacheKey);
@@ -311,7 +312,7 @@ class Salesforce extends DataObject
      * @return null|string
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getSalesForceUrl($websiteId = null)
+    public function getSalesForceUrl($websiteId = null): ?string
     {
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
         $cacheKey = $this->salesforceConfig->baseWebsiteIdLogin($websiteId);

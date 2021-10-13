@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Api;
 
 /**
@@ -7,7 +9,7 @@ namespace TNW\Salesforce\Api;
 interface WebsiteInterface
 {
     /**
-     * Do Magento Websites syncronization to Salesforce custom object
+     * Do Magento Websites synchronization to Salesforce custom object
      *
      * @param \Magento\Store\Model\Website[] $websites
      */

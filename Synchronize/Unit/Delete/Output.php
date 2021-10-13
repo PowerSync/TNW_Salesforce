@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit\Delete;
 
 use InvalidArgumentException;
 use Magento\Framework\DataObject;
 use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Phrase;
 use OutOfBoundsException;
 use RuntimeException;
 use TNW\Salesforce\Synchronize;
@@ -50,7 +52,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Delete entity: %s', $this->units()->get('context')->getSalesforceType());
     }
@@ -60,7 +62,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      *
      * @return Synchronize\Unit\UnitInterface
      */
-    public function deleteInput()
+    public function deleteInput(): Synchronize\Unit\UnitInterface
     {
         return $this->unit('deleteInput');
     }
@@ -70,7 +72,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      *
      * @return string
      */
-    public function fieldSalesforceId()
+    public function fieldSalesforceId(): string
     {
         return $this->units()->get('context')->getFieldSalesforceId();
     }
@@ -103,7 +105,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      *
      * @return Synchronize\Transport\Calls\Delete\Transport\Output
      */
-    public function createTransport()
+    public function createTransport(): Synchronize\Transport\Calls\Delete\Transport\Output
     {
         $output = $this->outputFactory->create(['type' => $this->units()->get('context')->getSalesforceType()]);
         $output->setUnit($this);
@@ -125,7 +127,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      * @return array
      * @throws OutOfBoundsException
      */
-    public function entities()
+    public function entities(): array
     {
         return array_filter($this->load()->get('entities'), [$this, 'filter']);
     }
@@ -133,7 +135,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     /**
      * @inheritdoc
      */
-    public function load()
+    public function load(): Synchronize\Unit\UnitInterface
     {
         return $this->unit('load');
     }
@@ -184,7 +186,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      * @param AbstractModel $entity
      * @return bool
      */
-    public function filter($entity)
+    public function filter($entity): bool
     {
         return !in_array(true, array_map(function ($unit) use ($entity) {
             return $this->unit($unit)->skipped($entity);
@@ -197,7 +199,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      * @param AbstractModel $entity
      * @return bool
      */
-    public function skipped($entity)
+    public function skipped($entity): bool
     {
         return empty($this->cache[$entity]['success']);
     }
@@ -205,7 +207,7 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
     /**
      * @inheridoc
      */
-    public function additionalSalesforceId()
+    public function additionalSalesforceId(): array
     {
         return [];
     }

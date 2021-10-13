@@ -1,8 +1,12 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account;
 
 use Magento\Customer\Model\Address;
 use Magento\Customer\Model\Customer;
+use Magento\Framework\Api\ExtensibleDataInterface;
+use Magento\Framework\DataObject;
 use Magento\Framework\Model\AbstractModel;
 use RuntimeException;
 use TNW\Salesforce\Model;
@@ -54,7 +58,7 @@ class Mapping extends Synchronize\Unit\Mapping
      *
      * @param Customer $entity
      * @param string $magentoEntityType
-     * @return mixed
+     * @return DataObject|ExtensibleDataInterface|null
      */
     public function objectByEntityType($entity, $magentoEntityType)
     {
@@ -119,11 +123,11 @@ class Mapping extends Synchronize\Unit\Mapping
     {
         $default = parent::defaultValue($entity, $mapper);
 
-        if (empty($default) && strcasecmp($mapper->getSalesforceAttributeName(), 'Name') === 0) {
+        if (empty($default) && strcasecmp((string)$mapper->getSalesforceAttributeName(), 'Name') === 0) {
             return self::generateCompanyByCustomer($entity);
         }
 
-        if (strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0) {
+        if (strcasecmp((string)$mapper->getSalesforceAttributeName(), 'OwnerId') === 0) {
             return $this->customerConfig->defaultOwner($entity->getData('config_website'));
         }
 
@@ -136,7 +140,7 @@ class Mapping extends Synchronize\Unit\Mapping
      * @param Customer $entity
      * @return string
      */
-    public static function companyByCustomer($entity)
+    public static function companyByCustomer($entity): string
     {
         $company = self::getCompanyByCustomer($entity);
         if (empty($company)) {
@@ -152,7 +156,7 @@ class Mapping extends Synchronize\Unit\Mapping
      * @param Customer $entity
      * @return string
      */
-    public static function getCompanyByCustomer($entity)
+    public static function getCompanyByCustomer($entity): string
     {
         $companyName = '';
 
@@ -170,8 +174,8 @@ class Mapping extends Synchronize\Unit\Mapping
      * @param Customer $entity
      * @return string
      */
-    public static function generateCompanyByCustomer($entity)
+    public static function generateCompanyByCustomer($entity): string
     {
-        return trim(sprintf('%s %s', trim($entity->getFirstname()), trim($entity->getLastname())));
+        return trim(sprintf('%s %s', trim((string)$entity->getFirstname()), trim((string)$entity->getLastname())));
     }
 }

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Test;
 
 /**
@@ -30,7 +32,7 @@ class Connection extends  \TNW\Salesforce\Model\Test
     /**
      * @return Connection
      */
-    public function execute()
+    public function execute(): Connection
     {
         $result = parent::STATUS_PASSED;
         /**

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Queue\Website;
 
 use Magento\Framework\Exception\LocalizedException;
@@ -32,7 +34,7 @@ class CreateByWebsite extends CreateByBase
      *
      * @return string
      */
-    public function createBy()
+    public function createBy(): string
     {
         return self::CREATE_BY;
     }
@@ -44,10 +46,10 @@ class CreateByWebsite extends CreateByBase
      * @param array $additional
      * @param callable $create
      * @param int $websiteId
-     * @return mixed
+     * @return array
      * @throws LocalizedException
      */
-    public function process(array $entityIds, array $additional, callable $create, $websiteId)
+    public function process(array $entityIds, array $additional, callable $create, $websiteId): array
     {
         $queues = [];
         foreach ($this->entities($entityIds) as $entity) {
@@ -69,7 +71,7 @@ class CreateByWebsite extends CreateByBase
      * @return array
      * @throws LocalizedException
      */
-    public function entities(array $entityIds)
+    public function entities(array $entityIds): array
     {
         $connection = $this->resourceWebsite->getConnection();
         $select = $connection->select()

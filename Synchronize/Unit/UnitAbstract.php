@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Magento\Framework\Phrase;
 use OutOfBoundsException;
 use RuntimeException;
 use TNW\Salesforce\Synchronize;
@@ -74,7 +77,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      *
      * @return string
      */
-    public function name()
+    public function name(): string
     {
         return $this->name;
     }
@@ -84,7 +87,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      *
      * @return array
      */
-    public function dependents()
+    public function dependents(): array
     {
         return $this->dependents;
     }
@@ -92,7 +95,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Process unit %1', get_class($this));
     }
@@ -102,7 +105,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      *
      * @return Synchronize\Group
      */
-    public function group()
+    public function group(): Synchronize\Group
     {
         return $this->group;
     }
@@ -112,7 +115,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      *
      * @return Synchronize\Units
      */
-    public function units()
+    public function units(): Synchronize\Units
     {
         return $this->units;
     }
@@ -121,10 +124,10 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      * Unit
      *
      * @param string $name
-     * @return UnitInterface
+     * @return UnitInterface|null
      * @throws OutOfBoundsException
      */
-    public function unit($name)
+    public function unit($name): ?UnitInterface
     {
         return $this->units->get($name);
     }
@@ -133,7 +136,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      * @param $entity
      * @return array
      */
-    public function getAllEntityError($entity)
+    public function getAllEntityError($entity): array
     {
         $errors = [];
 
@@ -176,7 +179,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      * @param object $entity
      * @return bool
      */
-    public function skipped($entity)
+    public function skipped($entity): bool
     {
         return empty($this->cache[$entity]);
     }
@@ -213,7 +216,7 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
      *
      * @return bool
      */
-    public function isComplete()
+    public function isComplete(): bool
     {
         return $this->status === self::COMPLETE;
     }

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Lib\Tnw\SoapClient;
 /**
  * AssignmentRuleHeader class to set rule during update Lead

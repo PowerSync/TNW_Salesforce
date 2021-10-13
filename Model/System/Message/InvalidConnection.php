@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Model\System\Message;
 
@@ -46,7 +47,7 @@ class InvalidConnection implements MessageInterface
      *
      * @return string
      */
-    public function getIdentity()
+    public function getIdentity(): string
     {
         return md5('TNW_SALESFORCE_INVALID_CONNECTION');
     }
@@ -56,7 +57,7 @@ class InvalidConnection implements MessageInterface
      *
      * @return bool
      */
-    public function isDisplayed()
+    public function isDisplayed(): bool
     {
         $result = true;
 
@@ -87,7 +88,7 @@ class InvalidConnection implements MessageInterface
      *
      * @return string
      */
-    public function getText()
+    public function getText(): string
     {
         $message = __('Salesforce connection cannot be established. ');
         $url = $this->urlBuilder->getUrl('adminhtml/system_config/edit/section/tnwsforce_general');
@@ -101,7 +102,7 @@ class InvalidConnection implements MessageInterface
      *
      * @return int
      */
-    public function getSeverity()
+    public function getSeverity(): int
     {
         return MessageInterface::SEVERITY_CRITICAL;
     }

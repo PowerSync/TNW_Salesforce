@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model;
 
 use Magento\Framework\Data\Collection\AbstractDb;
@@ -88,7 +90,7 @@ class Queue extends AbstractModel
     /**
      * Code
      *
-     * @return string
+     * @return mixed
      */
     public function getCode()
     {
@@ -98,7 +100,7 @@ class Queue extends AbstractModel
     /**
      * Entity Type
      *
-     * @return string
+     * @return mixed
      */
     public function getEntityType()
     {
@@ -108,7 +110,7 @@ class Queue extends AbstractModel
     /**
      * Object Type
      *
-     * @return string
+     * @return mixed
      */
     public function getObjectType()
     {
@@ -118,7 +120,7 @@ class Queue extends AbstractModel
     /**
      * Entity Id
      *
-     * @return int
+     * @return mixed
      */
     public function getEntityId()
     {
@@ -128,7 +130,7 @@ class Queue extends AbstractModel
     /**
      * Entity Load
      *
-     * @return string
+     * @return mixed
      */
     public function getEntityLoad()
     {
@@ -140,7 +142,7 @@ class Queue extends AbstractModel
      *
      * @return array
      */
-    public function getEntityLoadAdditional()
+    public function getEntityLoadAdditional(): array
     {
         return (array)$this->_getData('entity_load_additional');
     }
@@ -150,7 +152,7 @@ class Queue extends AbstractModel
      *
      * @return array
      */
-    public function getAdditional()
+    public function getAdditional(): array
     {
         return (array)$this->_getData('additional_data');
     }
@@ -173,7 +175,7 @@ class Queue extends AbstractModel
      * @param mixed $value
      * @return Queue
      */
-    public function setAdditionalByCode($code, $value)
+    public function setAdditionalByCode($code, $value): Queue
     {
         $data = $this->_getData('additional_data');
         $data[$code] = $value;
@@ -194,7 +196,7 @@ class Queue extends AbstractModel
     /**
      * Website Id
      *
-     * @return string
+     * @return mixed
      */
     public function getWebsiteId()
     {
@@ -204,7 +206,7 @@ class Queue extends AbstractModel
     /**
      * Status
      *
-     * @return string
+     * @return mixed
      */
     public function getStatus()
     {
@@ -216,7 +218,7 @@ class Queue extends AbstractModel
      *
      * @return int
      */
-    public function getSyncAttempt()
+    public function getSyncAttempt(): int
     {
         return (int)$this->_getData('sync_attempt');
     }
@@ -226,7 +228,7 @@ class Queue extends AbstractModel
      *
      * @return Queue
      */
-    public function incSyncAttempt()
+    public function incSyncAttempt(): Queue
     {
         // To restrict incrementing sync attempt upon processing from "In Progress: Salesforce Update" (waiting_upsert)
         if($this->isProcessOutputUpsert() === false || $this->getSyncAttempt() > $this->salesforceConfig->getMaxAdditionalAttemptsCount()) {
@@ -240,7 +242,7 @@ class Queue extends AbstractModel
      *
      * @return Queue
      */
-    public function decrSyncAttempt()
+    public function decrSyncAttempt(): Queue
     {
         $this->setData('sync_attempt', $this->getSyncAttempt() - 1);
         return $this;
@@ -251,7 +253,7 @@ class Queue extends AbstractModel
      *
      * @return bool
      */
-    public function isError()
+    public function isError(): bool
     {
         return in_array($this->_getData('status'), self::ERROR_STATUSES, true);
     }
@@ -261,7 +263,7 @@ class Queue extends AbstractModel
      *
      * @return bool
      */
-    public function isSuccess()
+    public function isSuccess(): bool
     {
         return in_array($this->_getData('status'), self::SUCCESS_STATUSES, true);
     }
@@ -271,7 +273,7 @@ class Queue extends AbstractModel
      *
      * @return bool
      */
-    public function isProcess()
+    public function isProcess(): bool
     {
         return in_array($this->_getData('status'), self::PROCESS_STATUSES, true);
     }
@@ -281,9 +283,9 @@ class Queue extends AbstractModel
      *
      * @return bool
      */
-    public function isSkipped()
+    public function isSkipped(): bool
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_SKIPPED) === 0;
+        return strcasecmp((string)$this->_getData('status'), self::STATUS_SKIPPED) === 0;
     }
 
     /**
@@ -291,9 +293,9 @@ class Queue extends AbstractModel
      *
      * @return bool
      */
-    public function isComplete()
+    public function isComplete(): bool
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_COMPLETE) === 0;
+        return strcasecmp((string)$this->_getData('status'), self::STATUS_COMPLETE) === 0;
     }
 
     /**
@@ -301,9 +303,9 @@ class Queue extends AbstractModel
      *
      * @return bool
      */
-    public function isWaitingUpsert()
+    public function isWaitingUpsert(): bool
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_WAITING_UPSERT) === 0;
+        return strcasecmp((string)$this->_getData('status'), self::STATUS_WAITING_UPSERT) === 0;
     }
 
     /**
@@ -311,9 +313,9 @@ class Queue extends AbstractModel
      *
      * @return bool
      */
-    public function isProcessInputUpsert()
+    public function isProcessInputUpsert(): bool
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_PROCESS_INPUT_UPSERT) === 0;
+        return strcasecmp((string)$this->_getData('status'), self::STATUS_PROCESS_INPUT_UPSERT) === 0;
     }
 
     /**
@@ -321,9 +323,9 @@ class Queue extends AbstractModel
      *
      * @return bool
      */
-    public function isProcessOutputUpsert()
+    public function isProcessOutputUpsert(): bool
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_PROCESS_OUTPUT_UPSERT) === 0;
+        return strcasecmp((string)$this->_getData('status'), self::STATUS_PROCESS_OUTPUT_UPSERT) === 0;
     }
 
     /**
@@ -332,7 +334,7 @@ class Queue extends AbstractModel
      * @param Queue[] $queues
      * @return Queue
      */
-    public function setDependence(array $queues)
+    public function setDependence(array $queues): Queue
     {
         $this->_hasDataChanges = true;
         $this->dependence = $queues;
@@ -345,7 +347,7 @@ class Queue extends AbstractModel
      * @param Queue $queue
      * @return Queue
      */
-    public function addDependence($queue)
+    public function addDependence($queue): Queue
     {
         $this->_hasDataChanges = true;
         $this->dependence[] = $queue;
@@ -357,7 +359,7 @@ class Queue extends AbstractModel
      *
      * @return Queue[]
      */
-    public function getDependence()
+    public function getDependence(): array
     {
         return $this->dependence;
     }
@@ -369,7 +371,7 @@ class Queue extends AbstractModel
      * @return Queue
      * @throws LocalizedException
      */
-    public function dependenceByCode($code)
+    public function dependenceByCode($code): Queue
     {
         return $this->loadById($this->_getResource()->dependenceIdByCode($this->getId(), $code));
     }
@@ -381,7 +383,7 @@ class Queue extends AbstractModel
      * @return Queue[]
      * @throws LocalizedException
      */
-    public function dependenciesByEntityType($entityType)
+    public function dependenciesByEntityType($entityType): array
     {
         return array_map(
             [$this, 'loadById'],
@@ -396,7 +398,7 @@ class Queue extends AbstractModel
      * @return Queue[]
      * @throws LocalizedException
      */
-    public function childByEntityType($entityType)
+    public function childByEntityType($entityType): array
     {
         return array_map(
             [$this, 'loadById'],
@@ -411,7 +413,7 @@ class Queue extends AbstractModel
      * @return Queue
      * @throws LocalizedException
      */
-    public function loadById($queueId)
+    public function loadById($queueId): Queue
     {
         $queue = clone $this;
         $queue->dependence = [];
@@ -428,7 +430,7 @@ class Queue extends AbstractModel
      * @return bool
      * @throws LocalizedException
      */
-    public function existsChildByCode($code)
+    public function existsChildByCode($code): bool
     {
         return (bool)$this->_getResource()->childIdByCode($this->getId(), $code);
     }

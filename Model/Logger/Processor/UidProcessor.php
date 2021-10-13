@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Logger\Processor;
 
 /**
@@ -32,7 +34,7 @@ class UidProcessor
      * @param array $record
      * @return array
      */
-    public function __invoke(array $record)
+    public function __invoke(array $record): array
     {
         $record['extra']['uid'] = $this->uid;
 

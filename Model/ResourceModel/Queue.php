@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\ResourceModel;
 
 use Magento\Framework\App\ObjectManager;
@@ -46,7 +48,7 @@ class Queue extends AbstractDb
      * @param \TNW\Salesforce\Model\Queue $object
      * @return AbstractDb
      */
-    protected function _afterSave(\Magento\Framework\Model\AbstractModel $object)
+    protected function _afterSave(\Magento\Framework\Model\AbstractModel $object): AbstractDb
     {
         $this->saveDependence($object);
         return parent::_afterSave($object);
@@ -56,10 +58,10 @@ class Queue extends AbstractDb
      * Merge
      *
      * @param \TNW\Salesforce\Model\Queue $queue
-     * @return $this
+     * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function convertToArray(\TNW\Salesforce\Model\Queue $queue)
+    public function convertToArray(\TNW\Salesforce\Model\Queue $queue): array
     {
 //        $this->unserializeFields($queue);
         $this->serializeFields($queue);
@@ -72,8 +74,9 @@ class Queue extends AbstractDb
     /**
      * @param \Magento\Framework\Model\AbstractModel $object
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function prepareDataForSave(\Magento\Framework\Model\AbstractModel $object)
+    public function prepareDataForSave(\Magento\Framework\Model\AbstractModel $object): array
     {
         return parent::_prepareDataForSave($object);
     }
@@ -123,7 +126,7 @@ class Queue extends AbstractDb
      * @return string[]
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getDependenceByCode($code)
+    public function getDependenceByCode($code): array
     {
         if (empty($this->dependenceByCode)) {
             $data = $this->resolveDependencies();
@@ -229,7 +232,7 @@ class Queue extends AbstractDb
      * @return Queue
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function loadByChild(\Magento\Framework\Model\AbstractModel $object, $code, $childId)
+    public function loadByChild(\Magento\Framework\Model\AbstractModel $object, $code, $childId): Queue
     {
         return $this->load($object, $this->dependenceIdByCode($childId, $code), $this->getIdFieldName());
     }
@@ -239,7 +242,7 @@ class Queue extends AbstractDb
      *
      * @param int $queueId
      * @param string $code
-     * @return int
+     * @return string|bool
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function dependenceIdByCode($queueId, $code)
@@ -265,7 +268,7 @@ class Queue extends AbstractDb
      * @return int[]
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function dependenceIdsByEntityType($queueId, $entityType)
+    public function dependenceIdsByEntityType($queueId, $entityType): array
     {
         $select = $this->getConnection()->select()
             ->from(['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')], [])
@@ -289,7 +292,7 @@ class Queue extends AbstractDb
      * @return Queue
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function loadByParent(\Magento\Framework\Model\AbstractModel $object, $code, $parentId)
+    public function loadByParent(\Magento\Framework\Model\AbstractModel $object, $code, $parentId): Queue
     {
         return $this->load($object, $this->childIdByCode($parentId, $code), $this->getIdFieldName());
     }
@@ -299,7 +302,7 @@ class Queue extends AbstractDb
      *
      * @param int $queueId
      * @param string $code
-     * @return int
+     * @return string|bool
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function childIdByCode($queueId, $code)
@@ -325,7 +328,7 @@ class Queue extends AbstractDb
      * @return int[]
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function childIdsByEntityType($queueId, $entityType)
+    public function childIdsByEntityType($queueId, $entityType): array
     {
         $select = $this->getConnection()->select()
             ->from(['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')], [])

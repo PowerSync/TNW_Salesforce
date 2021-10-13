@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Model\Config;
 
@@ -86,7 +87,7 @@ class WebsiteDetector
      * @return bool
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function isAdminArea()
+    public function isAdminArea(): bool
     {
         return ($this->appState->getAreaCode() == \Magento\Framework\App\Area::AREA_ADMINHTML);
     }
@@ -95,7 +96,7 @@ class WebsiteDetector
      * @return \Magento\Store\Api\Data\WebsiteInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getCurrentStoreWebsite()
+    public function getCurrentStoreWebsite(): \Magento\Store\Api\Data\WebsiteInterface
     {
         return $this->storeManager->getWebsite();
     }
@@ -120,12 +121,12 @@ class WebsiteDetector
 
     /**
      * @param null $websiteId
-     * @return int
+     * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      *
      * Returns default store of website
      */
-    public function getStroreIdByWebsite($websiteId = null)
+    public function getStroreIdByWebsite($websiteId = null): string
     {
         $websiteId = (int)$this->detectCurrentWebsite($websiteId);
 
@@ -135,7 +136,7 @@ class WebsiteDetector
 
             $this->websiteDefaultStores = $website->getDefaultStoresSelect(true);
 
-            $this->websiteDefaultStores =  $this->resourceConnection->getConnection()->fetchPairs($website->getDefaultStoresSelect(true));
+            $this->websiteDefaultStores = $this->resourceConnection->getConnection()->fetchPairs($website->getDefaultStoresSelect(true));
         }
 
         return $this->websiteDefaultStores[$websiteId];
@@ -146,7 +147,7 @@ class WebsiteDetector
      * @return integer[]
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getStroreIdsByWebsite($websiteId = null)
+    public function getStroreIdsByWebsite($websiteId = null): array
     {
         $websiteId = $this->detectCurrentWebsite($websiteId);
 

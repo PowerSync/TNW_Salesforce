@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Block\Adminhtml\Base\Edit\Renderer;
 
@@ -45,18 +46,18 @@ abstract class SForceId extends \Magento\Framework\Data\Form\Element\Link
     /**
      * @return integer
      */
-    abstract public function getEntityId();
+    abstract public function getEntityId(): int;
 
     /**
      * @return string
      */
-    abstract public function getMagentoObjectType();
+    abstract public function getMagentoObjectType(): string;
 
     /**
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getElementHtml()
+    public function getElementHtml(): string
     {
         return $this->generateLinkToSalesforce($this->getValue());
     }
@@ -75,7 +76,7 @@ abstract class SForceId extends \Magento\Framework\Data\Form\Element\Link
      * @return null|string
      * @throws \Exception
      */
-    public function getSalesforceObjectByAttribute()
+    public function getSalesforceObjectByAttribute(): ?string
     {
         $salesforceObject = null;
 
@@ -91,7 +92,7 @@ abstract class SForceId extends \Magento\Framework\Data\Form\Element\Link
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function generateLinkToSalesforce($field)
+    protected function generateLinkToSalesforce($field): string
     {
         $results = [];
 

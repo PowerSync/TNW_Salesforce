@@ -1,12 +1,16 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use InvalidArgumentException;
 use Magento\Eav\Model\Entity\AbstractEntity;
+use Magento\Framework\Api\ExtensibleDataInterface;
 use Magento\Framework\Data\Collection;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Phrase;
 use OutOfBoundsException;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\ResourceModel\Mapper\CollectionFactory;
@@ -53,7 +57,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         if (empty($this->units()->get('context')->getObjectType())) {
             return __('System mapping');
@@ -102,7 +106,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
                     $count++;
 
                     $message = "{$count}) ";
-                    $message .= strcasecmp($mapper->getAttributeType(), 'custom') !== 0
+                    $message .= strcasecmp((string)$mapper->getAttributeType(), 'custom') !== 0
                         ? "{$mapper->getMagentoEntityType()}::" : 'custom::';
                     $message .= "{$mapper->getMagentoAttributeName()} -> {$mapper->getSalesforceAttributeName()}";
 
@@ -140,7 +144,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @throws OutOfBoundsException
      * @throws LocalizedException
      */
-    public function generateObject($entity, Model\ResourceModel\Mapper\Collection $mappers)
+    public function generateObject($entity, Model\ResourceModel\Mapper\Collection $mappers): array
     {
         $object = [];
 
@@ -222,7 +226,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @param $entity
      * @return string
      */
-    public function getUpdateInsertFlag($entity)
+    public function getUpdateInsertFlag($entity): string
     {
         return Model\Config::MAPPING_WHEN_INSERT_ONLY;
     }
@@ -233,7 +237,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @param AbstractModel $entity
      * @return Model\ResourceModel\Mapper\Collection
      */
-    public function mappers($entity)
+    public function mappers($entity): Model\ResourceModel\Mapper\Collection
     {
         $objectType = $this->units()->get('context')->getObjectType();
         $upsertInsertFlag = $this->getUpdateInsertFlag($entity);
@@ -255,7 +259,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @return AbstractModel[]
      * @throws OutOfBoundsException
      */
-    protected function entities()
+    protected function entities(): array
     {
         return array_filter($this->load()->get('entities'), [$this, 'filter']);
     }
@@ -267,7 +271,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * @return bool
      * @throws OutOfBoundsException
      */
-    protected function filter($entity)
+    protected function filter($entity): bool
     {
         return !in_array(true, array_map(function ($unit) use ($entity) {
             return $this->unit($unit)->skipped($entity);
@@ -279,7 +283,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      *
      * @param AbstractModel $entity
      * @param string $magentoEntityType
-     * @return AbstractModel
+     * @return DataObject|ExtensibleDataInterface|null
      */
     public function objectByEntityType($entity, $magentoEntityType)
     {
@@ -352,7 +356,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * @return array
      */
-    public function getCompareIgnoreFields()
+    public function getCompareIgnoreFields(): array
     {
         return [
             'tnw_mage_enterp__disableMagentoSync__c',
@@ -362,10 +366,10 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 
     /**
      * @param $id
-     * @return string
+     * @return string|null
      */
-    public static function getPrepareId($id)
+    public static function getPrepareId($id): ?string
     {
-        return $id;
+        return $id ? (string)$id : $id;
     }
 }

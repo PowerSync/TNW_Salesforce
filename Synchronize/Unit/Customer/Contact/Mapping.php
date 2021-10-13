@@ -1,7 +1,11 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Contact;
 
 use Magento\Customer\Model\Customer;
+use Magento\Framework\Api\ExtensibleDataInterface;
+use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Model;
@@ -53,8 +57,7 @@ class Mapping extends Synchronize\Unit\Mapping
      *
      * @param Customer $entity
      * @param string $magentoEntityType
-     * @return mixed
-     * @throws LocalizedException
+     * @return DataObject|ExtensibleDataInterface|null
      */
     public function objectByEntityType($entity, $magentoEntityType)
     {
@@ -126,7 +129,7 @@ class Mapping extends Synchronize\Unit\Mapping
     protected function defaultValue($entity, $mapper)
     {
         if ($entity instanceof Customer &&
-            strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0
+            strcasecmp((string)$mapper->getSalesforceAttributeName(), 'OwnerId') === 0
         ) {
             if ($this->customerConfig->contactAssignee($entity->getData('config_website')) === ContactAssignee::DEFAULT_OWNER) {
                 return $this->customerConfig->defaultOwner($entity->getData('config_website'));

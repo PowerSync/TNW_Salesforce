@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls;
 
@@ -44,7 +45,7 @@ class Query implements Transport\Calls\QueryInterface
     }
 
     /**
-     * Do Unit syncronization to Salesforce object
+     * Do Unit synchronization to Salesforce object
      *
      * @param Transport\Calls\Query\Input $input
      * @param Transport\Calls\Query\Output $output
@@ -116,7 +117,7 @@ class Query implements Transport\Calls\QueryInterface
      * @param object $result
      * @return array
      */
-    protected function prepareOutput($result)
+    protected function prepareOutput($result): array
     {
         $return = [];
         foreach (get_object_vars($result) as $key => $value) {

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Model;
 
@@ -27,7 +28,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
      *
      * @return array
      */
-    public function getIdentities()
+    public function getIdentities(): array
     {
         return [$this->cache_tag . '_' .$this->getId()];
     }
@@ -35,7 +36,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     /**
      * Get Unique Id
      *
-     * @return int
+     * @return mixed
      */
     public function getMapId()
     {
@@ -45,7 +46,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     /**
      * Get Magento Attribute Name
      *
-     * @return String
+     * @return mixed
      */
     public function getMagentoAttributeName()
     {
@@ -55,7 +56,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     /**
      * Get Salesforce Attribute Name
      *
-     * @return String
+     * @return mixed
      */
     public function getSalesforceAttributeName()
     {
@@ -65,7 +66,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     /**
      * Get Default Attribute Value
      *
-     * @return String
+     * @return mixed
      */
     public function getDefaultValue()
     {
@@ -75,7 +76,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     /**
      * Get Magento Entity Type / Subtype
      *
-     * @return String
+     * @return mixed
      */
     public function getMagentoEntityType()
     {
@@ -85,7 +86,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     /**
      * Get Attribute Id
      *
-     * @return String
+     * @return mixed
      */
     public function getAttributeId()
     {
@@ -95,7 +96,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     /**
      * Get Default Attribute Type
      *
-     * @return String
+     * @return mixed
      */
     public function getAttributeType()
     {
@@ -107,7 +108,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
      *
      * @return String
      */
-    public function getObjectType()
+    public function getObjectType(): string
     {
         return $this->map_object;
     }

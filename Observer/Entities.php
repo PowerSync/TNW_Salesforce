@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Observer;
 
 /**
@@ -30,7 +32,7 @@ class Entities
      *
      * @return array
      */
-    public function entityIds()
+    public function entityIds(): array
     {
         return array_unique($this->entityIds);
     }
@@ -40,7 +42,7 @@ class Entities
      *
      * @return bool
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return empty($this->entityIds);
     }

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert;
 
 use TNW\Salesforce\Synchronize\Transport;
@@ -32,7 +34,7 @@ class Storage
      * @param object $entity
      * @return \Tnw\SoapClient\Result\UpsertResult
      */
-    public function searchResult($entity)
+    public function searchResult($entity): ?\Tnw\SoapClient\Result\UpsertResult
     {
         // hack, actually different objects could have the same hash
         $classType = get_class($entity);

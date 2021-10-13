@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Logger\Handler;
 
 use Magento\Framework\Logger\Handler\Base;

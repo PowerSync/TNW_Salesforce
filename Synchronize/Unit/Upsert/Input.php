@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
@@ -6,6 +7,7 @@ use DateTime;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Phrase;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use OutOfBoundsException;
 use TNW\Salesforce\Synchronize;
@@ -71,7 +73,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * @return Synchronize\Transport\Calls\Upsert\InputInterface
      */
-    public function getProcess()
+    public function getProcess(): Synchronize\Transport\Calls\Upsert\InputInterface
     {
         return $this->process;
     }
@@ -79,7 +81,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Upserting "%1" entity', $this->units()->get('context')->getSalesforceType());
     }
@@ -87,7 +89,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * @inheritdoc
      */
-    public function load()
+    public function load(): Synchronize\Unit\UnitInterface
     {
         return $this->unit('load');
     }
@@ -123,7 +125,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      *
      * @return Synchronize\Transport\Calls\Upsert\Transport\Input
      */
-    public function createTransport()
+    public function createTransport(): Synchronize\Transport\Calls\Upsert\Transport\Input
     {
         return $this->inputFactory->create(['type' => $this->units()->get('context')->getSalesforceType()]);
     }
@@ -147,7 +149,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @return array
      * @throws OutOfBoundsException
      */
-    public function entities()
+    public function entities(): array
     {
         $entities = array_filter($this->load()->get('entities'), [$this, 'filter']);
         $entities = array_filter($entities, [$this, 'needUpdate']);
@@ -161,7 +163,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @param AbstractModel $entity
      * @return bool
      */
-    public function filter($entity)
+    public function filter($entity): bool
     {
         return !$this->unit('mapping')->skipped($entity);
     }
@@ -191,7 +193,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @param $object
      * @return bool
      */
-    public function checkFieldProperty($fieldProperty, $fieldName, $object)
+    public function checkFieldProperty($fieldProperty, $fieldName, $object): bool
     {
         switch (true) {
             case (!$fieldProperty instanceof Field):
@@ -222,7 +224,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @return array
      * @throws LocalizedException
      */
-    public function prepareObject($entity, array $object)
+    public function prepareObject($entity, array $object): array
     {
         foreach (array_keys($object) as $fieldName) {
             if ($fieldName === 'Id') {
@@ -267,7 +269,7 @@ class Input extends Synchronize\Unit\UnitAbstract
             } elseif (in_array($fieldProperty->getSoapType(), ['xsd:double'])) {
                 $object[$fieldName] = (float)$object[$fieldName];
             } elseif (is_string($object[$fieldName])) {
-                $object[$fieldName] = trim($object[$fieldName]);
+                $object[$fieldName] = trim((string)$object[$fieldName]);
 
                 if ($fieldProperty->getLength()
                     && $fieldProperty->getLength() < strlen($object[$fieldName])
@@ -287,7 +289,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @return bool
      * @throws LocalizedException
      */
-    public function needUpdate($entity)
+    public function needUpdate($entity): bool
     {
         $lookup = $this->unit('lookup');
 
@@ -357,7 +359,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @param AbstractModel $entity
      * @return bool
      */
-    public function skipped($entity)
+    public function skipped($entity): bool
     {
         return false;
     }

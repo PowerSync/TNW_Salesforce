@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Config\Source\Customer;
 
 /**
@@ -12,7 +14,7 @@ class AccountName implements \Magento\Framework\Option\ArrayInterface
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 0, 'label' => __('Don\'t modify Account name if exists')],

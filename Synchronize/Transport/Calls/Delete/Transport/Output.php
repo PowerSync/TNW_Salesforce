@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Delete\Transport;
 
@@ -54,7 +55,7 @@ class Output extends SplObjectStorage
      *
      * @return string
      */
-    public function type()
+    public function type(): string
     {
         return $this->type;
     }
@@ -65,7 +66,7 @@ class Output extends SplObjectStorage
      * @param object $object
      * @return array
      */
-    public function &offsetGet($object)
+    public function &offsetGet($object): array
     {
         if (!$this->contains($object)) {
             $this->offsetSet($object, []);
@@ -92,7 +93,7 @@ class Output extends SplObjectStorage
      *
      * @return array
      */
-    public function getInfo()
+    public function getInfo(): array
     {
         return $this->info[parent::getInfo()];
     }

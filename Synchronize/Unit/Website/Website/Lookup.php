@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit\Website\Website;
 
@@ -36,14 +37,14 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      *
      * @return array
      */
-    public function collectIndex()
+    public function collectIndex(): array
     {
         $codeField = 'tnw_mage_basic__Code__c';
 
         $searchIndex = [];
         foreach ($this->output as $key => $record) {
             if (!empty($record[$codeField])) {
-                $searchIndex['code'][$key] = strtolower($record[$codeField]);
+                $searchIndex['code'][$key] = strtolower((string)$record[$codeField]);
             }
         }
 
@@ -57,12 +58,12 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      * @param \Magento\Store\Model\Website $entity
      * @return array
      */
-    public function searchPriorityOrder(array $searchIndex, $entity)
+    public function searchPriorityOrder(array $searchIndex, $entity): array
     {
         $recordsIds = [];
         if (!empty($searchIndex['code'])) {
             // Priority 1
-            $recordsIds[10] = array_keys($searchIndex['code'], strtolower($entity->getCode()));
+            $recordsIds[10] = array_keys($searchIndex['code'], strtolower((string)$entity->getCode()));
         }
 
         return $recordsIds;

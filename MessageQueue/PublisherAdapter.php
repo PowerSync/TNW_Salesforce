@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\MessageQueue;
 
 use Exception;
@@ -39,7 +41,7 @@ class PublisherAdapter implements \TNW\Salesforce\Api\MessageQueue\PublisherAdap
      * @param $initTopicName
      * @return string
      */
-    public function detectConnectionName($initTopicName)
+    public function detectConnectionName($initTopicName): string
     {
         if (!empty($this->config->getMQMode())) {
             $connectionName = $this->config->getMQMode();

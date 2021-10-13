@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
 use Magento\Framework\Exception\LocalizedException;
@@ -24,7 +26,7 @@ class Pool
      * @return DivideEntityByWebsiteOrg
      * @throws LocalizedException
      */
-    public function getDividerByGroupCode($groupCode)
+    public function getDividerByGroupCode($groupCode): DivideEntityByWebsiteOrg
     {
         if (empty($this->dividers[$groupCode])) {
             throw new LocalizedException(__("Invalid group code: '%1'", $groupCode));

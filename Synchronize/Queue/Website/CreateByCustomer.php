@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Queue\Website;
 
 use Magento\Customer\Model\ResourceModel\Customer;
@@ -30,7 +32,7 @@ class CreateByCustomer extends CreateByBase
      *
      * @return string
      */
-    public function createBy()
+    public function createBy(): string
     {
         return self::CREATE_BY;
     }
@@ -42,9 +44,9 @@ class CreateByCustomer extends CreateByBase
      * @param array $additional
      * @param callable $create
      * @param int $websiteId
-     * @return mixed
+     * @return array
      */
-    public function process(array $entityIds, array $additional, callable $create, $websiteId)
+    public function process(array $entityIds, array $additional, callable $create, $websiteId): array
     {
         $queues = [];
         foreach ($this->entities($entityIds) as $entity) {
@@ -65,7 +67,7 @@ class CreateByCustomer extends CreateByBase
      * @param int[] $entityIds
      * @return array
      */
-    public function entities(array $entityIds)
+    public function entities(array $entityIds): array
     {
         $connection = $this->resourceCustomer->getConnection();
         $select = $connection->select()

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Delete;
 
@@ -38,7 +39,7 @@ class Output implements Transport\Calls\Delete\OutputInterface
     /**
      * @return Storage
      */
-    public function getStorage()
+    public function getStorage(): Storage
     {
         return $this->storage;
     }
@@ -52,7 +53,7 @@ class Output implements Transport\Calls\Delete\OutputInterface
     }
 
     /**
-     * Do Unit syncronization to Salesforce object
+     * Do Unit synchronization to Salesforce object
      *
      * @param Transport\Calls\Upsert\Transport\Output $output
      */
@@ -87,7 +88,7 @@ class Output implements Transport\Calls\Delete\OutputInterface
      * @param Error $error
      * @return string
      */
-    public function message(Error $error)
+    public function message(Error $error): string
     {
         $message = $error->getMessage();
         if (count($fields = (array)$error->getFields()) !== 0) {

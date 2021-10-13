@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace  TNW\Salesforce\Model\Customer;
 
@@ -58,7 +59,7 @@ class Map
      * @param string $objectType
      * @return array
      */
-    public function getMapArray($objectType = \TNW\Salesforce\Model\Customer\Mapper::OBJECT_TYPE_CONTACT)
+    public function getMapArray($objectType = \TNW\Salesforce\Model\Customer\Mapper::OBJECT_TYPE_CONTACT): array
     {
         if (isset($this->map[$objectType])) {
             return $this->map[$objectType];
@@ -84,7 +85,7 @@ class Map
      * @param \Magento\Customer\Api\Data\CustomerInterface $customer
      * @return \stdClass
      */
-    public function getContactTransferObjectFromCustomer(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    public function getContactTransferObjectFromCustomer(\Magento\Customer\Api\Data\CustomerInterface $customer): \stdClass
     {
 
         $customerArray = $this->getCustomerDataAsArray($customer);
@@ -136,7 +137,7 @@ class Map
      * @param \Magento\Customer\Api\Data\CustomerInterface $customer
      * @return \stdClass
      */
-    public function getLeadTransferObjectFromCustomer(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    public function getLeadTransferObjectFromCustomer(\Magento\Customer\Api\Data\CustomerInterface $customer): \stdClass
     {
         $customerArray = $this->getCustomerDataAsArray($customer);
 
@@ -191,7 +192,7 @@ class Map
      * @param \Magento\Customer\Api\Data\CustomerInterface $customer
      * @return \stdClass
      */
-    public function getAccountTransferObjectFromCustomer(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    public function getAccountTransferObjectFromCustomer(\Magento\Customer\Api\Data\CustomerInterface $customer): \stdClass
     {
         $transferObject = new \stdClass();
         $customerArray = $this->getCustomerDataAsArray($customer);
@@ -248,9 +249,9 @@ class Map
     /**
      * get Customer as Array
      * @param \Magento\Customer\Api\Data\CustomerInterface $customer
-     * @return Array
+     * @return array
      */
-    protected function getCustomerDataAsArray(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    protected function getCustomerDataAsArray(\Magento\Customer\Api\Data\CustomerInterface $customer): array
     {
         /** @var \Magento\Framework\Reflection\DataObjectProcessor $dataObjectProcessor */
         $dataObjectProcessor =  $this->objectManager->get('\Magento\Framework\Reflection\DataObjectProcessor');
@@ -264,9 +265,9 @@ class Map
 
     /**
      * @param \Magento\Customer\Api\Data\AddressInterface $address
-     * @return Array
+     * @return array
      */
-    protected function getAddressDataAsArray(\Magento\Customer\Api\Data\AddressInterface $address)
+    protected function getAddressDataAsArray(\Magento\Customer\Api\Data\AddressInterface $address): array
     {
         $dataObjectProcessor =  $this->objectManager->get('\Magento\Framework\Reflection\DataObjectProcessor');
         $addressArray =
@@ -281,10 +282,10 @@ class Map
     /**
      * Merge Customer DataArray with custom attribute sub-array
      *
-     * @param Array $customerArray
-     * @return Array
+     * @param array $customerArray
+     * @return array
      */
-    private function mergeCustomerAttributes($customerArray)
+    private function mergeCustomerAttributes($customerArray): array
     {
         // Make customerArray flat, by merging with custom_attribute subarray
         if (isset($customerArray['custom_attributes']) && is_array($customerArray['custom_attributes'])) {
@@ -300,7 +301,7 @@ class Map
      * @param \Magento\Customer\Api\Data\CustomerInterface $customer
      * @return \Magento\Customer\Api\Data\AddressInterface|null
      */
-    public function getDefaultShippingAddress(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    public function getDefaultShippingAddress(\Magento\Customer\Api\Data\CustomerInterface $customer): ?\Magento\Customer\Api\Data\AddressInterface
     {
         $addresses = $customer->getAddresses();
         $shippingAddressId = $customer->getDefaultShipping();
@@ -322,7 +323,7 @@ class Map
      * @param \Magento\Customer\Api\Data\CustomerInterface $customer
      * @return \Magento\Customer\Api\Data\AddressInterface|null
      */
-    public function getDefaultBillingAddress(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    public function getDefaultBillingAddress(\Magento\Customer\Api\Data\CustomerInterface $customer): ?\Magento\Customer\Api\Data\AddressInterface
     {
         $addresses = $customer->getAddresses();
         $billingAddressId = $customer->getDefaultBilling();
@@ -342,7 +343,6 @@ class Map
      * @param $address
      * @param array $mapArrayAddress
      * @param \stdClass $transferObject
-     * @return array
      */
     protected function addAddressDataToTransferObject(
         $address,

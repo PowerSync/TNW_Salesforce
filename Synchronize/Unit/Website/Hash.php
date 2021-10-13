@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Website;
 
 use TNW\Salesforce\Synchronize;
@@ -14,7 +16,7 @@ class Hash implements Synchronize\Unit\HashInterface
      * @param \Magento\Store\Model\Website $entity
      * @return string
      */
-    public function calculateEntity($entity)
+    public function calculateEntity($entity): string
     {
         return $entity->getCode();
     }

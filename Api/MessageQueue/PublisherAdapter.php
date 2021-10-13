@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Api\MessageQueue;
 /**
@@ -11,7 +12,7 @@ interface PublisherAdapter
      * @param $initTopicName
      * @return string
      */
-    public function detectConnectionName($initTopicName);
+    public function detectConnectionName($initTopicName): string;
 
     /**
      * @param $topicName

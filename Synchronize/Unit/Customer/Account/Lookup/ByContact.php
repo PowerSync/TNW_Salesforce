@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup;
 
 use Magento\Customer\Model\Customer;
@@ -15,9 +17,9 @@ class ByContact extends Lookup
 {
 
     /**
-     * ProcessInput
+     * @inheritdoc
      */
-    public function processInput()
+    public function processInput(): bool
     {
         $magentoIdField = 'tnw_mage_basic__Magento_ID__c';
         $magentoWebsiteField = 'tnw_mage_basic__Magento_Website__c';
@@ -32,7 +34,7 @@ class ByContact extends Lookup
 
         foreach ($this->entities() as $entity) {
             $this->input[$entity]['AND']['CoM']['AND']['EaW']['AND']['Email']['=']
-                = strtolower($entity->getEmail());
+                = strtolower((string)$entity->getEmail());
 
             if ($this->customerConfigShare->isWebsiteScope()) {
                 $this->input[$entity]['AND']['CoM']['AND']['EaW']['AND'][$magentoWebsiteField]['IN']
@@ -48,15 +50,17 @@ class ByContact extends Lookup
         }
 
         $this->input->from = 'Contact';
+
+        return true;
     }
 
     /**
      * Prepare Record
      *
      * @param array $record
-     * @return mixed
+     * @return array
      */
-    public function prepareRecord(array $record)
+    public function prepareRecord(array $record): array
     {
         return $record['Account'];
     }

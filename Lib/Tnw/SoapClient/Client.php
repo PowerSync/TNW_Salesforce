@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Lib\Tnw\SoapClient;
 
@@ -56,7 +57,7 @@ class Client extends \Tnw\SoapClient\Client
     }
 
     /**
-     * @return int
+     * @return mixed
      * @throws NoSuchEntityException
      */
     public function getWebsiteId()
@@ -67,7 +68,7 @@ class Client extends \Tnw\SoapClient\Client
     /**
      * @return LoginResult
      */
-    public function getLoginResult()
+    public function getLoginResult(): LoginResult
     {
         return parent::getLoginResult();
     }
@@ -77,7 +78,7 @@ class Client extends \Tnw\SoapClient\Client
      * @param string $objectType
      * @return object
      */
-    protected function createSObject($object, $objectType)
+    protected function createSObject($object, $objectType): object
     {
         $sObject = parent::createSObject($object, $objectType);
         foreach (get_object_vars($sObject) as $field => $value) {
@@ -94,7 +95,7 @@ class Client extends \Tnw\SoapClient\Client
     /**
      * @return SoapClient
      */
-    public function getSoapClient()
+    public function getSoapClient(): SoapClient
     {
         return $this->soapClient;
     }
@@ -117,7 +118,7 @@ class Client extends \Tnw\SoapClient\Client
      * @param AssignmentRuleHeader $header
      * @return $this
      */
-    public function setAssignmentRuleHeader($header)
+    public function setAssignmentRuleHeader($header): Client
     {
         if ($header != null) {
             $data = [
@@ -135,7 +136,7 @@ class Client extends \Tnw\SoapClient\Client
     /**
      * @return bool
      */
-    public function sessionExpired()
+    public function sessionExpired(): bool
     {
         $currentTime = time();
 

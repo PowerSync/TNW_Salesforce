@@ -1,9 +1,9 @@
 <?php
-
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Plugin\Synchronize\Queue\Website;
 
-
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Api\Data\GroupInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Synchronize\Queue\CreateInterface;
@@ -27,13 +27,11 @@ class FixMissedWebsites
 
     /**
      * @param $website
-     * @return int
+     * @return mixed
      */
     public function getDefaultStoreId($website)
     {
-
         $defaultGroupId = $website->getDefaultGroupId();
-        /** @var GroupInterface $defaultGroup */
         $defaultGroup = $this->storeManager->getGroup($defaultGroupId);
         return $defaultGroup->getDefaultStoreId();
     }
@@ -45,6 +43,7 @@ class FixMissedWebsites
      * @param array $additional
      * @param callable $create
      * @param int $websiteId
+     * @throws LocalizedException
      */
     public function afterProcess(
         CreateInterface $subject,
@@ -54,7 +53,6 @@ class FixMissedWebsites
         callable $create,
         $websiteId
     ) {
-
         foreach ($result as $k => $item) {
             if (empty($item->getEntityId())) {
                 $defaultWebsite = $this->storeManager->getWebsite(true);

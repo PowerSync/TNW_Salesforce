@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use OutOfBoundsException;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Queue;
@@ -40,7 +42,7 @@ class Status extends Synchronize\Unit\UnitAbstract
     /**
      * @return Config
      */
-    public function getConfig()
+    public function getConfig(): Config
     {
         return !empty($this->units()->get('context')->getSalesforceIdStorage())
             ? $this->units()->get('context')->getSalesforceIdStorage()->getConfig()
@@ -50,7 +52,7 @@ class Status extends Synchronize\Unit\UnitAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Status queue ...');
     }
@@ -187,7 +189,7 @@ class Status extends Synchronize\Unit\UnitAbstract
      * @return object[]
      * @throws OutOfBoundsException
      */
-    public function entities()
+    public function entities(): array
     {
         return $this->load()->get('entities');
     }

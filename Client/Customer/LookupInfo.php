@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Client\Customer;
 
 class LookupInfo
@@ -50,7 +52,7 @@ class LookupInfo
      * @param \Magento\Customer\Api\Data\CustomerInterface[] $customers
      * @return \Tnw\SoapClient\Result\SObject[]
      */
-    protected function getContactsForLookup($customers)
+    protected function getContactsForLookup($customers): array
     {
         $magentoIdField = $this->config->getMagentoIdField();
         $websiteIdField = $this->config->getWebsiteIdField();
@@ -83,7 +85,7 @@ class LookupInfo
      * @param \stdClass $contactObj
      * @return \stdClass
      */
-    public function findContactObjFromLookupResult($contactObj, $perWebsite = false)
+    public function findContactObjFromLookupResult($contactObj, $perWebsite = false): \stdClass
     {
         $lookupResult = $this->getContactLookupRecords();
         $magentoIdBusiness = $this->config->getMagentoIdField();
@@ -105,7 +107,7 @@ class LookupInfo
             foreach ($lookupResult as $result) {
                 if (
                     (property_exists($contactObj, 'Email') && property_exists($result, 'Email'))
-                    && strtolower($result->Email) == strtolower($contactObj->Email)
+                    && strtolower((string)$result->Email) == strtolower((string)$contactObj->Email)
                     && (!$perWebsite || (!$result->{$websiteIdBusiness}
                             || $result->{$websiteIdBusiness} == $contactObj->{$websiteIdBusiness}))
                 ) {
@@ -133,7 +135,7 @@ class LookupInfo
      * @return \stdClass
      * @throws \Exception
      */
-    public function lookupAccountObj($accountObj)
+    public function lookupAccountObj($accountObj): \stdClass
     {
         $lookupQuery = "SELECT Id, Name, OwnerId FROM Account WHERE ";
         $found = false;
@@ -177,7 +179,7 @@ class LookupInfo
      * @return \Tnw\SoapClient\Result\SObject[]
      * @throws \Exception
      */
-    public function lookupContactObj($email, $magentoId = null, $salesForceId = null, $websiteSforceId = null)
+    public function lookupContactObj($email, $magentoId = null, $salesForceId = null, $websiteSforceId = null): array
     {
         if (!$email && !$magentoId && !$salesForceId) {
             throw new \Exception("'email' or 'magentoId' or 'salesForceId' must be set");
@@ -241,7 +243,7 @@ class LookupInfo
     protected function lookupFindInResults(\Tnw\SoapClient\Result\RecordIterator $response,
         $emailField, $magentoIdField, $websiteIdField,
         $email, $magentoId = null, $salesForceId = null, $websiteSforceId = null, $source = null
-    )
+    ): array
     {
         $results = [];
         if ($response->count() > 1) {
@@ -262,12 +264,12 @@ class LookupInfo
 
             // Search by email
             if ($email) {
-                $email = strtolower($email);
+                $email = strtolower((string)$email);
                 // Search for exact website first
                 if ($websiteSforceId) {
                     foreach ($response as $result) {
                         $this->defineProperty($result, $fieldsToDefine);
-                        if (strtolower($result->{$emailField}) == $email
+                        if (strtolower((string)$result->{$emailField}) == $email
                             && $result->{$websiteIdField} == $websiteSforceId
                             && (!$source || $result->LeadSource == $source)
                         ) {
@@ -279,7 +281,7 @@ class LookupInfo
                 if (empty($resultsEmail)) {
                     foreach ($response as $result) {
                         $this->defineProperty($result, $fieldsToDefine);
-                        if (strtolower($result->{$emailField}) == $email
+                        if (strtolower((string)$result->{$emailField}) == $email
                             && (!$websiteSforceId || !$result->{$websiteIdField})
                             && (!$source || $result->LeadSource == $source)
                         ) {
@@ -330,7 +332,7 @@ class LookupInfo
      * @param $property
      * @return bool
      */
-    protected function checkProperty($object, $property)
+    protected function checkProperty($object, $property): bool
     {
         return
             is_object($object)
@@ -350,7 +352,7 @@ class LookupInfo
      *
      * @return \stdClass $object
      */
-    public function defineProperty($object, $property)
+    public function defineProperty($object, $property): \stdClass
     {
         foreach ($property as $_property) {
             if (!array_key_exists($_property, $object)) {
@@ -365,7 +367,7 @@ class LookupInfo
      * @param $value
      * @return string
      */
-    public function soqlQuote($value)
+    public function soqlQuote($value): string
     {
         $value = str_replace("'", "\'", $value);
         return "'$value'";

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Controller\Adminhtml\System\Log;
 
 class Login extends \Magento\Backend\App\Action
@@ -20,7 +22,7 @@ class Login extends \Magento\Backend\App\Action
     /**
      * @return bool
      */
-    protected function _isAllowed()
+    protected function _isAllowed(): bool
     {
         return $this->_authorization->isAllowed('TNW_Salesforce::tools_login');
     }

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader;
 
 /**
@@ -28,10 +30,10 @@ class Website extends \TNW\Salesforce\Synchronize\Unit\EntityLoaderAbstract
      * Load
      *
      * @param \Magento\Customer\Model\Customer $entity
-     * @return \Magento\Framework\Model\AbstractModel
+     * @return \Magento\Framework\DataObject
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function load($entity)
+    public function load($entity): \Magento\Framework\DataObject
     {
         return $this->storeManager->getWebsite($entity->getWebsiteId());
     }

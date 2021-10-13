@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Code\Generator;
 
 class ParameterGenerator extends \Zend\Code\Generator\ParameterGenerator
@@ -12,7 +14,7 @@ class ParameterGenerator extends \Zend\Code\Generator\ParameterGenerator
      * @param $variadic
      * @return $this
      */
-    public function setVariadic($variadic)
+    public function setVariadic($variadic): ParameterGenerator
     {
         $this->variadic = (bool) $variadic;
         return $this;
@@ -21,7 +23,7 @@ class ParameterGenerator extends \Zend\Code\Generator\ParameterGenerator
     /**
      * @return bool
      */
-    public function getVariadic()
+    public function getVariadic(): bool
     {
         return $this->variadic;
     }
@@ -29,7 +31,7 @@ class ParameterGenerator extends \Zend\Code\Generator\ParameterGenerator
     /**
      * @return string
      */
-    public function generate()
+    public function generate(): string
     {
         $output = parent::generate();
         if (false === strpos($output, "...") && $this->variadic) {

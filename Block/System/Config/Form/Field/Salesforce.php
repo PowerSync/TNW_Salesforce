@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /**
  *
@@ -37,7 +38,7 @@ class Salesforce extends \Magento\Config\Block\System\Config\Form\Field
      * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
      * @return string
      */
-    public function render(\Magento\Framework\Data\Form\Element\AbstractElement $element)
+    public function render(\Magento\Framework\Data\Form\Element\AbstractElement $element): string
     {
         if (!$this->salesforceConfig->isDefaultOrg()) {
             $element

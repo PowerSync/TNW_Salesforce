@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\ResourceModel;
 
 use Magento\Framework\Exception\LocalizedException;
@@ -130,9 +132,9 @@ class Objects extends AbstractDb
      *
      * @return int
      */
-    public function baseWebsiteId($websiteId)
+    public function baseWebsiteId($websiteId): int
     {
-        return $this->config->baseWebsiteIdLogin($websiteId);
+        return (int)$this->config->baseWebsiteIdLogin($websiteId);
     }
 
     /**
@@ -140,7 +142,7 @@ class Objects extends AbstractDb
      * @param string $magentoType
      * @param int $websiteId
      *
-     * @return string
+     * @return string|bool
      */
     public function loadObjectId($entityId, $magentoType, $websiteId)
     {
@@ -157,7 +159,7 @@ class Objects extends AbstractDb
      * @param int $storeId
      * @param int $websiteId
      *
-     * @return string
+     * @return string|bool
      */
     public function loadPriceBookId($productId, $storeId, $websiteId)
     {
@@ -178,7 +180,7 @@ class Objects extends AbstractDb
      *
      * @return array
      */
-    public function loadObjectIds($entityId, $magentoType, $websiteId)
+    public function loadObjectIds($entityId, $magentoType, $websiteId): array
     {
         return array_flip($this->getConnection()->fetchPairs($this->selectObjectIds, [
             'magento_type' => $magentoType,
@@ -193,7 +195,7 @@ class Objects extends AbstractDb
      * @param string $magentoType
      * @param int $websiteId
      *
-     * @return int
+     * @return string|bool
      */
     public function loadStatus($entityId, $magentoType, $websiteId)
     {
@@ -210,7 +212,7 @@ class Objects extends AbstractDb
      * @param string $salesforceType
      * @param int $websiteId
      *
-     * @return int
+     * @return string|bool
      */
     public function loadEntityId($objectId, $salesforceType, $websiteId)
     {
@@ -229,7 +231,7 @@ class Objects extends AbstractDb
      *
      * @return array
      */
-    public function loadEntityIds($objectId, $salesforceType, $websiteId)
+    public function loadEntityIds($objectId, $salesforceType, $websiteId): array
     {
         return array_flip($this->getConnection()->fetchPairs($this->selectEntityId, [
             'salesforce_type' => $salesforceType,
@@ -339,7 +341,7 @@ class Objects extends AbstractDb
      *
      * @return array
      */
-    public function loadEntityIdsByType($objectId, $magentoType, $salesforceType, $websiteId)
+    public function loadEntityIdsByType($objectId, $magentoType, $salesforceType, $websiteId): array
     {
         return $this->getConnection()->fetchCol($this->selectEntityIdsByType, [
             'magento_type' => $magentoType,

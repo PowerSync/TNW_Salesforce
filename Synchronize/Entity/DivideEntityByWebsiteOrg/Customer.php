@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
@@ -28,7 +29,7 @@ class Customer extends DivideEntityByWebsiteOrg
      * @param array $ids
      * @return \Magento\Customer\Model\ResourceModel\Customer\Collection
      */
-    public function loadEntities($ids)
+    public function loadEntities($ids): \Magento\Customer\Model\ResourceModel\Customer\Collection
     {
         $collection = $this->collectionFactory->create();
         $collection->addFieldToFilter($collection->getRowIdFieldName(), $ids);
@@ -41,7 +42,7 @@ class Customer extends DivideEntityByWebsiteOrg
      *
      * @return array
      */
-    public function getEntityWebsiteIds($entity)
+    public function getEntityWebsiteIds($entity): array
     {
         return [(int)$entity->getWebsiteId()];
     }

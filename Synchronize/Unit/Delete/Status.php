@@ -1,12 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit\Delete;
 
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use OutOfBoundsException;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Synchronize\Unit\UnitInterface;
 
 /**
  * Unit Status
@@ -42,7 +45,7 @@ class Status extends Synchronize\Unit\UnitAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Status queue ...');
     }
@@ -68,10 +71,10 @@ class Status extends Synchronize\Unit\UnitAbstract
 
     /**
      * Delete Output
-     * @return Output
+     * @return UnitInterface|null
      *
      */
-    public function deleteOutput()
+    public function deleteOutput(): ?UnitInterface
     {
         return $this->unit('deleteOutput');
     }
@@ -82,7 +85,7 @@ class Status extends Synchronize\Unit\UnitAbstract
      * @return object[]
      * @throws OutOfBoundsException
      */
-    protected function entities()
+    protected function entities(): array
     {
         return $this->load()->get('entities');
     }
@@ -90,9 +93,9 @@ class Status extends Synchronize\Unit\UnitAbstract
     /**
      * Load
      *
-     * @return Load|UnitInterface
+     * @return UnitInterface|null
      */
-    public function load()
+    public function load(): ?UnitInterface
     {
         return $this->unit('load');
     }

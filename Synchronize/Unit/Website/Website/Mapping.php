@@ -1,8 +1,13 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Website\Website;
 
 use Exception;
+use Magento\Framework\Api\ExtensibleDataInterface;
+use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
 use Magento\Store\Model\Website;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Synchronize;
@@ -17,8 +22,7 @@ class Mapping extends Synchronize\Unit\Mapping
      *
      * @param Website $entity
      * @param string $magentoEntityType
-     * @return mixed
-     * @throws LocalizedException
+     * @return DataObject|ExtensibleDataInterface|null
      */
     public function objectByEntityType($entity, $magentoEntityType)
     {
@@ -52,7 +56,7 @@ class Mapping extends Synchronize\Unit\Mapping
      * @return Model\ResourceModel\Mapper\Collection
      * @throws Exception
      */
-    public function mappers($entity)
+    public function mappers($entity): Model\ResourceModel\Mapper\Collection
     {
         $collection = parent::mappers($entity);
 

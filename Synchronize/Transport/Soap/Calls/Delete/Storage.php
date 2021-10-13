@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Delete;
 
@@ -34,7 +35,7 @@ class Storage
      * @param object $entity
      * @return DeleteResult
      */
-    public function searchResult($entity)
+    public function searchResult($entity): ?DeleteResult
     {
         // hack, actually different objects could have the same hash
         $classType = get_class($entity);

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert;
 
 use TNW\Salesforce\Synchronize\Transport;
@@ -42,7 +44,7 @@ class Input implements Transport\Calls\Upsert\InputInterface
     }
 
     /**
-     * Do Unit syncronization to Salesforce object
+     * Do Unit synchronization to Salesforce object
      *
      * @param Transport\Calls\Upsert\Transport\Input $input
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -94,7 +96,7 @@ class Input implements Transport\Calls\Upsert\InputInterface
      * @param array $object
      * @return string|null
      */
-    public function hashObject($object)
+    public function hashObject($object): ?string
     {
         return empty($object['Id'])
             ? null : $object['Id'];

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Plugin\Synchronize\Unit\Mapping;
 
@@ -47,9 +48,9 @@ class CheckOwnerField extends Mapping
     /**
      * @param $entity
      * @param $value
-     * @return string
+     * @return string|null
      */
-    public function checkOwner($value, $entity)
+    public function checkOwner($value, $entity): ?string
     {
         $value = $this->correctSalesforceId($value);
         $actualOwners = $this->salesforceOwners->toOptionArray();
@@ -67,7 +68,7 @@ class CheckOwnerField extends Mapping
      * @param $actualOwners
      * @return array
      */
-    public function correctSalesforceIdKey($actualOwners)
+    public function correctSalesforceIdKey($actualOwners): array
     {
         $result= [];
         foreach ($actualOwners as $salesforceId => $value) {
@@ -89,7 +90,8 @@ class CheckOwnerField extends Mapping
         Mapping $subject,
         callable $proceed,
         $entity
-    ) {
+    ): ?Collection
+    {
         /** @var Collection $mappers */
         $mappers = $proceed($entity);
 
@@ -113,7 +115,7 @@ class CheckOwnerField extends Mapping
      * @param $mappers Collection
      * @return bool
      */
-    protected function ownerMappingDefined($mappers)
+    protected function ownerMappingDefined($mappers): bool
     {
         foreach ($mappers as $mapper) {
             if ($mapper->getSalesforceAttributeName() == self::OWNER_ID_FIELD) {

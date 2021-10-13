@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
 
 /**
@@ -68,7 +70,7 @@ class Unit
     private $ignoreFindGeneratorException;
 
     /**
-     * @var \TNW\Salesforce\Model\Queue[]
+     * @var Queue[]
      */
     private $queues = [];
 
@@ -141,7 +143,7 @@ class Unit
      *
      * @return string
      */
-    public function code()
+    public function code(): string
     {
         return $this->code;
     }
@@ -151,7 +153,7 @@ class Unit
      *
      * @return string
      */
-    public function entityType()
+    public function entityType(): string
     {
         return $this->entityType;
     }
@@ -161,7 +163,7 @@ class Unit
      *
      * @return string
      */
-    public function objectType()
+    public function objectType(): string
     {
         return $this->objectType;
     }
@@ -171,7 +173,7 @@ class Unit
      *
      * @return Unit[]
      */
-    public function parents()
+    public function parents(): array
     {
         return array_map([$this->objectManager, 'get'], $this->parents);
     }
@@ -181,7 +183,7 @@ class Unit
      *
      * @return Unit[]
      */
-    public function children()
+    public function children(): array
     {
         return array_map([$this->objectManager, 'get'], $this->children);
     }
@@ -189,10 +191,10 @@ class Unit
     /**
      * Skip
      *
-     * @param \TNW\Salesforce\Model\Queue $queue
+     * @param Queue $queue
      * @return bool
      */
-    public function skipQueue($queue)
+    public function skipQueue($queue): bool
     {
         foreach ($this->skipRules as $rule) {
             if ($rule->apply($queue) !== false) {
@@ -211,7 +213,7 @@ class Unit
      * @param int $baseEntityId
      * @param array $identifiers
      * @param array $additionalLoad
-     * @return \TNW\Salesforce\Model\Queue
+     * @return Queue|array
      * @throws LocalizedException
      */
     public function createQueue($loadBy, $entityId, $baseEntityId, array $identifiers, array $additionalLoad = [])
@@ -260,7 +262,7 @@ class Unit
      * @param array $identifiers
      * @return string
      */
-    public function description(array $identifiers)
+    public function description(array $identifiers): string
     {
         $search = $replace = [];
         foreach ($identifiers as $key => $identifier) {
@@ -281,7 +283,7 @@ class Unit
      * @return Queue[]
      * @throws LocalizedException
      */
-    public function generateQueues($loadBy, $entityIds, array $additional, $websiteId, $relatedUnitCode)
+    public function generateQueues($loadBy, $entityIds, array $additional, $websiteId, $relatedUnitCode): array
     {
         $generator = $this->findGenerator($loadBy);
         if ($generator instanceof CreateInterface) {
@@ -328,7 +330,7 @@ class Unit
      * @param $queues
      * @return array
      */
-    public function mergeQueue(&$queues)
+    public function mergeQueue(&$queues): array
     {
         foreach ($queues as $i => $queue1) {
             foreach ($queues as $j => $queue2) {
@@ -393,10 +395,10 @@ class Unit
      * @param string $type
      * @return CreateInterface|null
      */
-    public function findGenerator($type)
+    public function findGenerator($type): ?CreateInterface
     {
         foreach ($this->generators as $generator) {
-            if (strcasecmp($generator->createBy(), $type) !== 0) {
+            if (strcasecmp((string)$generator->createBy(), $type) !== 0) {
                 continue;
             }
 
@@ -407,7 +409,7 @@ class Unit
     }
 
     /**
-     * @return \TNW\Salesforce\Model\Queue[]
+     * @return Queue[]
      */
     public function getQueues(): array
     {
@@ -415,14 +417,14 @@ class Unit
     }
 
     /**
-     * @param \TNW\Salesforce\Model\Queue[] $queues
+     * @param Queue[] $queues
      */
     public function setQueues(array $queues): void
     {
         $this->queues = $queues;
     }
     /**
-     * @param \TNW\Salesforce\Model\Queue[] $queues
+     * @param Queue[] $queues
      */
     public function addQueues(array $queues): void
     {

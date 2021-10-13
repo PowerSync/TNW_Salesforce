@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Client;
 
 use Magento\Framework\App\Cache\State;
@@ -49,7 +51,7 @@ class Customer extends Salesforce
      * @return null|\Tnw\SoapClient\Client
      * @throws \Exception
      */
-    public function getClient($websiteId = null)
+    public function getClient($websiteId = null): ?\Tnw\SoapClient\Client
     {
         if (!(bool)parent::getClientStatus($websiteId)) {
             throw new \Exception('Salesforce integration is DISABLED');
@@ -64,7 +66,7 @@ class Customer extends Salesforce
      * @param null $websiteId
      * @return bool
      */
-    public function getClientStatus($websiteId = null)
+    public function getClientStatus($websiteId = null): bool
     {
         return
             parent::getClientStatus($websiteId)
@@ -78,7 +80,7 @@ class Customer extends Salesforce
      * @return array|null
      * @throws \Exception
      */
-    public function getOwners($connectionChecked = false)
+    public function getOwners($connectionChecked = false): ?array
     {
         if ($cached = $this->loadCache(self::CACHE_CUSTOMER_OWNERS_LIST)) {
             return $cached;
@@ -101,12 +103,12 @@ class Customer extends Salesforce
         return $result;
     }
 
-    public function upsertContacts($key, $objects)
+    public function upsertContacts($key, $objects): array
     {
         return $this->upsertData($key, $objects, self::SFORCE_CONTACT_OBJECT);
     }
 
-    public function upsertAccounts($key, $objects)
+    public function upsertAccounts($key, $objects): array
     {
         return $this->upsertData($key, $objects, self::SFORCE_ACCOUNT_OBJECT);
     }
@@ -115,7 +117,7 @@ class Customer extends Salesforce
      * Get Salesforce Contact object name
      * @return string
      */
-    public function salesforceContactObjectName()
+    public function salesforceContactObjectName(): string
     {
         return self::SFORCE_CONTACT_OBJECT;
     }
@@ -124,7 +126,7 @@ class Customer extends Salesforce
      * Get Salesforce Account object name
      * @return string
      */
-    public function salesforceAccountObjectName()
+    public function salesforceAccountObjectName(): string
     {
         return self::SFORCE_ACCOUNT_OBJECT;
     }

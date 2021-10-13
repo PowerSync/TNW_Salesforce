@@ -1,7 +1,12 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Entity;
 
+use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Client\Salesforce;
+use TNW\Salesforce\Model\Config;
 
 /**
  * DivideEntityByWebsiteOrg
@@ -9,16 +14,16 @@ use TNW\Salesforce\Client\Salesforce;
 abstract class DivideEntityByWebsiteOrg
 {
     /**
-     * @var \TNW\Salesforce\Model\Config
+     * @var Config
      */
     protected $config;
 
     /**
      * Entity constructor.
-     * @param \TNW\Salesforce\Model\Config $config
+     * @param Config $config
      */
     public function __construct(
-        \TNW\Salesforce\Model\Config $config
+        Config $config
     ) {
         $this->config = $config;
     }
@@ -26,16 +31,16 @@ abstract class DivideEntityByWebsiteOrg
     /**
      * Entity Website Ids
      *
-     * @param \Magento\Framework\Model\AbstractModel $entity
-     * @return int[]
+     * @param AbstractModel $entity
+     * @return array
      */
-    abstract public function getEntityWebsiteIds($entity);
+    abstract public function getEntityWebsiteIds($entity): array;
 
     /**
      * Load Entities
      *
-     * @param int[] $ids
-     * @return \Magento\Framework\Model\AbstractModel[]
+     * @param array $ids
+     * @return array|AbstractDb
      */
     abstract public function loadEntities($ids);
 
@@ -45,7 +50,7 @@ abstract class DivideEntityByWebsiteOrg
      * @param array $entities
      * @return array
      */
-    public function process(array $entities)
+    public function process(array $entities): array
     {
         $entitiesByWebsites = [];
         foreach (array_chunk($entities, Salesforce::SFORCE_UPSERT_CHUNK_SIZE) as $entitiesChunk) {

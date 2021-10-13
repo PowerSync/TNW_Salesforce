@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Model\Customer;
 
@@ -44,7 +45,7 @@ class CustomAttribute
      * Get attributes list to handle
      * @return array
      */
-    protected function getAttributesList()
+    protected function getAttributesList(): array
     {
         return [
             self::ATTRIBUTE_CODE_SF_ID,

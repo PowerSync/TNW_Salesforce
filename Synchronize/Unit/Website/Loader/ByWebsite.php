@@ -1,6 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Website\Loader;
 
+use Magento\Framework\DataObject;
+use Magento\Framework\Model\AbstractModel;
 use Magento\Store;
 
 /**
@@ -38,7 +42,7 @@ class ByWebsite implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
      *
      * @return string
      */
-    public function loadBy()
+    public function loadBy(): string
     {
         return self::LOAD_BY;
     }
@@ -48,9 +52,9 @@ class ByWebsite implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
      *
      * @param int $entityId
      * @param array $additional
-     * @return \Magento\Store\Api\Data\WebsiteInterface
+     * @return DataObject
      */
-    public function load($entityId, array $additional)
+    public function load($entityId, array $additional): DataObject
     {
         $website = $this->websiteFactory->create();
         $this->resourceWebsite->load($website, $entityId);

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer;
 
 /**
@@ -37,9 +39,9 @@ abstract class LoaderAbstract  extends \TNW\Salesforce\Synchronize\Unit\EntityLo
      * Load
      *
      * @param \Magento\Sales\Model\Order $entity
-     * @return \Magento\Framework\Model\AbstractModel
+     * @return \Magento\Framework\DataObject
      */
-    public function load($entity)
+    public function load($entity): \Magento\Framework\DataObject
     {
         $customer = $this->customerFactory->create();
         $this->resourceCustomer->load($customer, $entity->getCustomerId());

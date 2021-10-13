@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer;
 
 use TNW\Salesforce\Synchronize;
@@ -29,7 +31,7 @@ class Hash implements Synchronize\Unit\HashInterface
      * @param \Magento\Customer\Model\Customer $entity
      * @return string
      */
-    public function calculateEntity($entity)
+    public function calculateEntity($entity): string
     {
         $hash = $entity->getEmail();
         if ($this->customerConfigShare->isWebsiteScope()) {

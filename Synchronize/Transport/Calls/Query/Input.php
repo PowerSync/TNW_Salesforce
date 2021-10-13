@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Query;
 
 use function count;
@@ -26,7 +28,7 @@ class Input extends SplObjectStorage
      * @param array $entities
      * @return string
      */
-    public function query(array $entities = [])
+    public function query(array $entities = []): string
     {
         if (empty($this->from)) {
             throw new RuntimeException('SOQL part "from" is Empty');
@@ -47,7 +49,7 @@ class Input extends SplObjectStorage
      * @param array $columns
      * @return string
      */
-    public function select(array $columns)
+    public function select(array $columns): string
     {
         return implode(', ', $columns);
     }
@@ -56,7 +58,7 @@ class Input extends SplObjectStorage
      * @param array $entities
      * @return string
      */
-    public function where(array $entities)
+    public function where(array $entities): string
     {
         $groups = $this->mergeGroup($entities);
 
@@ -68,7 +70,7 @@ class Input extends SplObjectStorage
      * @param $entities
      * @return array
      */
-    protected function mergeGroup(array $entities)
+    protected function mergeGroup(array $entities): array
     {
         $group = [];
         foreach ($entities as $entity) {
@@ -123,13 +125,13 @@ class Input extends SplObjectStorage
      * @param $value
      * @return string
      */
-    protected function soqlQuote($value)
+    protected function soqlQuote($value): string
     {
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
         }
 
-        $value = addslashes($value);
+        $value = addslashes((string)$value);
         return "'$value'";
     }
 
@@ -137,7 +139,7 @@ class Input extends SplObjectStorage
      * @param array $groups
      * @return string
      */
-    protected function generateLookupWhereGroup(array $groups)
+    protected function generateLookupWhereGroup(array $groups): string
     {
         $sql = '';
         $first = true;
@@ -173,7 +175,7 @@ class Input extends SplObjectStorage
      * @param object $object
      * @return array
      */
-    public function &offsetGet($object)
+    public function &offsetGet($object): array
     {
         if (!$this->contains($object)) {
             $this->offsetSet($object, []);
@@ -185,7 +187,7 @@ class Input extends SplObjectStorage
     /**
      * @return array
      */
-    public function getInfo()
+    public function getInfo(): array
     {
         return $this->conditions[parent::getInfo()];
     }

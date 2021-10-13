@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 
 namespace TNW\Salesforce\Model\Config\Source\MQ;
@@ -15,7 +16,7 @@ class Mode implements \Magento\Framework\Data\OptionSourceInterface
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             [

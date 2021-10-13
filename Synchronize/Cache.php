@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize;
 
 /**
@@ -75,7 +77,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         $offset = $this->prepareHash($offset);
         return isset($this->data[$offset]);
@@ -134,7 +136,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @return \ArrayIterator
      */
-    public function getIterator()
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->data);
     }
@@ -144,7 +146,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->data);
     }
@@ -155,7 +157,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param Cache|mixed $cache
      * @return bool
      */
-    public static function isEmpty($cache)
+    public static function isEmpty($cache): bool
     {
         if ($cache instanceof self) {
             return $cache->count() === 0;

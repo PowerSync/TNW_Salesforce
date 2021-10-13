@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
@@ -28,7 +29,8 @@ class Website extends DivideEntityByWebsiteOrg
 
     /**
      * @param $ids
-     * @return \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory|\Magento\Framework\Data\CollectionFactory\AbstractDb
+     * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function loadEntities($ids)
     {
@@ -48,9 +50,9 @@ class Website extends DivideEntityByWebsiteOrg
     /**
      * @param $entity \Magento\Store\Model\Website
      *
-     * @return mixed
+     * @return array
      */
-    public function getEntityWebsiteIds($entity)
+    public function getEntityWebsiteIds($entity): array
     {
         return [$entity->getId()];
     }

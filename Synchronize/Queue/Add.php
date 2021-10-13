@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
@@ -122,7 +123,7 @@ class Add
     /**
      * Add To Queue
      *
-     * @param int[] $entityIds
+     * @param array $entityIds
      * @throws LocalizedException
      */
     public function addToQueue(array $entityIds)
@@ -133,8 +134,6 @@ class Add
         $this->addToQueueDirectly($entityIds);
 
         if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
-
-            /** @var MessageInterface $message */
             $message = $this->messageManager
                 ->createMessage(MessageInterface::TYPE_SUCCESS)
                 ->setText('Item(s) were added to the Salesforce sync queue');
@@ -145,6 +144,7 @@ class Add
 
     /**
      * @param array $entityIds
+     * @throws LocalizedException
      */
     public function addToPreQueue(array $entityIds)
     {
@@ -166,6 +166,7 @@ class Add
 
     /**
      * @param array $entityIds
+     * @param null $syncType
      * @throws LocalizedException
      */
     public function addToQueueDirectly(array $entityIds, $syncType = null)
@@ -212,7 +213,7 @@ class Add
      * @param $children
      * @return array
      */
-    public function buildDependency($current, $parents, $unitCode)
+    public function buildDependency($current, $parents, $unitCode): array
     {
         $dependency = [];
         foreach ($current as $queue) {
@@ -251,7 +252,8 @@ class Add
         &$dependencies,
         &$queuesUnique = [],
         $relatedUnitCode = null
-    ) {
+    ): array
+    {
         $queues = [];
         $parents = $children = [];
 
@@ -365,7 +367,7 @@ class Add
      * @return array
      * @throws LocalizedException
      */
-    public function getInsertArray($queues, $syncType, $websiteId)
+    public function getInsertArray($queues, $syncType, $websiteId): array
     {
         $queueDataToSave = [];
 
@@ -387,7 +389,7 @@ class Add
      * @param array $loadAdditional
      * @param $websiteId
      * @param $syncType
-     * @return array
+     * @return void
      * @throws LocalizedException
      */
     public function create(
@@ -555,7 +557,7 @@ class Add
      * @param int $websiteId
      * @return int
      */
-    public function syncType($count, $websiteId)
+    public function syncType($count, $websiteId): int
     {
         return Config::DIRECT_SYNC_TYPE_REALTIME;
     }

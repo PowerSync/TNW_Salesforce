@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Delete;
 
@@ -46,7 +47,7 @@ class Input implements Transport\Calls\Delete\InputInterface
     }
 
     /**
-     * Do Unit syncronization to Salesforce object
+     * Do Unit synchronization to Salesforce object
      *
      * @param Transport\Calls\Upsert\Transport\Input $input
      * @throws LocalizedException
@@ -95,7 +96,7 @@ class Input implements Transport\Calls\Delete\InputInterface
      * @param array $object
      * @return string|null
      */
-    public function hashObject($object)
+    public function hashObject($object): ?string
     {
         return empty($object['Id'])
             ? null : $object['Id'];

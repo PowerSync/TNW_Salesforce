@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Lib\Tnw\SoapClient;
 
 use Tnw\SoapClient\Soap\SoapClientFactory;
@@ -16,7 +18,7 @@ class ClientBuilder extends \Tnw\SoapClient\ClientBuilder
      *
      * @return Client
      */
-    public function build()
+    public function build(): Client
     {
         $soapClientFactory = new SoapClientFactory();
         $soapClient = $soapClientFactory->factory($this->wsdl, $this->soapOptions);

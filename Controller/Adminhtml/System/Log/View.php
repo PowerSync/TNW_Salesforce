@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Controller\Adminhtml\System\Log;
 
 class View extends \Magento\Backend\App\Action

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2016 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
@@ -16,12 +17,12 @@ use Magento\Framework\App\Cache\Type\Collection;
 
 class Config extends \TNW\Salesforce\Model\Customer\Config
 {
-    
+
 
     /**
      * Cron queue types
      */
-   
+
     const CLEAN_SYSTEM_LOGS = 8;
 
 
@@ -97,7 +98,7 @@ class Config extends \TNW\Salesforce\Model\Customer\Config
      * @param int $websiteId
      * @return int
      */
-    public function getMagentoTime($websiteId = null)
+    public function getMagentoTime($websiteId = null): int
     {
         return $this->dateTime->scopeTimeStamp($websiteId);
     }
@@ -105,7 +106,7 @@ class Config extends \TNW\Salesforce\Model\Customer\Config
     /**
      * Set Global Last Cron Run
      *
-     * @param string $value
+     * @param int $value
      * @param int $type
      * @throws LocalizedException
      */

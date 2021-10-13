@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\ResourceModel\Queue;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
@@ -39,7 +41,7 @@ class Collection extends AbstractCollection
      * @param int $syncType
      * @return Collection
      */
-    public function addFilterToSyncType($syncType)
+    public function addFilterToSyncType($syncType): Collection
     {
         return $this->addFieldToFilter('main_table.sync_type', $syncType);
     }
@@ -50,7 +52,7 @@ class Collection extends AbstractCollection
      * @param string $code
      * @return Collection
      */
-    public function addFilterToCode($code)
+    public function addFilterToCode($code): Collection
     {
         return $this->addFieldToFilter('main_table.code', $code);
     }
@@ -61,7 +63,7 @@ class Collection extends AbstractCollection
      * @param string $code
      * @return Collection
      */
-    public function addFilterToStatus($code)
+    public function addFilterToStatus($code): Collection
     {
         return $this->addFieldToFilter('main_table.status', $code);
     }
@@ -72,7 +74,7 @@ class Collection extends AbstractCollection
      * @param string $uid
      * @return Collection
      */
-    public function addFilterToTransactionUid($uid)
+    public function addFilterToTransactionUid($uid): Collection
     {
         return $this->addFieldToFilter('main_table.transaction_uid', $uid);
     }
@@ -83,7 +85,7 @@ class Collection extends AbstractCollection
      * @param string $uid
      * @return Collection
      */
-    public function addFilterToNotTransactionUid($uid)
+    public function addFilterToNotTransactionUid($uid): Collection
     {
         return $this->addFieldToFilter([
             'main_table.transaction_uid',
@@ -99,7 +101,7 @@ class Collection extends AbstractCollection
      *
      * @return $this
      */
-    public function addFilterDependent()
+    public function addFilterDependent(): Collection
     {
         $connection = $this->getConnection();
         $select = $connection->select()
@@ -122,7 +124,7 @@ class Collection extends AbstractCollection
      * @param string|array $cols
      * @return $this
      */
-    public function joinLeft($table, $cond, $cols = '*')
+    public function joinLeft($table, $cond, $cols = '*'): Collection
     {
         if (is_array($table)) {
             foreach ($table as $k => $v) {
@@ -148,7 +150,7 @@ class Collection extends AbstractCollection
      * @param string $code
      * @return Collection
      */
-    public function addFilterToWebsiteId($code)
+    public function addFilterToWebsiteId($code): Collection
     {
         return $this->addFieldToFilter('main_table.website_id', $code);
     }
@@ -159,7 +161,7 @@ class Collection extends AbstractCollection
      * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function websiteIds()
+    public function websiteIds(): array
     {
         $collection = clone $this;
         $collection
@@ -189,7 +191,7 @@ class Collection extends AbstractCollection
      * @return int
      * @throws \Exception
      */
-    public function updateLock(array $data)
+    public function updateLock(array $data): int
     {
         $this->getSelect()->group('identify');
 
@@ -227,7 +229,7 @@ class Collection extends AbstractCollection
      * @param \Magento\Framework\DataObject $item
      * @return \Magento\Framework\DataObject
      */
-    protected function beforeAddLoadedItem(\Magento\Framework\DataObject $item)
+    protected function beforeAddLoadedItem(\Magento\Framework\DataObject $item): \Magento\Framework\DataObject
     {
         $this->getResource()->unserializeFields($item);
         return parent::beforeAddLoadedItem($item);
@@ -236,7 +238,7 @@ class Collection extends AbstractCollection
     /**
      * @return $this
      */
-    public function denyDependentItems()
+    public function denyDependentItems(): Collection
     {
         $this->joinLeft(
             ['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')],

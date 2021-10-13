@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit\Delete;
 
 use InvalidArgumentException;
 use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Phrase;
 use OutOfBoundsException;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Synchronize\Group;
@@ -52,7 +54,7 @@ class Input extends Synchronize\Unit\UnitAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Look for the items to delete.');
     }
@@ -84,7 +86,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      *
      * @return Synchronize\Transport\Calls\Delete\Transport\Input
      */
-    public function createTransport()
+    public function createTransport(): Synchronize\Transport\Calls\Delete\Transport\Input
     {
         return $this->inputFactory->create(['type' => $this->units()->get('context')->getSalesforceType()]);
     }
@@ -108,7 +110,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @return array
      * @throws OutOfBoundsException
      */
-    protected function entities()
+    protected function entities(): array
     {
         return array_filter($entities = $this->unit('load')->get('entities'), [$this, 'filter']);
     }
@@ -129,7 +131,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @param AbstractModel $entity
      * @return bool
      */
-    public function skipped($entity)
+    public function skipped($entity): bool
     {
         return false;
     }
@@ -141,7 +143,7 @@ class Input extends Synchronize\Unit\UnitAbstract
      * @return bool
      * @throws OutOfBoundsException
      */
-    protected function filter($entity)
+    protected function filter($entity): bool
     {
         return !$this->unit('mapping')->skipped($entity);
     }

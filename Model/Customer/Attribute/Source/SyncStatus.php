@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Customer\Attribute\Source;
 
 /**
@@ -23,7 +25,7 @@ class SyncStatus extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSour
      *
      * @return array
      */
-    public function getAllOptions()
+    public function getAllOptions(): array
     {
         if ($this->_options === null) {
             $this->_options = [

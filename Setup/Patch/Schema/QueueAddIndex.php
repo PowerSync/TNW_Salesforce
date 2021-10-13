@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Setup\Patch\Schema;
 
@@ -63,7 +64,7 @@ class QueueAddIndex implements SchemaPatchInterface
     /**
      * {@inheritdoc}
      */
-    public static function getDependencies()
+    public static function getDependencies(): array
     {
         return [QueueRelationForeignKeyFix::class];
     }
@@ -71,7 +72,7 @@ class QueueAddIndex implements SchemaPatchInterface
     /**
      * {@inheritdoc}
      */
-    public function getAliases()
+    public function getAliases(): array
     {
         return [];
     }

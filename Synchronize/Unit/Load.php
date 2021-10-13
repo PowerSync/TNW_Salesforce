@@ -1,8 +1,12 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Phrase;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
 use TNW\Salesforce\Synchronize;
@@ -77,7 +81,7 @@ class Load extends Synchronize\Unit\UnitAbstract
     /**
      * Description
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Loading Magento %1 ...', $this->units()->get('context')->getMagentoType());
     }
@@ -176,11 +180,13 @@ class Load extends Synchronize\Unit\UnitAbstract
      * Website Id
      *
      * @param AbstractModel $entity
-     * @return int
+     * @return int|null
      */
-    public function websiteId($entity)
+    public function websiteId($entity): ?int
     {
-        return $entity->getData('config_website');
+        $websiteId =  $entity->getData('config_website');
+
+        return isset($websiteId) ? (int)$websiteId : null;
     }
 
     /**
@@ -205,7 +211,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @param string $entityType
      * @return AbstractModel|null
      */
-    public function entityByType($entity, $entityType)
+    public function entityByType($entity, $entityType): ?AbstractModel
     {
         if (empty($this->cache[$entity]['entities'][$entityType])) {
             $this->group()->messageDebug('Undefined magento entity type %s', $entityType);
@@ -219,10 +225,10 @@ class Load extends Synchronize\Unit\UnitAbstract
      * Load Entity
      *
      * @param Queue $queue
-     * @return AbstractModel
+     * @return DataObject
      * @throws LocalizedException
      */
-    public function loadEntity($queue)
+    public function loadEntity($queue): DataObject
     {
         $entity = $this->loaderBy($queue->getEntityLoad())
             ->load($queue->getEntityId(), $queue->getEntityLoadAdditional());
@@ -241,7 +247,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @return LoadLoaderInterface
      * @throws LocalizedException
      */
-    private function loaderBy($type)
+    private function loaderBy($type): LoadLoaderInterface
     {
         foreach ($this->loaders as $loader) {
             if (strcasecmp($loader->loadBy(), $type) !== 0) {
@@ -259,7 +265,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      *
      * @return array
      */
-    public function entities()
+    public function entities(): array
     {
         return $this->cache->get('entities');
     }
@@ -270,7 +276,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @param AbstractModel $entity
      * @return bool
      */
-    public function skipped($entity)
+    public function skipped($entity): bool
     {
         return empty($this->cache['entities'][$entity]);
     }

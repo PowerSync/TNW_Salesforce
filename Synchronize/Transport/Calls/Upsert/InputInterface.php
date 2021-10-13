@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Upsert;
 
 /**
@@ -7,7 +9,7 @@ namespace TNW\Salesforce\Synchronize\Transport\Calls\Upsert;
 interface InputInterface
 {
     /**
-     * Do Unit syncronization to Salesforce object
+     * Do Unit synchronization to Salesforce object
      *
      * @param Transport\Input $input
      */

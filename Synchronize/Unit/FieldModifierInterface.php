@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
 interface FieldModifierInterface extends UnitInterface
@@ -8,12 +10,12 @@ interface FieldModifierInterface extends UnitInterface
      *
      * @return string
      */
-    public function fieldSalesforceId();
+    public function fieldSalesforceId(): string;
 
     /**
      * Additional Salesforce Ids
      *
      * @return array
      */
-    public function additionalSalesforceId();
+    public function additionalSalesforceId(): array;
 }

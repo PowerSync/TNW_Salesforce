@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Model\Config;
 
@@ -59,7 +60,7 @@ class WebsiteEmulator
     /**
      * @return \Magento\Store\Model\App\Emulation
      */
-    public function stopEnvironmentEmulation()
+    public function stopEnvironmentEmulation(): \Magento\Store\Model\App\Emulation
     {
         return $this->storeEmulator->stopEnvironmentEmulation();
     }

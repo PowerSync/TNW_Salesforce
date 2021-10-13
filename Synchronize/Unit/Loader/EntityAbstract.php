@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Loader;
 
 /**
@@ -28,7 +30,7 @@ abstract class EntityAbstract implements \TNW\Salesforce\Synchronize\Unit\LoadLo
      * @return \Magento\Framework\Model\AbstractModel
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function loadSalesforceId($entity)
+    public function loadSalesforceId($entity): \Magento\Framework\Model\AbstractModel
     {
         if (null !== $this->salesforceIdStorage && null !== $entity->getId()) {
             $this->salesforceIdStorage->load($entity, $entity->getData('config_website'));

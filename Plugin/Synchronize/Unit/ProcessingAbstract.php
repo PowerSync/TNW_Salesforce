@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2021 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
@@ -48,7 +49,7 @@ class ProcessingAbstract
      * @return array
      * @throws LocalizedException
      */
-    public function beforeProcess(Subject $subject)
+    public function beforeProcess(Subject $subject): array
     {
         $storeId = (int) $this->request->getParam('store', 0);
         $store = $this->storeManager->getStore($storeId);

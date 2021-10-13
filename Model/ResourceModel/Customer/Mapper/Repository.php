@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace  TNW\Salesforce\Model\ResourceModel\Customer\Mapper;
 
@@ -19,7 +20,7 @@ class Repository
     /**
      * @return \TNW\Salesforce\Model\ResourceModel\Mapper\Collection
      */
-    public function getResultCollection($type = \TNW\Salesforce\Model\Customer\Mapper::OBJECT_TYPE_CONTACT)
+    public function getResultCollection($type = \TNW\Salesforce\Model\Customer\Mapper::OBJECT_TYPE_CONTACT): \TNW\Salesforce\Model\ResourceModel\Mapper\Collection
     {
         if(isset($this->cachedCollection[$type])){
             return $this->cachedCollection[$type];

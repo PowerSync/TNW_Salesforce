@@ -1,6 +1,11 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Upsert;
 
+use Magento\Customer\Model\Customer;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
 
@@ -23,7 +28,7 @@ class Input extends Synchronize\Unit\Upsert\Input
      * @param Synchronize\Transport\Calls\Upsert\InputInterface $process
      * @param Model\Customer\Config $customerConfig
      * @param Synchronize\Transport\Soap\ClientFactory $factory
-     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
+     * @param TimezoneInterface $localeDate
      */
     public function __construct(
         $name,
@@ -32,8 +37,8 @@ class Input extends Synchronize\Unit\Upsert\Input
         Synchronize\Transport\Calls\Upsert\Transport\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Upsert\InputInterface $process,
         Model\Customer\Config $customerConfig,
-        \TNW\Salesforce\Synchronize\Transport\Soap\ClientFactory $factory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
+        Synchronize\Transport\Soap\ClientFactory $factory,
+        TimezoneInterface $localeDate
     ) {
         parent::__construct(
             $name,
@@ -51,11 +56,12 @@ class Input extends Synchronize\Unit\Upsert\Input
     /**
      * Prepare Object
      *
-     * @param \Magento\Customer\Model\Customer $entity
+     * @param Customer $entity
      * @param array $object
      * @return array
+     * @throws LocalizedException
      */
-    public function prepareObject($entity, array $object)
+    public function prepareObject($entity, array $object): array
     {
         if (!empty($object['Id']) && !$this->customerConfig->canRenameAccount()) {
             unset($object['Name']);

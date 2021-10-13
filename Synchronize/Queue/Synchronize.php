@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
@@ -94,7 +95,7 @@ class Synchronize
     /**
      * @return Queue
      */
-    public function getSynchronizeQueue()
+    public function getSynchronizeQueue(): Queue
     {
         return $this->synchronizeQueue;
     }
@@ -102,7 +103,7 @@ class Synchronize
     /**
      * @return bool
      */
-    public function isCheck()
+    public function isCheck(): bool
     {
         return $this->isCheck;
     }
@@ -120,7 +121,7 @@ class Synchronize
      *
      * @return int
      */
-    public function type()
+    public function type(): int
     {
         return $this->type;
     }

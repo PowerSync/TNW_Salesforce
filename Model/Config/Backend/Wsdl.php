@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Config\Backend;
 
 use Exception;
@@ -126,7 +128,7 @@ class Wsdl extends Value
      * @return $this
      * @throws LocalizedException
      */
-    public function beforeSave()
+    public function beforeSave(): Wsdl
     {
         $value = $this->getValue();
         $file = $this->getFileData();
@@ -184,7 +186,7 @@ class Wsdl extends Value
      * @return string
      * @throw \Magento\Framework\Exception\LocalizedException
      */
-    protected function _getUploadDir()
+    protected function _getUploadDir(): string
     {
         return $this->_mediaDirectory->getAbsolutePath($this->_appendScopeInfo(self::UPLOAD_DIR));
     }
@@ -194,7 +196,7 @@ class Wsdl extends Value
      *
      * @return boolean
      */
-    protected function _addWhetherScopeInfo()
+    protected function _addWhetherScopeInfo(): bool
     {
         return true;
     }
@@ -269,7 +271,7 @@ class Wsdl extends Value
      * @return array
      * @since 100.1.0
      */
-    protected function getFileData()
+    protected function getFileData(): array
     {
         $file = [];
         $value = $this->getValue();
@@ -312,7 +314,7 @@ class Wsdl extends Value
      * @return string
      * @since 100.1.0
      */
-    protected function getUploadDirPath($uploadDir)
+    protected function getUploadDirPath($uploadDir): string
     {
         return $this->_mediaDirectory->getAbsolutePath($uploadDir);
     }
@@ -325,7 +327,7 @@ class Wsdl extends Value
      * @param string $path
      * @return string
      */
-    protected function _prependScopeInfo($path)
+    protected function _prependScopeInfo($path): string
     {
         $scopeInfo = $this->getScope();
         if (ScopeConfigInterface::SCOPE_TYPE_DEFAULT != $this->getScope()) {
@@ -342,7 +344,7 @@ class Wsdl extends Value
      * @param string $path
      * @return string
      */
-    protected function _appendScopeInfo($path)
+    protected function _appendScopeInfo($path): string
     {
         $path .= '/' . $this->getScope();
         if (ScopeConfigInterface::SCOPE_TYPE_DEFAULT != $this->getScope()) {
@@ -356,7 +358,7 @@ class Wsdl extends Value
      *
      * @return array
      */
-    protected function _getAllowedExtensions()
+    protected function _getAllowedExtensions(): array
     {
         return [];
     }

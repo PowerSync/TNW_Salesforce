@@ -1,8 +1,11 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use InvalidArgumentException;
 use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Phrase;
 use OutOfBoundsException;
 use TNW\Salesforce\Model\ResourceModel\Mapper\Collection;
 use TNW\Salesforce\Synchronize;
@@ -72,7 +75,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Trying to locate entity ...');
     }
@@ -82,7 +85,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      *
      * @return Synchronize\Transport\Calls\Query\Input
      */
-    public function input()
+    public function input(): Synchronize\Transport\Calls\Query\Input
     {
         return $this->input;
     }
@@ -92,7 +95,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      *
      * @return Synchronize\Transport\Calls\Query\Output
      */
-    public function output()
+    public function output(): Synchronize\Transport\Calls\Query\Output
     {
         return $this->output;
     }
@@ -130,9 +133,9 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     abstract public function processInput();
 
     /**
-     * @return Synchronize\Unit\UnitInterface
+     * @return Synchronize\Unit\UnitInterface|null
      */
-    public function getMappingUnit()
+    public function getMappingUnit(): ?UnitInterface
     {
         return $this->unit('mapping');
     }
@@ -186,9 +189,10 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
                 }
             }
 
-            if (!in_array(strtolower($map->getSalesforceAttributeName()), $definedColumns)) {
+            $salesforceAttributeName = strtolower((string)$map->getSalesforceAttributeName());
+            if (!in_array($salesforceAttributeName, $definedColumns)) {
                 $this->input->columns[] = $map->getSalesforceAttributeName();
-                $definedColumns[] = strtolower($map->getSalesforceAttributeName());
+                $definedColumns[] = $salesforceAttributeName;
             }
         }
     }
@@ -239,7 +243,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * @param $recordsPriority
      * @return array
      */
-    public function mergeLookupResult($recordsPriority)
+    public function mergeLookupResult($recordsPriority): array
     {
         $result = [];
         foreach ($recordsPriority as $priorityKey => $records) {
@@ -259,7 +263,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * @param array $record
      * @return array
      */
-    public function prepareRecord(array $record)
+    public function prepareRecord(array $record): array
     {
         return $record;
     }
@@ -279,7 +283,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      *
      * @return AbstractModel[]
      */
-    public function entities()
+    public function entities(): array
     {
         return array_filter($this->load()->get('entities'), [$this, 'filter']);
     }
@@ -291,7 +295,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * @return bool
      * @throws OutOfBoundsException
      */
-    public function filter($entity)
+    public function filter($entity): bool
     {
         return !in_array(true, array_map(function ($unit) use ($entity) {
             return $this->unit($unit)->skipped($entity);
@@ -303,7 +307,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      *
      * @return array
      */
-    abstract public function collectIndex();
+    abstract public function collectIndex(): array;
 
     /**
      * Search PriorityOrder
@@ -312,7 +316,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * @param AbstractModel $entity
      * @return array
      */
-    abstract public function searchPriorityOrder(array $searchIndex, $entity);
+    abstract public function searchPriorityOrder(array $searchIndex, $entity): array;
 
     /**
      * Filter By Priority
@@ -321,7 +325,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * @param AbstractModel $entity
      * @return array
      */
-    public function filterByPriority(array $recordsPriority, $entity)
+    public function filterByPriority(array $recordsPriority, $entity): ?array
     {
         $findRecord = null;
         foreach ($recordsPriority as $records) {
@@ -344,7 +348,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * @param object $entity
      * @return bool
      */
-    public function skipped($entity)
+    public function skipped($entity): bool
     {
         return false;
     }

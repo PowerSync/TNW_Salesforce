@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Queue\Customer;
 
 /**
@@ -28,7 +30,7 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
      *
      * @return string
      */
-    public function createBy()
+    public function createBy(): string
     {
         return self::CREATE_BY;
     }
@@ -42,7 +44,7 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
      * @param int $websiteId
      * @return \TNW\Salesforce\Model\Queue[]
      */
-    public function process(array $entityIds, array $additional, callable $create, $websiteId)
+    public function process(array $entityIds, array $additional, callable $create, $websiteId): array
     {
         $queues = [];
         foreach ($this->entities($entityIds) as $entity) {
@@ -63,7 +65,7 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
      * @param int[] $entityIds
      * @return array
      */
-    public function entities(array $entityIds)
+    public function entities(array $entityIds): array
     {
         $connection = $this->resourceCustomer->getConnection();
         $select = $connection->select()

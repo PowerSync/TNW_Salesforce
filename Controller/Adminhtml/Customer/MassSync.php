@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Controller\Adminhtml\Customer;
 
@@ -46,7 +47,7 @@ class MassSync extends \Magento\Backend\App\Action
      *
      * @return \Magento\Framework\Controller\Result\Redirect
      */
-    public function execute()
+    public function execute(): \Magento\Framework\Controller\Result\Redirect
     {
         try {
             $entityIds = $this->massActionFilter

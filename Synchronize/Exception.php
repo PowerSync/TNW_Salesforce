@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize;
 
@@ -29,7 +30,7 @@ class Exception extends LocalizedException
     /**
      * @return string
      */
-    public function getQueueStatus()
+    public function getQueueStatus(): string
     {
         return $this->queueStatus;
     }

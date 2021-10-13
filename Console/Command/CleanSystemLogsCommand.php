@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Console\Command;
 
@@ -76,7 +77,7 @@ class CleanSystemLogsCommand extends Command
      * @param OutputInterface $output
      * @return int|null
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): ?int
     {
 
         try {
@@ -84,7 +85,7 @@ class CleanSystemLogsCommand extends Command
             if (!$this->salesforceConfig->getClearSystemLogs()) {
                 $output->writeln($this->getDateTime() . ': ' .' Clear System logs not configured.');
                 $this->_logger->info($this->getDateTime() . ': ' .' Clear System logs not configured');
-                return;
+                return null;
             }
 
             // save to config time when cron was executed
@@ -94,12 +95,12 @@ class CleanSystemLogsCommand extends Command
             );
 
             $executeClearDebuglog = $this->clearSystemLogCron->execute();
-            
+
             if($executeClearDebuglog){
                 $output->writeln($this->getDateTime() . ': ' .'Cleared logs successfully.');
             }
-            
-           
+
+
         } catch (\Exception $e) {
             $output->writeln($this->getDateTime() . ': ' . $e->getMessage());
         }
@@ -111,7 +112,7 @@ class CleanSystemLogsCommand extends Command
     /**
      * @return string
      */
-    public function getDateTime()
+    public function getDateTime(): string
     {
         return $this->timezone->date()->format('m/d/y H:i:s');
     }

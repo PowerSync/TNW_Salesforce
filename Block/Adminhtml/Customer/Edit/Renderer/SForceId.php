@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer;
 
@@ -15,7 +16,7 @@ class SForceId extends \TNW\Salesforce\Block\Adminhtml\Base\Edit\Renderer\SForce
     /**
      * @return integer
      */
-    public function getEntityId()
+    public function getEntityId(): int
     {
         return $this->registry->registry(RegistryConstants::CURRENT_CUSTOMER_ID);
     }
@@ -23,7 +24,7 @@ class SForceId extends \TNW\Salesforce\Block\Adminhtml\Base\Edit\Renderer\SForce
     /**
      * @return string
      */
-    public function getMagentoObjectType()
+    public function getMagentoObjectType(): string
     {
         return \TNW\Salesforce\Model\Entity\SalesforceIdStorage::MAGENTO_TYPE_CUSTOMER;
     }
@@ -32,7 +33,7 @@ class SForceId extends \TNW\Salesforce\Block\Adminhtml\Base\Edit\Renderer\SForce
      * @return null|string
      * @throws LocalizedException
      */
-    public function getSalesforceObjectByAttribute()
+    public function getSalesforceObjectByAttribute(): ?string
     {
         $salesforceObject = null;
         switch ($this->getId()) {

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit;
 
@@ -15,7 +16,7 @@ class ProcessingUpsertOutput extends ProcessingAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Upsert Output Phase');
     }

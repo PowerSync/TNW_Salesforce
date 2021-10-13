@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Block\Adminhtml\Customer\Edit;
 
@@ -43,7 +44,7 @@ class Tabs extends Generic implements TabInterface
 
     /**
      * Get current customer ID
-     * @return string|null
+     * @return mixed
      */
     protected function getCustomerId()
     {
@@ -57,7 +58,7 @@ class Tabs extends Generic implements TabInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    protected function getCustomer()
+    protected function getCustomer(): \Magento\Customer\Api\Data\CustomerInterface
     {
         $customerId = $this->getCustomerId();
         return $this->customerRepository->getById($customerId);
@@ -66,7 +67,7 @@ class Tabs extends Generic implements TabInterface
     /**
      * @return \Magento\Framework\Phrase
      */
-    public function getTabLabel()
+    public function getTabLabel(): \Magento\Framework\Phrase
     {
         return __('Salesforce');
     }
@@ -74,7 +75,7 @@ class Tabs extends Generic implements TabInterface
     /**
      * @return \Magento\Framework\Phrase
      */
-    public function getTabTitle()
+    public function getTabTitle(): \Magento\Framework\Phrase
     {
         return __('Salesforce');
     }
@@ -82,7 +83,7 @@ class Tabs extends Generic implements TabInterface
     /**
      * @return bool
      */
-    public function canShowTab()
+    public function canShowTab(): bool
     {
         if ($this->getCustomerId()) {
             return true;
@@ -93,7 +94,7 @@ class Tabs extends Generic implements TabInterface
     /**
      * @return bool
      */
-    public function isHidden()
+    public function isHidden(): bool
     {
         if ($this->getCustomerId()) {
             return false;
@@ -106,7 +107,7 @@ class Tabs extends Generic implements TabInterface
      *
      * @return string
      */
-    public function getTabClass()
+    public function getTabClass(): string
     {
         return '';
     }
@@ -116,7 +117,7 @@ class Tabs extends Generic implements TabInterface
      *
      * @return string
      */
-    public function getTabUrl()
+    public function getTabUrl(): string
     {
         return '';
     }
@@ -126,7 +127,7 @@ class Tabs extends Generic implements TabInterface
      *
      * @return bool
      */
-    public function isAjaxLoaded()
+    public function isAjaxLoaded(): bool
     {
         return false;
     }
@@ -136,7 +137,7 @@ class Tabs extends Generic implements TabInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function initForm()
+    public function initForm(): Tabs
     {
         if (!$this->canShowTab()) {
             return $this;
@@ -217,9 +218,11 @@ class Tabs extends Generic implements TabInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function websiteId()
+    public function websiteId(): ?int
     {
-        return $this->getCustomer()->getWebsiteId();
+        $websiteId = $this->getCustomer()->getWebsiteId();
+
+        return isset($websiteId) ? (int)$websiteId : null;
     }
 
     /**
@@ -227,7 +230,7 @@ class Tabs extends Generic implements TabInterface
      * @param $productId
      * @return string
      */
-    private function getSyncButtonHtml($productId)
+    private function getSyncButtonHtml($productId): string
     {
         $buttonData = $this->getSyncButtonData($productId);
         $template = <<<EOT
@@ -252,7 +255,7 @@ EOT;
      * @param $customerId
      * @return array
      */
-    private function getSyncButtonData($customerId)
+    private function getSyncButtonData($customerId): array
     {
         $controller = $this->getUrl(
             'tnw_salesforce/customer/synccustomer',
@@ -301,7 +304,7 @@ EOT;
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    protected function _toHtml()
+    protected function _toHtml(): string
     {
         if ($this->canShowTab()) {
             $this->initForm();

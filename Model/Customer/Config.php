@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Model\Customer;
 
@@ -13,7 +14,7 @@ class Config extends \TNW\Salesforce\Model\Config
      * @param int|null $websiteId
      * @return bool
      */
-    public function getCustomerStatus($websiteId = null)
+    public function getCustomerStatus($websiteId = null): bool
     {
         return (bool)$this->getStoreConfig('tnwsforce_customer/general/active', $websiteId);
     }
@@ -23,7 +24,7 @@ class Config extends \TNW\Salesforce\Model\Config
      * @param null $websiteId
      * @return bool
      */
-    public function canRenameAccount($websiteId = null)
+    public function canRenameAccount($websiteId = null): bool
     {
         return (bool)$this->getStoreConfig('tnwsforce_customer/general/account_name', $websiteId);
     }
@@ -34,7 +35,7 @@ class Config extends \TNW\Salesforce\Model\Config
      * @param int|null $websiteId
      * @return bool
      */
-    public function getCustomerAllGroups($websiteId = null)
+    public function getCustomerAllGroups($websiteId = null): bool
     {
         return (bool)$this->getStoreConfig('tnwsforce_customer/general/sync_groups', $websiteId);
     }
@@ -45,13 +46,13 @@ class Config extends \TNW\Salesforce\Model\Config
      * @param int|null $websiteId
      * @return array
      */
-    public function getCustomerSyncGroups($websiteId = null)
+    public function getCustomerSyncGroups($websiteId = null): array
     {
 
         $value = $this->getStoreConfig('tnwsforce_customer/general/customer_group', $websiteId);
 
         $result = [];
-        $value = trim($value);
+        $value = trim((string)$value);
         if (strlen($value) > 0) {
             $result = array_unique(array_filter(array_map('intval', explode(',', $value))));
         }
@@ -64,11 +65,13 @@ class Config extends \TNW\Salesforce\Model\Config
      * This default owner will be assigned to Contact and/or Account when created.
      *
      * @param null $websiteId
-     * @return string
+     * @return string|null
      */
-    public function defaultOwner($websiteId = null)
+    public function defaultOwner($websiteId = null): ?string
     {
-        return $this->getStoreConfig('tnwsforce_customer/general/default_owner', $websiteId);
+        $defaultOwner = $this->getStoreConfig('tnwsforce_customer/general/default_owner', $websiteId);
+
+        return $defaultOwner ? (string)$defaultOwner : $defaultOwner;
     }
 
     /**
@@ -80,7 +83,7 @@ class Config extends \TNW\Salesforce\Model\Config
      * @param null $websiteId
      * @return int
      */
-    public function contactAssignee($websiteId = null)
+    public function contactAssignee($websiteId = null): int
     {
         return (int)$this->getStoreConfig('tnwsforce_customer/general/contact_assignee', $websiteId);
     }
@@ -92,7 +95,7 @@ class Config extends \TNW\Salesforce\Model\Config
      *
      * @return int 0 - Global, 1 - Per Website
      */
-    public function accountShareScope($websiteId = null)
+    public function accountShareScope($websiteId = null): int
     {
         return (int)$this->getStoreConfig('customer/account_share/scope', $websiteId);
     }

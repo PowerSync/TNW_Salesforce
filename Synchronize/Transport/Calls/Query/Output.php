@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Query;
 
 class Output implements \Countable, \Iterator, \ArrayAccess
@@ -29,7 +31,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * Return the key of the current element
      * @return int
      */
-    public function key()
+    public function key(): int
     {
         return \key($this->results);
     }
@@ -38,7 +40,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * Checks if current position is valid
      * @return bool
      */
-    public function valid()
+    public function valid(): bool
     {
         return \key($this->results) !== null;
     }
@@ -56,7 +58,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * @param int $offset
      * @return bool
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return array_key_exists($offset, $this->results);
     }
@@ -94,7 +96,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * Count elements of an object
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return \count($this->results);
     }

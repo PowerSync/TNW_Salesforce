@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit;
 
@@ -15,7 +16,7 @@ class ProcessingDeleteInput extends ProcessingAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Delete Input Phase');
     }
@@ -47,7 +48,7 @@ class ProcessingDeleteInput extends ProcessingAbstract
      * @param AbstractModel $entity
      * @return bool
      */
-    public function isEntityEmpty($entity)
+    public function isEntityEmpty($entity): bool
     {
         /**
          * remove technical data

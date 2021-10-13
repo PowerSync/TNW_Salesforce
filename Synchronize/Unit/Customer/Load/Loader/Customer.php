@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader;
 
 /**
@@ -36,7 +38,7 @@ class Customer implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
      *
      * @return string
      */
-    public function loadBy()
+    public function loadBy(): string
     {
         return self::LOAD_BY;
     }
@@ -48,7 +50,7 @@ class Customer implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
      * @param array $additional
      * @return \Magento\Customer\Model\Customer
      */
-    public function load($entityId, array $additional)
+    public function load($entityId, array $additional): \Magento\Customer\Model\Customer
     {
         $customer = $this->customerFactory->create();
         $this->resourceCustomer->load($customer, $entityId);

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize;
 
 use Magento\Framework\Stdlib\DateTime\Timezone;
@@ -61,6 +63,7 @@ class Queue
      * @param Model\ResourceModel\Queue $resourceQueue
      * @param Model\Logger\Processor\UidProcessor $uidProcessor
      * @param Timezone $timezone
+     * @param Queue\PushMqMessage $pushMqMessage
      * @param bool $isCheck
      */
     public function __construct(
@@ -146,14 +149,14 @@ class Queue
                 for ($i = 1; $i <= $lastPageNumber; $i++) {
                     $groupCollection->clear();
 
-                    $group->messageDebug(
-                        'Start job "%s", phase "%s" for website %s',
-                        $group->code(),
-                        $phase['phaseName'],
-                        $websiteId
-                    );
-
                     try {
+                        $group->messageDebug(
+                            'Start job "%s", phase "%s" for website %s',
+                            $group->code(),
+                            $phase['phaseName'],
+                            $websiteId
+                        );
+
                             $groupCollection->each('incSyncAttempt');
                             $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
                             $group->synchronize($groupCollection->getItems());
@@ -201,7 +204,7 @@ class Queue
      *
      * @return Group[]
      */
-    public function sortGroup($syncJobs = null)
+    public function sortGroup($syncJobs = null): array
     {
         $addGroup = function (array &$sortGroups, Group $group) use (&$addGroup, &$description) {
             $description[] = sprintf('%s;', $group->code());
@@ -269,7 +272,7 @@ class Queue
     /**
      * @return bool
      */
-    public function isCheck()
+    public function isCheck(): bool
     {
         return $this->isCheck;
     }

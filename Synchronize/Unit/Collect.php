@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Magento\Framework\Phrase;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -34,7 +37,7 @@ class Collect extends Synchronize\Unit\UnitAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Analyze %1 units result', implode(', ', $this->collect));
     }
@@ -136,7 +139,7 @@ class Collect extends Synchronize\Unit\UnitAbstract
      * @return bool
      * @throws \OutOfBoundsException
      */
-    public function skipped($entity)
+    public function skipped($entity): bool
     {
         foreach ($this->collect as $unit) {
             if ($this->units()->get($unit)->skipped($entity)) {

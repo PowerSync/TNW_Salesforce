@@ -1,7 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model;
 
 use Magento\Framework\DataObject;
+use Magento\Framework\Phrase;
 
 /**
  * Class Test
@@ -41,7 +44,7 @@ abstract class Test extends DataObject implements TestInterface
     /**
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): TestInterface
     {
         return $this;
     }
@@ -49,9 +52,9 @@ abstract class Test extends DataObject implements TestInterface
     /**
      * Get test label
      *
-     * @return string
+     * @return Phrase
      */
-    public function getLabel()
+    public function getLabel(): Phrase
     {
         return __($this->testLabel);
     }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository;
 
@@ -36,7 +37,7 @@ abstract class Base
     /**
      * @return array
      */
-    public function defaultConditionsData()
+    public function defaultConditionsData(): array
     {
         return $this->defaultConditionsData;
     }
@@ -45,7 +46,7 @@ abstract class Base
      * @param $conditionsData
      * @param int|null $websiteId
      *
-     * @return array
+     * @return mixed
      */
     public function search($conditionsData = null, $websiteId = null)
     {

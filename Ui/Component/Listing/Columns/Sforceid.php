@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Ui\Component\Listing\Columns;
 
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
@@ -41,7 +43,7 @@ class Sforceid extends Column
      * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function prepareDataSource(array $dataSource)
+    public function prepareDataSource(array $dataSource): array
     {
         if (empty($dataSource['data']['items'])) {
             return $dataSource;
@@ -67,7 +69,7 @@ class Sforceid extends Column
      *
      * @return int
      */
-    public function websiteIdByItem(array $item)
+    public function websiteIdByItem(array $item): int
     {
         return isset($item['sf_website_id']) ? (int)$item['sf_website_id'] : 0;
     }
@@ -81,7 +83,7 @@ class Sforceid extends Column
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function generateLinkToSalesforce($field, $websiteId)
+    private function generateLinkToSalesforce($field, $websiteId): string
     {
         $result = [];
 

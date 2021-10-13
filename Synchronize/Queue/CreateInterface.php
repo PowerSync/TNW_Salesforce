@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Queue;
 
 interface CreateInterface
@@ -8,7 +10,7 @@ interface CreateInterface
      *
      * @return string
      */
-    public function createBy();
+    public function createBy(): string;
 
     /**
      * Process
@@ -19,5 +21,5 @@ interface CreateInterface
      * @param int $websiteId
      * @return \TNW\Salesforce\Model\Queue[]
      */
-    public function process(array $entityIds, array $additional, callable $create, $websiteId);
+    public function process(array $entityIds, array $additional, callable $create, $websiteId): array;
 }

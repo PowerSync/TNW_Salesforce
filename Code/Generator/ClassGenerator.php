@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Code\Generator;
 
 class ClassGenerator extends \Magento\Framework\Code\Generator\ClassGenerator
@@ -18,7 +20,7 @@ class ClassGenerator extends \Magento\Framework\Code\Generator\ClassGenerator
      * @param array $methods
      * @return $this
      */
-    public function addMethods(array $methods)
+    public function addMethods(array $methods): ClassGenerator
     {
         foreach ($methods as $methodOptions) {
             $methodObject = $this->createMethodGenerator();

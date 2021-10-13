@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Controller\Adminhtml\System\Config;
 
 use Exception;
@@ -121,7 +123,7 @@ class Testconnection extends Action
      * @return string
      * @throw \Magento\Framework\Exception\LocalizedException
      */
-    protected function _getUploadDir()
+    protected function _getUploadDir(): string
     {
         return $this->_mediaDirectory->getAbsolutePath(self::UPLOAD_DIR);
     }
@@ -130,7 +132,7 @@ class Testconnection extends Action
      * @param $wsdl
      * @return string
      */
-    protected function _getWsdlPath($wsdl)
+    protected function _getWsdlPath($wsdl): string
     {
         $wsdl = basename($wsdl);
 

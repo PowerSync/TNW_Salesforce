@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\ResourceModel\Objects;
 
 abstract class SelectAbstract
@@ -36,7 +38,7 @@ abstract class SelectAbstract
      *
      * @return string
      */
-    public function getTable($tableName)
+    public function getTable($tableName): string
     {
         return $this->resource->getTableName($tableName, $this->connectionName);
     }
@@ -54,7 +56,7 @@ abstract class SelectAbstract
     /**
      * @return \Magento\Framework\DB\Select
      */
-    public function select()
+    public function select(): \Magento\Framework\DB\Select
     {
         return $this->getConnection()->select();
     }

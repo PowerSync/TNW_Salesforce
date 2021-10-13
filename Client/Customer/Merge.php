@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Client\Customer;
 
 class Merge
@@ -23,7 +25,7 @@ class Merge
      * @param bool $personAccount
      * @return \Tnw\SoapClient\Result\SObject[]|null
      */
-    public function mergeDuplicateRecords($lookupResult, $type, $personAccount = false)
+    public function mergeDuplicateRecords($lookupResult, $type, $personAccount = false): ?array
     {
         return $lookupResult;
     }

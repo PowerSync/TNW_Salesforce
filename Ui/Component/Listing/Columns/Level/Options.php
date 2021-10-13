@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Ui\Component\Listing\Columns\Level;
 
 use Magento\Framework\Data\OptionSourceInterface;
@@ -12,7 +14,7 @@ class Options implements OptionSourceInterface
      *
      * @return array Format: array(array('value' => '<value>', 'label' => '<label>'), ...)
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $option = [];
         foreach (Logger::getLevels() as $name => $level) {

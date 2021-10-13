@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model;
 
 /**
@@ -32,7 +34,7 @@ class Logger
     /**
      * @return \Psr\Log\LoggerInterface
      */
-    public function getLogger()
+    public function getLogger(): \Psr\Log\LoggerInterface
     {
         return $this->systemLogger;
     }
@@ -45,7 +47,7 @@ class Logger
      * @deprecated
      * @see messageError method
      */
-    public function addSessionErrorMessages($messages, $group = null)
+    public function addSessionErrorMessages($messages, $group = null): Logger
     {
         if (!is_array($messages)) {
             $messages = [(string)$messages];
@@ -64,7 +66,7 @@ class Logger
      * @deprecated
      * @see messageSuccess method
      */
-    public function addSessionSuccessMessages($messages, $group = null)
+    public function addSessionSuccessMessages($messages, $group = null): Logger
     {
         if (!is_array($messages)) {
             $messages = [(string)$messages];
@@ -83,7 +85,7 @@ class Logger
      * @deprecated
      * @see messageWarning method
      */
-    public function addSessionWarningMessages($messages, $group = null)
+    public function addSessionWarningMessages($messages, $group = null): Logger
     {
         if (!is_array($messages)) {
             $messages = [(string)$messages];

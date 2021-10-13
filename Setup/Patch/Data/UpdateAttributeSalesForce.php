@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Setup\Patch\Data;
 
@@ -51,7 +52,7 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
      *
      * @return array|string[]
      */
-    public static function getDependencies()
+    public static function getDependencies(): array
     {
         return [AddSalesForceAttribute::class];
     }
@@ -61,7 +62,7 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
      *
      * @return array|string[]
      */
-    public function getAliases()
+    public function getAliases(): array
     {
         return [];
     }
@@ -840,7 +841,7 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
      *
      * @return string
      */
-    public static function getVersion()
+    public static function getVersion(): string
     {
         return '0.0.1';
     }

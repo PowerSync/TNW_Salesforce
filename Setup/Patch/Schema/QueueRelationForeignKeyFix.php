@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Setup\Patch\Schema;
 
 use Magento\Framework\DB\Adapter\AdapterInterface;
@@ -91,7 +93,8 @@ class QueueRelationForeignKeyFix implements SchemaPatchInterface
         $onUpdate = AdapterInterface::FK_ACTION_CASCADE,
         $purge = false,
         $schemaName = null
-    ) {
+    ): Zend_Db_Statement_Interface
+    {
         $connection = $this->schemaSetup->getConnection();
 
         $connection->dropForeignKey($tableName, $fkName, $schemaName);
@@ -135,7 +138,7 @@ class QueueRelationForeignKeyFix implements SchemaPatchInterface
     /**
      * {@inheritdoc}
      */
-    public static function getDependencies()
+    public static function getDependencies(): array
     {
         return [];
     }
@@ -143,7 +146,7 @@ class QueueRelationForeignKeyFix implements SchemaPatchInterface
     /**
      * {@inheritdoc}
      */
-    public function getAliases()
+    public function getAliases(): array
     {
         return [];
     }

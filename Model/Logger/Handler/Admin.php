@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Logger\Handler;
 
 use Monolog\Handler\AbstractProcessingHandler;
@@ -43,7 +45,7 @@ class Admin extends AbstractProcessingHandler
      */
     protected function write(array $record)
     {
-        if (strcasecmp($this->request->getActionName(), 'inlineEdit') === 0) {
+        if (strcasecmp((string)$this->request->getActionName(), 'inlineEdit') === 0) {
             return;
         }
 

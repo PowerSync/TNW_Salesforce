@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
@@ -63,7 +64,7 @@ class DependenciesQueue
      *
      * @return string[][]
      */
-    public function getChildrenList()
+    public function getChildrenList(): array
     {
         if (!$this->childrenList) {
             $childrenList = [];
@@ -89,7 +90,7 @@ class DependenciesQueue
      * @param string $entityType
      * @return string[]
      */
-    public function getResolvesCodes(string $entityType)
+    public function getResolvesCodes(string $entityType): array
     {
         $resolves = [];
         if (
@@ -109,7 +110,7 @@ class DependenciesQueue
      * @param $descendantStr
      * @return array
      */
-    public function parseDependencyString($descendantStr)
+    public function parseDependencyString($descendantStr): array
     {
         $descendantsTmp = explode('&', $descendantStr);
         $descendants = [];
@@ -130,7 +131,7 @@ class DependenciesQueue
      * @param $descendantStr
      * @return array
      */
-    public function parseDependencyStringWithReplace($descendantStr)
+    public function parseDependencyStringWithReplace($descendantStr): array
     {
         $descendants = $this->parseDependencyString($descendantStr);
         $descendants = str_replace('_', '.', array_keys($descendants));

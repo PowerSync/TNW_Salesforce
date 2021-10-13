@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Plugin\Framework\Data\Collection;
 
 use Magento\Framework\Data\Collection\AbstractDb as Collection;
@@ -23,7 +25,7 @@ class AbstractDb
      *
      * @return array
      */
-    public function beforeLoad(Collection $collection, $printQuery = false, $logQuery = false)
+    public function beforeLoad(Collection $collection, $printQuery = false, $logQuery = false): array
     {
         if ($collection->isLoaded()) {
             return [$printQuery, $logQuery];

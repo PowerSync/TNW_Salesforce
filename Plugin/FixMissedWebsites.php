@@ -1,9 +1,9 @@
 <?php
-
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Plugin;
 
-
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Store\Api\Data\GroupInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -27,28 +27,27 @@ class FixMissedWebsites
 
     /**
      * @param $website
-     * @return int
+     * @return mixed
      */
     public function getDefaultStoreId($website)
     {
-
         $defaultGroupId = $website->getDefaultGroupId();
-        /** @var GroupInterface $defaultGroup */
         $defaultGroup = $this->storeManager->getGroup($defaultGroupId);
         return $defaultGroup->getDefaultStoreId();
     }
 
     /**
-     * @param AbstractModel $entity
+     * @param DivideEntityByWebsiteOrg $subject
      * @param $result
      * @param $entity
+     * @return array|mixed
+     * @throws LocalizedException
      */
     public function afterGetEntityWebsiteIds(
         DivideEntityByWebsiteOrg $subject,
         $result,
         $entity
     ) {
-
         if (in_array(0, $result)) {
             $result = array_filter($result);
             if (empty($result)) {

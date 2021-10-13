@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Magento\Framework\Phrase;
 use TNW\Salesforce\Synchronize;
 
 /**
@@ -29,7 +31,7 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Processing %1', $this->name());
     }
@@ -50,7 +52,7 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
      * @return \Magento\Framework\Model\AbstractModel[]
      * @throws \OutOfBoundsException
      */
-    public function entities()
+    public function entities(): array
     {
         return array_filter($this->load()->get('entities'), [$this, 'filter']);
     }
@@ -61,7 +63,7 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @return bool
      */
-    protected function filter($entity)
+    protected function filter($entity): bool
     {
         return !in_array(true, array_map(function ($unit) use ($entity) {
             return $this->unit($unit)->skipped($entity);
@@ -124,7 +126,7 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
      * Analize
      *
      * @param \Magento\Framework\Model\AbstractModel $entity
-     * @return bool|\Magento\Framework\Phrase
+     * @return bool|string|\Magento\Framework\Phrase
      */
     abstract public function analize($entity);
 }

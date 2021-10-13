@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model;
 
 /**
@@ -32,7 +34,7 @@ class TestCollection
      * @param array $testIds
      * @return array
      */
-    public function getSalesforceDependencies(array $testIds = array())
+    public function getSalesforceDependencies(array $testIds = array()): array
     {
         $result = array();
         if (!$testIds) {
@@ -52,7 +54,7 @@ class TestCollection
      * @param string $testId
      * @return array
      */
-    protected function test($testId)
+    protected function test($testId): array
     {
         $result = array();
         /** @var $test TestInterface */
@@ -72,7 +74,7 @@ class TestCollection
      *
      * @return array
      */
-    protected function getAllTests()
+    protected function getAllTests(): array
     {
         $result = array();
         foreach ($this->tests as $testType) {

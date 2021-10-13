@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Magento\Framework\Phrase;
 use TNW\Salesforce\Synchronize;
 
 interface UnitInterface
@@ -12,27 +15,27 @@ interface UnitInterface
     /**
      * @return string
      */
-    public function name();
+    public function name(): string;
 
     /**
      * @return array
      */
-    public function dependents();
+    public function dependents(): array;
 
     /**
-     * @return string
+     * @return string|Phrase
      */
     public function description();
 
     /**
      * @return Synchronize\Group
      */
-    public function group();
+    public function group(): Synchronize\Group;
 
     /**
      * @return Synchronize\Units
      */
-    public function units();
+    public function units(): Synchronize\Units;
 
     /**
      *

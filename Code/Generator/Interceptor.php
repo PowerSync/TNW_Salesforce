@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Code\Generator;
 
 class Interceptor extends \Magento\Framework\Interception\Code\Generator\Interceptor
@@ -22,7 +24,7 @@ class Interceptor extends \Magento\Framework\Interception\Code\Generator\Interce
      * @param array $parameters
      * @return string
      */
-    protected function _getParameterList(array $parameters)
+    protected function _getParameterList(array $parameters): string
     {
         return implode(
             ', ',
@@ -45,7 +47,7 @@ class Interceptor extends \Magento\Framework\Interception\Code\Generator\Interce
      * @param \ReflectionParameter $parameter
      * @return array
      */
-    protected function _getMethodParameterInfo(\ReflectionParameter $parameter)
+    protected function _getMethodParameterInfo(\ReflectionParameter $parameter): array
     {
         $parameterInfo = parent::_getMethodParameterInfo($parameter);
         $parameterInfo['variadic'] = $parameter->isVariadic();

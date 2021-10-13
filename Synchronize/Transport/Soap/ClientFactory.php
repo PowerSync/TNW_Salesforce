@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Transport\Soap;
 
@@ -53,7 +54,7 @@ class ClientFactory
      * @return \TNW\Salesforce\Lib\Tnw\SoapClient\Client
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function client($websiteId = null)
+    public function client($websiteId = null): \TNW\Salesforce\Lib\Tnw\SoapClient\Client
     {
         $websiteId = (int)$this->websiteDetector->detectCurrentWebsite($websiteId);
 
@@ -73,7 +74,7 @@ class ClientFactory
      * @return \TNW\Salesforce\Lib\Tnw\SoapClient\Client
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function create($websiteId = null)
+    public function create($websiteId = null): \TNW\Salesforce\Lib\Tnw\SoapClient\Client
     {
         $websiteId = (int)$this->websiteDetector->detectCurrentWebsite($websiteId);
 

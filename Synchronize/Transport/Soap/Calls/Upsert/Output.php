@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert;
 
 use TNW\Salesforce\Synchronize\Transport;
@@ -34,7 +36,7 @@ class Output implements Transport\Calls\Upsert\OutputInterface
     /**
      * @return Storage
      */
-    public function getStorage()
+    public function getStorage(): Storage
     {
         return $this->storage;
     }
@@ -48,7 +50,7 @@ class Output implements Transport\Calls\Upsert\OutputInterface
     }
 
     /**
-     * Do Unit syncronization to Salesforce object
+     * Do Unit synchronization to Salesforce object
      *
      * @param Transport\Calls\Upsert\Transport\Output $output
      */
@@ -84,7 +86,7 @@ class Output implements Transport\Calls\Upsert\OutputInterface
      * @param \Tnw\SoapClient\Result\Error $error
      * @return string
      */
-    public function message(\Tnw\SoapClient\Result\Error $error)
+    public function message(\Tnw\SoapClient\Result\Error $error): string
     {
         $message = $error->getMessage();
         if (count($fields = (array)$error->getFields()) !== 0) {

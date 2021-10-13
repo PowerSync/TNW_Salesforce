@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use Exception;
@@ -41,7 +43,7 @@ class ProcessingUpsertInput extends ProcessingAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Upsert Input Phase');
     }
@@ -50,7 +52,7 @@ class ProcessingUpsertInput extends ProcessingAbstract
      * @param AbstractModel $entity
      * @return bool
      */
-    public function isEntityEmpty($entity)
+    public function isEntityEmpty($entity): bool
     {
         /**
          * remove technical data

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Client;
 
@@ -75,7 +76,7 @@ class Website extends Salesforce implements WebsiteInterface
      * @throws \Exception
      * @deprecated
      */
-    public function syncWebsites($websites, $forceSync = false)
+    public function syncWebsites($websites, $forceSync = false): ?array
     {
         if (!$this->getClientStatus()) {
             return null;
@@ -145,7 +146,7 @@ class Website extends Salesforce implements WebsiteInterface
      * @param @param \Magento\Store\Model\Website[] $websites
      * @return bool
      */
-    protected function addToQueue($websites)
+    protected function addToQueue($websites): bool
     {
         return false;
     }

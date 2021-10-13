@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Config\Source\Salesforce;
 
+use TNW\Salesforce\Synchronize\Transport\Calls\Query\Output;
 use TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Base as salesforceEntityRepository;
 /**
  * Class Base
@@ -37,7 +40,7 @@ class Base extends \Magento\Framework\DataObject implements \Magento\Framework\O
     }
 
     /**
-     * @return \TNW\Salesforce\Synchronize\Transport\Calls\Query\Output
+     * @return array|Output
      */
     public function getObjects()
     {
@@ -49,7 +52,7 @@ class Base extends \Magento\Framework\DataObject implements \Magento\Framework\O
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $options = $entities= [];
 

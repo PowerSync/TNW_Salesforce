@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize;
 
 /**
@@ -14,7 +16,7 @@ class Units implements \IteratorAggregate
      * @param Unit\UnitInterface|null $unit
      * @return $this
      */
-    public function add(Unit\UnitInterface $unit)
+    public function add(Unit\UnitInterface $unit): Units
     {
         if ($unit) {
             $this->units[$unit->name()] = $unit;
@@ -27,10 +29,10 @@ class Units implements \IteratorAggregate
      * Get
      *
      * @param string $name
-     * @return Unit\UnitInterface
+     * @return Unit\UnitInterface|null
      * @throws \OutOfBoundsException
      */
-    public function get($name)
+    public function get($name): ?Unit\UnitInterface
     {
         if (empty($this->units[$name])) {
             return null;
@@ -46,7 +48,7 @@ class Units implements \IteratorAggregate
      * @return $this
      * @throws \RuntimeException
      */
-    public function sort()
+    public function sort(): Units
     {
         $addUnit = function (array &$sortUnits, Unit\UnitInterface $unit) use (&$addUnit) {
             foreach ($unit->dependents() as $dependent) {

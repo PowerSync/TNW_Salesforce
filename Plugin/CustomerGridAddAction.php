@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Plugin;
 
 /**
@@ -30,7 +32,8 @@ class CustomerGridAddAction
         \Magento\Customer\Ui\Component\Listing\Column\Actions $subject,
         \Closure $proceed,
         array $dataSource
-    ) {
+    ): array
+    {
         $result = $proceed($dataSource);
 
         if (isset($result['data']['items'])) {

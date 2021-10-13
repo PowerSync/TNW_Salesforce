@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize;
 
 use BadMethodCallException;
@@ -78,7 +80,7 @@ class Group
      *
      * @return string
      */
-    public function code()
+    public function code(): string
     {
         return $this->groupCode;
     }
@@ -86,11 +88,11 @@ class Group
     /**
      * Synchronize
      *
-     * @param \TNW\Salesforce\Model\Queue[] $queues
+     * @param array $queues
      * @return Units
      * @throws LocalizedException
      */
-    public function synchronize(array $queues)
+    public function synchronize(array $queues): Units
     {
         $units = $this->createUnits($queues)->sort();
         /** @var Unit\UnitInterface $unit */
@@ -119,7 +121,7 @@ class Group
      * @param \TNW\Salesforce\Model\Queue[] $queues
      * @return Units
      */
-    protected function createUnits(array $queues)
+    protected function createUnits(array $queues): Units
     {
         /** @var Units $units */
         $units = $this->unitsFactory->create();
@@ -228,7 +230,7 @@ class Group
      * @param mixed $argument
      * @return string
      */
-    public function prepareArgument($argument)
+    public function prepareArgument($argument): string
     {
         if ($argument instanceof Phrase) {
             $argument = $argument->render();
@@ -268,7 +270,7 @@ class Group
      *
      * @return bool
      */
-    public function isError()
+    public function isError(): bool
     {
         return count($this->errorMessages) > 0;
     }
@@ -278,7 +280,7 @@ class Group
      *
      * @return string
      */
-    public function error()
+    public function error(): string
     {
         return implode("\n", $this->errorMessages);
     }

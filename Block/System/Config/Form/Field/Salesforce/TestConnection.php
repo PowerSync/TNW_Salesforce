@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Block\System\Config\Form\Field\Salesforce;
 
@@ -9,7 +10,7 @@ class TestConnection extends \Magento\Config\Block\System\Config\Form\Field
      *
      * @return \TNW\Salesforce\Block\System\Config\Form\Field\Salesforce\TestConnection
      */
-    protected function _prepareLayout()
+    protected function _prepareLayout(): TestConnection
     {
         parent::_prepareLayout();
         if (!$this->getTemplate()) {
@@ -24,7 +25,7 @@ class TestConnection extends \Magento\Config\Block\System\Config\Form\Field
      * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
      * @return string
      */
-    public function render(\Magento\Framework\Data\Form\Element\AbstractElement $element)
+    public function render(\Magento\Framework\Data\Form\Element\AbstractElement $element): string
     {
         $element->unsScope()->unsCanUseWebsiteValue()->unsCanUseDefaultValue();
         return parent::render($element);
@@ -36,7 +37,7 @@ class TestConnection extends \Magento\Config\Block\System\Config\Form\Field
      * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
      * @return string
      */
-    protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
+    protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element): string
     {
         $originalData = $element->getOriginalData();
         $buttonLabel = !empty($originalData['button_label']) ? $originalData['button_label'] : __('Test Connection');

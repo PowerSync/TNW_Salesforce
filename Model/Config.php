@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -125,7 +127,7 @@ class Config extends DataObject
      *
      * @return int
      */
-    public function getBaseUpdateLimit()
+    public function getBaseUpdateLimit(): int
     {
         return self::SFORCE_BASE_UPDATE_LIMIT;
     }
@@ -135,7 +137,7 @@ class Config extends DataObject
      *
      * @return string
      */
-    public static function getMagentoIdField()
+    public static function getMagentoIdField(): string
     {
         return self::SFORCE_BASIC_PREFIX . self::SFORCE_MAGENTO_ID;
     }
@@ -145,7 +147,7 @@ class Config extends DataObject
      *
      * @return string
      */
-    public function getWebsiteIdField()
+    public function getWebsiteIdField(): string
     {
         return self::SFORCE_BASIC_PREFIX . self::SFORCE_WEBSITE_ID;
     }
@@ -154,9 +156,9 @@ class Config extends DataObject
      * Get TNW general status
      *
      * @param int|null $websiteId
-     * @return string
+     * @return bool
      */
-    public function getSalesforceStatus($websiteId = null)
+    public function getSalesforceStatus($websiteId = null): bool
     {
         return (bool)$this->getStoreConfig('tnwsforce_general/salesforce/active', $websiteId);
     }
@@ -168,7 +170,7 @@ class Config extends DataObject
      * @param int|null $websiteId
      * @return bool
      */
-    public function getReverseSyncEnabled($websiteId = null)
+    public function getReverseSyncEnabled($websiteId = null): bool
     {
         return $this->getStoreConfig('tnwsforce_general/salesforce/active', $websiteId) == Mode::SYNC_MODE_BOTH;
     }
@@ -178,7 +180,7 @@ class Config extends DataObject
      *
      * @param int|null $websiteId
      *
-     * @return string
+     * @return mixed
      */
     public function getSalesforceUsername($websiteId = null)
     {
@@ -189,7 +191,7 @@ class Config extends DataObject
      * Get Salesfoce password from config
      *
      * @param int|null $websiteId
-     * @return string
+     * @return mixed
      */
     public function getSalesforcePassword($websiteId = null)
     {
@@ -207,7 +209,7 @@ class Config extends DataObject
      * Get Salesfoce token from config
      *
      * @param int|null $websiteId
-     * @return string
+     * @return mixed
      */
     public function getSalesforceToken($websiteId = null)
     {
@@ -229,7 +231,7 @@ class Config extends DataObject
      * @return string
      * @throws FileSystemException
      */
-    public function getSalesforceWsdl($websiteId = null)
+    public function getSalesforceWsdl($websiteId = null): string
     {
         $dir = $this->getStoreConfig('tnwsforce_general/salesforce/wsdl', $websiteId);
 
@@ -246,7 +248,7 @@ class Config extends DataObject
     /**
      * @return bool
      */
-    public function isDefaultOrg()
+    public function isDefaultOrg(): bool
     {
         foreach ($this->credentialsConfigPaths as $configPath) {
             if ($this->getStoreConfig($configPath) != $this->scopeConfig->getValue($configPath)) {
@@ -260,7 +262,7 @@ class Config extends DataObject
     /**
      * @return WebsiteInterface[]
      */
-    public function getWebsites()
+    public function getWebsites(): array
     {
         $result = $this->websiteRepository->getList();
         $adminWebsite = ['admin' => $result['admin']];
@@ -274,7 +276,7 @@ class Config extends DataObject
     /**
      * @return array
      */
-    public function getWebsitesGrouppedByOrg()
+    public function getWebsitesGrouppedByOrg(): array
     {
         if (empty($this->websitesGrouppedByOrg)) {
             $websites = $this->getWebsites();
@@ -306,7 +308,7 @@ class Config extends DataObject
      *
      * @return array
      */
-    public function getOrgsWebsites()
+    public function getOrgsWebsites(): array
     {
         $websitesByOrg = $this->getWebsitesGrouppedByOrg();
         $orgsWebsites = [];
@@ -327,7 +329,7 @@ class Config extends DataObject
      * @param int $currentWebsiteId
      * @return int[]
      */
-    public function getOrgWebsites($currentWebsiteId)
+    public function getOrgWebsites($currentWebsiteId): array
     {
         $websitesByOrg = $this->getWebsitesGrouppedByOrg();
 
@@ -351,7 +353,7 @@ class Config extends DataObject
      * @deprecated
      * @see getOrgWebsites
      */
-    public function getCurrentOrgWebsites()
+    public function getCurrentOrgWebsites(): array
     {
         return $this->getOrgWebsites($this->storeManager->getWebsite()->getId());
     }
@@ -379,7 +381,7 @@ class Config extends DataObject
      * @param int|null $websiteId
      * @return int
      */
-    public function getPageSizeFromMagento($websiteId = null)
+    public function getPageSizeFromMagento($websiteId = null): int
     {
         return (int)$this->getStoreConfig('tnwsforce_general/synchronization/page_size_from_magento', $websiteId);
     }
@@ -390,7 +392,7 @@ class Config extends DataObject
      * @param int|null $websiteId
      * @return int
      */
-    public function getLogStatus($websiteId = null)
+    public function getLogStatus($websiteId = null): int
     {
         return (int)$this->getStoreConfig('tnwsforce_general/debug/logstatus', $websiteId);
     }
@@ -398,7 +400,7 @@ class Config extends DataObject
     /**
      * @return int
      */
-    public function logBaseDay()
+    public function logBaseDay(): int
     {
         $baseDay = $this->scopeConfig->getValue(
             'tnwsforce_general/debug/logbaseday'
@@ -417,7 +419,7 @@ class Config extends DataObject
      * @param int|null $websiteId
      * @return int
      */
-    public function getDbLogStatus($websiteId = null)
+    public function getDbLogStatus($websiteId = null): int
     {
         return (int)$this->getStoreConfig('tnwsforce_general/debug/dblogstatus', $websiteId);
     }
@@ -429,7 +431,7 @@ class Config extends DataObject
      *
      * @return int
      */
-    public function getLogDebug($websiteId = null)
+    public function getLogDebug($websiteId = null): int
     {
         return (int)$this->getStoreConfig('tnwsforce_general/debug/logdebug', $websiteId);
     }
@@ -437,7 +439,7 @@ class Config extends DataObject
     /**
      * @param int|null $websiteId
      *
-     * @return string
+     * @return mixed
      */
     public function getDbLogLimit($websiteId = null)
     {
@@ -450,7 +452,7 @@ class Config extends DataObject
      * @param int|null $websiteId
      * @return int
      */
-    public function getClearSystemLogs($websiteId = null)
+    public function getClearSystemLogs($websiteId = null): int
     {
         return (int)$this->getStoreConfig('tnwsforce_general/debug/clearsystemlogs', $websiteId);
     }
@@ -461,7 +463,7 @@ class Config extends DataObject
      * @param int|null $websiteId
      * @return int
      */
-    public function getDebugLogClearDays($websiteId = null)
+    public function getDebugLogClearDays($websiteId = null): int
     {
         return (int)$this->getStoreConfig('tnwsforce_general/debug/debugcleardays', $websiteId);
     }
@@ -472,7 +474,7 @@ class Config extends DataObject
      * @return string
      * @throws FileSystemException
      */
-    public function getLogDir()
+    public function getLogDir(): string
     {
         return $this->directoryList->getPath(DirectoryList::LOG)
             . DIRECTORY_SEPARATOR . 'sforce.log';
@@ -525,7 +527,7 @@ class Config extends DataObject
      * Get cron maximum attempt count to sync
      * @return int
      */
-    public function getSyncMaxAttemptsCount()
+    public function getSyncMaxAttemptsCount(): int
     {
         $value = (int)$this->getStoreConfig(self::SYNC_MAX_ATTEMPT_COUNT_XML);
         if (!$value) {
@@ -549,7 +551,7 @@ class Config extends DataObject
      * Get Page Size
      *
      * @param int|null $websiteId
-     * @return int
+     * @return mixed
      */
     public function getMQMode($websiteId = null)
     {

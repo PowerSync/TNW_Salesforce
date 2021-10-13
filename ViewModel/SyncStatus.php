@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\ViewModel;
 
 use Magento\Framework\View\Element\Block\ArgumentInterface;
@@ -12,7 +14,7 @@ class SyncStatus implements ArgumentInterface
      * @param int $status
      * @return string
      */
-    public function getStatusHtml(int $status)
+    public function getStatusHtml(int $status): string
     {
         switch ($status) {
             case Options::STATUS_IN_SYNC:

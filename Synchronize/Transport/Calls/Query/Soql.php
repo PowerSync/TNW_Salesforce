@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Query;
 
 class Soql
@@ -8,7 +10,7 @@ class Soql
      * @param array
      * @return string
      */
-    public function build($data)
+    public function build($data): string
     {
         if (empty($data['from'])) {
             throw new \RuntimeException('SOQL part "from" is Empty');
@@ -51,19 +53,19 @@ class Soql
      * @param array $columns
      * @return string
      */
-    public function select(array $columns)
+    public function select(array $columns): string
     {
         return implode(', ', $columns);
     }
 
     /**
-     * @param array $entities
+     * @param array $conditions
      * @return string
      */
-    public function where($conditions)
+    public function where($conditions): string
     {
         if (empty($conditions)) {
-            return;
+            return '';
         }
 
         $groups = $this->mergeGroup($conditions);
@@ -76,7 +78,7 @@ class Soql
      * @param $entities
      * @return array
      */
-    protected function mergeGroup($conditions)
+    protected function mergeGroup($conditions): array
     {
 //        $group = [];
 //        foreach ($conditions as $condition) {
@@ -131,7 +133,7 @@ class Soql
      * @param $value
      * @return string
      */
-    protected function soqlQuote($value)
+    protected function soqlQuote($value): string
     {
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
@@ -145,7 +147,7 @@ class Soql
      * @param array $groups
      * @return string
      */
-    protected function generateLookupWhereGroup(array $groups)
+    protected function generateLookupWhereGroup(array $groups): string
     {
         $sql = '';
         $first = true;

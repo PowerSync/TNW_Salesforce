@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Created by PhpStorm.
  * User: eermolaev
@@ -128,7 +129,7 @@ class ClearSystemLog
     /**
      * @return string
      */
-    public function getDateTime()
+    public function getDateTime(): string
     {
         return $this->timezone->date()->format('m/d/y H:i:s');
     }
@@ -136,7 +137,7 @@ class ClearSystemLog
     /**
      * @return string
      */
-    public function getDate()
+    public function getDate(): string
     {
         return $this->timezone->date()->format('m/d/y');
     }

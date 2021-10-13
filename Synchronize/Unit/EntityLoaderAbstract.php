@@ -1,6 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Magento\Framework\Api\ExtensibleDataInterface;
+use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
@@ -29,10 +33,10 @@ abstract class EntityLoaderAbstract
      * Load
      *
      * @param AbstractModel $entity
-     * @return AbstractModel
+     * @return DataObject|null
      * @throws LocalizedException
      */
-    public function get($entity)
+    public function get($entity): ?DataObject
     {
         $subEntity = $this->load($entity);
         if (!empty($subEntity) && null !== $this->salesforceIdStorage && null !== $subEntity->getId()) {
@@ -45,7 +49,7 @@ abstract class EntityLoaderAbstract
     /**
      * @return SalesforceIdStorage|null
      */
-    public function getSalesforceIdStorage()
+    public function getSalesforceIdStorage(): ?SalesforceIdStorage
     {
         return $this->salesforceIdStorage;
     }
@@ -54,7 +58,7 @@ abstract class EntityLoaderAbstract
      * Load
      *
      * @param AbstractModel $entity
-     * @return AbstractModel
+     * @return DataObject|ExtensibleDataInterface|null
      */
     abstract public function load($entity);
 }

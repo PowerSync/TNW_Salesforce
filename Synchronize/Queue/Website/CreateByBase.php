@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Queue\Website;
 
@@ -14,7 +15,7 @@ abstract class CreateByBase implements \TNW\Salesforce\Synchronize\Queue\CreateI
      *
      * @return string
      */
-    public function createBy()
+    public function createBy(): string
     {
         return self::CREATE_BY;
     }

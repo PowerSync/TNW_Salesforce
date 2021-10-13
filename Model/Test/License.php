@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Test;
 
 /**
@@ -41,7 +43,7 @@ class License extends \TNW\Salesforce\Model\Test
      * @return License
      * @throws \Exception
      */
-    public function execute()
+    public function execute(): License
     {
         $result = parent::STATUS_PASSED;
 

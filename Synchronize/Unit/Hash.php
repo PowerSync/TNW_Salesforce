@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
 /**
@@ -12,7 +14,7 @@ class Hash implements HashInterface
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @return string
      */
-    public function calculateEntity($entity)
+    public function calculateEntity($entity): string
     {
         return spl_object_hash($entity);
     }

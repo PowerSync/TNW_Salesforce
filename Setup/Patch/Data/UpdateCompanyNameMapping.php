@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Setup\Patch\Data;
 
@@ -32,7 +33,7 @@ class UpdateCompanyNameMapping implements DataPatchInterface
      *
      * @return array|string[]
      */
-    public static function getDependencies()
+    public static function getDependencies(): array
     {
         return [UpdateAttributeSalesForce::class];
     }
@@ -42,7 +43,7 @@ class UpdateCompanyNameMapping implements DataPatchInterface
      *
      * @return array|string[]
      */
-    public function getAliases()
+    public function getAliases(): array
     {
         return [];
     }

@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use Exception;
+use Magento\Framework\Phrase;
 use function implode;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\Exception\LocalizedException;
@@ -44,7 +46,7 @@ class Save extends Synchronize\Unit\UnitAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Updating Magento entity ...');
     }
@@ -152,7 +154,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      * @return Product[]
      * @throws OutOfBoundsException
      */
-    public function entities()
+    public function entities(): array
     {
         return array_filter($this->load()->get('entities'), [$this, 'filter']);
     }
@@ -161,9 +163,9 @@ class Save extends Synchronize\Unit\UnitAbstract
      * Filter
      *
      * @param AbstractModel $entity
-     * @return bool
+     * @return bool|null
      */
-    public function filter($entity)
+    public function filter($entity): ?bool
     {
         $attributeName = $this->fieldModifier()->fieldSalesforceId();
         if (!is_array($attributeName)) {
@@ -185,7 +187,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      * @return Product[]
      * @throws OutOfBoundsException
      */
-    public function skippedEntities()
+    public function skippedEntities(): array
     {
         return array_filter($this->load()->get('entities'), [$this, 'skipped']);
     }
@@ -196,7 +198,7 @@ class Save extends Synchronize\Unit\UnitAbstract
      * @param AbstractModel $entity
      * @return bool
      */
-    public function skipped($entity)
+    public function skipped($entity): bool
     {
         $attributeName = $this->fieldModifier()->fieldSalesforceId();
         if (!is_array($attributeName)) {

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Contact;
 
@@ -57,7 +58,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      *
      * @return bool
      */
-    public function processInput()
+    public function processInput(): bool
     {
         $magentoIdField = 'tnw_mage_basic__Magento_ID__c';
         $magentoWebsiteField = 'tnw_mage_basic__Magento_Website__c';
@@ -72,7 +73,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         $this->input->columns[] = $magentoWebsiteField;
 
         foreach ($this->entities() as $entity) {
-            $this->input[$entity]['AND']['EaW']['AND']['Email']['='] = strtolower($entity->getEmail());
+            $this->input[$entity]['AND']['EaW']['AND']['Email']['='] = strtolower((string)$entity->getEmail());
             if ($this->customerConfigShare->isWebsiteScope()) {
                 $this->input[$entity]['AND']['EaW']['AND'][$magentoWebsiteField]['IN']
                     = ['', $this->load()->entityByType($entity, 'website')->getData('salesforce_id')];
@@ -93,7 +94,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      *
      * @return array
      */
-    public function collectIndex()
+    public function collectIndex(): array
     {
         $magentoIdField = 'tnw_mage_basic__Magento_ID__c';
         $magentoWebsiteField = 'tnw_mage_basic__Magento_Website__c';
@@ -110,7 +111,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
             }
 
             if (!empty($record[$magentoIdField])) {
-                $searchIndex['magentoId'][$key] = strtolower($record[$magentoIdField]);
+                $searchIndex['magentoId'][$key] = strtolower((string)$record[$magentoIdField]);
             }
         }
 
@@ -124,11 +125,11 @@ class Lookup extends Synchronize\Unit\LookupAbstract
      * @param \Magento\Customer\Model\Customer $entity
      * @return array
      */
-    public function searchPriorityOrder(array $searchIndex, $entity)
+    public function searchPriorityOrder(array $searchIndex, $entity): array
     {
         $recordsIds = [];
         if (!empty($searchIndex['magentoId'])) {
-            $recordsIds[10] = array_keys($searchIndex['magentoId'], strtolower($entity->getId()));
+            $recordsIds[10] = array_keys($searchIndex['magentoId'], strtolower((string)$entity->getId()));
         }
 
         if (!empty($searchIndex['eaw'])) {

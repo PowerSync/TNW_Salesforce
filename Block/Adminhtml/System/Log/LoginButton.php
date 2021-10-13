@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Block\Adminhtml\System\Log;
 
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
@@ -41,7 +43,7 @@ class LoginButton implements ButtonProviderInterface
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getButtonData()
+    public function getButtonData(): array
     {
         return [
             'label' => __('Login Salesforce'),
@@ -54,7 +56,7 @@ class LoginButton implements ButtonProviderInterface
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function loginUrlButtonOptions()
+    public function loginUrlButtonOptions(): array
     {
         $splitButtonOptions = [];
         foreach ($this->config->getWebsitesGrouppedByOrg() as $websiteId) {
@@ -73,7 +75,7 @@ class LoginButton implements ButtonProviderInterface
      * @param int $websiteId
      * @return string
      */
-    public function getLoginUrl($websiteId)
+    public function getLoginUrl($websiteId): string
     {
         return $this->context->getUrlBuilder()
             ->getUrl('tnw_salesforce/system_log/login', ['website_id' => $websiteId]);

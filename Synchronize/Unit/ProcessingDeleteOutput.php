@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit;
 
@@ -15,7 +16,7 @@ class ProcessingDeleteOutput extends ProcessingAbstract
     /**
      * @inheritdoc
      */
-    public function description()
+    public function description(): Phrase
     {
         return __('Delete Output Phase');
     }

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Controller\Adminhtml\Customer;
 
 class SyncCustomer extends \Magento\Backend\App\Action
@@ -24,7 +26,7 @@ class SyncCustomer extends \Magento\Backend\App\Action
     /**
      * @return \Magento\Framework\Controller\Result\Redirect
      */
-    public function execute()
+    public function execute(): \Magento\Framework\Controller\Result\Redirect
     {
         $customerId = $this->getRequest()->getParam('customer_id');
         try {
@@ -34,7 +36,7 @@ class SyncCustomer extends \Magento\Backend\App\Action
         }
 
         $return = $this->getRequest()->getParam('return', 'edit');
-        if (strcasecmp($return, 'index') === 0) {
+        if (strcasecmp((string)$return, 'index') === 0) {
             return $this->resultRedirectFactory->create()
                 ->setPath('customer/index');
         }

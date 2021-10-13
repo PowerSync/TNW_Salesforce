@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\SalesForce\Setup;
 
@@ -528,7 +529,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $schemaName = null,
         $refSchemaName = null,
         $onUpdate = AdapterInterface::FK_ACTION_CASCADE
-    )
+    ): UpgradeSchema
     {
         $setup->getConnection()->dropForeignKey($tableName, $fkName, $schemaName);
 

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Ui\Component\Listing\Columns;
 
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
@@ -36,7 +38,7 @@ class Raw extends Column
      *
      * @return array
      */
-    public function prepareDataSource(array $dataSource)
+    public function prepareDataSource(array $dataSource): array
     {
         if (!isset($dataSource['data']['items'])) {
             return $dataSource;

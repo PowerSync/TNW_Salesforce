@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright © 2021 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
@@ -49,7 +50,7 @@ class Add
      * @return array
      * @throws LocalizedException
      */
-    public function beforeAddToQueue(Subject $subject, $entityIds)
+    public function beforeAddToQueue(Subject $subject, $entityIds): array
     {
         $storeId = (int) $this->request->getParam('store', 0);
         $store = $this->storeManager->getStore($storeId);

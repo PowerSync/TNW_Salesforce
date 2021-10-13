@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Client\Customer;
 
+use stdClass;
 use TNW\Salesforce\Model\Config\Source\Customer\ContactAssignee;
 
 class Updater
@@ -19,7 +22,7 @@ class Updater
     protected $customAttribute;
     /** @var \TNW\Salesforce\Client\Customer\LookupInfo */
     protected $lookupInfo;
-    /** @var \stdClass[] */
+    /** @var stdClass[] */
     protected $results;
     /** @var \TNW\Salesforce\Model\Logger */
     protected $logger;
@@ -50,13 +53,16 @@ class Updater
     }
 
     /**
-     * Do Magento Customer syncronization to Salesforce Contact and Account
+     * Do Magento Customer synchronization to Salesforce Contact and Account
      *
-     * @param \Magento\Customer\Api\Data\CustomerInterface[] $customers
+     * @param $customerIds
      * @param bool $is_observer
-     * @return bool
+     * @return bool|null
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\State\InputMismatchException
      */
-    public function syncCustomers($customerIds, $is_observer = false)
+    public function syncCustomers($customerIds, $is_observer = false): ?bool
     {
         $searchCriteria = $this->searchCriteriaBuilder
             ->addFilter('entity_id', $customerIds, 'in')
@@ -83,7 +89,7 @@ class Updater
         #endregion
         foreach ($customers as $customer) {
             #region Create object for store response data
-            $stdObj = new \stdClass();
+            $stdObj = new stdClass();
             $stdObj->id = $customer->getId();
             $transferObjectsIds[$i] = $stdObj;
             #endregion
@@ -279,7 +285,7 @@ class Updater
      * @param $websiteId
      * @return bool Add it or not to sync
      */
-    protected function initNewContactAccount($contactObject, $transferAccountObject, $stdObj, $defaultOwner, $websiteId)
+    protected function initNewContactAccount($contactObject, $transferAccountObject, $stdObj, $defaultOwner, $websiteId): bool
     {
         if ($this->checkProperty($transferAccountObject, 'Id'))
         {
@@ -299,9 +305,9 @@ class Updater
     /**
      * Get last sync results
      *
-     * @return \stdClass
+     * @return stdClass[]
      */
-    public function getResults()
+    public function getResults(): array
     {
         return $this->results;
     }
@@ -310,7 +316,7 @@ class Updater
      * Get sync errors
      * @return array
      */
-    public function getErrors()
+    public function getErrors(): array
     {
         $errors = [];
         if (is_array($this->results)) {
@@ -335,7 +341,7 @@ class Updater
      * Get sync process warnings
      * @return array
      */
-    public function getWarnings()
+    public function getWarnings(): array
     {
         return [];
     }
@@ -344,7 +350,7 @@ class Updater
      * Get total count of items were synchronized
      * @return int
      */
-    public function getResultsTotalCount()
+    public function getResultsTotalCount(): int
     {
         if (is_array($this->results)) {
             return count($this->results);
@@ -357,7 +363,7 @@ class Updater
      * Calculate count of successfully synchronized items
      * @return int
      */
-    public function getResultsSuccessCount()
+    public function getResultsSuccessCount(): int
     {
         $count = 0;
         if (is_array($this->results)) {
@@ -379,7 +385,7 @@ class Updater
      * @param $property
      * @return bool
      */
-    protected function checkProperty($object, $property)
+    protected function checkProperty($object, $property): bool
     {
         return
             is_object($object)
@@ -394,12 +400,12 @@ class Updater
     /**
      * Define property if it undefined.
      *
-     * @param \stdClass $object
+     * @param stdClass $object
      * @param array $property
      *
-     * @return \stdClass $object
+     * @return stdClass $object
      */
-    public function defineProperty($object, $property)
+    public function defineProperty($object, $property): stdClass
     {
         foreach ($property as $_property) {
             if (!array_key_exists($_property, $object)) {

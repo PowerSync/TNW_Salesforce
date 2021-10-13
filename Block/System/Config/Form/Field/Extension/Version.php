@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Block\System\Config\Form\Field\Extension;
 
@@ -38,7 +39,7 @@ class Version extends Field
      * @param AbstractElement $element
      * @return string
      */
-    protected function _getElementHtml(AbstractElement $element)
+    protected function _getElementHtml(AbstractElement $element): string
     {
         $element->setReadonly(1);
 

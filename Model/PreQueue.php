@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model;
 
 use TNW\Salesforce\Model\ResourceModel;

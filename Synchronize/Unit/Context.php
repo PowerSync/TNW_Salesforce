@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
@@ -81,7 +83,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return IdentificationInterface
      */
-    public function getIdentification()
+    public function getIdentification(): IdentificationInterface
     {
         return $this->identification;
     }
@@ -89,7 +91,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return SalesforceIdStorage
      */
-    public function getSalesforceIdStorage()
+    public function getSalesforceIdStorage(): SalesforceIdStorage
     {
         return $this->salesforceIdStorage;
     }
@@ -97,7 +99,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return HashInterface
      */
-    public function getHash()
+    public function getHash(): HashInterface
     {
         return $this->hash;
     }
@@ -105,7 +107,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return string
      */
-    public function getMagentoType()
+    public function getMagentoType(): string
     {
         return $this->magentoType;
     }
@@ -113,7 +115,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return string|null
      */
-    public function getObjectType()
+    public function getObjectType(): ?string
     {
         return $this->objectType;
     }
@@ -121,7 +123,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return string
      */
-    public function getSalesforceType()
+    public function getSalesforceType(): string
     {
         return $this->salesforceType;
     }
@@ -129,7 +131,7 @@ class Context extends Synchronize\Unit\UnitAbstract
     /**
      * @return string
      */
-    public function getFieldSalesforceId()
+    public function getFieldSalesforceId(): string
     {
         return $this->fieldSalesforceId;
     }

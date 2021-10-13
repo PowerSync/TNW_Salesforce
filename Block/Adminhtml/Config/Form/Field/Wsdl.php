@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Block\Adminhtml\Config\Form\Field;
 
 class Wsdl extends \Magento\Config\Block\System\Config\Form\Field
 {
-    protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
+    protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element): string
     {
         $browserLabel = __('Browse...');
         $saveLabel = __('Save');

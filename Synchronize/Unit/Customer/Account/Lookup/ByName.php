@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup;
 
 use TNW\Salesforce\Synchronize;
@@ -110,12 +112,12 @@ class ByName extends Synchronize\Unit\LookupAbstract
      *
      * @return array
      */
-    public function collectIndex()
+    public function collectIndex(): array
     {
         $searchIndex = [];
         foreach ($this->output as $key => $record) {
             if (!empty($record['Name'])) {
-                $searchIndex['name'][$key] = strtolower($record['Name']);
+                $searchIndex['name'][$key] = strtolower((string)$record['Name']);
             }
         }
 
@@ -132,11 +134,11 @@ class ByName extends Synchronize\Unit\LookupAbstract
      * @throws \Zend_Db_Select_Exception
      * @throws \Zend_Db_Statement_Exception
      */
-    public function searchPriorityOrder(array $searchIndex, $entity)
+    public function searchPriorityOrder(array $searchIndex, $entity): array
     {
         $recordsIds = [];
         if (!empty($searchIndex['name'])) {
-            $recordsIds[10] = array_keys($searchIndex['name'], strtolower($this->valueCompany($entity)));
+            $recordsIds[10] = array_keys($searchIndex['name'], strtolower((string)$this->valueCompany($entity)));
         }
 
         return $recordsIds;

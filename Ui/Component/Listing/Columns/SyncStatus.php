@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Ui\Component\Listing\Columns;
 
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
@@ -50,7 +52,7 @@ class SyncStatus extends Column
      * @param array $dataSource
      * @return array
      */
-    public function prepareDataSource(array $dataSource)
+    public function prepareDataSource(array $dataSource): array
     {
         $syncStatusName = 'sforce_sync_status';
 

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Delete;
 
@@ -8,7 +9,7 @@ namespace TNW\Salesforce\Synchronize\Transport\Calls\Delete;
 interface OutputInterface
 {
     /**
-     * Do Unit syncronization to Salesforce object
+     * Do Unit synchronization to Salesforce object
      *
      * @param Transport\Output $output
      */

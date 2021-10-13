@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\Config\Source\Customer;
 
 /**
@@ -16,7 +18,7 @@ class ContactAssignee implements \Magento\Framework\Option\ArrayInterface
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             [
