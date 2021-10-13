@@ -109,6 +109,8 @@ class Save extends Synchronize\Unit\UnitAbstract
                         case (!empty($this->unit('lookup')) && !empty($this->unit('lookup')->get('%s/record/' . $key, $entity))):
                             $salesforceId = $this->unit('lookup')->get('%s/record/' . $key, $entity);
                             break;
+                        default:
+                            $salesforceId = null;
                     }
 
                     // Save Salesforce Id

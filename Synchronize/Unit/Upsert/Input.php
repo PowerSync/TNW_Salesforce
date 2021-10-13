@@ -369,7 +369,9 @@ class Input extends Synchronize\Unit\UnitAbstract
         $fieldName['Id'] = $this->unit('upsertOutput')->fieldSalesforceId();
 
         foreach ($fieldName as $sfkey => $mKey) {
-            $entity->setData($mKey, $lookupObject[$sfkey]);
+            if (!empty($lookupObject[$sfkey])) {
+                $entity->setData($mKey, $lookupObject[$sfkey]);
+            }
         }
 
         $this->cache[$entity]['updated'] = true;
