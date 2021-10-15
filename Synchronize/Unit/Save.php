@@ -114,7 +114,8 @@ class Save extends Synchronize\Unit\UnitAbstract
                     }
 
                     // Save Salesforce Id
-                    $this->entityObject->saveByAttribute($entity, $attributeName, $entity->getData('config_website'));
+                    $this->entityObject->saveValueByAttribute($entity, $salesforceId, $attributeName, $entity->getData('config_website'));
+
                     $this->load()->get('%s/queue', $entity)->setAdditionalByCode($attributeName, $salesforceId);
 
                     $message[] = __(
