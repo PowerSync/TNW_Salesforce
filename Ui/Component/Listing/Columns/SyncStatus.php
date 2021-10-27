@@ -80,7 +80,7 @@ class SyncStatus extends Column
     protected function applySorting()
     {
         $dataProdider = $this->getContext()->getDataProvider();
-        if (!$dataProdider instanceof \Magento\Ui\DataProvider\AbstractDataProvider) {
+        if (!($dataProdider instanceof \Magento\Ui\DataProvider\AbstractDataProvider)) {
             parent::applySorting();
             return;
         }

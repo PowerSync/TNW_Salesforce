@@ -264,7 +264,7 @@ class Salesforce extends DataObject
         $describe = $this->describeSObject($type);
         foreach (get_object_vars($object) as $field => $value) {
             $describeField = $describe->getField($field);
-            if (!$describeField instanceof \Tnw\SoapClient\Result\DescribeSObjectResult\Field) {
+            if (!($describeField instanceof \Tnw\SoapClient\Result\DescribeSObjectResult\Field)) {
                 $this->logger->messageDebug('Field "%s::%s" not found in SF! Skipped field.', $type, $field);
                 unset($object->$field);
                 continue;

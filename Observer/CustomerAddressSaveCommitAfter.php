@@ -43,7 +43,7 @@ class CustomerAddressSaveCommitAfter implements \Magento\Framework\Event\Observe
         $address = $observer->getEvent()->getData('data_object');
 
         $customer = $address->getCustomer();
-        if (!$customer instanceof \Magento\Customer\Model\Customer || $customer->getId() === null) {
+        if (!($customer instanceof \Magento\Customer\Model\Customer) || $customer->getId() === null) {
             return;
         }
 

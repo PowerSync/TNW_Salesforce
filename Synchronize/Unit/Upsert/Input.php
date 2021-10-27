@@ -240,7 +240,7 @@ class Input extends Synchronize\Unit\UnitAbstract
 
             if (in_array($fieldProperty->getType(), ['datetime', 'date'])) {
                 try {
-                    if (!$object[$fieldName] instanceof DateTime) {
+                    if (!($object[$fieldName] instanceof DateTime)) {
                         $object[$fieldName] = date_create($object[$fieldName]);
                     }
 

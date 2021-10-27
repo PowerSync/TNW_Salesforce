@@ -188,7 +188,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 
             default:
                 $subEntity = $this->objectByEntityType($entity, $mapper->getMagentoEntityType());
-                if (!$subEntity instanceof DataObject) {
+                if (!($subEntity instanceof DataObject)) {
                     $this->group()->messageDebug(
                         'Object type "%s" not found. Entity: %s.',
                         $mapper->getMagentoEntityType(),
