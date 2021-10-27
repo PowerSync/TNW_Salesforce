@@ -119,8 +119,6 @@ class Load extends Synchronize\Unit\UnitAbstract
 
     /**
      * Process
-     *
-     * @throws LocalizedException
      */
     public function process()
     {
@@ -190,7 +188,14 @@ class Load extends Synchronize\Unit\UnitAbstract
                 $this->cache['websiteIds'][$entity] = $this->websiteId($entity);
                 $message[] = __('Entity %1 loaded', $this->identification->printEntity($entity));
             } catch (\Exception $e) {
-                $this->group()->messageError('Magento entity loading error, queueId: %s. Error: %s', $queue->getId(), $e->getMessage());
+                $syncDetails = sprintf(
+                    'Magento entity loading error, queueId: %s. Error: %s',
+                    $queue->getId(),
+                    $e->getMessage()
+                );
+                $message[] = $syncDetails;
+                $queue->setData('status', Queue::STATUS_ERROR);
+                $queue->setData('message', $syncDetails);
             }
         }
 
