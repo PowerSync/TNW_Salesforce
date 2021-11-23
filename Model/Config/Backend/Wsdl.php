@@ -137,7 +137,6 @@ class Wsdl extends Value
                 $uploader = $this->_uploaderFactory->create(['fileId' => $file]);
                 $uploader->setAllowedExtensions($this->_getAllowedExtensions());
                 $uploader->setAllowRenameFiles(false);
-                $uploader->addValidateCallback('size', $this, 'validateMaxSize');
                 $result = $uploader->save($uploadDir);
 
                 $loadedxmlfile = $result['path'] . '/' . $result['file'];
@@ -283,26 +282,6 @@ class Wsdl extends Value
         }
 
         return $file;
-    }
-
-    /**
-     * Validation callback for checking max file size
-     *
-     * @param  string $filePath Path to temporary uploaded file
-     * @return void
-     * @throws LocalizedException
-     */
-    public function validateMaxSize($filePath)
-    {
-        $directory = $this->_filesystem->getDirectoryRead(DirectoryList::SYS_TMP);
-        if ($this->_maxFileSize > 0 && $directory->stat(
-            $directory->getRelativePath($filePath)
-        )['size'] > $this->_maxFileSize * 1024
-        ) {
-            throw new LocalizedException(
-                __('The file you\'re uploading exceeds the server size limit of %1 kilobytes.', $this->_maxFileSize)
-            );
-        }
     }
 
     /**

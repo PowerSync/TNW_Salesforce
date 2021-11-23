@@ -76,7 +76,6 @@ class Testconnection extends Action
                 $uploader = $this->_uploaderFactory->create(['fileId' => $file]);
                 $uploader->setAllowedExtensions(['xml', 'wsdl']);
                 $uploader->setAllowRenameFiles(false);
-                $uploader->addValidateCallback('size', $this, 'validateMaxSize');
                 $result = $uploader->save($uploadDir);
 
                 $response = ['success' => 'true', 'message' => 'file uploaded successfully'];
