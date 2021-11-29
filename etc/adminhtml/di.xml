@@ -2,6 +2,8 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
+    <preference for="Magento\MediaGalleryIntegration\Plugin\SaveImageInformation" type="TNW\Salesforce\Plugin\SaveImageInformation" />
+
     <type name="Magento\Backend\App\Request\BackendValidator">
         <plugin name="validator_skip" type="TNW\Salesforce\Plugin\ValidatorSkip" />
     </type>

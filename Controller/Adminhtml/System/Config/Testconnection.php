@@ -9,7 +9,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Filesystem;
-use Magento\MediaStorage\Model\File\UploaderFactory;
+use Magento\Framework\File\UploaderFactory;
 use TNW\Salesforce\Client\Salesforce;
 use TNW\Salesforce\Model\Config;
 
