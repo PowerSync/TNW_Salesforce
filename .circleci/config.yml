@@ -9,6 +9,21 @@ jobs:
           name: Deploy Over SSH
           command: |
             ssh $SSH_USER@$SSH_HOST "./release"
+
+  marketplace-submit:
+    machine:
+      enabled: true
+    working_directory: ~/tnw_extension/
+    steps:
+      - checkout
+      - run:
+          name: Submit code to Magento Marketplace
+          command: |
+            cd ~/tnw_extension/
+            cd .circleci
+            chmod +x submit_code.sh
+            ./submit_code.sh
+
   tag-release:
     machine:
       enabled: true
@@ -22,13 +37,6 @@ jobs:
             cd .circleci
             chmod +x git_release.sh
             ./git_release.sh
-      - run:
-          name: Submit code to Magento Marketplace
-          command: |
-            cd ~/tnw_extension/
-            cd .circleci
-            chmod +x submit_code.sh
-            ./submit_code.sh
 
   m233-commerce-php72: &base-image
     docker:
@@ -350,6 +358,11 @@ workflows:
               only: master
 
       - deploy:
+          context: powersync
+          requires:
+              - tag-release
+
+      - marketplace-submit:
           context: powersync
           requires:
               - tag-release
