@@ -261,7 +261,9 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         foreach ($recordsPriority as $priorityKey => $records) {
             $records = array_map([$this, 'prepareRecord'], $records);
             foreach ($records as $record) {
-                $result[$record['Id']] = $record;
+                if (isset($record['Id'])) {
+                    $result[$record['Id']] = $record;
+                }
             }
         }
         $result = array_values($result);

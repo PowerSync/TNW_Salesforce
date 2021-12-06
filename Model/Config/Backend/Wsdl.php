@@ -12,8 +12,8 @@ use Magento\Framework\App\Config\Value;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\File\Uploader;
-use Magento\Framework\File\UploaderFactory;
+use TNW\Salesforce\Model\File\Uploader;
+use TNW\Salesforce\Model\File\UploaderFactory;
 use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Magento\Framework\Model\Context;
@@ -137,7 +137,6 @@ class Wsdl extends Value
                 $uploader = $this->_uploaderFactory->create(['fileId' => $file]);
                 $uploader->setAllowedExtensions($this->_getAllowedExtensions());
                 $uploader->setAllowRenameFiles(false);
-                $uploader->addValidateCallback('size', $this, 'validateMaxSize');
                 $result = $uploader->save($uploadDir);
 
                 $loadedxmlfile = $result['path'] . '/' . $result['file'];
@@ -283,26 +282,6 @@ class Wsdl extends Value
         }
 
         return $file;
-    }
-
-    /**
-     * Validation callback for checking max file size
-     *
-     * @param  string $filePath Path to temporary uploaded file
-     * @return void
-     * @throws LocalizedException
-     */
-    public function validateMaxSize($filePath)
-    {
-        $directory = $this->_filesystem->getDirectoryRead(DirectoryList::SYS_TMP);
-        if ($this->_maxFileSize > 0 && $directory->stat(
-            $directory->getRelativePath($filePath)
-        )['size'] > $this->_maxFileSize * 1024
-        ) {
-            throw new LocalizedException(
-                __('The file you\'re uploading exceeds the server size limit of %1 kilobytes.', $this->_maxFileSize)
-            );
-        }
     }
 
     /**

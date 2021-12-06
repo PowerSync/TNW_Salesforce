@@ -9,7 +9,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Filesystem;
-use Magento\MediaStorage\Model\File\UploaderFactory;
+use TNW\Salesforce\Model\File\UploaderFactory;
 use TNW\Salesforce\Client\Salesforce;
 use TNW\Salesforce\Model\Config;
 
@@ -76,7 +76,6 @@ class Testconnection extends Action
                 $uploader = $this->_uploaderFactory->create(['fileId' => $file]);
                 $uploader->setAllowedExtensions(['xml', 'wsdl']);
                 $uploader->setAllowRenameFiles(false);
-                $uploader->addValidateCallback('size', $this, 'validateMaxSize');
                 $result = $uploader->save($uploadDir);
 
                 $response = ['success' => 'true', 'message' => 'file uploaded successfully'];
