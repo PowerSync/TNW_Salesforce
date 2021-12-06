@@ -22,6 +22,13 @@ jobs:
             cd .circleci
             chmod +x git_release.sh
             ./git_release.sh
+      - run:
+          name: Submit code to Magento Marketplace
+          command: |
+            cd ~/tnw_extension/
+            cd .circleci
+            chmod +x submit_code.sh
+            ./submit_code.sh
 
   m233-commerce-php72: &base-image
     docker:
