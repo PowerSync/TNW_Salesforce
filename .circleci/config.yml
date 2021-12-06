@@ -11,8 +11,8 @@ jobs:
             ssh $SSH_USER@$SSH_HOST "./release"
 
   marketplace-submit:
-    machine:
-      enabled: true
+    docker:
+      - image: circleci/php:7.1-apache-stretch-node-browsers
     working_directory: ~/tnw_extension/
     steps:
       - checkout
