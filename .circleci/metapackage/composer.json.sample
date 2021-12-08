@@ -1,0 +1,12 @@
+{
+    "name": "tnw/salesforce-basic",
+    "description": "Integration between Magento 2 and Salesforce metapackage",
+    "version": "$VERSION",
+    "type": "metapackage",
+    "require": {
+        "tnw/salesforce": "$VERSION"
+    },
+    "license": [
+        "gpl-3.0"
+    ]
+}
