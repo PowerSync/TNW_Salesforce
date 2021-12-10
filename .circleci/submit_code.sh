@@ -9,7 +9,7 @@ cd ..
 zip -r $SHARED_ARCH_NAME ./*
 
 # Upload shared package update to Marketplace
-cd WD
+cd $WD
 git clone git@github.com:PowerSync/TNW_EQP.git eqp --branch main
 mv ../$SHARED_ARCH_NAME eqp
 cd eqp
