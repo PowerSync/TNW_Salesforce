@@ -229,11 +229,13 @@ class Unit
             'transaction_uid' => '0',
             'sync_attempt' => 0,
             '_base_entity_id' => [$baseEntityId],
+            // phpcs:ignore Magento2.Security.InsecureFunction
             'identify' => md5(sprintf(
                 '%s/%s/%s/%s/%s',
                 $this->code(),
                 $this->entityType,
                 $entityId,
+                // phpcs:ignore Magento2.Security.InsecureFunction
                 serialize($additionalLoad),
                 $this->objectType
             ))

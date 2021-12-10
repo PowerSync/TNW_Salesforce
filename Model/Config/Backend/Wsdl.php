@@ -251,6 +251,7 @@ class Wsdl extends Value
         if ($this->cacheState->isEnabled(Collection::TYPE_IDENTIFIER)) {
 
             /** @var mixed $serialized */
+            // phpcs:ignore Magento2.Security.InsecureFunction
             $serialized = serialize($value);
 
             $this->cacheCollection->save(
