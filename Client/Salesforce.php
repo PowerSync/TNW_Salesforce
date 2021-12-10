@@ -180,6 +180,7 @@ class Salesforce extends DataObject
         if ($this->cacheState->isEnabled(Collection::TYPE_IDENTIFIER)) {
 
             /** @var mixed $serialized */
+            // phpcs:ignore Magento2.Security.InsecureFunction
             $serialized = serialize($value);
 
             $this->cacheCollection->save(
@@ -213,6 +214,7 @@ class Salesforce extends DataObject
             );
 
             if ($cachedData) {
+                // phpcs:ignore Magento2.Security.InsecureFunction
                 $result = unserialize($cachedData);
             }
 

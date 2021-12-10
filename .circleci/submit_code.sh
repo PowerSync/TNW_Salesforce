@@ -14,6 +14,7 @@ git clone git@github.com:PowerSync/TNW_EQP.git eqp --branch main
 mv ../$SHARED_ARCH_NAME eqp
 cd eqp
 bin/main $SHARED_ARCH_NAME $VERSION 0
+rm $SHARED_ARCH_NAME
 
 # Create meta package update payload
 cd $WD
@@ -28,3 +29,4 @@ zip -j $META_ARCH_NAME $TARGET
 mv $META_ARCH_NAME eqp
 cd eqp
 bin/main $META_ARCH_NAME $VERSION 1
+rm $META_ARCH_NAME

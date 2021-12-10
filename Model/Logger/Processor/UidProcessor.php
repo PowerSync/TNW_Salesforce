@@ -69,6 +69,7 @@ class UidProcessor
             throw new \InvalidArgumentException('The uid length must be an integer between 1 and 32');
         }
 
+        // phpcs:ignore Magento2.Security.InsecureFunction
         return substr(hash('md5', uniqid('', true)), 0, $length);
     }
 }
