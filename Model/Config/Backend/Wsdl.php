@@ -10,8 +10,10 @@ use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Value;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Serialize\SerializerInterface;
 use TNW\Salesforce\Model\File\Uploader;
 use TNW\Salesforce\Model\File\UploaderFactory;
 use Magento\Framework\Filesystem;
@@ -82,6 +84,10 @@ class Wsdl extends Value
      *
      */
     const UPLOAD_DIR = 'wsdl';
+    /**
+     * @var SerializerInterface|null
+     */
+    private $serializer;
 
     public function __construct(
         Context $context,
@@ -98,26 +104,21 @@ class Wsdl extends Value
         WebsiteDetector $websiteDetector,
         Collection $cacheCollection,
         State $cacheState,
-        array $data = []
+        array $data = [],
+        SerializerInterface $serializer = null
     ) {
         $this->_uploaderFactory = $uploaderFactory;
         $this->_requestData = $requestData;
         $this->_filesystem = $filesystem;
         $this->_mediaDirectory = $filesystem->getDirectoryWrite(DirectoryList::MEDIA);
-
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
-
         $this->_mediaDirectory = $filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
-
         $this->xmlParser = $xmlParser;
-
         $this->resourceConfig = $resourceConfig;
-
         $this->websiteDetector = $websiteDetector;
-
         $this->cacheCollection = $cacheCollection;
-
         $this->cacheState = $cacheState;
+        $this->serializer = $serializer ?? ObjectManager::getInstance()->get(SerializerInterface::class);
     }
 
     /**
@@ -251,8 +252,7 @@ class Wsdl extends Value
         if ($this->cacheState->isEnabled(Collection::TYPE_IDENTIFIER)) {
 
             /** @var mixed $serialized */
-            // phpcs:ignore Magento2.Security.InsecureFunction
-            $serialized = serialize($value);
+            $serialized = $this->serializer->serialize($value);
 
             $this->cacheCollection->save(
                 $serialized,

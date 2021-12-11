@@ -2,8 +2,10 @@
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Model\ResourceModel\Objects;
 
@@ -88,6 +90,11 @@ class Unit
     protected $request;
 
     /**
+     * @var SerializerInterface
+     */
+    private $serializer;
+
+    /**
      * Queue constructor.
      * @param string $code
      * @param string $description
@@ -118,7 +125,8 @@ class Unit
         array $skipRules = [],
         array $parents = [],
         array $children = [],
-        $ignoreFindGeneratorException = false
+        $ignoreFindGeneratorException = false,
+        SerializerInterface $serializer= null
     ) {
         $this->code = $code;
         $this->entityType = $entityType;
@@ -134,6 +142,7 @@ class Unit
         $this->parents = $parents;
         $this->children = $children;
         $this->ignoreFindGeneratorException = $ignoreFindGeneratorException;
+        $this->serializer = $serializer ?? ObjectManager::getInstance()->get(SerializerInterface::class);
     }
 
     /**
@@ -229,16 +238,14 @@ class Unit
             'transaction_uid' => '0',
             'sync_attempt' => 0,
             '_base_entity_id' => [$baseEntityId],
-            // phpcs:ignore Magento2.Security.InsecureFunction
-            'identify' => md5(sprintf(
+            'identify' => hash('sha256', (sprintf(
                 '%s/%s/%s/%s/%s',
                 $this->code(),
                 $this->entityType,
                 $entityId,
-                // phpcs:ignore Magento2.Security.InsecureFunction
-                serialize($additionalLoad),
+                $this->serializer->serialize($additionalLoad),
                 $this->objectType
-            ))
+            )))
         ]]);
 
         if ($this->skipQueue($queue)) {
