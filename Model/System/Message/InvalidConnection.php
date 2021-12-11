@@ -48,8 +48,7 @@ class InvalidConnection implements MessageInterface
      */
     public function getIdentity()
     {
-        // phpcs:ignore Magento2.Security.InsecureFunction
-        return md5('TNW_SALESFORCE_INVALID_CONNECTION');
+        return hash('sha256', 'TNW_SALESFORCE_INVALID_CONNECTION');
     }
 
     /**

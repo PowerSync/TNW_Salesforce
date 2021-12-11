@@ -4,8 +4,10 @@ namespace TNW\Salesforce\Client;
 
 use Magento\Framework\App\Cache\State;
 use Magento\Framework\App\Cache\Type\Collection;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Serialize\SerializerInterface;
 use Tnw\SoapClient\Client;
 use Tnw\SoapClient\Result\LoginResult;
 use TNW\Salesforce\Lib\Tnw\SoapClient\ClientBuilder;
@@ -49,6 +51,11 @@ class Salesforce extends DataObject
     protected $websiteDetector;
 
     /**
+     * @var SerializerInterface
+     */
+    private $serializer;
+
+    /**
      * Salesforce constructor.
      *
      * @param Config     $salesForceConfig
@@ -60,7 +67,8 @@ class Salesforce extends DataObject
         Collection $cacheCollection,
         State $cacheState,
         \TNW\Salesforce\Model\Logger $logger,
-        WebsiteDetector $websiteDetector
+        WebsiteDetector $websiteDetector,
+        SerializerInterface $serializer = null
     ) {
         parent::__construct();
         $this->salesforceConfig = $salesForceConfig;
@@ -68,6 +76,7 @@ class Salesforce extends DataObject
         $this->cacheState = $cacheState;
         $this->logger = $logger;
         $this->websiteDetector = $websiteDetector;
+        $this->serializer = $serializer ?? ObjectManager::getInstance()->get(SerializerInterface::class);
     }
 
     /**
@@ -180,8 +189,7 @@ class Salesforce extends DataObject
         if ($this->cacheState->isEnabled(Collection::TYPE_IDENTIFIER)) {
 
             /** @var mixed $serialized */
-            // phpcs:ignore Magento2.Security.InsecureFunction
-            $serialized = serialize($value);
+            $serialized = $this->serializer->serialize($value);
 
             $this->cacheCollection->save(
                 $serialized,
@@ -214,8 +222,7 @@ class Salesforce extends DataObject
             );
 
             if ($cachedData) {
-                // phpcs:ignore Magento2.Security.InsecureFunction
-                $result = unserialize($cachedData);
+                $result = $this->serializer->unserialize($cachedData);
             }
 
         } else if (array_key_exists($identifier . '_' . $websiteId, $this->handCache)) {
