@@ -82,51 +82,6 @@ class CheckOwnerField extends Mapping
      * @param Mapping $subject
      * @param callable $proceed
      * @param AbstractModel $entity
-     * @return Collection|null
-     * @throws Exception
-     */
-    public function aroundMappers(
-        Mapping $subject,
-        callable $proceed,
-        $entity
-    ) {
-        /** @var Collection $mappers */
-        $mappers = $proceed($entity);
-
-        $ownerId = $subject->lookup()->get('%s/record/OwnerId', $entity);
-
-        if ($ownerId && $ownerId != $this->checkOwner($ownerId, $entity)) {
-            if (!$this->ownerMappingDefined($mappers)) {
-                $mappers->addItem($mappers->getNewEmptyItem()->setData([
-                    'magento_attribute_name' => 'sf_owner_id',
-                    'salesforce_attribute_name' => 'OwnerId',
-                    'magento_entity_type' => '',
-                    'default_value' => false,
-                ]));
-            }
-        }
-
-        return $mappers;
-    }
-
-    /**
-     * @param $mappers Collection
-     * @return bool
-     */
-    protected function ownerMappingDefined($mappers)
-    {
-        foreach ($mappers as $mapper) {
-            if ($mapper->getSalesforceAttributeName() == self::OWNER_ID_FIELD) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @param Mapping $subject
-     * @param callable $proceed
-     * @param AbstractModel $entity
      * @param Mapper $mapper
      * @return mixed|null
      */
