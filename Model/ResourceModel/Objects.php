@@ -180,12 +180,23 @@ class Objects extends AbstractDb
      */
     public function loadObjectIds($entityId, $magentoType, $websiteId)
     {
-        return array_flip($this->getConnection()->fetchPairs($this->selectObjectIds, [
+
+        $ids = $this->getConnection()->fetchPairs($this->selectObjectIds, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
             'entity_website_id' => $websiteId,
             'base_website_id' => $this->baseWebsiteId($websiteId),
-        ]));
+        ]);
+        $result = [];
+        foreach ($ids as $id => $type) {
+            if (!isset($result[$type])) {
+                $result[$type] = $id;
+            } else {
+                $result[$type] .= "\n" . $id;
+            }
+        }
+
+        return $result;
     }
 
     /**

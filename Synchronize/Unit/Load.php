@@ -166,9 +166,16 @@ class Load extends Synchronize\Unit\UnitAbstract
                             }
                         }
 
+                        $additional = [];
                         foreach ($queue->dependenciesByEntityType($this->entityTypeMap($entityType)) as $_queue) {
-                            $subEntity->addData($_queue->getAdditional());
+                            foreach ($_queue->getAdditional() as $type => $id) {
+                                $additional[$type][$id] = $id;
+                            }
                         }
+                        $additional = array_map(function($item) {
+                            return is_array($item)? implode("\n", $item): $item;
+                        }, $additional);
+                        $subEntity->addData($additional);
 
                         $this->cache[$entity]['entities'][$entityType] = $subEntity;
                     }
