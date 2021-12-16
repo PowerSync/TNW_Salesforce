@@ -1,0 +1,23 @@
+[
+  {
+    "edition": "CE",
+    "versions": [
+      "2.3",
+      "2.4"
+    ]
+  },
+  {
+    "edition": "EE",
+    "versions": [
+      "2.3",
+      "2.4"
+    ]
+  },
+  {
+    "edition": "ECE",
+    "versions": [
+      "2.3",
+      "2.4"
+    ]
+  }
+]
