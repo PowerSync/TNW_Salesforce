@@ -12,6 +12,7 @@ zip -r $SHARED_ARCH_NAME ./*
 cd $WD
 git clone git@github.com:PowerSync/TNW_EQP.git eqp --branch main
 mv ../$SHARED_ARCH_NAME eqp
+cp -r data eqp
 cd eqp
 bin/main $SHARED_ARCH_NAME $VERSION 0
 rm $SHARED_ARCH_NAME
