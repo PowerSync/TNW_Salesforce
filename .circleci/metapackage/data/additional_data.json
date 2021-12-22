@@ -1,0 +1,49 @@
+{
+  "pricing_model": {
+    "pricing_type": "one-time",
+    "payment_period": 1
+  },
+  "prices": [
+    {
+      "edition": "CE",
+      "currency_code": "USD",
+      "price": 0.00,
+      "installation_price": 299.00
+    },
+    {
+      "edition": "EE",
+      "currency_code": "USD",
+      "price": 0.00,
+      "installation_price": 599.00
+    },
+    {
+      "edition": "ECE",
+      "currency_code": "USD",
+      "price": 0.00,
+      "installation_price": 599.00
+    }
+  ],
+  "version_compatibility": [
+    {
+      "edition": "CE",
+      "versions": [
+        "2.3",
+        "2.4"
+      ]
+    },
+    {
+      "edition": "EE",
+      "versions": [
+        "2.3",
+        "2.4"
+      ]
+    },
+    {
+      "edition": "ECE",
+      "versions": [
+        "2.3",
+        "2.4"
+      ]
+    }
+  ]
+}
