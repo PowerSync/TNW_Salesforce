@@ -1,6 +1,7 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
@@ -168,6 +169,9 @@ class Load extends Synchronize\Unit\UnitAbstract
 
                         $additional = [];
                         foreach ($queue->dependenciesByEntityType($this->entityTypeMap($entityType)) as $_queue) {
+                            if ($subEntity->getId() != $_queue->getEntityId()) {
+                                continue;
+                            }
                             foreach ($_queue->getAdditional() as $type => $id) {
                                 $additional[$type][$id] = $id;
                             }
@@ -194,7 +198,7 @@ class Load extends Synchronize\Unit\UnitAbstract
                 $index[$hash] = $this->cache['entities'][$entity] = $entity;
                 $this->cache['websiteIds'][$entity] = $this->websiteId($entity);
                 $message[] = __('Entity %1 loaded', $this->identification->printEntity($entity));
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $syncDetails = sprintf(
                     'Magento entity loading error, queueId: %s. Error: %s',
                     $queue->getId(),
