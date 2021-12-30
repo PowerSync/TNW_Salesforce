@@ -169,7 +169,10 @@ class Load extends Synchronize\Unit\UnitAbstract
 
                         $additional = [];
                         foreach ($queue->dependenciesByEntityType($this->entityTypeMap($entityType)) as $_queue) {
-                            if ($subEntity->getId() != $_queue->getEntityId()) {
+                            if (
+                                (!$subEntity->getGenerated() && $subEntity->getId() != $_queue->getEntityId())
+                                || ($subEntity->getGenerated() && $subEntity->getGeneratedEntityId() != $_queue->getEntityId())
+                            ) {
                                 continue;
                             }
                             foreach ($_queue->getAdditional() as $type => $id) {
