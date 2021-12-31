@@ -17,17 +17,17 @@ class Status extends Synchronize\Unit\UnitAbstract
     /**
      * @var string
      */
-    private $load;
+    protected $load;
 
     /**
      * @var string
      */
-    private $upsertOutput;
+    protected $upsertOutput;
 
     /**
      * @var SalesforceIdStorage|null
      */
-    private $salesforceIdStorage;
+    protected $salesforceIdStorage;
 
     /** @var Config  */
     protected $config;
