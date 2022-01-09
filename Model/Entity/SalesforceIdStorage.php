@@ -109,16 +109,7 @@ class SalesforceIdStorage
      */
     public function load($entity, $website = null)
     {
-        if (empty($this->magentoType)) {
-            throw new Exception('magentoType was not defined!');
-        }
-
-        $objectIds = $this->resourceObjects
-            ->loadObjectIds(
-                $entity->getId(),
-                $this->magentoType,
-                $this->prepareWebsiteId($website)
-            );
+        $objectIds = $this->loadObjectIds($entity, $website);
 
         foreach ($this->mappingAttribute as $attributeKey => $objectName) {
             if (empty($objectIds[$objectName])) {
@@ -284,5 +275,41 @@ class SalesforceIdStorage
     public function getConfig()
     {
         return $this->config;
+    }
+
+    /**
+     * @param AbstractModel $entity
+     * @param string $attributeName
+     * @param null|bool|int|string|WebsiteInterface $website
+     *
+     * @return bool
+     * @throws LocalizedException
+     */
+    public function recordExist($entity, $attributeName, $website = null)
+    {
+        $objectIds = $this->loadObjectIds($entity, $website);
+
+        return array_key_exists($attributeName, $objectIds);
+    }
+
+    /**
+     * @param AbstractModel $entity
+     * @param null|bool|int|string|WebsiteInterface $website
+     *
+     * @return array
+     * @throws LocalizedException
+     * @throws Exception
+     */
+    public function loadObjectIds($entity, $website = null)
+    {
+        if (empty($this->magentoType)) {
+            throw new Exception('magentoType was not defined!');
+        }
+
+        return $this->resourceObjects->loadObjectIds(
+            $entity->getId(),
+            $this->magentoType,
+            $this->prepareWebsiteId($website)
+        );
     }
 }

@@ -113,8 +113,12 @@ class Save extends Synchronize\Unit\UnitAbstract
                             $salesforceId = null;
                     }
 
+                    $website = $entity->getData('config_website');
+
                     // Save Salesforce Id
-                    $this->entityObject->saveValueByAttribute($entity, $salesforceId, $attributeName, $entity->getData('config_website'));
+                    if ($salesforceId || $this->entityObject->recordExist($entity, $attributeName, $website)) {
+                        $this->entityObject->saveValueByAttribute($entity, $salesforceId, $attributeName, $website);
+                    }
 
                     $this->load()->get('%s/queue', $entity)->setAdditionalByCode($attributeName, $salesforceId);
 
@@ -127,12 +131,7 @@ class Save extends Synchronize\Unit\UnitAbstract
 
                     // Save Salesforce Id from duplicates
                     foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
-                        $this->entityObject->saveValueByAttribute(
-                            $duplicate,
-                            $salesforceId,
-                            $attributeName,
-                            $entity->getData('config_website')
-                        );
+                        $this->entityObject->saveValueByAttribute($duplicate, $salesforceId, $attributeName, $website);
 
                         $this->load()->get('%s/queue', $duplicate)->setAdditionalByCode($attributeName, $salesforceId);
 
