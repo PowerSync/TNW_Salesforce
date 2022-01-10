@@ -1,4 +1,6 @@
 {
+  "license_type": "custom",
+  "custom_license_url": "https://powersync.biz/m2-license",
   "pricing_model": {
     "pricing_type": "one-time",
     "payment_period": 1
@@ -45,5 +47,50 @@
         "2.4"
       ]
     }
-  ]
+  ],
+  "documentation_artifacts" : {
+    "installation" : {
+      "file_upload_id" : "6006343"
+    }
+  },
+  "media_artifacts" : {
+    "icon_image" : {
+      "file_upload_id" : "1020493"
+    },
+    "gallery_images" : [
+      {
+        "file_upload_id" : "1020508"
+      },
+      {
+        "file_upload_id" : "1020509"
+      },
+      {
+        "file_upload_id" : "1020510"
+      },
+      {
+        "file_upload_id" : "1020511"
+      },
+      {
+        "file_upload_id" : "1020512"
+      },
+      {
+        "file_upload_id" : "1020513"
+      },
+      {
+        "file_upload_id" : "1020514"
+      },
+      {
+        "file_upload_id" : "1020515"
+      },
+      {
+        "file_upload_id" : "1020516"
+      },
+      {
+        "file_upload_id" : "1020517"
+      }
+    ],
+    "video_urls" : [
+      "https://www.youtube.com/watch?v=oFm6Zcoxy80"
+    ]
+  }
 }
