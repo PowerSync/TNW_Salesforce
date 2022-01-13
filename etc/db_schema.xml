@@ -61,6 +61,7 @@
         <column xsi:type="smallint" name="website_id" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Website ID" />
         <column xsi:type="smallint" name="store_id" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Store ID" />
         <column xsi:type="bigint" name="id" padding="20" unsigned="false" nullable="false" identity="true" comment="Id" />
+        <column xsi:type="varchar" name="additional" nullable="false" default="" length="32" comment="Additional data" />
         <constraint xsi:type="unique" referenceId="SALESFORCE_OBJECTS_ENTITY_ID_SALESFORCE_TYPE_MAGENTO_TYPE" disabled="true">
             <column name="entity_id" />
             <column name="salesforce_type" />
