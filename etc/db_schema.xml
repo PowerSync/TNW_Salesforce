@@ -61,6 +61,7 @@
         <column xsi:type="smallint" name="website_id" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Website ID" />
         <column xsi:type="smallint" name="store_id" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Store ID" />
         <column xsi:type="bigint" name="id" padding="20" unsigned="false" nullable="false" identity="true" comment="Id" />
+        <column xsi:type="varchar" name="additional" nullable="false" default="" length="32" comment="Additional data" />
         <constraint xsi:type="unique" referenceId="SALESFORCE_OBJECTS_ENTITY_ID_SALESFORCE_TYPE_MAGENTO_TYPE" disabled="true">
             <column name="entity_id" />
             <column name="salesforce_type" />
@@ -95,23 +96,14 @@
         <column xsi:type="smallint" name="website_id" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Website ID" />
         <column xsi:type="smallint" name="store_id" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Store ID" />
         <column xsi:type="bigint" name="id" padding="20" unsigned="false" nullable="false" identity="true" comment="Id" />
-        <constraint xsi:type="unique" referenceId="SALESFORCE_OBJECTS_ENTITY_ID_SALESFORCE_TYPE_MAGENTO_TYPE" disabled="true">
-            <column name="entity_id" />
-            <column name="salesforce_type" />
-            <column name="magento_type" />
-        </constraint>
-        <constraint xsi:type="unique" referenceId="SALESFORCE_OBJECTS_ENTT_ID_SALESFORCE_TYPE_MAGENTO_TYPE_WS_ID" disabled="true">
-            <column name="entity_id" />
-            <column name="salesforce_type" />
-            <column name="magento_type" />
-            <column name="website_id" />
-        </constraint>
+        <column xsi:type="varchar" name="additional" nullable="false" default="" length="32" comment="Additional data" />
         <constraint xsi:type="unique" referenceId="UNQ_43ED4E0733AB5D74307906A6569F24E3">
             <column name="entity_id" />
             <column name="salesforce_type" />
             <column name="magento_type" />
             <column name="website_id" />
             <column name="store_id" />
+            <column name="additional" />
         </constraint>
         <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID" table="tnw_salesforce_objects" column="website_id" referenceTable="store_website" referenceColumn="website_id" onDelete="CASCADE" />
         <constraint xsi:type="foreign" referenceId="SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID" table="tnw_salesforce_objects" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE" />

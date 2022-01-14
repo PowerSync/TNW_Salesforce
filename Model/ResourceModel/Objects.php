@@ -270,6 +270,7 @@ class Objects extends AbstractDb
                 'status',
                 'website_id',
                 'store_id',
+                'additional'
             ]));
         }, $records);
 
