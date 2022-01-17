@@ -106,10 +106,11 @@ class Unit
      * @param Objects $resourceObjects
      * @param StoreManagerInterface $storeManager
      * @param RequestInterface $request
-     * @param SkipInterface[] $skipRules
-     * @param string[] $parents
-     * @param string[] $children
-     * @param bool $ignoreFindGeneratorException
+     * @param array $skipRules
+     * @param array $parents
+     * @param array $children
+     * @param $ignoreFindGeneratorException
+     * @param SerializerInterface|null $serializer
      */
     public function __construct(
         $code,
@@ -142,7 +143,7 @@ class Unit
         $this->parents = $parents;
         $this->children = $children;
         $this->ignoreFindGeneratorException = $ignoreFindGeneratorException;
-        $this->serializer = $serializer ?? ObjectManager::getInstance()->get(SerializerInterface::class);
+        $this->serializer = $serializer ?? $objectManager->get(SerializerInterface::class);
     }
 
     /**

@@ -7,6 +7,7 @@ use Magento\Framework\App\Cache\Type\Collection;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Tnw\SoapClient\Client;
 use Tnw\SoapClient\Result\LoginResult;
@@ -56,11 +57,13 @@ class Salesforce extends DataObject
     private $serializer;
 
     /**
-     * Salesforce constructor.
-     *
-     * @param Config     $salesForceConfig
+     * @param Config $salesForceConfig
      * @param Collection $cacheCollection
-     * @param State      $cacheState
+     * @param State $cacheState
+     * @param \TNW\Salesforce\Model\Logger $logger
+     * @param WebsiteDetector $websiteDetector
+     * @param ObjectManagerInterface $objectManager
+     * @param SerializerInterface|null $serializer
      */
     public function __construct(
         Config $salesForceConfig,
@@ -68,6 +71,7 @@ class Salesforce extends DataObject
         State $cacheState,
         \TNW\Salesforce\Model\Logger $logger,
         WebsiteDetector $websiteDetector,
+        ObjectManagerInterface $objectManager,
         SerializerInterface $serializer = null
     ) {
         parent::__construct();
@@ -76,7 +80,7 @@ class Salesforce extends DataObject
         $this->cacheState = $cacheState;
         $this->logger = $logger;
         $this->websiteDetector = $websiteDetector;
-        $this->serializer = $serializer ?? ObjectManager::getInstance()->get(SerializerInterface::class);
+        $this->serializer = $serializer ?? $objectManager->get(SerializerInterface::class);
     }
 
     /**
