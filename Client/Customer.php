@@ -3,6 +3,7 @@ namespace TNW\Salesforce\Client;
 
 use Magento\Framework\App\Cache\State;
 use Magento\Framework\App\Cache\Type\Collection;
+use Magento\Framework\ObjectManagerInterface;
 use TNW\Salesforce\Model\Customer\Config;
 
 /**
@@ -36,9 +37,10 @@ class Customer extends Salesforce
         Collection $cacheCollection,
         State $cacheState,
         \TNW\Salesforce\Model\Logger $logger,
-        \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector
+        \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector,
+        ObjectManagerInterface $objectManager
     ) {
-        parent::__construct($config, $cacheCollection, $cacheState, $logger, $websiteDetector);
+        parent::__construct($config, $cacheCollection, $cacheState, $logger, $websiteDetector, $objectManager);
         $this->config = $config;
     }
 

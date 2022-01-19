@@ -2,7 +2,11 @@
 namespace TNW\Salesforce\Model\ResourceModel;
 
 use Magento\Framework\App\ObjectManager;
-use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use Magento\Framework\Model\ResourceModel\Db\Context;
+use Magento\Framework\ObjectManagerInterface;
 use TNW\Salesforce\Synchronize\Queue\DependenciesQueue;
 
 /**
@@ -32,6 +36,10 @@ class Queue extends AbstractDb
 
     /** @var string[][] */
     protected $appliedResolvers = [];
+
+    /** @var ObjectManagerInterface  */
+    protected $objectManager;
+
     /**
      * Construct
      */
@@ -40,13 +48,23 @@ class Queue extends AbstractDb
         $this->_init('tnw_salesforce_entity_queue', 'queue_id');
     }
 
+    public function __construct(
+        Context $context,
+        ObjectManagerInterface $objectManager,
+        $connectionName = null
+    ) {
+        $this->objectManager = $objectManager;
+        parent::__construct($context, $connectionName);
+    }
+
+
     /**
      * After Save
      *
      * @param \TNW\Salesforce\Model\Queue $object
      * @return AbstractDb
      */
-    protected function _afterSave(\Magento\Framework\Model\AbstractModel $object)
+    protected function _afterSave(AbstractModel $object)
     {
         $this->saveDependence($object);
         return parent::_afterSave($object);
@@ -57,7 +75,7 @@ class Queue extends AbstractDb
      *
      * @param \TNW\Salesforce\Model\Queue $queue
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function convertToArray(\TNW\Salesforce\Model\Queue $queue)
     {
@@ -70,10 +88,10 @@ class Queue extends AbstractDb
     }
 
     /**
-     * @param \Magento\Framework\Model\AbstractModel $object
+     * @param AbstractModel $object
      * @return array
      */
-    public function prepareDataForSave(\Magento\Framework\Model\AbstractModel $object)
+    public function prepareDataForSave(AbstractModel $object)
     {
         return parent::_prepareDataForSave($object);
     }
@@ -108,10 +126,10 @@ class Queue extends AbstractDb
     /**
      * Object Id
      *
-     * @param \Magento\Framework\Model\AbstractModel $object
+     * @param AbstractModel $object
      * @return mixed
      */
-    private function objectId(\Magento\Framework\Model\AbstractModel $object)
+    private function objectId(AbstractModel $object)
     {
         return $object->getId();
     }
@@ -121,7 +139,7 @@ class Queue extends AbstractDb
      *
      * @param string $code
      * @return string[]
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function getDependenceByCode($code)
     {
@@ -202,8 +220,7 @@ class Queue extends AbstractDb
      */
     private function resolveDependencies(): array
     {
-        $objManager = ObjectManager::getInstance();
-        $preQueue = $objManager->create(DependenciesQueue::class);
+        $preQueue = $this->objectManager->create(DependenciesQueue::class);
         foreach ($preQueue->queueAddPool as $entotyCode => $entity) {
             if ($entity->resolves) {
                 $this->buildDependencies($entity->resolves);
@@ -223,13 +240,13 @@ class Queue extends AbstractDb
     /**
      * Load By Child
      *
-     * @param \Magento\Framework\Model\AbstractModel $object
+     * @param AbstractModel $object
      * @param string $code
      * @param int $childId
      * @return Queue
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    public function loadByChild(\Magento\Framework\Model\AbstractModel $object, $code, $childId)
+    public function loadByChild(AbstractModel $object, $code, $childId)
     {
         return $this->load($object, $this->dependenceIdByCode($childId, $code), $this->getIdFieldName());
     }
@@ -240,7 +257,7 @@ class Queue extends AbstractDb
      * @param int $queueId
      * @param string $code
      * @return int
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function dependenceIdByCode($queueId, $code)
     {
@@ -263,7 +280,7 @@ class Queue extends AbstractDb
      * @param int $queueId
      * @param string $entityType
      * @return int[]
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function dependenceIdsByEntityType($queueId, $entityType)
     {
@@ -283,13 +300,13 @@ class Queue extends AbstractDb
     /**
      * Load By Parent
      *
-     * @param \Magento\Framework\Model\AbstractModel $object
+     * @param AbstractModel $object
      * @param string $code
      * @param int $parentId
      * @return Queue
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    public function loadByParent(\Magento\Framework\Model\AbstractModel $object, $code, $parentId)
+    public function loadByParent(AbstractModel $object, $code, $parentId)
     {
         return $this->load($object, $this->childIdByCode($parentId, $code), $this->getIdFieldName());
     }
@@ -300,7 +317,7 @@ class Queue extends AbstractDb
      * @param int $queueId
      * @param string $code
      * @return int
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function childIdByCode($queueId, $code)
     {
@@ -323,7 +340,7 @@ class Queue extends AbstractDb
      * @param int $queueId
      * @param string $entityType
      * @return int[]
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function childIdsByEntityType($queueId, $entityType)
     {
