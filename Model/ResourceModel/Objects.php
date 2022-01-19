@@ -136,7 +136,7 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $entityId
+     * @param string $entityId
      * @param string $magentoType
      * @param int $websiteId
      *
@@ -146,7 +146,7 @@ class Objects extends AbstractDb
     {
         return $this->getConnection()->fetchOne($this->selectObjectId, [
             'magento_type' => $magentoType,
-            'entity_id' => (int)$entityId,
+            'entity_id' => $entityId,
             'entity_website_id' => (int)$websiteId,
             'base_website_id' => (int)$this->baseWebsiteId($websiteId),
         ]);
@@ -172,7 +172,7 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $entityId
+     * @param string $entityId
      * @param string $magentoType
      * @param int $websiteId
      *
@@ -180,7 +180,6 @@ class Objects extends AbstractDb
      */
     public function loadObjectIds($entityId, $magentoType, $websiteId)
     {
-
         $ids = $this->getConnection()->fetchPairs($this->selectObjectIds, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
@@ -200,7 +199,7 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $entityId
+     * @param string $entityId
      * @param string $magentoType
      * @param int $websiteId
      *
@@ -279,7 +278,7 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $entityId
+     * @param string $entityId
      * @param string $magentoType
      * @param int $status
      * @param int $websiteId
@@ -292,12 +291,12 @@ class Objects extends AbstractDb
             ->update(
                 $this->getMainTable(),
                 ['status' => (int)$status],
-                "entity_id = $entityId AND magento_type = '$magentoType' AND website_id = {$websiteId}"
+                "entity_id = '$entityId' AND magento_type = '$magentoType' AND website_id = {$websiteId}"
             );
     }
 
     /**
-     * @param int $entityId
+     * @param string $entityId
      * @param string $magentoType
      * @param int $websiteId
      *
@@ -319,7 +318,7 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $entityId
+     * @param string $entityId
      * @param string $magentoType
      * @param int $websiteId
      * @param string|null $salesforceType
