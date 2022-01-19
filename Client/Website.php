@@ -60,7 +60,7 @@ class Website extends Salesforce implements WebsiteInterface
         ManagerInterface $messageManager,
         \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector
     ) {
-        parent::__construct($salesForceConfig, $cacheCollection, $cacheState, $logger, $websiteDetector);
+        parent::__construct($salesForceConfig, $cacheCollection, $cacheState, $logger, $websiteDetector, $objectManager);
         $this->objectManager = $objectManager;
         $this->resourceSfWebsite = $resourceSfWebsite;
         $this->messageManager = $messageManager;

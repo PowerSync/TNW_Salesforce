@@ -13,6 +13,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use TNW\Salesforce\Model\File\Uploader;
 use TNW\Salesforce\Model\File\UploaderFactory;
@@ -104,6 +105,7 @@ class Wsdl extends Value
         WebsiteDetector $websiteDetector,
         Collection $cacheCollection,
         State $cacheState,
+        ObjectManagerInterface $objectManager,
         array $data = [],
         SerializerInterface $serializer = null
     ) {
@@ -118,7 +120,7 @@ class Wsdl extends Value
         $this->websiteDetector = $websiteDetector;
         $this->cacheCollection = $cacheCollection;
         $this->cacheState = $cacheState;
-        $this->serializer = $serializer ?? ObjectManager::getInstance()->get(SerializerInterface::class);
+        $this->serializer = $serializer ?? $objectManager->get(SerializerInterface::class);
     }
 
     /**
