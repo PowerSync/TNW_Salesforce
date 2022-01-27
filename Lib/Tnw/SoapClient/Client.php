@@ -23,6 +23,8 @@ class Client extends \Tnw\SoapClient\Client
 {
     const CACHE_TAG = 'AUTH_RESULT';
 
+    const ERR_INVALID_SESSION = 'sf:INVALID_SESSION_ID';
+
     const TIMEOUT_RESERVE = 180;
 
     /** @var Collection */
@@ -170,6 +172,9 @@ class Client extends \Tnw\SoapClient\Client
     public function resetSession()
     {
         $this->sessionHeader = null;
+        $this->loginResult = null;
+        $this->expirationTime = null;
+        $this->soapClient->__setSoapHeaders(null);
     }
 
     /**
@@ -234,5 +239,25 @@ class Client extends \Tnw\SoapClient\Client
             return parent::logcall($method, $params);
         }
         return $this->processLoginRequest($method, $params);
+    }
+
+    /**
+     * @param $method
+     * @param array $params
+     * @return array|Traversable
+     * @throws \SoapFault
+     */
+    protected function call($method, array $params = array())
+    {
+        try {
+            return parent::call($method, $params);
+        } catch (\SoapFault $e) {
+            if ($e->faultcode == self::ERR_INVALID_SESSION) {
+                $this->resetSession();
+                return parent::call($method, $params);
+            } else {
+                throw $e;
+            }
+        }
     }
 }
