@@ -359,7 +359,7 @@ class Input extends Synchronize\Unit\UnitAbstract
                 }
             }
 
-            if ((empty($lookupObject[$compareField]) && !empty($compareValue)) || (!empty($lookupObject[$compareField]) && $compareValue != $lookupObject[$compareField])) {
+            if ($this->isFieldValueChanged($entity, $compareField, $compareValue)) {
                 $this->group()->messageDebug('Entity %1 has changed field: %2 = %3', $this->identification->printEntity($entity), $compareField, $compareValue);
                 return true;
             }
@@ -393,5 +393,20 @@ class Input extends Synchronize\Unit\UnitAbstract
     public function skipped($entity)
     {
         return false;
+    }
+
+    /**
+     * @param \Magento\Framework\DataObject $entity
+     * @param string $compareField
+     * @param mixed $compareValue
+     * @return bool
+     */
+    protected function isFieldValueChanged($entity, $compareField, $compareValue): bool
+    {
+        $lookup = $this->unit('lookup');
+        $lookupObject = $lookup->get('%s/record', $entity);
+
+        return (empty($lookupObject[$compareField]) && !empty($compareValue))
+            || (!empty($lookupObject[$compareField]) && $compareValue != $lookupObject[$compareField]);
     }
 }
