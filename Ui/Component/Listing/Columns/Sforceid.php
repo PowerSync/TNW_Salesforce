@@ -89,7 +89,7 @@ class Sforceid extends Column
         foreach (explode("\n", $field) as $value) {
             $currency = '';
             if (strpos($value, ':') !== false) {
-                list($currency, $value) = explode(':', $value);
+                list($storeId, $currency, $value) = explode(':', $value);
                 $currency .= ': ';
             }
 
