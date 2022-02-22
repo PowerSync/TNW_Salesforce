@@ -191,6 +191,11 @@ class Queue extends AbstractModel
         return $this->_getData('sync_type');
     }
 
+    public function isRealtime()
+    {
+        return $this->getSyncType() == Config::DIRECT_SYNC_TYPE_REALTIME;
+    }
+
     /**
      * Website Id
      *
