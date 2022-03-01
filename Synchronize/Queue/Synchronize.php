@@ -5,6 +5,7 @@ namespace TNW\Salesforce\Synchronize\Queue;
 use Exception;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
+use Magento\Framework\Data\Collection;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Store\Api\WebsiteRepositoryInterface;
 use TNW\Salesforce\Model\Config;
@@ -152,6 +153,9 @@ class Synchronize
             'main_table.sync_attempt',
             ['lt' => $this->salesforceConfig->getMaxAdditionalAttemptsCount($this->getSynchronizeQueue()->isCheck())]
         );
+
+        $collection->addOrder('sync_at', Collection::SORT_ORDER_ASC);
+        $collection->addOrder('sync_attempt', Collection::SORT_ORDER_ASC);
 
         try {
             $this->synchronizeQueue->synchronize($collection, $websiteId, $syncJobs);
