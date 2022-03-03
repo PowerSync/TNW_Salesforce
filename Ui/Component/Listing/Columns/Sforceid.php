@@ -88,8 +88,13 @@ class Sforceid extends Column
         $url = $this->client->getSalesForceUrl($websiteId);
         foreach (explode("\n", $field) as $value) {
             $currency = '';
+
             if (strpos($value, ':') !== false) {
-                list($storeId, $currency, $value) = explode(':', $value);
+                if (substr_count($value,':') == 2) {
+                    list($storeId, $currency, $value) = explode(':', $value);
+                } else {
+                    list($currency, $value) = explode(':', $value);
+                }
                 $currency .= ': ';
             }
 
