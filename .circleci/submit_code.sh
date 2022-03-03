@@ -13,9 +13,11 @@ cd "${WD}"
 git clone git@github.com:PowerSync/TNW_EQP.git eqp --branch main
 [ -f .env ] && cp .env eqp
 mv ../$SHARED_ARCH_NAME eqp
+cp -r sharedpackage/data eqp
 cd eqp
 bin/main $SHARED_ARCH_NAME $VERSION 0
 RESULT=$?
+rm data
 rm $SHARED_ARCH_NAME
 if [ $RESULT -ne 0 ]; then
     exit $RESULT
