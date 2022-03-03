@@ -111,8 +111,8 @@ abstract class SForceId extends \Magento\Framework\Data\Form\Element\Link
             $addition = '';
             if (strpos($value, ':') !== false) {
                 $tmp = explode(':', $value);
-                $addition = $tmp[0] . ': ';
-                $value = $tmp[1];
+                $addition = $tmp[1] . ': ';
+                $value = $tmp[2];
             }
 
             if (empty($value)) {
