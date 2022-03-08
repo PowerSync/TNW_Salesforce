@@ -18,9 +18,11 @@ class Customer extends DivideEntityByWebsiteOrg
      */
     private $collectionFactory;
 
-    private CustomerConfig $customerConfig;
+    /** @var CustomerConfig  */
+    private $customerConfig;
 
-    private StoreManagerInterface $storeManager;
+    /** @var StoreManagerInterface  */
+    private $storeManager;
 
     /**
      * Customer constructor.
