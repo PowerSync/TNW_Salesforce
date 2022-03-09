@@ -47,7 +47,9 @@ class AddSalesForceAttribute implements DataPatchInterface, PatchVersionInterfac
      */
     public static function getDependencies()
     {
-        return [];
+        return [
+            UpgradeData0000::class,
+        ];
     }
 
     /**
