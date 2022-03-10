@@ -34,7 +34,7 @@ class GetSelect implements GetSelectInterface
     /**
      * @inheritDoc
      */
-    public function execute(array $entityIds): Select
+    public function execute(array $entityIds): ?Select
     {
         $collection = $this->collectionFactory->create();
         $collection->addFieldToFilter($collection->getRowIdFieldName(), $entityIds);

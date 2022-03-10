@@ -34,7 +34,7 @@ class GetSelect implements GetSelectInterface
     /**
      * @inheritDoc
      */
-    public function execute(array $entityIds): Select
+    public function execute(array $entityIds): ?Select
     {
         $connection = $this->resource->getConnection();
         $select = $connection->select()->from(
@@ -48,9 +48,9 @@ class GetSelect implements GetSelectInterface
             'sales_order.entity_id = sales_invoice.order_id',
             []
         );
-        $select->where('entity_id IN (?)', $entityIds);
+        $select->where('sales_invoice.entity_id IN (?)', $entityIds);
         $customerSyncGroupsIds = $this->getCustomerGroupIds->execute();
-        $customerSyncGroupsIds !== null && $select->where('customer_group_id IN (?)', $customerSyncGroupsIds);
+        $customerSyncGroupsIds !== null && $select->where('sales_order.customer_group_id IN (?)', $customerSyncGroupsIds);
 
         return $select;
     }

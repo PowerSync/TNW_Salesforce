@@ -12,7 +12,7 @@ interface GetSelectInterface
     /**
      * @param array $entityIds
      *
-     * @return Select
+     * @return null|Select
      */
-    public function execute(array $entityIds): Select;
+    public function execute(array $entityIds): ?Select;
 }

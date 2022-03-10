@@ -735,5 +735,16 @@
             <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">ShipmentGetIdsFilteredByCustomerGroupConfiguration</argument>
         </arguments>
     </virtualType>
+    <virtualType name="NewsletterSubscribersGetIdsFilteredByCustomerGroupConfiguration" type="TNW\Salesforce\Service\CustomerGroupConfiguration\GetFilteredIds">
+        <arguments>
+            <argument name="entityType" xsi:type="string">NewsletterSubscribers</argument>
+            <argument name="getSelect" xsi:type="object">TNW\Salesforce\Service\CustomerGroupConfiguration\NewsletterSubscribers\GetSelect</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NewsletterSubscribersSkipByCustomerGroupConfiguration" type="TNW\Salesforce\Synchronize\Queue\SkipRules\SkipByCustomerGroupConfiguration">
+        <arguments>
+            <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">NewsletterSubscribersGetIdsFilteredByCustomerGroupConfiguration</argument>
+        </arguments>
+    </virtualType>
 
 </config>

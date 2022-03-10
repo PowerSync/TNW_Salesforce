@@ -34,7 +34,7 @@ class GetSelect implements GetSelectInterface
     /**
      * @inheritDoc
      */
-    public function execute(array $entityIds): Select
+    public function execute(array $entityIds): ?Select
     {
         $connection = $this->resource->getConnection();
         $select = $connection->select()->from(

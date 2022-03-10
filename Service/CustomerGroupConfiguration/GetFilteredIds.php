@@ -27,18 +27,24 @@ class GetFilteredIds implements GetIdsFilteredByCustomerGroupConfigurationInterf
     /** @var string */
     private $entityType;
 
+    /** @var GetCustomerGroupIds */
+    private $getCustomerGroupIds;
+
     /**
-     * @param GetSelectInterface $getSelect
-     * @param ResourceConnection $resource
-     * @param string             $entityType
+     * @param GetSelectInterface  $getSelect
+     * @param ResourceConnection  $resource
+     * @param GetCustomerGroupIds $getCustomerGroupIds
+     * @param string              $entityType
      */
     public function __construct(
-        GetSelectInterface $getSelect,
-        ResourceConnection $resource,
-        string $entityType
+        GetSelectInterface  $getSelect,
+        ResourceConnection  $resource,
+        GetCustomerGroupIds $getCustomerGroupIds,
+        string              $entityType
     ) {
         $this->getSelect = $getSelect;
         $this->resource = $resource;
+        $this->getCustomerGroupIds = $getCustomerGroupIds;
         $this->entityType = $entityType;
     }
 
@@ -48,8 +54,19 @@ class GetFilteredIds implements GetIdsFilteredByCustomerGroupConfigurationInterf
     public function execute(array $entityIds): array
     {
         $entityIds = array_map('intval', $entityIds);
-        $missedIds = [];
         $entityType = $this->entityType;
+        if ($this->getCustomerGroupIds->execute() === null) {
+            $result = [];
+            foreach ($entityIds as $entityId) {
+                $this->processedIds[$entityType][$entityId] = 1;
+                $this->cache[$entityType][$entityId] = $entityId;
+                $result[$entityId] = $entityId;
+            }
+
+            return $result;
+        }
+
+        $missedIds = [];
         foreach ($entityIds as $entityId) {
             if (!isset($this->processedIds[$entityType][$entityId])) {
                 $missedIds[] = $entityId;
@@ -59,7 +76,11 @@ class GetFilteredIds implements GetIdsFilteredByCustomerGroupConfigurationInterf
 
         if ($missedIds) {
             $connection = $this->resource->getConnection();
-            $loadedEntityIds = $connection->fetchCol($this->getSelect->execute($entityIds));
+            $select = $this->getSelect->execute($entityIds);
+            $loadedEntityIds = $entityIds;
+            if ($select) {
+                $loadedEntityIds = $connection->fetchCol($select);
+            }
             if ($loadedEntityIds) {
                 $loadedEntityIds = array_map('intval', $loadedEntityIds);
                 foreach ($loadedEntityIds as $loadedEntityId) {
