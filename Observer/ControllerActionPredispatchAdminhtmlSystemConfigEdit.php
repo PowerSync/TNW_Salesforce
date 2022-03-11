@@ -25,30 +25,27 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements \Magento\F
     private $salesforceClient;
 
     /**
-     * @var array
+     * @var string[]
      */
-    protected $allowSection = [
-        'tnwsforce_customer',
-        'tnwsforce_product',
-        'tnwsforce_order',
-        'tnwsforce_invoice',
-        'tnwsforce_shipment',
-    ];
+    private $allowSection;
 
     /**
      * ControllerActionPredispatchAdminhtmlSystemConfigEdit constructor.
      * @param \Magento\Framework\UrlInterface $urlBuilder
      * @param \Magento\Framework\Message\ManagerInterface $messageManager
      * @param \TNW\Salesforce\Client\Salesforce $salesforceClient
+     * @param string[] $allowSection
      */
     public function __construct(
         \Magento\Framework\UrlInterface $urlBuilder,
         \Magento\Framework\Message\ManagerInterface $messageManager,
-        \TNW\Salesforce\Client\Salesforce $salesforceClient
+        \TNW\Salesforce\Client\Salesforce $salesforceClient,
+        array $allowSection = []
     ) {
         $this->urlBuilder = $urlBuilder;
         $this->messageManager = $messageManager;
         $this->salesforceClient = $salesforceClient;
+        $this->allowSection = $allowSection;
     }
 
     /**
@@ -67,7 +64,7 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements \Magento\F
         $controllerAction = $observer->getEvent()->getData('controller_action');
 
         if (!$this->salesforceClient->getClientStatus()) {
-            $this->messageManager->addWarningMessage('Saleseforce Integration is disable');
+            $this->messageManager->addWarningMessage('Salesforce Integration is disabled.');
             $this->redirect($controllerAction);
             return;
         }
@@ -78,15 +75,15 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements \Magento\F
         } catch (\SoapFault $e) {
             switch (true) {
                 case strcasecmp($e->faultcode, 'sf:INVALID_OPERATION_WITH_EXPIRED_PASSWORD') === 0:
-                    $this->messageManager->addErrorMessage(__('You Salesforce password is expired. Login to Salesforce, update password. Put new Password and token in our module configuration.'));
+                    $this->messageManager->addErrorMessage(__('Your Salesforce password has expired. Please login to Salesforce and update the password. Put a new password and token in our module configuration.'));
                     break;
 
                 case strcasecmp($e->faultcode, 'sf:INVALID_LOGIN') === 0:
-                    $this->messageManager->addErrorMessage(__('Defined Salesforce login, password or token is incorrect. Please defined valid information.'));
+                    $this->messageManager->addErrorMessage(__('Provided Salesforce login, password, or token is incorrect. Please provide valid information.'));
                     break;
 
                 case strcasecmp($e->faultcode, 'WSDL') === 0:
-                    $this->messageManager->addErrorMessage(__('The WSDL file is no available or corrupted. Upload new wsdl file.'));
+                    $this->messageManager->addErrorMessage(__('The WSDL file is not available or corrupted. Please, upload a new WSDL file.'));
                     break;
 
                 default:

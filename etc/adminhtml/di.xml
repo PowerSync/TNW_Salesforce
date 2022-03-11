@@ -59,4 +59,16 @@
     <type name="Magento\Customer\Model\ResourceModel\Grid\Collection">
         <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Customer\Model\ResourceModel\Grid\Collection" />
     </type>
+
+    <type name="TNW\Salesforce\Observer\ControllerActionPredispatchAdminhtmlSystemConfigEdit">
+        <arguments>
+            <argument name="allowSection" xsi:type="array">
+                <item name="customer" xsi:type="string">tnwsforce_customer</item>
+                <item name="product" xsi:type="string">tnwsforce_product</item>
+                <item name="order" xsi:type="string">tnwsforce_order</item>
+                <item name="invoice" xsi:type="string">tnwsforce_invoice</item>
+                <item name="shipment" xsi:type="string">tnwsforce_shipment</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

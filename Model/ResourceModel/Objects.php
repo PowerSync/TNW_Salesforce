@@ -309,7 +309,7 @@ class Objects extends AbstractDb
                 $this->getMainTable(),
                 ['status' => new \Zend_Db_Expr('(status + 10)')],
                 new \Zend_Db_Expr(sprintf(
-                    'entity_id = %d AND magento_type = \'%s\' AND website_id = %d AND status < 10',
+                    'entity_id = \'%s\' AND magento_type = \'%s\' AND website_id = %d AND status < 10',
                     $entityId,
                     $magentoType,
                     $websiteId
