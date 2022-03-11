@@ -713,6 +713,17 @@
             <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">QuoteGetIdsFilteredByCustomerGroupConfiguration</argument>
         </arguments>
     </virtualType>
+    <virtualType name="QuoteItemGetIdsFilteredByCustomerGroupConfiguration" type="TNW\Salesforce\Service\CustomerGroupConfiguration\GetFilteredIds">
+        <arguments>
+            <argument name="entityType" xsi:type="string">QuoteItem</argument>
+            <argument name="getSelect" xsi:type="object">TNW\Salesforce\Service\CustomerGroupConfiguration\QuoteItem\GetSelect</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="QuoteItemSkipByCustomerGroupConfiguration" type="TNW\Salesforce\Synchronize\Queue\SkipRules\SkipByCustomerGroupConfiguration">
+        <arguments>
+            <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">QuoteItemGetIdsFilteredByCustomerGroupConfiguration</argument>
+        </arguments>
+    </virtualType>
     <virtualType name="InvoiceGetIdsFilteredByCustomerGroupConfiguration" type="TNW\Salesforce\Service\CustomerGroupConfiguration\GetFilteredIds">
         <arguments>
             <argument name="entityType" xsi:type="string">Invoice</argument>
