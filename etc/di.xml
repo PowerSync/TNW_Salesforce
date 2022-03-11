@@ -603,6 +603,11 @@
             <argument name="children" xsi:type="array">
                 <item name="contact" xsi:type="string">TS\Queue\Unit\Customer\Contact</item>
             </argument>
+            <argument name="skipRules" xsi:type="array">
+                <item name="disabledSync" xsi:type="object">
+                    TNW\Salesforce\Synchronize\Queue\Customer\SkipRules\SkipDisabledSync
+                </item>
+            </argument>
         </arguments>
     </virtualType>
 
@@ -678,4 +683,6 @@
             type="TNW\Salesforce\Plugin\Synchronize\Queue\Website\FixMissedWebsites"/>
     </type>
 
+    <preference for="TNW\Salesforce\Api\Service\Customer\IsSyncDisabledInterface"
+                type="TNW\Salesforce\Service\Customer\IsSyncDisabled"/>
 </config>
