@@ -109,6 +109,14 @@ class Input extends SplObjectStorage
                         $condition = "$fieldName IN ({$in})";
                         break;
 
+                    case array_key_exists('NOT IN', $condition):
+                        $in = is_array($condition['NOT IN'])
+                            ? implode(',', array_map([$this, 'soqlQuote'], array_unique($condition['NOT IN'])))
+                            : $condition['NOT IN'];
+
+                        $condition = "$fieldName NOT IN ({$in})";
+                        break;
+
                     default:
                         if (is_array($condition)) {
                             $this->prepareLookupWhereGroup($condition);
