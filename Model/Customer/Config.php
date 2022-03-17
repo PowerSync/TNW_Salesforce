@@ -45,14 +45,14 @@ class Config extends \TNW\Salesforce\Model\Config
      * @param int|null $websiteId
      * @return array
      */
-    public function getCustomerSyncGroups($websiteId = null)
+    public function getCustomerSyncGroups($websiteId = null): array
     {
 
-        $value = $this->getStoreConfig('tnwsforce_customer/general/customer_group', $websiteId);
+        $value = (string)($this->getStoreConfig('tnwsforce_customer/general/customer_group', $websiteId));
 
         $result = [];
         $value = trim($value);
-        if (strlen($value) > 0) {
+        if ($value !== '') {
             $result = array_unique(array_filter(array_map('intval', explode(',', $value))));
         }
 

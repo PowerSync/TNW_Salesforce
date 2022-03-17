@@ -2,31 +2,44 @@
 
 namespace TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
+use Magento\Customer\Model\ResourceModel\Customer\Collection;
+use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Model\Config;
+use TNW\Salesforce\Model\Customer\Config as CustomerConfig;
 use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
 class Customer extends DivideEntityByWebsiteOrg
 {
     /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory
+     * @var CollectionFactory
      */
     private $collectionFactory;
 
     /**
      * Customer constructor.
-     * @param \TNW\Salesforce\Model\Config $config
-     * @param \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collectionFactory
+     *
+     * @param Config                $config
+     * @param CollectionFactory     $collectionFactory
+     * @param CustomerConfig        $customerConfig
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
-        \TNW\Salesforce\Model\Config $config,
-        \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collectionFactory
+        Config $config,
+        CollectionFactory $collectionFactory,
+        CustomerConfig $customerConfig,
+        StoreManagerInterface $storeManager
     ) {
-        $this->collectionFactory = $collectionFactory;
         parent::__construct($config);
+        $this->collectionFactory = $collectionFactory;
     }
 
     /**
+     * Load customer entities
+     *
      * @param array $ids
-     * @return \Magento\Customer\Model\ResourceModel\Customer\Collection
+     *
+     * @return Collection
      */
     public function loadEntities($ids)
     {
