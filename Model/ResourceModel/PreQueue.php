@@ -27,17 +27,21 @@ class PreQueue extends AbstractDb
             return;
         }
 
-        $arrayToInsert = [];
-        foreach ($ids as $id) {
-            $arrayToInsert[$id] = [
-                'entity_id' => $id,
-                'entity_type' => $entityType,
-                'sync_type' => $syncType
-            ];
-        }
+        foreach ($ids as $batchIds) {
+            $arrayToInsert = [];
+            foreach ($batchIds as $id) {
+                $arrayToInsert[$id] = [
+                    'entity_id' => $id,
+                    'entity_type' => $entityType,
+                    'sync_type' => $syncType
+                ];
+            }
+            if (empty($arrayToInsert)) {
+                continue;
+            }
 
-        $this
-            ->getConnection()
-            ->insertOnDuplicate($this->getMainTable(), $arrayToInsert);
+            $this->getConnection()
+                ->insertOnDuplicate($this->getMainTable(), $arrayToInsert);
+        }
     }
 }
