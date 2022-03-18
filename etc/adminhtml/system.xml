@@ -157,7 +157,7 @@
                 </field>
                 <field id="customer_group" translate="label" type="multiselect" sortOrder="35" showInDefault="1" showInWebsite="1">
                     <label>Customer Groups</label>
-                    <source_model>Magento\Customer\Model\Config\Source\Group\Multiselect</source_model>
+                    <source_model>TNW\Salesforce\Model\Config\Source\Customer\AllGroups</source_model>
                     <comment>Only synchronize customers and orders placed by customers from these groups.</comment>
                     <depends>
                         <field id="sync_groups">0</field>

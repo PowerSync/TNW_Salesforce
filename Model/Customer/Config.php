@@ -53,7 +53,14 @@ class Config extends \TNW\Salesforce\Model\Config
         $result = [];
         $value = trim($value);
         if ($value !== '') {
-            $result = array_unique(array_filter(array_map('intval', explode(',', $value))));
+            $result = array_unique(
+                array_filter(
+                    array_map('intval', explode(',', $value)),
+                    static function(int $customerGroupId) {
+                        return $customerGroupId === 0 || !empty($customerGroupId);
+                    }
+                )
+            );
         }
 
         return $result;
