@@ -151,7 +151,7 @@ class Load extends Synchronize\Unit\UnitAbstract
                         if (!empty($entityLoader->getSalesforceIdStorage()) && !$subEntity->getData($subEntity->getIdFieldName())) {
                             $salesforceIds = $this->objects->loadObjectIds(
                                 $queue->getEntityId(),
-                                $queue->getEntityType(),
+                                $queue->getEntityLoad(),
                                 $queue->getWebsiteId()
                             );
                             if ($salesforceIds) {
