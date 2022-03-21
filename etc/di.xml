@@ -604,7 +604,7 @@
                 <item name="contact" xsi:type="string">TS\Queue\Unit\Customer\Contact</item>
             </argument>
             <argument name="skipRules" xsi:type="array">
-                <item name="skipByCustomerGroupConfiguration" xsi:type="object">CustomerSkipByCustomerGroupConfiguration</item>
+                <item name="skipByCustomerGroupConfiguration" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\SkipRules\SkipByCustomerGroup</item>
             </argument>
         </arguments>
     </virtualType>
@@ -746,4 +746,12 @@
             <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">ShipmentGetIdsFilteredByCustomerGroupConfiguration</argument>
         </arguments>
     </virtualType>
+    <type name="TNW\Salesforce\Synchronize\Queue\Customer\SkipRules\SkipByCustomerGroup">
+        <arguments>
+            <argument name="skipRulesByQueueLoadFromEntityType" xsi:type="array">
+                <item name="customer" xsi:type="object">CustomerSkipByCustomerGroupConfiguration</item>
+                <item name="order" xsi:type="object">OrderSkipByCustomerGroupConfiguration</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
