@@ -680,6 +680,14 @@
         <plugin name="tnw_salesforce"
             type="TNW\Salesforce\Plugin\Synchronize\Queue\Website\FixMissedWebsites"/>
     </type>
+
+    <type name="TNW\Salesforce\Model\Customer\Config">
+        <arguments>
+            <argument name="configPathMap" xsi:type="array">
+                <item name="tnwsforce_customer/general/default_owner" xsi:type="string">tnwsforce_customer/general/default_owner</item>
+            </argument>
+        </arguments>
+    </type>
     <virtualType name="CustomerGetIdsFilteredByCustomerGroupConfiguration" type="TNW\Salesforce\Service\CustomerGroupConfiguration\GetFilteredIds">
         <arguments>
             <argument name="entityType" xsi:type="string">Customer</argument>
