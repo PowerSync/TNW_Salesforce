@@ -603,6 +603,9 @@
             <argument name="children" xsi:type="array">
                 <item name="contact" xsi:type="string">TS\Queue\Unit\Customer\Contact</item>
             </argument>
+            <argument name="skipRules" xsi:type="array">
+                <item name="skipByCustomerGroupConfiguration" xsi:type="object">CustomerSkipByCustomerGroupConfiguration</item>
+            </argument>
         </arguments>
     </virtualType>
 
@@ -685,4 +688,70 @@
             </argument>
         </arguments>
     </type>
+    <virtualType name="CustomerGetIdsFilteredByCustomerGroupConfiguration" type="TNW\Salesforce\Service\CustomerGroupConfiguration\GetFilteredIds">
+        <arguments>
+            <argument name="entityType" xsi:type="string">Customer</argument>
+            <argument name="getSelect" xsi:type="object">TNW\Salesforce\Service\CustomerGroupConfiguration\Customer\GetSelect</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="CustomerSkipByCustomerGroupConfiguration" type="TNW\Salesforce\Synchronize\Queue\SkipRules\SkipByCustomerGroupConfiguration">
+        <arguments>
+            <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">CustomerGetIdsFilteredByCustomerGroupConfiguration</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderGetIdsFilteredByCustomerGroupConfiguration" type="TNW\Salesforce\Service\CustomerGroupConfiguration\GetFilteredIds">
+        <arguments>
+            <argument name="entityType" xsi:type="string">Order</argument>
+            <argument name="getSelect" xsi:type="object">TNW\Salesforce\Service\CustomerGroupConfiguration\Order\GetSelect</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderSkipByCustomerGroupConfiguration" type="TNW\Salesforce\Synchronize\Queue\SkipRules\SkipByCustomerGroupConfiguration">
+        <arguments>
+            <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">OrderGetIdsFilteredByCustomerGroupConfiguration</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="QuoteGetIdsFilteredByCustomerGroupConfiguration" type="TNW\Salesforce\Service\CustomerGroupConfiguration\GetFilteredIds">
+        <arguments>
+            <argument name="entityType" xsi:type="string">Quote</argument>
+            <argument name="getSelect" xsi:type="object">TNW\Salesforce\Service\CustomerGroupConfiguration\Quote\GetSelect</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="QuoteSkipByCustomerGroupConfiguration" type="TNW\Salesforce\Synchronize\Queue\SkipRules\SkipByCustomerGroupConfiguration">
+        <arguments>
+            <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">QuoteGetIdsFilteredByCustomerGroupConfiguration</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="QuoteItemGetIdsFilteredByCustomerGroupConfiguration" type="TNW\Salesforce\Service\CustomerGroupConfiguration\GetFilteredIds">
+        <arguments>
+            <argument name="entityType" xsi:type="string">QuoteItem</argument>
+            <argument name="getSelect" xsi:type="object">TNW\Salesforce\Service\CustomerGroupConfiguration\QuoteItem\GetSelect</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="QuoteItemSkipByCustomerGroupConfiguration" type="TNW\Salesforce\Synchronize\Queue\SkipRules\SkipByCustomerGroupConfiguration">
+        <arguments>
+            <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">QuoteItemGetIdsFilteredByCustomerGroupConfiguration</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="InvoiceGetIdsFilteredByCustomerGroupConfiguration" type="TNW\Salesforce\Service\CustomerGroupConfiguration\GetFilteredIds">
+        <arguments>
+            <argument name="entityType" xsi:type="string">Invoice</argument>
+            <argument name="getSelect" xsi:type="object">TNW\Salesforce\Service\CustomerGroupConfiguration\Invoice\GetSelect</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="InvoiceSkipByCustomerGroupConfiguration" type="TNW\Salesforce\Synchronize\Queue\SkipRules\SkipByCustomerGroupConfiguration">
+        <arguments>
+            <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">InvoiceGetIdsFilteredByCustomerGroupConfiguration</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShipmentGetIdsFilteredByCustomerGroupConfiguration" type="TNW\Salesforce\Service\CustomerGroupConfiguration\GetFilteredIds">
+        <arguments>
+            <argument name="entityType" xsi:type="string">Shipment</argument>
+            <argument name="getSelect" xsi:type="object">TNW\Salesforce\Service\CustomerGroupConfiguration\Shipment\GetSelect</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShipmentSkipByCustomerGroupConfiguration" type="TNW\Salesforce\Synchronize\Queue\SkipRules\SkipByCustomerGroupConfiguration">
+        <arguments>
+            <argument name="getIdsFilteredByCustomerGroupConfiguration" xsi:type="object">ShipmentGetIdsFilteredByCustomerGroupConfiguration</argument>
+        </arguments>
+    </virtualType>
 </config>
