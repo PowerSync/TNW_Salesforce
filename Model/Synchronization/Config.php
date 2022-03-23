@@ -48,7 +48,6 @@ class Config extends \TNW\Salesforce\Model\Customer\Config
     protected $handCache = [];
 
     /**
-     * Config constructor.
      * @param ScopeConfigInterface $scopeConfig
      * @param DirectoryList $directoryList
      * @param EncryptorInterface $encryptor
@@ -59,6 +58,9 @@ class Config extends \TNW\Salesforce\Model\Customer\Config
      * @param \Magento\Framework\App\Request\Http $request
      * @param \Magento\Framework\Filesystem $filesystem
      * @param \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector
+     * @param Collection $cacheCollection
+     * @param State $cacheState
+     * @param array $configPathMap
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -72,7 +74,8 @@ class Config extends \TNW\Salesforce\Model\Customer\Config
         \Magento\Framework\Filesystem $filesystem,
         \TNW\Salesforce\Model\Config\WebsiteDetector $websiteDetector,
         Collection $cacheCollection,
-        State $cacheState
+        State $cacheState,
+        array $configPathMap = []
     ) {
         $this->dateTime = $dateTime;
         $this->resource = $resource;
@@ -87,7 +90,8 @@ class Config extends \TNW\Salesforce\Model\Customer\Config
             $websiteRepository,
             $request,
             $filesystem,
-            $websiteDetector
+            $websiteDetector,
+            $configPathMap
         );
     }
 

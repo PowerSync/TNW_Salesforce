@@ -2,11 +2,60 @@
 
 namespace TNW\Salesforce\Model\Customer;
 
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Filesystem;
+use Magento\Store\Api\WebsiteRepositoryInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Model\Config\WebsiteDetector;
+
 /**
  * Configuration for customer Salesforce client
  */
 class Config extends \TNW\Salesforce\Model\Config
 {
+    /**
+     * @var array
+     */
+    private $configPathMap;
+
+    /**
+     * @param ScopeConfigInterface $scopeConfig
+     * @param DirectoryList $directoryList
+     * @param EncryptorInterface $encryptor
+     * @param StoreManagerInterface $storeManager
+     * @param WebsiteRepositoryInterface $websiteRepository
+     * @param Http $request
+     * @param Filesystem $filesystem
+     * @param WebsiteDetector $websiteDetector
+     * @param array $configPathMap
+     */
+    public function __construct(
+        ScopeConfigInterface $scopeConfig,
+        DirectoryList $directoryList,
+        EncryptorInterface $encryptor,
+        StoreManagerInterface $storeManager,
+        WebsiteRepositoryInterface $websiteRepository,
+        Http $request,
+        Filesystem $filesystem,
+        WebsiteDetector $websiteDetector,
+        array $configPathMap = []
+    ) {
+        parent::__construct(
+            $scopeConfig,
+            $directoryList,
+            $encryptor,
+            $storeManager,
+            $websiteRepository,
+            $request,
+            $filesystem,
+            $websiteDetector
+        );
+        $this->configPathMap = $configPathMap;
+    }
+
     /**
      * Get Customer Integration status
      *
@@ -53,7 +102,14 @@ class Config extends \TNW\Salesforce\Model\Config
         $result = [];
         $value = trim($value);
         if ($value !== '') {
-            $result = array_unique(array_filter(array_map('intval', explode(',', $value))));
+            $result = array_unique(
+                array_filter(
+                    array_map('intval', explode(',', $value)),
+                    static function(int $customerGroupId) {
+                        return $customerGroupId === 0 || !empty($customerGroupId);
+                    }
+                )
+            );
         }
 
         return $result;
@@ -68,7 +124,7 @@ class Config extends \TNW\Salesforce\Model\Config
      */
     public function defaultOwner($websiteId = null)
     {
-        return $this->getStoreConfig('tnwsforce_customer/general/default_owner', $websiteId);
+        return $this->getStoreConfig($this->configPathMap['tnwsforce_customer/general/default_owner'], $websiteId);
     }
 
     /**
