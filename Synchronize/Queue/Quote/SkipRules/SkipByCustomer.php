@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace TNW\Salesforce\Synchronize\Queue\Quote\SkipRules;
 
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Quote\Model\ResourceModel\Quote as QuoteResource;
+use TNW\Salesforce\Api\Service\Customer\GetCustomerIdByQuoteIdInterface;
 use TNW\Salesforce\Api\Service\Customer\IsSyncDisabledInterface;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize\Queue\SkipInterface;
@@ -17,20 +17,19 @@ class SkipByCustomer implements SkipInterface
     /** @var IsSyncDisabledInterface */
     private $isSyncDisabled;
 
-    /** @var QuoteResource */
-    private $quoteResource;
-
-    /** @var int[] */
-    private $cache;
+    /** @var GetCustomerIdByQuoteIdInterface */
+    private $getCustomerIdByQuoteId;
 
     /**
-     * @param IsSyncDisabledInterface $isSyncDisabled
-     * @param QuoteResource           $quoteResource
+     * @param IsSyncDisabledInterface         $isSyncDisabled
+     * @param GetCustomerIdByQuoteIdInterface $getCustomerIdByQuoteId
      */
-    public function __construct(IsSyncDisabledInterface $isSyncDisabled, QuoteResource $quoteResource)
-    {
+    public function __construct(
+        IsSyncDisabledInterface $isSyncDisabled,
+        GetCustomerIdByQuoteIdInterface $getCustomerIdByQuoteId
+    ) {
         $this->isSyncDisabled = $isSyncDisabled;
-        $this->quoteResource = $quoteResource;
+        $this->getCustomerIdByQuoteId = $getCustomerIdByQuoteId;
     }
 
     /**
@@ -44,33 +43,11 @@ class SkipByCustomer implements SkipInterface
             return false;
         }
 
-        $customerId = $this->getCustomerId($queue->getEntityId());
+        $customerId = $this->getCustomerIdByQuoteId->execute((int)$queue->getEntityId());
         if (!$customerId) {
             return false;
         }
 
         return $this->isSyncDisabled->execute($customerId);
-    }
-
-    /**
-     * @param int $quoteId
-     *
-     * @return int|null
-     * @throws LocalizedException
-     */
-    private function getCustomerId(int $quoteId): ?int
-    {
-        if (isset($this->cache[$quoteId])) {
-            return $this->cache[$quoteId];
-        }
-
-        $connection = $this->quoteResource->getConnection();
-        $table = $this->quoteResource->getMainTable();
-        $select = $connection->select()
-            ->from($table, ['entity_id'])
-            ->where($connection->quoteInto('entity_id = ?', $quoteId));
-        $this->cache[$quoteId] = (int)$connection->fetchOne($select);
-
-        return $this->cache[$quoteId];
     }
 }

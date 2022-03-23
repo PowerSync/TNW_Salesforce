@@ -71,7 +71,7 @@ class SkipByCustomer implements SkipInterface
             ->from(['main_table' => $orderTable], [OrderInterface::CUSTOMER_ID])
             ->joinInner(
                 ['order_item' => $orderItemTable],
-                'order_item.order_id = main_table.entity_id AND order_item.order_id = ' . $orderItemId,
+                'order_item.order_id = main_table.entity_id AND order_item.item_id = ' . $orderItemId,
                 []
             );
         $this->cache[$orderItemId] = (int)$connection->fetchOne($select);

@@ -752,4 +752,6 @@
 
     <preference for="TNW\Salesforce\Api\Service\Customer\IsSyncDisabledInterface"
                 type="TNW\Salesforce\Service\Customer\IsSyncDisabled"/>
+    <preference for="TNW\Salesforce\Api\Service\Customer\GetCustomerIdByQuoteIdInterface"
+                type="TNW\Salesforce\Service\Customer\GetCustomerIdByQuoteId"/>
 </config>
