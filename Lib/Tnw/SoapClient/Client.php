@@ -117,19 +117,19 @@ class Client extends \Tnw\SoapClient\Client
      * Set Assignment rule to created/updated Lead
      *
      * @param AssignmentRuleHeader $header
+     *
      * @return $this
      */
-    public function setAssignmentRuleHeader($header)
+    public function setAssignmentRuleHeader(AssignmentRuleHeader $header)
     {
-        if ($header != null) {
-            $data = [
-                'AssignmentRuleHeader' => [
-                    'assignmentRuleId' => $header->assignmentRuleId,
-                    'useDefaultRule' => $header->useDefaultRuleFlag
-                ]
-            ];
-            $this->setSoapHeaders($data);
-        }
+        $data = [
+            'AssignmentRuleHeader' => [
+                'assignmentRuleId' => $header->assignmentRuleId,
+                'useDefaultRule' => $header->useDefaultRuleFlag
+            ]
+        ];
+
+        $this->setSoapHeaders($data);
 
         return $this;
     }
@@ -175,6 +175,7 @@ class Client extends \Tnw\SoapClient\Client
         $this->loginResult = null;
         $this->expirationTime = null;
         $this->soapClient->__setSoapHeaders(null);
+        $this->headers = [];
     }
 
     /**
@@ -242,22 +243,22 @@ class Client extends \Tnw\SoapClient\Client
     }
 
     /**
-     * @param $method
-     * @param array $params
-     * @return array|Traversable
+     * @inheritDoc
+     *
      * @throws \SoapFault
      */
-    protected function call($method, array $params = array())
+    protected function call($method, array $params = [], $headers = [])
     {
         try {
-            return parent::call($method, $params);
+            return parent::call($method, $params, $headers);
         } catch (\SoapFault $e) {
-            if ($e->faultcode == self::ERR_INVALID_SESSION) {
+            if ($e->faultcode === self::ERR_INVALID_SESSION) {
                 $this->resetSession();
-                return parent::call($method, $params);
-            } else {
-                throw $e;
+
+                return parent::call($method, $params, $headers);
             }
+
+            throw $e;
         }
     }
 }
