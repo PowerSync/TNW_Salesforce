@@ -76,7 +76,6 @@ class Input implements Transport\Calls\Upsert\InputInterface
 
             $client = $this->factory->client();
             $headers = $input->getHeaders();
-//            $headers && $client->addSoapHeaders($headers);
             $results = $client->upsert($input->externalIdFieldName(), $batch, $input->type(), $headers);
             foreach ($entities as $key => $entity) {
                 if (empty($results[$key])) {

@@ -175,7 +175,6 @@ class Client extends \Tnw\SoapClient\Client
         $this->loginResult = null;
         $this->expirationTime = null;
         $this->soapClient->__setSoapHeaders(null);
-        $this->headers = [];
     }
 
     /**
@@ -243,22 +242,22 @@ class Client extends \Tnw\SoapClient\Client
     }
 
     /**
-     * @inheritDoc
-     *
+     * @param $method
+     * @param array $params
+     * @return array|Traversable
      * @throws \SoapFault
      */
-    protected function call($method, array $params = [], $headers = [])
+    protected function call($method, array $params = array())
     {
         try {
-            return parent::call($method, $params, $headers);
+            return parent::call($method, $params);
         } catch (\SoapFault $e) {
-            if ($e->faultcode === self::ERR_INVALID_SESSION) {
+            if ($e->faultcode == self::ERR_INVALID_SESSION) {
                 $this->resetSession();
-
-                return parent::call($method, $params, $headers);
+                return parent::call($method, $params);
+            } else {
+                throw $e;
             }
-
-            throw $e;
         }
     }
 }
