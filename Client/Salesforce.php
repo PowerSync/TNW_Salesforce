@@ -2,14 +2,20 @@
 
 namespace TNW\Salesforce\Client;
 
+use Exception;
 use Magento\Framework\App\Cache\State;
 use Magento\Framework\App\Cache\Type\Collection;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Serialize\Serializer\Serialize;
 use Magento\Framework\Serialize\SerializerInterface;
+use stdClass;
+use TNW\Salesforce\Model\Logger;
+use TNW\Salesforce\Service\ObjectConvertor;
 use Tnw\SoapClient\Client;
+use Tnw\SoapClient\Result\DescribeSObjectResult;
+use Tnw\SoapClient\Result\DescribeSObjectResult\Field;
 use Tnw\SoapClient\Result\LoginResult;
 use TNW\Salesforce\Lib\Tnw\SoapClient\ClientBuilder;
 use TNW\Salesforce\Model\Config;
@@ -34,7 +40,7 @@ class Salesforce extends DataObject
     protected $cacheCollection;
 
     /** @var Client[] */
-    private $client = array();
+    private $client = [];
 
     /** @var LoginResult[] $loginResult */
     private $loginResult = [];
@@ -45,34 +51,37 @@ class Salesforce extends DataObject
     /** @var  array */
     protected $handCache = [];
 
-    /** @var \TNW\Salesforce\Model\Logger */
+    /** @var Logger */
     protected $logger;
 
     /** @var WebsiteDetector  */
     protected $websiteDetector;
 
-    /**
-     * @var SerializerInterface
-     */
+    /** @var SerializerInterface */
     private $serializer;
 
+    /** @var ObjectConvertor|null */
+    private $objectConvertor;
+
     /**
-     * @param Config $salesForceConfig
-     * @param Collection $cacheCollection
-     * @param State $cacheState
-     * @param \TNW\Salesforce\Model\Logger $logger
-     * @param WebsiteDetector $websiteDetector
-     * @param ObjectManagerInterface $objectManager
+     * @param Config                   $salesForceConfig
+     * @param Collection               $cacheCollection
+     * @param State                    $cacheState
+     * @param Logger                   $logger
+     * @param WebsiteDetector          $websiteDetector
+     * @param ObjectManagerInterface   $objectManager
      * @param SerializerInterface|null $serializer
+     * @param ObjectConvertor|null     $objectConvertor
      */
     public function __construct(
         Config $salesForceConfig,
         Collection $cacheCollection,
         State $cacheState,
-        \TNW\Salesforce\Model\Logger $logger,
+        Logger $logger,
         WebsiteDetector $websiteDetector,
         ObjectManagerInterface $objectManager,
-        SerializerInterface $serializer = null
+        SerializerInterface $serializer = null,
+        ObjectConvertor $objectConvertor = null
     ) {
         parent::__construct();
         $this->salesforceConfig = $salesForceConfig;
@@ -80,7 +89,8 @@ class Salesforce extends DataObject
         $this->cacheState = $cacheState;
         $this->logger = $logger;
         $this->websiteDetector = $websiteDetector;
-        $this->serializer = $serializer ?? $objectManager->get(SerializerInterface::class);
+        $this->serializer = $serializer ?? $objectManager->get(Serialize::class);
+        $this->objectConvertor = $objectConvertor ?? $objectManager->get(ObjectConvertor::class);
     }
 
     /**
@@ -89,7 +99,7 @@ class Salesforce extends DataObject
      * @param int|null $websiteId
      *
      * @return null|Client
-     * @throws \Exception
+     * @throws Exception
      */
     public function getClient($websiteId = null)
     {
@@ -105,7 +115,7 @@ class Salesforce extends DataObject
                     $this->salesforceConfig->getSalesforceToken($websiteId)
                 );
                 $this->loginResult[$cacheKey] = $this->client[$cacheKey]->getLoginResult();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->client[$cacheKey] = null;
             }
         }
@@ -122,7 +132,7 @@ class Salesforce extends DataObject
      * @param String $token
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function checkConnection($wsdl, $username, $password, $token)
     {
@@ -184,7 +194,7 @@ class Salesforce extends DataObject
      * @param String $identifier
      * @param int|null $websiteId
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function saveCache($value, $identifier, $websiteId = null)
     {
@@ -210,7 +220,7 @@ class Salesforce extends DataObject
      * @param int|null $websiteId
      *
      * @return mixed
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function loadCache($identifier, $websiteId = null)
     {
@@ -244,7 +254,7 @@ class Salesforce extends DataObject
      * @param $type
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function upsertData($key, $data, $type)
     {
@@ -268,15 +278,15 @@ class Salesforce extends DataObject
      * Prepare SObject
      *
      * @param string $type
-     * @param \stdClass $object
-     * @throws \Exception
+     * @param stdClass $object
+     * @throws Exception
      */
-    protected function prepareSObject($type, \stdClass $object)
+    protected function prepareSObject($type, stdClass $object)
     {
         $describe = $this->describeSObject($type);
         foreach (get_object_vars($object) as $field => $value) {
             $describeField = $describe->getField($field);
-            if (!$describeField instanceof \Tnw\SoapClient\Result\DescribeSObjectResult\Field) {
+            if (!$describeField instanceof Field) {
                 $this->logger->messageDebug('Field "%s::%s" not found in SF! Skipped field.', $type, $field);
                 unset($object->$field);
                 continue;
@@ -299,18 +309,21 @@ class Salesforce extends DataObject
 
     /**
      * @param $objectName
-     * @return \Tnw\SoapClient\Result\DescribeSObjectResult
-     * @throws \Exception
+     * @return DescribeSObjectResult
+     * @throws Exception
      */
     public function describeSObject($objectName)
     {
         $cacheKey = sprintf(self::SFORCE_DESCRIBE_CACHE_IDENTIFIER, strtolower($objectName));
 
         /** @var string|null $url */
-        $describe = $this->loadCache($cacheKey);
-        if (!$describe) {
+        $describeData = $this->loadCache($cacheKey);
+        if ($describeData) {
+            $describe = $this->objectConvertor->toObject($describeData);
+        } else {
             $describe = $this->getClient()->describeSObjects([$objectName])[0];
-            $this->saveCache($describe, $cacheKey);
+            $describeData = $this->objectConvertor->toArray($describe);
+            $this->saveCache($describeData, $cacheKey);
         }
 
         return $describe;
@@ -322,7 +335,7 @@ class Salesforce extends DataObject
      * @param int|null $websiteId
      *
      * @return null|string
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function getSalesForceUrl($websiteId = null)
     {
@@ -341,7 +354,7 @@ class Salesforce extends DataObject
             if (empty($this->loginResult[$cacheKey])) {
                 try {
                     $this->getClient($websiteId);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->logger->messageError($e);
                 }
             }
