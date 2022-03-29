@@ -67,7 +67,7 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements \Magento\F
         $controllerAction = $observer->getEvent()->getData('controller_action');
 
         if (!$this->salesforceClient->getClientStatus()) {
-            $this->messageManager->addWarningMessage('Saleseforce Integration is disable');
+            $this->messageManager->addWarningMessage('Saleseforce Integration is disabled');
             $this->redirect($controllerAction);
             return;
         }
