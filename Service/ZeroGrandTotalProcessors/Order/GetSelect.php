@@ -1,34 +1,28 @@
 <?php
 declare(strict_types=1);
 
-namespace TNW\Salesforce\Service\CustomerGroupConfiguration\Order;
+namespace TNW\Salesforce\Service\ZeroGrandTotalProcessors\Order;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use TNW\Salesforce\Api\Service\GetSelectInterface;
-use TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds;
 
 /**
- *  Order ids filtered by customer group from store configuration
+ *  Select with filter by zero grand total for order
  */
 class GetSelect implements GetSelectInterface
 {
     /** @var ResourceConnection */
     private $resource;
 
-    /** @var GetCustomerGroupIds */
-    private $getCustomerGroupIds;
-
     /**
-     * @param ResourceConnection  $resource
-     * @param GetCustomerGroupIds $getCustomerGroupIds
+     * @param ResourceConnection $resource
      */
     public function __construct(
-        ResourceConnection    $resource,
-        GetCustomerGroupIds   $getCustomerGroupIds
-    ) {
+        ResourceConnection $resource
+    )
+    {
         $this->resource = $resource;
-        $this->getCustomerGroupIds = $getCustomerGroupIds;
     }
 
     /**
@@ -44,8 +38,7 @@ class GetSelect implements GetSelectInterface
             ]
         );
         $select->where('entity_id IN (?)', $entityIds);
-        $customerSyncGroupsIds = $this->getCustomerGroupIds->execute();
-        $customerSyncGroupsIds !== null && $select->where('customer_group_id IN (?)', $customerSyncGroupsIds);
+        $select->where('grand_total <> ?', 0);
 
         return $select;
     }
