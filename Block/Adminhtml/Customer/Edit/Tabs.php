@@ -8,6 +8,7 @@ use Magento\Ui\Component\Layout\Tabs\TabInterface;
 use Magento\Backend\Block\Widget\Form\Generic;
 use TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SForceId;
 use TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SyncStatus;
+use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 
 class Tabs extends Generic implements TabInterface
 {
@@ -152,9 +153,9 @@ class Tabs extends Generic implements TabInterface
         $fieldSet->addType('sforce_id', SForceId::class);
 
         $status = $this->resourceObjects->loadStatus(
-            $this->getCustomerId(),
-            \TNW\Salesforce\Model\Entity\SalesforceIdStorage::MAGENTO_TYPE_CUSTOMER,
-            $this->websiteId()
+            (int)$this->getCustomerId(),
+            SalesforceIdStorage::MAGENTO_TYPE_CUSTOMER,
+            (int)$this->websiteId()
         );
 
         $fieldSet->addField('sforce_sync_status', 'sync_status', [
@@ -167,7 +168,7 @@ class Tabs extends Generic implements TabInterface
 
         $salesforceIds = $this->resourceObjects->loadObjectIds(
             $this->getCustomerId(),
-            \TNW\Salesforce\Model\Entity\SalesforceIdStorage::MAGENTO_TYPE_CUSTOMER,
+            SalesforceIdStorage::MAGENTO_TYPE_CUSTOMER,
             $this->websiteId()
         );
 

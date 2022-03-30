@@ -200,20 +200,29 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $entityId
-     * @param string $magentoType
-     * @param int $websiteId
+     * @param int         $entityId
+     * @param string      $magentoType
+     * @param int         $websiteId
+     * @param string|null $salesForceType
      *
      * @return int
      */
-    public function loadStatus($entityId, $magentoType, $websiteId)
+    public function loadStatus(int $entityId, string $magentoType, int $websiteId, string $salesForceType = null): int
     {
-        return $this->getConnection()->fetchOne($this->selectStatus, [
+        $select = clone $this->selectStatus;
+        $bindData = [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
             'entity_website_id' => $websiteId,
             'base_website_id' => $this->baseWebsiteId($websiteId),
-        ]);
+        ];
+
+        if ($salesForceType) {
+            $select->where('salesforce_type = :salesforce_type');
+            $bindData['salesforce_type'] = $salesForceType;
+        }
+
+        return (int)$this->getConnection()->fetchOne($select, $bindData);
     }
 
     /**
