@@ -39,7 +39,7 @@ class SkipByCustomer implements SkipInterface
      */
     public function apply(Queue $queue)
     {
-        if (strcasecmp($queue->getEntityLoad(), 'quoteItem') !== 0) {
+        if (strcasecmp($queue->getEntityLoad(), 'quote') !== 0) {
             return false;
         }
 
