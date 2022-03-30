@@ -1,6 +1,6 @@
 <?php
 
-namespace TNW\Salesforce\Api\Service\CustomerGroupConfiguration;
+namespace TNW\Salesforce\Api\Service;
 
 use Magento\Framework\DB\Select;
 
