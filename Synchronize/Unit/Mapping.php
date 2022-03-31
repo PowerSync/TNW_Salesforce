@@ -187,10 +187,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     {
         $object = [];
 
+        /** @var Model\Mapper $mapper */
         foreach ($mappers as $mapper) {
             try {
                 $value = $this->value($entity, $mapper);
-                if (null === $value) {
+                if (null === $value && $mapper->getSkipBlankValues()) {
                     continue;
                 }
 
