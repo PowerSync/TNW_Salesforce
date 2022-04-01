@@ -5,7 +5,7 @@ namespace TNW\Salesforce\Service\CustomerGroupConfiguration\Invoice;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
-use TNW\Salesforce\Api\Service\CustomerGroupConfiguration\GetSelectInterface;
+use TNW\Salesforce\Api\Service\GetSelectInterface;
 use TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds;
 
 /**
