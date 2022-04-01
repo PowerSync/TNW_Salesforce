@@ -771,4 +771,11 @@
             </argument>
         </arguments>
     </type>
+    <type name="TNW\Salesforce\Synchronize\Queue\Unit">
+        <arguments>
+            <argument name="skipRules" xsi:type="array">
+                <item name="SkipByWebsiteWithoutPriceBook" xsi:type="object">TNW\Salesforce\Synchronize\Queue\SkipRules\SkipByWebsiteWithoutPriceBook</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
