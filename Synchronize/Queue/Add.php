@@ -573,9 +573,8 @@ class Add
         if (!empty($queueDataToSave)) {
             $orWhere = array_map(function (array $queue) {
                 return sprintf(
-                    '(old_queue.identify = \'%s\' AND old_queue.sync_type = \'%s\' AND old_queue.website_id= \'%s\')',
+                    '(old_queue.identify = \'%s\' AND old_queue.website_id= \'%s\')',
                     $queue['identify'],
-                    $queue['sync_type'],
                     $queue['website_id']
                 );
             },
