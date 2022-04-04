@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace TNW\Salesforce\Service\CustomerGroupConfiguration;
 
 use Magento\Framework\App\ResourceConnection;
-use TNW\Salesforce\Api\Service\CustomerGroupConfiguration\GetSelectInterface;
 use TNW\Salesforce\Api\Service\GetIdsFilteredByCustomerGroupConfigurationInterface;
+use TNW\Salesforce\Api\Service\GetSelectInterface;
 
 /**
  *  Load ids filtered by customer group from store configuration
