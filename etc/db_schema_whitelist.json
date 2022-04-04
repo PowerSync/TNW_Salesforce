@@ -10,7 +10,8 @@
             "object_type": true,
             "magento_entity_type": true,
             "is_default": true,
-            "website_id": true
+            "website_id": true,
+            "skip_blank_values": true
         },
         "index": {
             "TNW_SALESFORCE_MAPPER_MAP_ID": true
@@ -53,7 +54,8 @@
             "status": true,
             "website_id": true,
             "store_id": true,
-            "id": true
+            "id": true,
+            "additional": true
         },
         "constraint": {
             "SALESFORCE_OBJECTS_ENTITY_ID_SALESFORCE_TYPE_MAGENTO_TYPE": true,
@@ -73,7 +75,8 @@
             "status": true,
             "website_id": true,
             "store_id": true,
-            "id": true
+            "id": true,
+            "additional": true
         },
         "constraint": {
             "TNW_SALESFORCE_OBJECTS_ENTITY_ID_SALESFORCE_TYPE_MAGENTO_TYPE": true,
@@ -81,7 +84,8 @@
             "UNQ_841C9F764B2E165295E5FD196EB9C9EC": true,
             "TNW_SALESFORCE_OBJECTS_WEBSITE_ID_STORE_WEBSITE_WEBSITE_ID": true,
             "TNW_SALESFORCE_OBJECTS_STORE_ID_STORE_STORE_ID": true,
-            "PRIMARY": true
+            "PRIMARY": true,
+            "UNQ_3AB18685F88247830F265A0590296B9D": true
         }
     },
     "tnw_salesforce_entity_queue": {
@@ -103,7 +107,8 @@
             "transaction_uid": true,
             "additional_data": true,
             "created_at": true,
-            "identify": true
+            "identify": true,
+            "updated_at": true
         },
         "index": {
             "TNW_SALESFORCE_ENTITY_QUEUE_CODE_ENTITY_ID_ENTITY_LOAD": true,
