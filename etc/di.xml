@@ -771,4 +771,9 @@
             </argument>
         </arguments>
     </type>
+    <type name="TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert\Storage">
+        <plugin name="FormatResponseForArchivedProductsPlugin"
+                type="TNW\Salesforce\Plugin\Synchronize\Transport\Soap\Calls\Upsert\Storage\FormatResponseForArchivedProductsPlugin"
+        />
+    </type>
 </config>
