@@ -90,10 +90,11 @@ class Sforceid extends Column
             $currency = '';
 
             if (strpos($value, ':') !== false) {
-                if (substr_count($value,':') == 2) {
-                    list($storeId, $currency, $value) = explode(':', $value);
+                if (substr_count($value,':') === 2) {
+                    [$storeId, $currency, $value] = explode(':', $value);
+                    $currency = "$storeId:$currency";
                 } else {
-                    list($currency, $value) = explode(':', $value);
+                    [$currency, $value] = explode(':', $value);
                 }
                 $currency .= ': ';
             }
