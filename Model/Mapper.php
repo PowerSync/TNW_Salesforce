@@ -111,4 +111,14 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     {
         return $this->map_object;
     }
+
+    /**
+     * Get skip blank values flag value
+     *
+     * @return bool
+     */
+    public function getSkipBlankValues(): bool
+    {
+        return (bool)$this->_getData('skip_blank_values');
+    }
 }
