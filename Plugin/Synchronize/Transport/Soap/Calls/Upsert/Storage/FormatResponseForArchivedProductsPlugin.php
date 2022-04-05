@@ -51,7 +51,10 @@ class FormatResponseForArchivedProductsPlugin
                     if ($wasFound) {
                         $messageProperty = new \ReflectionProperty($error, 'message');
                         $messageProperty->setAccessible(true);
-                        $messageProperty->setValue($error, __('Product is archived!')->render());
+                        $format = 'Item cannot be synced! Reason: "Product archived"! See details: %s';
+                        $link = 'https://technweb.atlassian.net/wiki/spaces/IWS/pages/3240394753/Synchronization+of+Magento+product+with+Archived+product+in+Salesforce';
+                        $message = sprintf($format, $link);
+                        $messageProperty->setValue($error, __($message)->render());
                     }
                 }
             }
