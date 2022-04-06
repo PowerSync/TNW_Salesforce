@@ -1,0 +1,8 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+$allowedTags = $block->getData('allowed_tags');
+if(!is_array($allowedTags)) {
+    $allowedTags = null;
+}
+$message = __($block->getData('message'));
+echo $block->escapeHtml($message, $allowedTags);

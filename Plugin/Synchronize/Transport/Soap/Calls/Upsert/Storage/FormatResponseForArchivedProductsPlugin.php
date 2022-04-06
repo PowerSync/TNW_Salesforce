@@ -14,6 +14,7 @@ use Tnw\SoapClient\Result\UpsertResult;
 class FormatResponseForArchivedProductsPlugin
 {
     private const ERROR_CODE = 'DUPLICATE_VALUE';
+    private const LINK = 'https://technweb.atlassian.net/wiki/spaces/IWS/pages/3240394753/Synchronization+of+Magento+product+with+Archived+product+in+Salesforce';
 
     /** @var CurrentUnit */
     private $currentUnit;
@@ -51,8 +52,12 @@ class FormatResponseForArchivedProductsPlugin
                     if ($wasFound) {
                         $messageProperty = new \ReflectionProperty($error, 'message');
                         $messageProperty->setAccessible(true);
-                        $format = 'Item cannot be synced! Reason: "Product archived"! See details: %s';
-                        $link = 'https://technweb.atlassian.net/wiki/spaces/IWS/pages/3240394753/Synchronization+of+Magento+product+with+Archived+product+in+Salesforce';
+                        $format = 'Item cannot be synced! Reason: "Product is archived!". For more information click %s';
+                        $link = sprintf(
+                            '<a href="%s">here</a>',
+                            self::LINK
+                        );
+
                         $message = sprintf($format, $link);
                         $messageProperty->setValue($error, __($message)->render());
                     }

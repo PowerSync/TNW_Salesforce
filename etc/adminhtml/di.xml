@@ -59,4 +59,16 @@
     <type name="Magento\Customer\Model\ResourceModel\Grid\Collection">
         <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Customer\Model\ResourceModel\Grid\Collection" />
     </type>
+    <type name="Magento\Framework\View\Element\Message\MessageConfigurationsPool">
+        <arguments>
+            <argument name="configurationsMap" xsi:type="array">
+                <item name="allowHtmlTagsMessage" xsi:type="array">
+                    <item name="renderer" xsi:type="const">\Magento\Framework\View\Element\Message\Renderer\BlockRenderer::CODE</item>
+                    <item name="data" xsi:type="array">
+                        <item name="template" xsi:type="string">TNW_Salesforce::messages/allowHtmlTagsMessage.phtml</item>
+                    </item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
 </config>
