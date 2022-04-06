@@ -5,7 +5,7 @@ namespace TNW\Salesforce\Service\CustomerGroupConfiguration\Customer;
 
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory;
 use Magento\Framework\DB\Select;
-use TNW\Salesforce\Api\Service\CustomerGroupConfiguration\GetSelectInterface;
+use TNW\Salesforce\Api\Service\GetSelectInterface;
 use TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds;
 
 /**

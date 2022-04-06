@@ -117,11 +117,11 @@ class Objects extends AbstractDb
 
         $this->selectPriceBookId = $this->getConnection()->select()
             ->from($this->getMainTable(), ['object_id', 'salesforce_type'])
-            ->where('magento_type = "PricebookEntry"')
+            ->where('magento_type = :magento_type')
             ->where('entity_id = :entity_id')
-            ->where('store_id = :store_id')
             ->where('website_id IN(:entity_website_id, :base_website_id)')
             ->order(new \Zend_Db_Expr('FIELD(website_id, :entity_website_id, :base_website_id)'))
+            ->order(new \Zend_Db_Expr('FIELD(store_id, :store_id, 0)'))
             ->limit(1);
     }
 
@@ -139,12 +139,17 @@ class Objects extends AbstractDb
      * @param string $entityId
      * @param string $magentoType
      * @param int $websiteId
-     *
+     * @param string|null $salesforceType
      * @return string
      */
-    public function loadObjectId($entityId, $magentoType, $websiteId)
+    public function loadObjectId($entityId, $magentoType, $websiteId, ?string $salesforceType = null)
     {
-        return $this->getConnection()->fetchOne($this->selectObjectId, [
+        $loadObjectIdSelect = clone $this->selectObjectId;
+        if ($salesforceType !== null) {
+            $loadObjectIdSelect->where('salesforce_type = ?', $salesforceType);
+        }
+        
+        return $this->getConnection()->fetchOne($loadObjectIdSelect, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
             'entity_website_id' => (int)$websiteId,
@@ -159,16 +164,25 @@ class Objects extends AbstractDb
      *
      * @return string
      */
-    public function loadPriceBookId($productId, $storeId, $websiteId)
-    {
-        $condition = [
+    public function loadPriceBookId(
+        $productId,
+        $storeId,
+        $websiteId,
+        string $magentoType = 'PricebookEntry',
+        ?string $salesforceType = null
+    ) {
+        $loadPricebookIdSelect = clone $this->selectPriceBookId;
+        if ($salesforceType !== null) {
+            $loadPricebookIdSelect->where('salesforce_type = ?', $salesforceType);
+        }
+
+        return $this->getConnection()->fetchOne($loadPricebookIdSelect, [
             'entity_id' => $productId,
             'store_id' => $storeId,
             'entity_website_id' => $websiteId,
             'base_website_id' => $this->baseWebsiteId($websiteId),
-        ];
-
-        return $this->getConnection()->fetchOne($this->selectPriceBookId, $condition);
+            'magento_type' => $magentoType
+        ]);
     }
 
     /**
@@ -202,12 +216,17 @@ class Objects extends AbstractDb
      * @param string $entityId
      * @param string $magentoType
      * @param int $websiteId
-     *
+     * @param string|null $salesforceType
      * @return int
      */
-    public function loadStatus($entityId, $magentoType, $websiteId)
+    public function loadStatus($entityId, $magentoType, $websiteId, ?string $salesforceType = null)
     {
-        return $this->getConnection()->fetchOne($this->selectStatus, [
+        $loadObjectStatusSelect = clone $this->selectStatus;
+        if ($salesforceType !== null) {
+            $loadObjectStatusSelect->where('salesforce_type = ?', $salesforceType);
+        }
+        
+        return $this->getConnection()->fetchOne($loadObjectStatusSelect, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
             'entity_website_id' => $websiteId,

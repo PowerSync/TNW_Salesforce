@@ -605,6 +605,9 @@
             </argument>
             <argument name="skipRules" xsi:type="array">
                 <item name="skipByCustomerGroupConfiguration" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\SkipRules\SkipByCustomerGroup</item>
+                <item name="disabledSync" xsi:type="object">
+                    TNW\Salesforce\Synchronize\Queue\Customer\SkipRules\SkipDisabledSync
+                </item>
             </argument>
         </arguments>
     </virtualType>
@@ -762,4 +765,17 @@
             </argument>
         </arguments>
     </type>
+    <type name="TNW\Salesforce\Service\GetFilteredIdsWithoutOrderZeroGrandTotal">
+        <arguments>
+            <argument name="getSelectProcessors" xsi:type="array">
+                <item name="order" xsi:type="object">TNW\Salesforce\Service\ZeroGrandTotalProcessors\Order\GetSelect</item>
+                <item name="orderShipment" xsi:type="object">TNW\Salesforce\Service\ZeroGrandTotalProcessors\Shipment\GetSelect</item>
+                <item name="orderInvoice" xsi:type="object">TNW\Salesforce\Service\ZeroGrandTotalProcessors\Invoice\GetSelect</item>
+            </argument>
+        </arguments>
+    </type>
+    <preference for="TNW\Salesforce\Api\Service\Customer\IsSyncDisabledInterface"
+                type="TNW\Salesforce\Service\Customer\IsSyncDisabled"/>
+    <preference for="TNW\Salesforce\Api\Service\Customer\GetCustomerIdByQuoteIdInterface"
+                type="TNW\Salesforce\Service\Customer\GetCustomerIdByQuoteId"/>
 </config>
