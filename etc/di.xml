@@ -779,6 +779,8 @@
                 <item name="orderInvoice" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Invoice</item>
                 <item name="orderShipment" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Shipment</item>
                 <item name="store" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Store</item>
+                <item name="quote" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Quote</item>
+                <item name="quoteItem" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\QuoteItem</item>
             </argument>
         </arguments>
     </type>

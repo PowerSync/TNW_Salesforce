@@ -13,6 +13,7 @@ use TNW\Salesforce\Api\Service\GetWebsiteByEntityType\GetWebsiteIdByEntityIdsInt
  */
 abstract class ByStoreIdAbstract implements GetWebsiteIdByEntityIdsInterface
 {
+    protected $entityField = 'entity_id';
 
     /** @var ResourceConnection */
     private $resource;
@@ -57,9 +58,15 @@ abstract class ByStoreIdAbstract implements GetWebsiteIdByEntityIdsInterface
             $connection = $this->resource->getConnection();
             $select = $connection->select()->from(
                 ['main_table' => $this->resource->getTableName($this->getMainTable())],
-                ['entity_id', 'store_id']
+                [$this->entityField, 'store_id']
             );
-            $select->where('entity_id IN (?)', $missedEntityIds);
+            $select->where(
+                sprintf(
+                    '%s IN (?)',
+                    $this->entityField
+                ),
+                $missedEntityIds
+            );
             $items = $connection->fetchPairs($select);
             foreach ($missedEntityIds as $missedEntityId) {
                 $storeId = $items[$missedEntityId] ?? null;

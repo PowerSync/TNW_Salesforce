@@ -8,6 +8,8 @@ namespace TNW\Salesforce\Service\GetWebsiteByEntityType;
  */
 class QuoteItem extends ByStoreIdAbstract
 {
+    protected $entityField = 'item_id';
+
     /**
      * @inheritDoc
      */
