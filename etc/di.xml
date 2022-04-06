@@ -605,6 +605,9 @@
             </argument>
             <argument name="skipRules" xsi:type="array">
                 <item name="skipByCustomerGroupConfiguration" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer\SkipRules\SkipByCustomerGroup</item>
+                <item name="disabledSync" xsi:type="object">
+                    TNW\Salesforce\Synchronize\Queue\Customer\SkipRules\SkipDisabledSync
+                </item>
             </argument>
         </arguments>
     </virtualType>
@@ -776,4 +779,8 @@
                 type="TNW\Salesforce\Plugin\Synchronize\Transport\Soap\Calls\Upsert\Storage\FormatResponseForArchivedProductsPlugin"
         />
     </type>
+    <preference for="TNW\Salesforce\Api\Service\Customer\IsSyncDisabledInterface"
+                type="TNW\Salesforce\Service\Customer\IsSyncDisabled"/>
+    <preference for="TNW\Salesforce\Api\Service\Customer\GetCustomerIdByQuoteIdInterface"
+                type="TNW\Salesforce\Service\Customer\GetCustomerIdByQuoteId"/>
 </config>
