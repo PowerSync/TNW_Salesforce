@@ -5,10 +5,12 @@ use Magento\Customer\Model\Address;
 use Magento\Customer\Model\Customer;
 use Magento\Framework\Model\AbstractModel;
 use RuntimeException;
+use TNW\Salesforce\Api\Service\Company\GenerateCompanyNameInterface;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\Customer\Config;
 use TNW\Salesforce\Model\Mapper;
 use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Utils\Company;
 
 /**
  * Customer Account Mapping
@@ -20,19 +22,23 @@ class Mapping extends Synchronize\Unit\Mapping
      */
     private $customerConfig;
 
+    /** @var GenerateCompanyNameInterface */
+    private $generateCompanyName;
+
     /**
      * Mapping constructor.
      *
-     * @param string $name
-     * @param string $load
-     * @param string $lookup
-     * @param string $objectType
-     * @param Synchronize\Units $units
-     * @param Synchronize\Group $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
+     * @param string                                       $name
+     * @param string                                       $load
+     * @param string                                       $lookup
+     * @param string                                       $objectType
+     * @param Synchronize\Units                            $units
+     * @param Synchronize\Group                            $group
+     * @param Synchronize\Unit\IdentificationInterface     $identification
      * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
-     * @param Config $customerConfig
-     * @param array $dependents
+     * @param Config                                       $customerConfig
+     * @param GenerateCompanyNameInterface                 $generateCompanyName
+     * @param array                                        $dependents
      */
     public function __construct(
         $name,
@@ -44,6 +50,7 @@ class Mapping extends Synchronize\Unit\Mapping
         Synchronize\Unit\IdentificationInterface $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
         Config $customerConfig,
+        GenerateCompanyNameInterface $generateCompanyName,
         array $dependents = []
     ) {
         parent::__construct(
@@ -59,6 +66,7 @@ class Mapping extends Synchronize\Unit\Mapping
         );
 
         $this->customerConfig = $customerConfig;
+        $this->generateCompanyName = $generateCompanyName;
     }
 
     /**
@@ -100,21 +108,7 @@ class Mapping extends Synchronize\Unit\Mapping
         }
 
         if ($entity instanceof Customer && strcasecmp($attributeCode, 'sf_company') === 0) {
-            switch (true) {
-                case (!empty($entity->getCompany())):
-                    $company = $entity->getCompany();
-                    break;
-                case (!empty($entity->getDefaultBillingAddress()) && !empty($entity->getDefaultBillingAddress()->getCompany())):
-                    $company = $entity->getDefaultBillingAddress()->getCompany();
-                    break;
-                case (!empty($entity->getDefaultShippingAddress()) && !empty($entity->getDefaultShippingAddress()->getCompany())):
-                    $company = $entity->getDefaultShippingAddress()->getCompany();
-                    break;
-                default:
-                    $company = self::generateCompanyByCustomer($entity);
-                    break;
-            }
-            return $company;
+            return $this->generateCompanyName->execute($entity);
         }
 
         return parent::prepareValue($entity, $attributeCode);
@@ -132,7 +126,7 @@ class Mapping extends Synchronize\Unit\Mapping
         $default = parent::defaultValue($entity, $mapper);
 
         if (empty($default) && strcasecmp($mapper->getSalesforceAttributeName(), 'Name') === 0) {
-            return self::generateCompanyByCustomer($entity);
+            return Company::generateCompanyByCustomer($entity);
         }
 
         if (strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0) {
@@ -152,7 +146,7 @@ class Mapping extends Synchronize\Unit\Mapping
     {
         $company = self::getCompanyByCustomer($entity);
         if (empty($company)) {
-            $company = self::generateCompanyByCustomer($entity);
+            $company = Company::generateCompanyByCustomer($entity);
         }
 
         return $company;
@@ -174,16 +168,5 @@ class Mapping extends Synchronize\Unit\Mapping
         }
 
         return $companyName;
-    }
-
-    /**
-     * Generate Company By Customer
-     *
-     * @param Customer $entity
-     * @return string
-     */
-    public static function generateCompanyByCustomer($entity)
-    {
-        return trim(sprintf('%s %s', trim($entity->getFirstname()), trim($entity->getLastname())));
     }
 }
