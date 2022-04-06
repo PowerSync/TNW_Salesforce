@@ -1,43 +1,52 @@
 <?php
+
 namespace TNW\Salesforce\Model\Config\Source\Salesforce;
 
-use TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Base as salesforceEntityRepository;
+use Exception;
+use Magento\Framework\DataObject;
+use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\Option\ArrayInterface;
+use TNW\Salesforce\Synchronize\Transport\Calls\Query\Output;
+use TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Base as SalesforceEntityRepository;
+
 /**
  * Class Base
  * @package TNW\Salesforce\Model\Config\Source\Customer
  */
-class Base extends \Magento\Framework\DataObject implements \Magento\Framework\Option\ArrayInterface
+class Base extends DataObject implements ArrayInterface
 {
-
-    /**
-     * @var \Magento\Framework\Message\ManagerInterface
-     */
+    /** @var ManagerInterface */
     protected $messageManager;
 
-    /**
-     * @var \TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Base
-     */
+    /** @var SalesforceEntityRepository */
     protected $salesforceEntityRepository;
+
+    /** @var bool */
+    private $addEmptyFirstItem;
 
     /**
      * Owner constructor.
-     * @param \Magento\Framework\Message\ManagerInterface $messageManager
-     * @param $salesforceEntityRepository $salesforceEntityRepository
-     * @param array $data
+     *
+     * @param ManagerInterface           $messageManager
+     * @param SalesforceEntityRepository $salesforceEntityRepository
+     * @param array                      $data
+     * @param bool                       $addEmptyFirstItem
      */
     public function __construct(
-        \Magento\Framework\Message\ManagerInterface $messageManager,
-        salesforceEntityRepository $salesforceEntityRepository,
-        array $data = []
+        ManagerInterface $messageManager,
+        SalesforceEntityRepository $salesforceEntityRepository,
+        array $data = [],
+        bool $addEmptyFirstItem = true
     ) {
         parent::__construct($data);
 
         $this->messageManager = $messageManager;
         $this->salesforceEntityRepository = $salesforceEntityRepository;
+        $this->addEmptyFirstItem = $addEmptyFirstItem;
     }
 
     /**
-     * @return \TNW\Salesforce\Synchronize\Transport\Calls\Query\Output
+     * @return array|Output
      */
     public function getObjects()
     {
@@ -51,15 +60,15 @@ class Base extends \Magento\Framework\DataObject implements \Magento\Framework\O
      */
     public function toOptionArray()
     {
-        $options = $entities= [];
+        $options = $entities = [];
 
         try {
             $entities = $this->getObjects();
-            $options[''] = ' ';
-            foreach($entities as $data) {
+            $this->addEmptyFirstItem && $options[''] = ' ';
+            foreach ($entities as $data) {
                 $options[$data['Id']] = $data['Name'];
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->messageManager->addExceptionMessage($e);
         }
 
