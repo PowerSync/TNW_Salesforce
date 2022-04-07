@@ -32,9 +32,12 @@ class GetWebsiteIdByQueue
     {
         $entityLoad = $queue->getEntityLoad();
         $entityId = $queue->getEntityId();
-        if($entityLoad === 'product' && $queue->getObjectType() === 'PricebookEntry') {
+        if ($entityLoad === 'product' && $queue->getObjectType() === 'PricebookEntry') {
             $entityLoad = 'store';
             $entityId = (int)($queue->getEntityLoadAdditional()['store_id'] ?? 0);
+        }
+        if ($entityLoad === 'TierPrice') {
+            $entityId = (int)($queue->getEntityLoadAdditional()['website_id'] ?? 0);
         }
 
         return (int)($this->getWebsiteByEntityLoad->execute([$entityId], (string)$entityLoad)[$entityId] ?? 0);
