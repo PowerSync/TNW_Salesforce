@@ -774,6 +774,11 @@
             </argument>
         </arguments>
     </type>
+    <type name="TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert\Storage">
+        <plugin name="FormatResponseForArchivedProductsPlugin"
+                type="TNW\Salesforce\Plugin\Synchronize\Transport\Soap\Calls\Upsert\Storage\FormatResponseForArchivedProductsPlugin"
+        />
+    </type>
     <preference for="TNW\Salesforce\Api\Service\Customer\IsSyncDisabledInterface"
                 type="TNW\Salesforce\Service\Customer\IsSyncDisabled"/>
     <preference for="TNW\Salesforce\Api\Service\Customer\GetCustomerIdByQuoteIdInterface"
