@@ -203,7 +203,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: docker
 
   magento-coding-standard:
-    <<: *base-image235
+    <<: *base-image243
     steps:
       - checkout
       - run:
@@ -211,8 +211,16 @@ jobs:
           command: |
             /var/www/html/magento-coding-standard/vendor/bin/phpcs $CIRCLE_WORKING_DIRECTORY --standard=MEQP2 --severity=10 --extensions=php,phtml
   check-composer-installation:
-    <<: *base-image235
+    <<: *base-image243
     steps:
+      - run:
+          name: Reinstall Composer
+          command: |
+            cd ~
+            curl -sS https://getcomposer.org/installer -o composer-setup.php
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+            cd /var/www/html/magento/
+            composer --no-plugins config allow-plugins true
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
