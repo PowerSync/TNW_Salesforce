@@ -27,15 +27,11 @@ class Mapper extends AbstractDb
                 'magento_entity_type',
                 'magento_attribute_name',
                 'salesforce_attribute_name',
-                'website_id'
             ],
             'title' => __(
-                'Mapper with for such %1, %2, %3, %4, %5',
-                __('Object Type'),
-                __('Magento Object'),
+                'Mapper with same %1 and %2',
                 __('Magento Attribute'),
-                __('Magento Attribute'),
-                __('Website')
+                __('Salesforce Attribute')
             )
         ]];
 
