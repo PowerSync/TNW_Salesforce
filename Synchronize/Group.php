@@ -9,6 +9,7 @@ use Magento\Framework\Phrase;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use SplObjectStorage;
+use TNW\Salesforce\Synchronize\Unit\CurrentUnit;
 
 /**
  * Group
@@ -51,6 +52,9 @@ class Group
      */
     protected $unitsFactory;
 
+    /** @var CurrentUnit */
+    private $currentUnit;
+
     /**
      * Entity constructor.
      * @param string $groupCode
@@ -64,13 +68,15 @@ class Group
         array $units,
         UnitsFactory $unitsFactory,
         ObjectManagerInterface $objectManager,
-        LoggerInterface $systemLogger
+        LoggerInterface $systemLogger,
+        CurrentUnit $currentUnit
     ) {
         $this->groupCode = $groupCode;
         $this->units = array_filter($units);
         $this->objectManager = $objectManager;
         $this->systemLogger = $systemLogger;
         $this->unitsFactory = $unitsFactory;
+        $this->currentUnit = $currentUnit;
     }
 
     /**
@@ -95,6 +101,7 @@ class Group
         $units = $this->createUnits($queues)->sort();
         /** @var Unit\UnitInterface $unit */
         foreach ($units as $unit) {
+            $this->currentUnit->setUnit($unit);
             foreach ($unit->dependents() as $dependent) {
                 if ($units->get($dependent)->isComplete()) {
                     continue;
@@ -109,6 +116,7 @@ class Group
             $unit->process();
             $unit->status($unit::COMPLETE);
         }
+        $this->currentUnit->clear();
 
         return $units;
     }
