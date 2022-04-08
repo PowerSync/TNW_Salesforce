@@ -321,7 +321,7 @@ workflows:
           context: powersync
           filters:
             branches:
-            only: /.*/
+              only: /.*/
       - m235-open_source-php73:
           context: powersync
           filters:
@@ -331,7 +331,7 @@ workflows:
           context: powersync
           filters:
             branches:
-            only: /.*/
+              only: /.*/
       - m243-open_source-php74:
           context: powersync
           filters:
