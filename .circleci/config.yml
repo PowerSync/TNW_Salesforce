@@ -178,7 +178,6 @@ jobs:
           name: Install the Extension
           command: |
             cd /var/www/html/magento
-            COMPOSER_MEMORY_LIMIT=-1 composer require tnw/soap-client magento/extension-b2b=^1.1
             rm -rf ./generated/*
             ./bin/magento module:status
             ./bin/magento module:enable --all
