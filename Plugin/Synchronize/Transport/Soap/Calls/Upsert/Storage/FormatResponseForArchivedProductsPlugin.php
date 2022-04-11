@@ -4,9 +4,12 @@ declare(strict_types=1);
 namespace TNW\Salesforce\Plugin\Synchronize\Transport\Soap\Calls\Upsert\Storage;
 
 use Magento\Catalog\Api\Data\ProductInterface;
+use ReflectionException;
+use ReflectionProperty;
+use TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert\Storage;
 use TNW\Salesforce\Synchronize\Unit\CurrentUnit;
 use TNW\Salesforce\Synchronize\Unit\Upsert\Input;
-use Tnw\SoapClient\Result\UpsertResult;
+use Tnw\SoapClient\Result\SaveResult;
 
 /**
  *  Find archived product error
@@ -19,9 +22,10 @@ class FormatResponseForArchivedProductsPlugin
     /** @var CurrentUnit */
     private $currentUnit;
 
-    public function __construct(
-        CurrentUnit $currentUnit
-    )
+    /**
+     * @param CurrentUnit $currentUnit
+     */
+    public function __construct(CurrentUnit $currentUnit)
     {
         $this->currentUnit = $currentUnit;
     }
@@ -29,14 +33,14 @@ class FormatResponseForArchivedProductsPlugin
     /**
      * Check and prepare message
      *
-     * @param              $subject
-     * @param              $entity
-     * @param UpsertResult $result
+     * @param Storage    $subject
+     * @param object     $entity
+     * @param SaveResult $result
      *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function beforeSaveResult($subject, $entity, UpsertResult $result)
+    public function beforeSaveResult(Storage $subject, object $entity, SaveResult $result)
     {
         $unit = $this->currentUnit->getUnit();
         if ($entity instanceof ProductInterface &&
@@ -50,7 +54,7 @@ class FormatResponseForArchivedProductsPlugin
                 foreach ($result->getErrors() as $error) {
                     $wasFound = $error->getStatusCode() === self::ERROR_CODE;
                     if ($wasFound) {
-                        $messageProperty = new \ReflectionProperty($error, 'message');
+                        $messageProperty = new ReflectionProperty($error, 'message');
                         $messageProperty->setAccessible(true);
                         $format = 'Item cannot be synced! Reason: "Product is archived!". For more information click %s';
                         $link = sprintf(
