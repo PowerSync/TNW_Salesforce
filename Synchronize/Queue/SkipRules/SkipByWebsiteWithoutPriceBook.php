@@ -13,17 +13,24 @@ use TNW\Salesforce\Synchronize\Queue\SkipInterface;
  */
 class SkipByWebsiteWithoutPriceBook implements SkipInterface
 {
-    /** @var StoreManagerInterface */
+    /**
+     * @var StoreManagerInterface
+     */
     private $storeManager;
 
-    /** @var GetWebsiteIdByQueue */
+    /**
+     * @var GetWebsiteIdByQueue
+     */
     private $getWebsiteIdByQueue;
 
+    /**
+     * @param StoreManagerInterface $storeManager
+     * @param GetWebsiteIdByQueue $getWebsiteIdByQueue
+     */
     public function __construct(
         StoreManagerInterface $storeManager,
         GetWebsiteIdByQueue $getWebsiteIdByQueue
-    )
-    {
+    ) {
         $this->storeManager = $storeManager;
         $this->getWebsiteIdByQueue = $getWebsiteIdByQueue;
     }
