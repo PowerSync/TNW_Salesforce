@@ -787,6 +787,7 @@
         <arguments>
             <argument name="processors" xsi:type="array">
                 <item name="order" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Order</item>
+                <item name="orderItem" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\OrderItem</item>
                 <item name="customer" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Customer</item>
                 <item name="orderInvoice" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Invoice</item>
                 <item name="orderShipment" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Shipment</item>
