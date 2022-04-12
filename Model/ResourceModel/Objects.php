@@ -116,12 +116,13 @@ class Objects extends AbstractDb
             ->limit(1);
 
         $this->selectPriceBookId = $this->getConnection()->select()
-            ->from($this->getMainTable(), ['object_id', 'salesforce_type'])
-            ->where('magento_type = :magento_type')
+            ->from($this->getMainTable(), ['GROUP_CONCAT(DISTINCT(object_id) SEPARATOR "\n")'])
+            ->where('magento_type = "Product"')
+            ->where('salesforce_type = "PricebookEntry"')
             ->where('entity_id = :entity_id')
             ->where('website_id IN(:entity_website_id, :base_website_id)')
-            ->order(new \Zend_Db_Expr('FIELD(website_id, :entity_website_id, :base_website_id)'))
-            ->order(new \Zend_Db_Expr('FIELD(store_id, :store_id, 0)'))
+            ->order('website_id DESC')
+            ->group('website_id')
             ->limit(1);
     }
 
@@ -158,30 +159,24 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $productId
-     * @param int $storeId
-     * @param int $websiteId
+     * @param int      $productId
+     * @param int      $websiteId
+     *
+     * @param int|null $storeId
      *
      * @return string
      */
-    public function loadPriceBookId(
-        $productId,
-        $storeId,
-        $websiteId,
-        string $magentoType = 'PricebookEntry',
-        ?string $salesforceType = null
-    ) {
+    public function loadPriceBookId(int $productId, int $websiteId, int $storeId = null): string
+    {
         $loadPricebookIdSelect = clone $this->selectPriceBookId;
-        if ($salesforceType !== null) {
-            $loadPricebookIdSelect->where('salesforce_type = ?', $salesforceType);
+        if ($storeId) {
+            $loadPricebookIdSelect->where('store_id = ?', $storeId);
         }
 
-        return $this->getConnection()->fetchOne($loadPricebookIdSelect, [
+        return (string)$this->getConnection()->fetchOne($loadPricebookIdSelect, [
             'entity_id' => $productId,
-            'store_id' => $storeId,
             'entity_website_id' => $websiteId,
             'base_website_id' => $this->baseWebsiteId($websiteId),
-            'magento_type' => $magentoType
         ]);
     }
 

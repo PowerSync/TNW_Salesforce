@@ -49,7 +49,14 @@ class Admin extends AbstractProcessingHandler
 
         switch ($record['level']) {
             case \Monolog\Logger::ERROR:
-                $this->messageManager->addErrorMessage($record['message'], 'backend');
+                $this->messageManager->addComplexErrorMessage(
+                    'allowHtmlTagsMessage',
+                    [
+                        'message' => $record['message'],
+                        'allowed_tags' => ['a']
+                    ],
+                    'backend'
+                );
                 break;
 
             case \Monolog\Logger::WARNING:
