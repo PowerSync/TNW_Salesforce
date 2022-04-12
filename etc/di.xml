@@ -797,4 +797,6 @@
             </argument>
         </arguments>
     </type>
+    <preference for="TNW\Salesforce\Api\Service\Company\GenerateCompanyNameInterface"
+                type="TNW\Salesforce\Service\Company\GenerateCompanyName"/>
 </config>
