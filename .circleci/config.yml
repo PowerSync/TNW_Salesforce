@@ -207,6 +207,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Update coding standarts
+          command: |
+            cd /var/www/html/magento-coding-standard
+            composer update
+      - run:
           name: Run Magento Coding Standard
           command: |
             /var/www/html/magento-coding-standard/vendor/bin/phpcs $CIRCLE_WORKING_DIRECTORY --standard=MEQP2 --severity=10 --extensions=php,phtml
