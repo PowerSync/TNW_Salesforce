@@ -240,12 +240,13 @@ class Unit
             'sync_attempt' => 0,
             '_base_entity_id' => [$baseEntityId],
             'identify' => hash('sha256', (sprintf(
-                '%s/%s/%s/%s/%s',
+                '%s/%s/%s/%s/%s/%s',
                 $this->code(),
                 $this->entityType,
                 $entityId,
                 $this->serializer->serialize($additionalLoad),
-                $this->objectType
+                $this->objectType,
+                $baseEntityId
             )))
         ]]);
 
