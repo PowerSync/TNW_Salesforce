@@ -2,11 +2,12 @@
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
 
 /**
@@ -70,7 +71,7 @@ class Unit
     private $ignoreFindGeneratorException;
 
     /**
-     * @var \TNW\Salesforce\Model\Queue[]
+     * @var Queue[]
      */
     private $queues = [];
 
@@ -199,7 +200,7 @@ class Unit
     /**
      * Skip
      *
-     * @param \TNW\Salesforce\Model\Queue $queue
+     * @param Queue $queue
      * @return bool
      */
     public function skipQueue($queue)
@@ -217,15 +218,24 @@ class Unit
      * Create
      *
      * @param string $loadBy
-     * @param int $entityId
-     * @param int $baseEntityId
-     * @param array $identifiers
-     * @param array $additionalLoad
-     * @return \TNW\Salesforce\Model\Queue
+     * @param int    $entityId
+     * @param int    $baseEntityId
+     * @param array  $identifiers
+     * @param array  $additionalLoad
+     * @param array  $additionalToHash
+     *
+     * @return Queue
      * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function createQueue($loadBy, $entityId, $baseEntityId, array $identifiers, array $additionalLoad = [])
-    {
+    public function createQueue(
+        $loadBy,
+        $entityId,
+        $baseEntityId,
+        array $identifiers,
+        array $additionalLoad = [],
+        array $additionalToHash = []
+    ) {
         $queue = $this->queueFactory->create(['data' => [
             'queue_id' => uniqid('', true),
             'code' => $this->code,
@@ -246,7 +256,7 @@ class Unit
                 $entityId,
                 $this->serializer->serialize($additionalLoad),
                 $this->objectType,
-                $baseEntityId
+                $this->serializer->serialize($additionalToHash)
             )))
         ]]);
 
@@ -418,7 +428,7 @@ class Unit
     }
 
     /**
-     * @return \TNW\Salesforce\Model\Queue[]
+     * @return Queue[]
      */
     public function getQueues(): array
     {
@@ -426,14 +436,14 @@ class Unit
     }
 
     /**
-     * @param \TNW\Salesforce\Model\Queue[] $queues
+     * @param Queue[] $queues
      */
     public function setQueues(array $queues): void
     {
         $this->queues = $queues;
     }
     /**
-     * @param \TNW\Salesforce\Model\Queue[] $queues
+     * @param Queue[] $queues
      */
     public function addQueues(array $queues): void
     {
