@@ -156,7 +156,7 @@ jobs:
           name: Checkout related modules
           command: |
             cd /var/www/html/magento/
-
+            
             for moduleName in $MODULES_NAME; do
               composer config repositories.TNW_$moduleName git git@github.com:PowerSync/TNW_$moduleName.git
               moduleNameLower=(`echo $moduleName| tr '[:upper:]' '[:lower:]'`)
@@ -281,7 +281,6 @@ jobs:
       - run:
           name: Push changes to wiki
           command: |
-            set -x
             cd ~/.composer/
 
             for package in $PACKAGES_NAME; do
