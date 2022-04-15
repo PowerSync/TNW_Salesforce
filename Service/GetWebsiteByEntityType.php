@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Service;
 
+use Magento\Framework\Exception\LocalizedException;
 use RuntimeException;
 use TNW\Salesforce\Api\Service\GetWebsiteByEntityType\GetWebsiteIdByEntityIdsInterface;
 
@@ -32,18 +33,18 @@ class GetWebsiteByEntityType
     }
 
     /**
-     * @param array  $entityIds
+     * @param array $entityIds
      * @param string $entityType
      *
      * @return array
+     * @throws LocalizedException
      */
     public function execute(array $entityIds, string $entityType): array
     {
         $processor = $this->processors[$entityType] ?? null;
         if (!$processor) {
-            $format = "Processor for Entity load: '%s' is not defined!";
-            throw new RuntimeException(
-                sprintf($format, $entityType)
+            throw new LocalizedException(
+                __("Processor for Entity load: '%1' is not defined!", $entityType)
             );
         }
         $entityIds = array_map('intval', $entityIds);
