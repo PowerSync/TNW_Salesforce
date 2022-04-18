@@ -68,6 +68,7 @@
                 <item name="order" xsi:type="string">tnwsforce_order</item>
                 <item name="invoice" xsi:type="string">tnwsforce_invoice</item>
                 <item name="shipment" xsi:type="string">tnwsforce_shipment</item>
+                <item name="picklists" xsi:type="string">tnwsforce_picklists</item>
             </argument>
         </arguments>
     </type>
