@@ -117,6 +117,7 @@ class Salesforce extends DataObject
                 $this->loginResult[$cacheKey] = $this->client[$cacheKey]->getLoginResult();
             } catch (Exception $e) {
                 $this->client[$cacheKey] = null;
+                throw $e;
             }
         }
 
