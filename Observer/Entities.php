@@ -22,7 +22,8 @@ class Entities
             $entity = $entity->getId();
         }
 
-        $this->entityIds[] = $entity;
+        $this->entityIds[] = (int)$entity;
+        $this->entityIds = array_unique($this->entityIds);
     }
 
     /**
