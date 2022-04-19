@@ -3,14 +3,18 @@
 namespace TNW\Salesforce\Client;
 
 use Exception;
+use Magento\Framework\App\Area;
 use Magento\Framework\App\Cache\State;
 use Magento\Framework\App\Cache\Type\Collection;
+use Magento\Framework\App\State as AppState;
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\Serializer\Serialize;
 use Magento\Framework\Serialize\SerializerInterface;
 use stdClass;
+use Throwable;
 use TNW\Salesforce\Model\Logger;
 use TNW\Salesforce\Service\ObjectConvertor;
 use Tnw\SoapClient\Client;
@@ -63,6 +67,9 @@ class Salesforce extends DataObject
     /** @var ObjectConvertor|null */
     private $objectConvertor;
 
+    /** @var AppState|null */
+    private $appState;
+
     /**
      * @param Config                   $salesForceConfig
      * @param Collection               $cacheCollection
@@ -72,6 +79,7 @@ class Salesforce extends DataObject
      * @param ObjectManagerInterface   $objectManager
      * @param SerializerInterface|null $serializer
      * @param ObjectConvertor|null     $objectConvertor
+     * @param AppState|null            $appState
      */
     public function __construct(
         Config $salesForceConfig,
@@ -81,7 +89,8 @@ class Salesforce extends DataObject
         WebsiteDetector $websiteDetector,
         ObjectManagerInterface $objectManager,
         SerializerInterface $serializer = null,
-        ObjectConvertor $objectConvertor = null
+        ObjectConvertor $objectConvertor = null,
+        AppState $appState = null
     ) {
         parent::__construct();
         $this->salesforceConfig = $salesForceConfig;
@@ -91,6 +100,7 @@ class Salesforce extends DataObject
         $this->websiteDetector = $websiteDetector;
         $this->serializer = $serializer ?? $objectManager->get(Serialize::class);
         $this->objectConvertor = $objectConvertor ?? $objectManager->get(ObjectConvertor::class);
+        $this->appState = $appState ?? $objectManager->get(AppState::class);
     }
 
     /**
@@ -99,7 +109,7 @@ class Salesforce extends DataObject
      * @param int|null $websiteId
      *
      * @return null|Client
-     * @throws Exception
+     * @throws LocalizedException|FileSystemException|Throwable
      */
     public function getClient($websiteId = null)
     {
@@ -115,9 +125,11 @@ class Salesforce extends DataObject
                     $this->salesforceConfig->getSalesforceToken($websiteId)
                 );
                 $this->loginResult[$cacheKey] = $this->client[$cacheKey]->getLoginResult();
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 $this->client[$cacheKey] = null;
-                throw $e;
+                if ($this->appState->getAreaCode() === Area::AREA_ADMINHTML) {
+                    throw $e;
+                }
             }
         }
 
