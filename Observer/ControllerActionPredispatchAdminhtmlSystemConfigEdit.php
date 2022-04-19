@@ -33,6 +33,7 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements \Magento\F
         'tnwsforce_order',
         'tnwsforce_invoice',
         'tnwsforce_shipment',
+        'tnwsforce_picklists',
     ];
 
     /**
