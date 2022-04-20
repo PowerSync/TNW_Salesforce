@@ -246,6 +246,7 @@ jobs:
       - run:
           name: Checkout related modules
           command: |
+            set -x
             cd /var/www/html/magento/
             for package in $PACKAGES_NAME; do
               NEW_MODULE_VERSION=(`composer show -al $package |grep '^latest '|awk '{print $3}'|sed 's/,//'`);
