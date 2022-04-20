@@ -176,6 +176,9 @@ class Load extends Synchronize\Unit\UnitAbstract
                                 continue;
                             }
                             foreach ($_queue->getAdditional() as $type => $id) {
+                                if (empty($id) && (string)$id != '0') {
+                                    continue;
+                                }
                                 $additional[$type][$id] = $id;
                             }
                         }
