@@ -2,6 +2,16 @@
 
 namespace  TNW\Salesforce\Model\Customer;
 
+use Magento\Customer\Api\Data\AddressInterface;
+use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Reflection\DataObjectProcessor;
+use stdClass;
+use TNW\Salesforce\Client\Website;
+use TNW\Salesforce\Model\Logger;
+use TNW\Salesforce\Model\ResourceModel\Customer\Mapper\Repository;
+use TNW\SForceEnterprise\Service\Map\AllowBlankValue;
+
 /**
  * Class Map
  *
@@ -11,7 +21,7 @@ namespace  TNW\Salesforce\Model\Customer;
 class Map
 {
     /**
-     * @var \TNW\Salesforce\Model\ResourceModel\Customer\Mapper\Repository
+     * @var Repository
      */
     protected $repository;
 
@@ -20,10 +30,10 @@ class Map
      */
     protected $map;
 
-    /** @var \Magento\Framework\ObjectManagerInterface  */
+    /** @var ObjectManagerInterface  */
     protected $objectManager;
 
-    /** @var \TNW\Salesforce\Model\Logger */
+    /** @var Logger */
     protected $logger;
 
     /**
@@ -37,19 +47,24 @@ class Map
     const SFORCE_ENTERPRISE_PREFIX = 'tnw_mage_enterp__';
     const SFORCE_MAGENTO_ID = 'Magento_ID__c';
 
+    /** @var AllowBlankValue */
+    private $allowBlankValue;
+
     /**
-     * @param \TNW\Salesforce\Model\ResourceModel\Customer\Mapper\Repository
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param Repository
+     * @param ObjectManagerInterface $objectManager
      */
     public function __construct(
-        \TNW\Salesforce\Model\ResourceModel\Customer\Mapper\Repository $repository,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \TNW\Salesforce\Model\Logger $logger
+        Repository $repository,
+        ObjectManagerInterface $objectManager,
+        Logger $logger,
+        AllowBlankValue $allowBlankValue
     ) {
         $this->objectManager = $objectManager;
         $this->repository = $repository;
         $this->logger = $logger;
         $this->defaultMap = ['AccountId' => 'sforce_account_id', 'Id' => 'sforce_id'];
+        $this->allowBlankValue = $allowBlankValue;
     }
 
     /**
@@ -58,14 +73,14 @@ class Map
      * @param string $objectType
      * @return array
      */
-    public function getMapArray($objectType = \TNW\Salesforce\Model\Customer\Mapper::OBJECT_TYPE_CONTACT)
+    public function getMapArray($objectType = Mapper::OBJECT_TYPE_CONTACT)
     {
         if (isset($this->map[$objectType])) {
             return $this->map[$objectType];
         }
 
         /**
-         * @var \TNW\Salesforce\Model\Customer\Mapper[] $items
+         * @var Mapper[] $items
          */
         $items = $this->repository->getResultCollection($objectType)->getItems();
         $resultArray = [];
@@ -81,40 +96,54 @@ class Map
     /**
      * Create Contact Transfer object from Customer and Customer Address
      *
-     * @param \Magento\Customer\Api\Data\CustomerInterface $customer
-     * @return \stdClass
+     * @param CustomerInterface $customer
+     * @return stdClass
      */
-    public function getContactTransferObjectFromCustomer(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    public function getContactTransferObjectFromCustomer(CustomerInterface $customer)
     {
 
         $customerArray = $this->getCustomerDataAsArray($customer);
 
-        $transferObject = new \stdClass();
+        $transferObject = new stdClass();
 
-        $mapArray = $this->getMapArray();
+        $objectType = Mapper::OBJECT_TYPE_CONTACT;
+        $mapArray = $this->getMapArray($objectType);
         $mapArray['customer'] = array_merge($mapArray['customer'],$this->defaultMap);
 
         $this->logger->messageDebug("Mapping Customer, email: %s -> Contact. Data:\n%s",
             $customer->getEmail(), $mapArray);
 
-        foreach ($mapArray['customer'] as $sfAttr => $mAttr) {
+        foreach ($mapArray['customer'] ?? [] as $sfAttr => $mAttr) {
             if (!isset($customerArray[$mAttr]) || $customerArray[$mAttr] == "" || $customerArray[$mAttr] == null) {
-                continue;
+                if (!$this->allowBlankValue->execute(
+                    Mapper::OBJECT_TYPE_CONTACT,
+                    $sfAttr
+                )) {
+                    continue;
+                }
             }
             $value = $customerArray[$mAttr];
             $transferObject->$sfAttr = $value;
         }
 
         // billing address
-        if($billingAddress = $this->getDefaultBillingAddress($customer)){
-            $this->addAddressDataToTransferObject($billingAddress,
-                $mapArray['customer_address/billing'], $transferObject);
+        if ($billingAddress = $this->getDefaultBillingAddress($customer)) {
+            $this->addAddressDataToTransferObject(
+                $billingAddress,
+                $mapArray['customer_address/billing'] ?? [],
+                $transferObject,
+                $objectType
+            );
         }
 
         // shipping address
         if ($shippingAddress = $this->getDefaultShippingAddress($customer)) {
-            $this->addAddressDataToTransferObject($shippingAddress,
-                $mapArray['customer_address/shipping'], $transferObject);
+            $this->addAddressDataToTransferObject(
+                $shippingAddress,
+                $mapArray['customer_address/shipping'] ?? [],
+                $transferObject,
+                $objectType
+            );
         }
 
         if (isset($customerArray['sforce_id'])) {
@@ -124,7 +153,7 @@ class Map
         $transferObject->{self::SFORCE_BASIC_PREFIX.self::SFORCE_MAGENTO_ID} = $customer->getId();
 
         $websiteRepository = $this->objectManager->create('Magento\Store\Api\WebsiteRepositoryInterface');
-        $transferObject->{\TNW\Salesforce\Client\Website::SFORCE_WEBSITE_OBJECT} =
+        $transferObject->{Website::SFORCE_WEBSITE_OBJECT} =
             $websiteRepository->getById($customer->getWebsiteId())->getSalesforceId();
 
         return $transferObject;
@@ -133,16 +162,17 @@ class Map
     /**
      * Create Contact Transfer object from Customer and Customer Address
      *
-     * @param \Magento\Customer\Api\Data\CustomerInterface $customer
-     * @return \stdClass
+     * @param CustomerInterface $customer
+     * @return stdClass
      */
-    public function getLeadTransferObjectFromCustomer(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    public function getLeadTransferObjectFromCustomer(CustomerInterface $customer)
     {
         $customerArray = $this->getCustomerDataAsArray($customer);
 
-        $transferObject = new \stdClass();
+        $transferObject = new stdClass();
 
-        $mapArray = $this->getMapArray();
+        $objectType = Mapper::OBJECT_TYPE_CONTACT;
+        $mapArray = $this->getMapArray($objectType);
         //$mapArray['customer'] = array_merge($mapArray['customer'],$this->defaultMap);
 
         $this->logger->messageDebug("Mapping Customer, email: %s -> Lead. Data:\n%s",
@@ -150,7 +180,9 @@ class Map
 
         foreach ($mapArray['customer'] as $sfAttr => $mAttr) {
             if (!isset($customerArray[$mAttr]) || $customerArray[$mAttr] == "" || $customerArray[$mAttr] == null) {
-                continue;
+                if (!$this->allowBlankValue->execute($objectType, $sfAttr)) {
+                    continue;
+                }
             }
             $value = $customerArray[$mAttr];
             $transferObject->$sfAttr = $value;
@@ -158,14 +190,22 @@ class Map
 
         // billing address
         if($billingAddress = $this->getDefaultBillingAddress($customer)){
-            $this->addAddressDataToTransferObject($billingAddress,
-                $mapArray['customer_address/billing'], $transferObject);
+            $this->addAddressDataToTransferObject(
+                $billingAddress,
+                $mapArray['customer_address/billing'],
+                $transferObject,
+                $objectType
+            );
         }
 
         // shipping address
         if ($shippingAddress = $this->getDefaultShippingAddress($customer)) {
-            $this->addAddressDataToTransferObject($shippingAddress,
-                $mapArray['customer_address/shipping'], $transferObject);
+            $this->addAddressDataToTransferObject(
+                $shippingAddress,
+                $mapArray['customer_address/shipping'],
+                $transferObject,
+                $objectType
+            );
         }
 
         //Check if there is NO Billing Company Name
@@ -179,7 +219,7 @@ class Map
         $transferObject->{self::SFORCE_BASIC_PREFIX.self::SFORCE_MAGENTO_ID} = $customer->getId();
 
         $websiteRepository = $this->objectManager->create('Magento\Store\Api\WebsiteRepositoryInterface');
-        $transferObject->{\TNW\Salesforce\Client\Website::SFORCE_WEBSITE_OBJECT} =
+        $transferObject->{Website::SFORCE_WEBSITE_OBJECT} =
             $websiteRepository->getById($customer->getWebsiteId())->getSalesforceId();
 
         return $transferObject;
@@ -188,45 +228,58 @@ class Map
     /**
      * Create Account Transfer Object from Customer
      *
-     * @param \Magento\Customer\Api\Data\CustomerInterface $customer
-     * @return \stdClass
+     * @param CustomerInterface $customer
+     * @return stdClass
      */
-    public function getAccountTransferObjectFromCustomer(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    public function getAccountTransferObjectFromCustomer(CustomerInterface $customer)
     {
-        $transferObject = new \stdClass();
+        $transferObject = new stdClass();
         $customerArray = $this->getCustomerDataAsArray($customer);
-        $mapArray = $this->getMapArray(\TNW\Salesforce\Model\Customer\Mapper::OBJECT_TYPE_ACCOUNT);
+        $objectType = Mapper::OBJECT_TYPE_ACCOUNT;
+        $mapArray = $this->getMapArray($objectType);
 
         $this->logger->messageDebug("Mapping Customer, email: %s -> Account. Data:\n%s",
             $customer->getEmail(), $mapArray);
 
-        /** @var \TNW\Salesforce\Model\Customer\Mapper[] $items */
-        $items = $this->repository->getResultCollection(\TNW\Salesforce\Model\Customer\Mapper::OBJECT_TYPE_ACCOUNT)->getItems();
+        /** @var Mapper[] $items */
+        $items = $this->repository->getResultCollection($objectType)->getItems();
         foreach ($items as $item) {
+            $salesforceAttributeName = $item->getSalesforceAttributeName();
+            $magentoAttributeName = $item->getMagentoAttributeName();
             switch ($item->getMagentoEntityType()){
                 case 'customer':
-                    if (!empty($customerArray[$item->getMagentoAttributeName()])) {
-                        $transferObject->{$item->getSalesforceAttributeName()}
-                            = $customerArray[$item->getMagentoAttributeName()];
+                    if (!empty($customerArray[$magentoAttributeName]) ||
+                        $this->allowBlankValue->execute($objectType, $salesforceAttributeName)
+                    ) {
+                        $transferObject->{$salesforceAttributeName}
+                            = $customerArray[$magentoAttributeName];
                     }
                     break;
 
                 case 'customer_address/billing':
                     if($billingAddress = $this->getDefaultBillingAddress($customer)){
-                        $this->addAddressDataToTransferObject($billingAddress,
-                            [$item->getSalesforceAttributeName() => $item->getMagentoAttributeName()], $transferObject);
+                        $this->addAddressDataToTransferObject(
+                            $billingAddress,
+                            [$salesforceAttributeName => $magentoAttributeName],
+                            $transferObject,
+                            $objectType
+                        );
                     }
                     break;
 
                 case 'customer_address/shipping':
                     if ($shippingAddress = $this->getDefaultShippingAddress($customer)) {
-                        $this->addAddressDataToTransferObject($shippingAddress,
-                            [$item->getSalesforceAttributeName() => $item->getMagentoAttributeName()], $transferObject);
+                        $this->addAddressDataToTransferObject(
+                            $shippingAddress,
+                            [$salesforceAttributeName => $magentoAttributeName],
+                            $transferObject,
+                            $objectType
+                        );
                     }
                     break;
 
                 default:
-                    $transferObject->{$item->getSalesforceAttributeName()}
+                    $transferObject->{$salesforceAttributeName}
                         = $item->getDefaultValue();
                     break;
             }
@@ -247,12 +300,12 @@ class Map
 
     /**
      * get Customer as Array
-     * @param \Magento\Customer\Api\Data\CustomerInterface $customer
+     * @param CustomerInterface $customer
      * @return Array
      */
-    protected function getCustomerDataAsArray(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    protected function getCustomerDataAsArray(CustomerInterface $customer)
     {
-        /** @var \Magento\Framework\Reflection\DataObjectProcessor $dataObjectProcessor */
+        /** @var DataObjectProcessor $dataObjectProcessor */
         $dataObjectProcessor =  $this->objectManager->get('\Magento\Framework\Reflection\DataObjectProcessor');
         $customerArray =
             $dataObjectProcessor->buildOutputDataArray($customer, '\Magento\Customer\Api\Data\CustomerInterface');
@@ -263,10 +316,10 @@ class Map
     }
 
     /**
-     * @param \Magento\Customer\Api\Data\AddressInterface $address
+     * @param AddressInterface $address
      * @return Array
      */
-    protected function getAddressDataAsArray(\Magento\Customer\Api\Data\AddressInterface $address)
+    protected function getAddressDataAsArray(AddressInterface $address)
     {
         $dataObjectProcessor =  $this->objectManager->get('\Magento\Framework\Reflection\DataObjectProcessor');
         $addressArray =
@@ -297,10 +350,10 @@ class Map
     }
 
     /**
-     * @param \Magento\Customer\Api\Data\CustomerInterface $customer
-     * @return \Magento\Customer\Api\Data\AddressInterface|null
+     * @param CustomerInterface $customer
+     * @return AddressInterface|null
      */
-    public function getDefaultShippingAddress(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    public function getDefaultShippingAddress(CustomerInterface $customer)
     {
         $addresses = $customer->getAddresses();
         $shippingAddressId = $customer->getDefaultShipping();
@@ -319,10 +372,10 @@ class Map
 
     /**
      *
-     * @param \Magento\Customer\Api\Data\CustomerInterface $customer
-     * @return \Magento\Customer\Api\Data\AddressInterface|null
+     * @param CustomerInterface $customer
+     * @return AddressInterface|null
      */
-    public function getDefaultBillingAddress(\Magento\Customer\Api\Data\CustomerInterface $customer)
+    public function getDefaultBillingAddress(CustomerInterface $customer)
     {
         $addresses = $customer->getAddresses();
         $billingAddressId = $customer->getDefaultBilling();
@@ -339,26 +392,29 @@ class Map
     }
 
     /**
-     * @param $address
-     * @param array $mapArrayAddress
-     * @param \stdClass $transferObject
+     * @param          $address
+     * @param array    $mapArrayAddress
+     * @param stdClass $transferObject
+     * @param string   $objectType
+     *
      * @return array
      */
     protected function addAddressDataToTransferObject(
         $address,
         array $mapArrayAddress,
-        \stdClass $transferObject
+        stdClass $transferObject,
+        string $objectType
     ) {
         $addressArray = $this->getAddressDataAsArray($address);
         foreach ($mapArrayAddress as $sfAttr => $mAttr) {
-            if (!isset($addressArray[$mAttr])) {
+            $value = $addressArray[$mAttr] ?? null;
+            if (!isset($value) && !$this->allowBlankValue->execute($objectType, $sfAttr)) {
                 continue;
             }
-            if (is_array($addressArray[$mAttr])) {
-                $value = implode(',', $addressArray[$mAttr]);
-            } else {
-                $value = $addressArray[$mAttr];
+            if (is_array($value)) {
+                $value = implode(',', $value);
             }
+
             $transferObject->$sfAttr = $value;
         }
 
