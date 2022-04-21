@@ -293,12 +293,12 @@ jobs:
           command: |
             set -x
             cd ~/.composer/
-            MODULE_NAME=$(grep -o '^ *"name": *"[a-zA-Z\/]*"' ~/tnw_extension/composer.json |  awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
+            MODULE_NAME=$(grep -o '^ *"name": *"[a-zA-Z\/]*"' ~/project/composer.json |  awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
             for package in $PACKAGES_NAME; do
 
               if [[ "$package" == "$MODULE_NAME" ]];
               then
-                NEW_MODULE_VERSION=$(grep -o '^ *"version": *"[0-9\.]*"' ~/tnw_extension/composer.json | awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
+                NEW_MODULE_VERSION=$(grep -o '^ *"version": *"[0-9\.]*"' ~/project/composer.json | awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
               else
                 NEW_MODULE_VERSION=(`composer show -al $package |grep '^latest '|awk '{print $3}'|sed 's/,//'`);
               fi
