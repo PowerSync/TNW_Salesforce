@@ -218,6 +218,7 @@ jobs:
   check-composer-installation:
     <<: *base-image243
     steps:
+      - checkout
       - run:
           name: Reinstall Composer
           command: |
@@ -248,8 +249,15 @@ jobs:
           command: |
             set -x
             cd /var/www/html/magento/
+            MODULE_NAME=$(grep -o '^ *"name": *"[a-zA-Z\/]*"' ~/tnw_extension/composer.json |  awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
             for package in $PACKAGES_NAME; do
-              NEW_MODULE_VERSION=(`composer show -al $package |grep '^latest '|awk '{print $3}'|sed 's/,//'`);
+
+              if [[ "$package" == "$MODULE_NAME" ]];
+              then
+                NEW_MODULE_VERSION=$(grep -o '^ *"version": *"[0-9\.]*"' ~/tnw_extension/composer.json | awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
+              else
+                NEW_MODULE_VERSION=(`composer show -al $package |grep '^latest '|awk '{print $3}'|sed 's/,//'`);
+              fi
               composer require $package=$NEW_MODULE_VERSION
             done
 
@@ -272,6 +280,7 @@ jobs:
     docker:
       - image: circleci/php:7.1-apache-stretch-node-browsers
     steps:
+      - checkout
       - run:
           name: Prepare for wiki update
           command: |
@@ -283,12 +292,17 @@ jobs:
           name: Push changes to wiki
           command: |
             set -x
-
             cd ~/.composer/
-
+            MODULE_NAME=$(grep -o '^ *"name": *"[a-zA-Z\/]*"' ~/project/composer.json |  awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
             for package in $PACKAGES_NAME; do
 
-              NEW_MODULE_VERSION=(`composer show -al $package |grep '^latest '|awk '{print $3}'|sed 's/,//'`);
+              if [[ "$package" == "$MODULE_NAME" ]];
+              then
+                NEW_MODULE_VERSION=$(grep -o '^ *"version": *"[0-9\.]*"' ~/project/composer.json | awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
+              else
+                NEW_MODULE_VERSION=(`composer show -al $package |grep '^latest '|awk '{print $3}'|sed 's/,//'`);
+              fi
+
               PAGE_TITLE='_'
               PAGE_TITLE+=`echo "$package" | sed 's/\//_/'`
 
