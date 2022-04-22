@@ -10,7 +10,7 @@ use stdClass;
 use TNW\Salesforce\Client\Website;
 use TNW\Salesforce\Model\Logger;
 use TNW\Salesforce\Model\ResourceModel\Customer\Mapper\Repository;
-use TNW\SForceEnterprise\Service\Map\AllowBlankValue;
+use TNW\Salesforce\Service\Map\AllowBlankValue;
 
 /**
  * Class Map
