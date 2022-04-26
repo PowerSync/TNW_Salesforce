@@ -71,8 +71,4 @@
             </argument>
         </arguments>
     </type>
-    <type name="Magento\Framework\Message\ManagerInterface">
-        <plugin name="tnw_salesforce_add_group_to_error_message"
-                type="TNW\Salesforce\Plugin\Framework\Message\AddGroupToMessage"/>
-    </type>
 </config>

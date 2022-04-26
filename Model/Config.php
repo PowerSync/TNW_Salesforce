@@ -194,7 +194,6 @@ class Config extends DataObject
     public function getSalesforcePassword($websiteId = null)
     {
         $password = $this->getStoreConfig('tnwsforce_general/salesforce/password', $websiteId);
-        $password = '';
         $decrypt = $this->encryptor->decrypt($password);
         if (!empty($decrypt)) {
             return $decrypt;
