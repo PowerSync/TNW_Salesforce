@@ -520,6 +520,9 @@
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="tnw_salesforce_log_data_source" xsi:type="string">salesforceLogSearchResult</item>
+                <item name="tnw_salesforce_log_file_listing_data_source" xsi:type="string">
+                    TNW\Salesforce\Model\ResourceModel\Log\File\Synchronization\Grid\Collection
+                </item>
             </argument>
         </arguments>
     </type>
