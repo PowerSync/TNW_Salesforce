@@ -1,4 +1,9 @@
 <?xml version="1.0"?>
+<!--
+  ~ Copyright © 2022 TechNWeb, Inc. All rights reserved.
+  ~ See TNW_LICENSE.txt for license details.
+  -->
+
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="tnw_salesforce_mapper" resource="default" engine="innodb" comment="TNW Magento&lt;-&gt;Salesforce mapping">
         <column xsi:type="int" name="map_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Map Id" />
