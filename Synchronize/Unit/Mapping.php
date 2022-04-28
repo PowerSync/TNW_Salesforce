@@ -2,6 +2,7 @@
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use InvalidArgumentException;
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Eav\Model\Entity\AbstractEntity;
 use Magento\Framework\Data\Collection;
 use Magento\Framework\DataObject;
@@ -343,9 +344,15 @@ class Mapping extends Synchronize\Unit\UnitAbstract
             $entity->getResource()->getAttribute($attributeCode) &&
             $entity->getResource()->getAttribute($attributeCode)->getFrontend()->getConfigField('input') != 'boolean'
         ) {
-            $value = (string)$entity->getResource()->getAttribute($attributeCode)->getFrontend()->getValue($entity);
+            /** @var Attribute $attribute */
+            $attribute = $entity->getResource()->getAttribute($attributeCode);
+            $value = (string)$attribute->getFrontend()->getValue($entity);
 
             if (!empty($value)) {
+                if ($attribute->getFrontendInput() === 'multiselect') {
+                    $value = explode(',', $value);
+                    $value = implode(';', $value);
+                }
                 return (string)$value;
             }
         }
