@@ -17,9 +17,6 @@ use Magento\Ui\Component\Listing\Columns\Column;
  */
 class LogFileActions extends Column
 {
-    private const LOG_URL_PATH_VIEW = 'logfile/view/index';
-    private const LOG_URL_PATH_DOWNLOAD = 'logfile/donwload/index';
-
     /** @var UrlInterface */
     private $urlBuilder;
 
@@ -50,15 +47,17 @@ class LogFileActions extends Column
             return $dataSource;
         }
 
+        $routePart = $this->getData('config', 'routePath') ?? '*/*';
+        $routePart = trim((string)$routePart, '/');
         foreach ($dataSource['data']['items'] as &$item) {
             $name = $this->getData('name');
             if (isset($item['id'])) {
                 $item[$name]['view'] = [
-                    'href' => $this->urlBuilder->getUrl(self::LOG_URL_PATH_VIEW, ['id' => $item['id']]),
+                    'href' => $this->urlBuilder->getUrl("$routePart/view", ['id' => $item['id']]),
                     'label' => __('View'),
                 ];
                 $item[$name]['download'] = [
-                    'href' => $this->urlBuilder->getUrl(self::LOG_URL_PATH_DOWNLOAD, ['id' => $item['id']]),
+                    'href' => $this->urlBuilder->getUrl("$routePart/download", ['id' => $item['id']]),
                     'label' => __('Download'),
                 ];
             }

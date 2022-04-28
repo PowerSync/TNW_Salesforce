@@ -68,21 +68,23 @@ class LoadFileData
     {
         $path = $this->getAbsolutePath($id);
         if (!$this->ioFile->fileExists($path)) {
-            throw new FileSystemException(__('Log file with path %1 not exist', $id));
+            return;
         }
 
         $fileInfo = $this->ioFile->getPathInfo($path);
         $fileName = $fileInfo['basename'] ?? '';
-        $id = $this->getBasePath($path);
+        $basePath = $this->getBasePath($path);
         $statistics = $this->file->stat($path);
         $createdAt = $statistics['ctime'] ?? '';
         $dateTime = $this->localDate->date($createdAt);
         $gmtDateTime = $this->dateTime->gmtDate('Y-m-d H:i:s', $dateTime);
 
-        $logModel->setId($id)
+        $logModel->setId($basePath)
             ->setName($fileName)
             ->setTime($gmtDateTime)
-            ->setSize($statistics['size'] ?? '');
+            ->setSize($statistics['size'] ?? '')
+            ->setPath($basePath);
+        // TODO FILE SIZE TO MB \Magento\Framework\File\Size
 //        $filePath = $fileInfo['filename'] ?? '';
 //        return [
 //            'id' => $id,

@@ -69,6 +69,11 @@
             </settings>
         </column>
         <actionsColumn name="actions" class="TNW\Salesforce\Ui\Component\Listing\Columns\LogFileActions">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="routePath" xsi:type="string">tnw_salesforce/logfile_sync</item>
+                </item>
+            </argument>
             <settings>
                 <indexField>id</indexField>
             </settings>

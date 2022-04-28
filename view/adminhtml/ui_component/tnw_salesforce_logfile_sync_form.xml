@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">tnw_mapper_form.tnw_mapper_form_data_source</item>
+            <item name="deps" xsi:type="string">tnw_mapper_form.tnw_mapper_form_data_source</item>
+            <item name="imports" xsi:type="array">
+                <item name="params" xsi:type="string">${ $.provider }:params</item>
+            </item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Mapper Information</item>
+        <item name="config" xsi:type="array">
+            <item name="dataScope" xsi:type="string">data</item>
+            <item name="namespace" xsi:type="string">tnw_mapper_form</item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+        <item name="buttons" xsi:type="array">
+            <item name="back" xsi:type="string">TNW\SForceEnterprise\SForceBusiness\Block\Adminhtml\Mapper\Edit\BackButton</item>
+            <item name="reset" xsi:type="string">TNW\SForceEnterprise\SForceBusiness\Block\Adminhtml\Mapper\Edit\ResetButton</item>
+            <item name="save_and_continue" xsi:type="string">TNW\SForceEnterprise\SForceBusiness\Block\Adminhtml\Mapper\Edit\SaveAndContinueButton</item>
+            <item name="delete" xsi:type="string">TNW\SForceEnterprise\SForceBusiness\Block\Adminhtml\Mapper\Edit\DeleteButton</item>
+            <item name="save" xsi:type="string">TNW\SForceEnterprise\SForceBusiness\Block\Adminhtml\Mapper\Edit\SaveButton</item>
+        </item>
+        <item name="acl" xsi:type="string">TNW_SForceEnterprise::mapper</item>
+    </argument>
+    <dataSource name="tnw_mapper_form_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">TNW\SForceEnterprise\SForceBusiness\Ui\DataProvider\Mapper\Form\MapperDataProvider</argument>
+            <argument name="name" xsi:type="string">tnw_mapper_form_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">map_id</argument>
+            <argument name="requestFieldName" xsi:type="string">map_id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="submit_url" xsi:type="url" path="tnw_sforceenterprise/mapper/save"/>
+                    <item name="reloadUrl" xsi:type="url" path="tnw_sforceenterprise/mapper/reload">
+                        <param name="componentJson">1</param>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+    <fieldset name="general">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">Mapping Information</item>
+            </item>
+        </argument>
+        <field name="map_id">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="visible" xsi:type="boolean">false</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                </item>
+            </argument>
+        </field>
+        <field name="object_type">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="visible" xsi:type="boolean">false</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="imports" xsi:type="array">
+                        <item name="value" xsi:type="string">${$.provider}:params.object_type</item>
+                    </item>
+                </item>
+            </argument>
+        </field>
+        <field name="magento_attribute_name">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Magento Attribute</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">select</item>
+                    <item name="component" xsi:type="string">TNW_SForceEnterprise/js/form/element/select2</item>
+                    <item name="elementTmpl" xsi:type="string">TNW_SForceEnterprise/form/element/select2</item>
+                    <item name="imports" xsi:type="array">
+                        <item name="disabled" xsi:type="string">${$.provider}:data.is_default</item>
+                    </item>
+                </item>
+            </argument>
+        </field>
+        <field name="salesforce_attribute_name">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Salesforce Attribute</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">select</item>
+                    <item name="component" xsi:type="string">TNW_SForceEnterprise/js/form/element/select2</item>
+                    <item name="elementTmpl" xsi:type="string">TNW_SForceEnterprise/form/element/select2</item>
+                    <item name="imports" xsi:type="array">
+                        <item name="disabled" xsi:type="string">${$.provider}:data.is_default</item>
+                    </item>
+                </item>
+            </argument>
+        </field>
+        <field name="default_value">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Default Value</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                </item>
+            </argument>
+        </field>
+        <field name="custom_attribute_name">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Custom Attribute Name</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="component" xsi:type="string">TNW_SForceEnterprise/js/form/custom</item>
+                    <item name="imports" xsi:type="array">
+                        <item name="checkVisible" xsi:type="string">${ $.parentName}.magento_attribute_name:value</item>
+                    </item>
+                    <item name="listens" xsi:type="array">
+                        <item name="${ $.parentName}.magento_attribute_name:value" xsi:type="string">checkVisible</item>
+                    </item>
+                </item>
+            </argument>
+        </field>
+        <field name="skip_blank_values">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Skip blank values</item>
+                    <item name="dataType" xsi:type="string">boolean</item>
+                    <item name="formElement" xsi:type="string">checkbox</item>
+                    <item name="prefer" xsi:type="string">toggle</item>
+                    <item name="valueMap" xsi:type="array">
+                        <item name="true" xsi:type="number">1</item>
+                        <item name="false" xsi:type="number">0</item>
+                    </item>
+                    <item name="default" xsi:type="number">1</item>
+                </item>
+            </argument>
+        </field>
+    </fieldset>
+    <fieldset name="mapping_detail_fieldset_from_magento">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">Magento -> Salesforce Settings</item>
+            </item>
+        </argument>
+        <field name="magento_to_sf_enable">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Enable</item>
+                    <item name="dataType" xsi:type="string">boolean</item>
+                    <item name="formElement" xsi:type="string">checkbox</item>
+                    <item name="notice" xsi:type="string" translate="true">Allow Magento to change data in Salesforce for this mapping</item>
+                    <item name="prefer" xsi:type="string">toggle</item>
+                    <item name="valueMap" xsi:type="array">
+                        <item name="true" xsi:type="number">1</item>
+                        <item name="false" xsi:type="number">0</item>
+                    </item>
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+        </field>
+        <field name="magento_to_sf_when">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">When</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">select</item>
+                    <item name="notice" xsi:type="string" translate="true">
+                        Upsert - update value when inserting or creating record.
+                        Insert Only - pass value to Salesforce only when creating a new record.
+                        Update Only - pass value to Salesforce only when updating record.
+                    </item>
+                </item>
+                <item name="options" xsi:type="object">TNW\SForceEnterprise\SForceBusiness\Model\Config\Source\Mapper\When</item>
+            </argument>
+        </field>
+    </fieldset>
+
+    <fieldset name="mapping_detail_fieldset_from_sf" class="TNW\SForceEnterprise\Ui\Component\Form\Fieldset\Mapping\FromSF">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">Salesforce -> Magento Settings</item>
+            </item>
+        </argument>
+        <field name="sf_to_magento_enable">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Enable</item>
+                    <item name="dataType" xsi:type="string">boolean</item>
+                    <item name="formElement" xsi:type="string">checkbox</item>
+                    <item name="prefer" xsi:type="string">toggle</item>
+                    <item name="notice" xsi:type="string" translate="true">Allow Salesforce to change data in Magento for this mapping</item>
+                    <item name="valueMap" xsi:type="array">
+                        <item name="true" xsi:type="number">1</item>
+                        <item name="false" xsi:type="number">0</item>
+                    </item>
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+        </field>
+        <field name="sf_to_magento_when">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">When</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">select</item>
+                    <item name="notice" xsi:type="string" translate="true">
+                        Upsert - update value when inserting or creating record.
+                        Insert Only - pass value to Salesforce only when creating a new record.
+                        Update Only - pass value to Salesforce only when updating record.
+                    </item>
+                </item>
+                <item name="options" xsi:type="object">TNW\SForceEnterprise\SForceBusiness\Model\Config\Source\Mapper\When</item>
+            </argument>
+        </field>
+    </fieldset>
+</form>

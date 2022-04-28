@@ -18,6 +18,7 @@ class File extends DataObject
     public const NAME = 'name';
     public const TIME = 'time';
     public const SIZE = 'size';
+    public const PATH = 'path';
 
     /**
      * Get file id.
@@ -116,4 +117,29 @@ class File extends DataObject
 
         return $this;
     }
+
+    /**
+     * Get log file relative path.
+     *
+     * @return string|null
+     */
+    public function getPath(): ?string
+    {
+        return $this->getData(self::PATH);
+    }
+
+    /**
+     * Set log file relative path.
+     *
+     * @param string $path
+     *
+     * @return File
+     */
+    public function setPath(string $path): File
+    {
+        $this->setData(self::PATH, $path);
+
+        return $this;
+    }
+
 }
