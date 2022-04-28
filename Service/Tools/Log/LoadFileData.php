@@ -83,7 +83,8 @@ class LoadFileData
             ->setName($fileName)
             ->setTime($gmtDateTime)
             ->setSize($statistics['size'] ?? '')
-            ->setPath($basePath);
+            ->setRelativePath($basePath)
+            ->setAbsolutePath($path);
         // TODO FILE SIZE TO MB \Magento\Framework\File\Size
 //        $filePath = $fileInfo['filename'] ?? '';
 //        return [

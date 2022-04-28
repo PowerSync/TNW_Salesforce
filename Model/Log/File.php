@@ -18,7 +18,8 @@ class File extends DataObject
     public const NAME = 'name';
     public const TIME = 'time';
     public const SIZE = 'size';
-    public const PATH = 'path';
+    public const RELATIVE_PATH = 'relative_path';
+    public const ABSOLUTE_PATH = 'absolute_path';
 
     /**
      * Get file id.
@@ -123,9 +124,9 @@ class File extends DataObject
      *
      * @return string|null
      */
-    public function getPath(): ?string
+    public function getRelativePath(): ?string
     {
-        return $this->getData(self::PATH);
+        return $this->getData(self::RELATIVE_PATH);
     }
 
     /**
@@ -135,11 +136,34 @@ class File extends DataObject
      *
      * @return File
      */
-    public function setPath(string $path): File
+    public function setRelativePath(string $path): File
     {
-        $this->setData(self::PATH, $path);
+        $this->setData(self::RELATIVE_PATH, $path);
 
         return $this;
     }
 
+    /**
+     * Get log file absolute path.
+     *
+     * @return string|null
+     */
+    public function getAbsolutePath(): ?string
+    {
+        return $this->getData(self::ABSOLUTE_PATH);
+    }
+
+    /**
+     * Set log file absolue path.
+     *
+     * @param string $path
+     *
+     * @return File
+     */
+    public function setAbsolutePath(string $path): File
+    {
+        $this->setData(self::ABSOLUTE_PATH, $path);
+
+        return $this;
+    }
 }

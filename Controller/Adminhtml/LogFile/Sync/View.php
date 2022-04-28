@@ -9,8 +9,11 @@ namespace TNW\Salesforce\Controller\Adminhtml\LogFile\Sync;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Result\PageFactory;
+use Throwable;
 use TNW\Salesforce\Model\Log\File;
 use TNW\Salesforce\Model\Log\FileFactory;
 use TNW\Salesforce\Service\Tools\Log\LoadFileData;
@@ -52,23 +55,35 @@ class View extends Action
      */
     public function execute()
     {
+        $fileId = (string)$this->getRequest()->getParam('id');
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('TNW_Salesforce::tools_sync_log');
 
-        $fileId = $this->getRequest()->getParam('id');
-        $resultPage->getConfig()->getTitle()->prepend((__('View Synchronization Log File: %1', )));
+        try {
+            $file = $this->getFileModel($fileId);
+            $resultPage->getConfig()->getTitle()->prepend((__('View Synchronization Log File: %1', $file->getName())));
+        } catch (Throwable $exception) {
+            $this->messageManager->addErrorMessage($exception->getMessage());
+            $resultPage = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('*/*/index');
+        }
 
         return $resultPage;
     }
 
     /**
+     * @param string $fileId
+     *
+     * @return File
      * @throws FileSystemException
      */
-    private function getFileModel(string $id): File
+    private function getFileModel(string $fileId): File
     {
-        $file = $this->fileFactory->create();
-        $this->loadFileData->execute($file, $id);
+        $model = $this->fileFactory->create();
+        $this->loadFileData->execute($model, $fileId);
+        if (!$model->getId()) {
+            throw new FileSystemException(__('Requested log file %1 no longer exists.', $fileId));
+        }
 
-
+        return $model;
     }
 }

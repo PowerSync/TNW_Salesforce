@@ -13,6 +13,7 @@ use Magento\Framework\Data\Collection\EntityFactoryInterface;
 use Magento\Framework\Data\Collection\Filesystem as FilesystemCollection;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem;
+use TNW\Salesforce\Model\Log\File;
 use TNW\Salesforce\Model\Log\FileFactory;
 use TNW\Salesforce\Service\Tools\Log\Config;
 use TNW\Salesforce\Service\Tools\Log\LoadFileData;
@@ -23,6 +24,9 @@ use TNW\Salesforce\Service\Tools\Log\LoadFileData;
 class Collection extends FilesystemCollection
 {
     private const FILE_MASK = '/^.*\.log$/i';
+
+    /** @var string */
+    protected $_itemObjectClass = File::class;
 
     /** @var LoadFileData */
     private $loadLogFileData;

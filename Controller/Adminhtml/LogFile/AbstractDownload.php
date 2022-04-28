@@ -12,7 +12,6 @@ use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Response\Http\FileFactory as FileResponseFactory;
 use Magento\Framework\Controller\ResultFactory;
-use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\FileSystemException;
 use Throwable;
 use TNW\Salesforce\Model\Log\File;
@@ -59,41 +58,30 @@ abstract class AbstractDownload extends Action
      */
     public function execute()
     {
-        $request = $this->getRequest();
-        $fileId = $request->getParam('id');
+        $fileId = (string)$this->getRequest()->getParam('id');
 
         try {
             $model = $this->getFileModel($fileId);
-
-            return $this->fileResponseFactory->create(
-                $model->getName(),
-                [
-                    'type' => 'filename',
-                    'value' => $model->getPath(),
-                ],
-                DirectoryList::LOG
-            );
+            $content = [
+                'type' => 'filename',
+                'value' => $model->getRelativePath(),
+            ];
+            $response = $this->fileResponseFactory->create($model->getName(), $content, DirectoryList::LOG);
         } catch (Throwable $exception) {
             $this->messageManager->addErrorMessage($exception->getMessage());
+            $response = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath($this->redirectRoutePath);
         }
 
-        return $this->getRedirect($this->redirectRoutePath);
+        return $response;
     }
 
     /**
-     * @param string $path
+     * @param string $fileId
      *
-     * @return ResultInterface
-     */
-    private function getRedirect(string $path): ResultInterface
-    {
-        return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath($path);
-    }
-
-    /**
+     * @return File
      * @throws FileSystemException
      */
-    private function getFileModel($fileId): File
+    private function getFileModel(string $fileId): File
     {
         $model = $this->fileFactory->create();
         $this->loadFileData->execute($model, $fileId);
