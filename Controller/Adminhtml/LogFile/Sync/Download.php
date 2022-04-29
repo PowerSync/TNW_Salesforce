@@ -11,6 +11,7 @@ use TNW\Salesforce\Controller\Adminhtml\LogFile\AbstractDownload;
 
 /**
  * Download synchronization log file action.
+ * @TODO Remove after controller renaiming
  */
 class Download extends AbstractDownload
 {

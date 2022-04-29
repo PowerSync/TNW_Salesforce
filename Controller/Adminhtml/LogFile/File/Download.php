@@ -5,10 +5,11 @@ declare(strict_types=1);
  * See TNW_LICENSE.txt for license details.
  */
 
-namespace TNW\Salesforce\Controller\Adminhtml\LogFile;
+namespace TNW\Salesforce\Controller\Adminhtml\LogFile\File;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Response\Http\FileFactory as FileResponseFactory;
 use Magento\Framework\Controller\ResultFactory;
@@ -19,14 +20,10 @@ use TNW\Salesforce\Model\Log\FileFactory;
 use TNW\Salesforce\Service\Tools\Log\LoadFileData;
 
 /**
- * Base download log file action.
- * @TODO Remove after controller renaiming
+ * Log file download action.
  */
-abstract class AbstractDownload extends Action
+class Download extends Action implements HttpGetActionInterface
 {
-    /** @var string */
-    protected $redirectRoutePath = '*/*/index';
-
     /** @var LoadFileData */
     private $loadFileData;
 
@@ -70,7 +67,7 @@ abstract class AbstractDownload extends Action
             $response = $this->fileResponseFactory->create($model->getName(), $content, DirectoryList::LOG);
         } catch (Throwable $exception) {
             $this->messageManager->addErrorMessage($exception->getMessage());
-            $response = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath($this->redirectRoutePath);
+            $response = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('*/*/index');
         }
 
         return $response;

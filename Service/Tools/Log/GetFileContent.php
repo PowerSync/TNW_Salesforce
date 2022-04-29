@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Service\Tools\Log;
 
-use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\Io\File;
 use SplFileObject;
@@ -52,10 +51,13 @@ class GetFileContent
         $endLine = $page * $pageSize;
         $file = new SplFileObject($filePath);
         $file->seek($firstLine);
-        while ($file->key() < $endLine || !$file->eof()) {
+        while ($file->key() < $endLine) {
             $content .= $file->current();
 
             $file->next();
+            if (!$file->valid()) {
+                break;
+            }
         }
 
         return $content;

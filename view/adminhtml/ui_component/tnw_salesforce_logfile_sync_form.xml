@@ -29,9 +29,6 @@
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="submit_url" xsi:type="url" path="mui/index/render"/>
-                    <!--                    <item name="reloadUrl" xsi:type="url" path="tnw_sforceenterprise/mapper/reload">-->
-                    <!--                        <param name="componentJson">1</param>-->
-                    <!--                    </item>-->
                 </item>
             </argument>
         </argument>
@@ -40,7 +37,8 @@
                 <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
             </item>
         </argument>
-        <dataProvider class="TNW\Salesforce\Ui\DataProvider\FileLog\Synchronization\Form\DataProvider" name="tnw_salesforce_logfile_sync_form_data_source">
+        <dataProvider class="TNW\Salesforce\Ui\DataProvider\FileLog\Synchronization\Form\DataProvider"
+                      name="tnw_salesforce_logfile_sync_form_data_source">
             <settings>
                 <requestFieldName>id</requestFieldName>
                 <primaryFieldName>id</primaryFieldName>
@@ -85,20 +83,7 @@
                 <label translate="true">File name</label>
             </settings>
         </field>
-        <field name="content" formElement="textarea" sortOrder="40">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="source" xsi:type="string">content</item>
-                    <item name="cols" xsi:type="number">25</item>
-                    <item name="rows" xsi:type="number">255</item>
-                </item>
-            </argument>
-            <settings>
-                <dataType>text</dataType>
-                <label translate="true">Content</label>
-            </settings>
-        </field>
-        <field name="content_pre" formElement="input" sortOrder="50">
+        <field name="content" formElement="input" sortOrder="50">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="source" xsi:type="string">content</item>
@@ -107,7 +92,7 @@
             </argument>
             <settings>
                 <dataType>text</dataType>
-                <label translate="true">Content Pre</label>
+                <label translate="true">Content</label>
             </settings>
         </field>
     </fieldset>
