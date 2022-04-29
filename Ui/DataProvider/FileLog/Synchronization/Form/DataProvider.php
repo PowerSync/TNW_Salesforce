@@ -96,7 +96,7 @@ class DataProvider extends AbstractDataProvider
     private function getFormData(File $file): array
     {
         $linesCount = $this->logConfig->getLinesCount();
-        $url = $this->urlBuilder->getUrl("*/*/download", ['id' => $file->getId()]);
+        $href = $this->urlBuilder->getUrl("*/*/download", ['id' => $file->getId()]);
         try {
             $content = $this->getFileContent->execute($file->getAbsolutePath(), $linesCount);
         } catch (Throwable $exception) {
@@ -106,8 +106,9 @@ class DataProvider extends AbstractDataProvider
 
         return [
             'name' => $file->getName(),
-            'url' => $url,
+            'url' => $href,
             'content' => $content,
+            'current_page' => 1,
         ];
     }
 }

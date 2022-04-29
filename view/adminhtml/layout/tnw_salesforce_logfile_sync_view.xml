@@ -7,4 +7,10 @@
             <uiComponent name="tnw_salesforce_logfile_sync_form"/>
         </referenceContainer>
     </body>
+<!--    <body>-->
+<!--        <referenceBlock name="content">-->
+<!--            <block class="TNW\Salesforce\Block\Adminhtml\Tools\LogFile\View" name="tnw_salesforce_logfile_sync_form">-->
+<!--            </block>-->
+<!--        </referenceBlock>-->
+<!--    </body>-->
 </page>
