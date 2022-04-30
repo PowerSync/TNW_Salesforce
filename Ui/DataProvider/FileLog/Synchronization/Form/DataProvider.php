@@ -13,7 +13,6 @@ use Psr\Log\LoggerInterface;
 use Throwable;
 use TNW\Salesforce\Model\Log\File;
 use TNW\Salesforce\Model\ResourceModel\Log\File\Synchronization\Grid\CollectionFactory;
-use TNW\Salesforce\Service\Tools\Log\Config;
 use TNW\Salesforce\Service\Tools\Log\GetFileContent;
 
 /**
@@ -27,9 +26,6 @@ class DataProvider extends AbstractDataProvider
     /** @var GetFileContent */
     private $getFileContent;
 
-    /** @var Config */
-    private $logConfig;
-
     /** @var LoggerInterface */
     private $logger;
 
@@ -42,7 +38,6 @@ class DataProvider extends AbstractDataProvider
      * @param string            $requestFieldName
      * @param CollectionFactory $collectionFactory
      * @param GetFileContent    $getFileContent
-     * @param Config            $logConfig
      * @param LoggerInterface   $logger
      * @param UrlInterface      $urlBuilder
      * @param array             $meta
@@ -54,7 +49,6 @@ class DataProvider extends AbstractDataProvider
         $requestFieldName,
         CollectionFactory $collectionFactory,
         GetFileContent $getFileContent,
-        Config $logConfig,
         LoggerInterface $logger,
         UrlInterface $urlBuilder,
         array $meta = [],
@@ -63,7 +57,6 @@ class DataProvider extends AbstractDataProvider
         parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
         $this->collection = $collectionFactory->create();
         $this->getFileContent = $getFileContent;
-        $this->logConfig = $logConfig;
         $this->logger = $logger;
         $this->urlBuilder = $urlBuilder;
     }
@@ -95,19 +88,21 @@ class DataProvider extends AbstractDataProvider
      */
     private function getFormData(File $file): array
     {
-        $linesCount = $this->logConfig->getLinesCount();
-        $href = $this->urlBuilder->getUrl("*/*/download", ['id' => $file->getId()]);
+        $downloadFileUrl = $this->urlBuilder->getUrl("*/*/download", ['id' => $file->getId()]);
+        $ajaxUrl = $this->urlBuilder->getUrl("*/logfile_file/view");
         try {
-            $content = $this->getFileContent->execute($file->getAbsolutePath(), $linesCount);
+            $content = $this->getFileContent->execute($file->getAbsolutePath());
         } catch (Throwable $exception) {
             $content = '';
             $this->logger->critical($exception->getMessage());
         }
 
         return [
+            'id' => $file->getId(),
             'name' => $file->getName(),
-            'url' => $href,
+            'url' => $downloadFileUrl,
             'content' => $content,
+            'ajax_url' => $ajaxUrl,
             'current_page' => 1,
         ];
     }

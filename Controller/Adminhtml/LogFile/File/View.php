@@ -9,12 +9,12 @@ namespace TNW\Salesforce\Controller\Adminhtml\LogFile\File;
 
 use Laminas\Http\Response;
 use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\FileSystemException;
 use Throwable;
 use TNW\Salesforce\Model\Log\FileFactory;
-use TNW\Salesforce\Service\Tools\Log\Config;
 use TNW\Salesforce\Service\Tools\Log\GetFileContent;
 use TNW\Salesforce\Service\Tools\Log\LoadFileData;
 
@@ -29,9 +29,6 @@ class View extends Action implements HttpPostActionInterface
     /** @var GetFileContent */
     private $getFileContent;
 
-    /** @var Config */
-    private $config;
-
     /** @var LoadFileData */
     private $loadFileData;
 
@@ -39,22 +36,23 @@ class View extends Action implements HttpPostActionInterface
     private $fileFactory;
 
     /**
+     * @param Context        $context
      * @param JsonFactory    $jsonFactory
      * @param GetFileContent $getFileContent
-     * @param Config         $config
      * @param LoadFileData   $loadFileData
      * @param FileFactory    $fileFactory
      */
     public function __construct(
+        Context $context,
         JsonFactory $jsonFactory,
         GetFileContent $getFileContent,
-        Config $config,
         LoadFileData $loadFileData,
         FileFactory $fileFactory
     ) {
+        parent::__construct($context);
+
         $this->jsonFactory = $jsonFactory;
         $this->getFileContent = $getFileContent;
-        $this->config = $config;
         $this->loadFileData = $loadFileData;
         $this->fileFactory = $fileFactory;
     }
@@ -93,10 +91,9 @@ class View extends Action implements HttpPostActionInterface
      */
     private function getContent(string $fileId, int $page): array
     {
-        $linesCount = $this->config->getLinesCount();
         $file = $this->fileFactory->create();
         $this->loadFileData->execute($file, $fileId);
-        $content = $this->getFileContent->execute($file->getAbsolutePath(), $linesCount, $page);
+        $content = $this->getFileContent->execute($file->getAbsolutePath(), $page);
 
         return ['content' => $content];
     }

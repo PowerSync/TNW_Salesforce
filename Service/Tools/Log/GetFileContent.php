@@ -16,17 +16,20 @@ use SplFileObject;
  */
 class GetFileContent
 {
-    private const DEFAULT_PAGE_SIZE = 250;
-
     /** @var File */
     private $ioFile;
 
+    /** @var Config */
+    private $config;
+
     /**
-     * @param File $ioFile
+     * @param File   $ioFile
+     * @param Config $config
      */
-    public function __construct(File $ioFile)
+    public function __construct(File $ioFile, Config $config)
     {
         $this->ioFile = $ioFile;
+        $this->config = $config;
     }
 
     /**
@@ -39,14 +42,14 @@ class GetFileContent
      * @return string
      * @throws FileSystemException
      */
-    public function execute(string $filePath, int $pageSize = self::DEFAULT_PAGE_SIZE, int $page = 1): string
+    public function execute(string $filePath, int $page = 1, int $pageSize = null): string
     {
         if (!$this->ioFile->fileExists($filePath)) {
             throw new FileSystemException(__('Log file %1 no longer exist', $filePath));
         }
 
         $content = '';
-        $pageSize = $pageSize ?? self::DEFAULT_PAGE_SIZE;
+        $pageSize = $pageSize ?? $this->config->getLinesCount();
         $firstLine = ($page - 1) * $pageSize;
         $endLine = $page * $pageSize;
         $file = new SplFileObject($filePath);

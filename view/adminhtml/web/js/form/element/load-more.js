@@ -11,55 +11,32 @@ define([
     'use strict';
 
     return Button.extend({
-        // defaults: {
-        //     currentRecordNamespace: 'bundle_current_record',
-        //     listingDataProvider: '',
-        //     value: [],
-        //     imports: {
-        //         currentRecordName: '${ $.provider }:${ $.currentRecordNamespace }',
-        //         listingData: '${ $.provider }:${ $.listingDataProvider }'
-        //     },
-        //     links: {
-        //         value: '${ $.provider }:${ $.dataScope }'
-        //     },
-        //     listens: {
-        //         listingData: 'setListingData'
-        //     }
-        // },
 
         /**
-         * Call parent "action" method
-         * and set new data to record and listing.
+         * Load more content from backend to container.
          *
          * @returns {Object} Chainable.
          */
-
         action: function () {
-            // this._super();
-            console.log('start');
-            let $page = $();
-            let page = 1;
-            new Ajax.Updater($('pre[name="content"]'), '/tnw_salesforce/logfile_file/view', {
-                parameters: { page: page },
-                insertion: function(receiver, responseText) {
-                    var insertion = {};
-                    // insertion[config.get('insertion')] = responseText
-                    //     .replace(/&/g, "&amp;")
-                    //     .replace(/</g, "&lt;")
-                    //     .replace(/>/g, "&gt;")
-                    //     .replace(/"/g, "&quot;")
-                    //     .replace(/'/g, "&#039;");
-
-                    receiver.insert(responseText);
+            let id = this.source.data.id;
+            let url = this.source.data.ajax_url;
+            let page = this.source.data.current_page++;
+            new Ajax.Updater('content', url, {
+                parameters: {
+                    key: window.FORM_KEY,
+                    id: id,
+                    page: page
                 },
-                onComplete: function (response, json) {
+                insertion: function (receiver, responseText) {
+                    let data = JSON.parse(responseText);
+                    receiver.insert(data.content);
+                },
+                onComplete: function (response) {
                     if (response.responseText.empty()) {
                         alert('End of file');
                     }
                 }
             });
-            // this.source.set(this.currentRecordNamespace, this.name);
-            // this.source.set(this.listingDataProvider, this.value());
 
             return this;
         }

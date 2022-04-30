@@ -16,6 +16,8 @@ use Magento\Framework\View\Result\PageFactory;
  */
 class Index extends Action
 {
+    public const ADMIN_RESOURCE = 'TNW_Salesforce::tools_sync_log';
+
     /** @var PageFactory */
     private $resultPageFactory;
 

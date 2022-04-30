@@ -17,11 +17,6 @@
                 <class>back</class>
                 <label translate="true">Back</label>
             </button>
-<!--            <button name="load_more">-->
-<!--                <url path="*/logfile_file/view"/>-->
-<!--                <class>load-more primary</class>-->
-<!--                <label translate="true">Load more</label>-->
-<!--            </button>-->
         </buttons>
         <namespace>tnw_salesforce_logfile_sync_form</namespace>
         <dataScope>data</dataScope>
@@ -34,9 +29,6 @@
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="submit_url" xsi:type="url" path="mui/index/render"/>
-<!--                    <item name="reloadUrl" xsi:type="url" path="tnw_sforceenterprise/mapper/reload">-->
-<!--                        <param name="componentJson">1</param>-->
-<!--                    </item>-->
                 </item>
             </argument>
         </argument>
@@ -59,26 +51,6 @@
                 <item name="label" xsi:type="string" translate="true">Log Information</item>
             </item>
         </argument>
-        <field name="id" formElement="hidden" sortOrder="10">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="source" xsi:type="string">id</item>
-                </item>
-            </argument>
-            <settings>
-                <dataType>text</dataType>
-            </settings>
-        </field>
-        <field name="current_page" formElement="hidden" sortOrder="20">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="source" xsi:type="string">current_page</item>
-                </item>
-            </argument>
-            <settings>
-                <dataType>text</dataType>
-            </settings>
-        </field>
         <field name="name" formElement="input" sortOrder="30">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
@@ -94,6 +66,7 @@
         <field name="content" formElement="input" sortOrder="50">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="id" xsi:type="string">content</item>
                     <item name="source" xsi:type="string">content</item>
                     <item name="elementTmpl" xsi:type="string">TNW_Salesforce/form/element/raw</item>
                 </item>
@@ -103,35 +76,13 @@
                 <label translate="true">Content</label>
             </settings>
         </field>
-<!--        <button name="load_more1">-->
-<!--            <argument name="data" xsi:type="array">-->
-<!--                <item name="config" xsi:type="array">-->
-<!--                    <item name="buttonClasses" xsi:type="string">load-more primary</item>-->
-<!--                    <item name="actions" xsi:type="array">-->
-<!--                        <item name="0" xsi:type="array">-->
-<!--                            <item name="targetName" xsi:type="string">TARGET_NAME</item>-->
-<!--                            <item name="actionName" xsi:type="string">ACTION_NAME</item>-->
-<!--                        </item>-->
-<!--                    </item>-->
-<!--                </item>-->
-<!--            </argument>-->
-<!--            <settings>-->
-<!--                <displayAsLink>true</displayAsLink>-->
-<!--                <title translate="true">Load More</title>-->
-<!--            </settings>-->
-<!--        </button>-->
         <field name="load_more" formElement="button" sortOrder="60">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="label" xsi:type="string">Load More</item>
-                    <item name="align" xsi:type="string">center</item>
+                    <item name="title" xsi:type="string">Load More</item>
                     <item name="component" xsi:type="string">TNW_Salesforce/js/form/element/load-more</item>
                 </item>
             </argument>
-            <settings>
-                <label translate="true">Load More</label>
-<!--                <additionalClasses>load-more primary</additionalClasses>-->
-            </settings>
         </field>
     </fieldset>
 </form>
