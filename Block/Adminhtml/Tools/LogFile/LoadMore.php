@@ -7,10 +7,12 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Block\Adminhtml\Tools\LogFile;
 
-use Magento\Backend\Block\Widget\Form\Generic;
-use PayPal\Braintree\Block\Adminhtml\Virtual\Edit\Form;
+use Magento\Backend\Block\Template;
 
-class View extends Generic
+class LoadMore extends Template
 {
-
+    /**
+     * @inerhitDoc
+     */
+    protected $_template = 'tools/log/load_more.phtml';
 }

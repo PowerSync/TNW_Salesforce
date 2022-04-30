@@ -12,7 +12,6 @@ use Magento\Backend\App\Action;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\FileSystemException;
-use Magento\Tests\NamingConvention\true\string;
 use Throwable;
 use TNW\Salesforce\Model\Log\FileFactory;
 use TNW\Salesforce\Service\Tools\Log\Config;

@@ -10,7 +10,7 @@
                 tnw_salesforce_log_file_listing.tnw_salesforce_log_file_listing_data_source
             </item>
         </item>
-        <item name="spinner" xsi:type="string">field_mapping_columns</item>
+        <item name="spinner" xsi:type="string">field_log_columns</item>
     </argument>
 
     <dataSource name="tnw_salesforce_log_file_listing_data_source">
@@ -46,7 +46,7 @@
         </filterSearch>
         <paging name="listing_paging"/>
     </listingToolbar>
-    <columns name="field_mapping_columns">
+    <columns name="field_log_columns">
         <column name="time" class="Magento\Ui\Component\Listing\Columns\Date"
                 component="Magento_Ui/js/grid/columns/date" sortOrder="10">
             <settings>
