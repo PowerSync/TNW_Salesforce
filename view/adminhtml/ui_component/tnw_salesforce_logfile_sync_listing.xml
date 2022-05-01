@@ -4,19 +4,19 @@
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
             <item name="provider" xsi:type="string">
-                tnw_salesforce_log_file_listing.tnw_salesforce_log_file_listing_data_source
+                tnw_salesforce_logfile_sync_listing.tnw_salesforce_logfile_sync_listing_data_source
             </item>
             <item name="deps" xsi:type="string">
-                tnw_salesforce_log_file_listing.tnw_salesforce_log_file_listing_data_source
+                tnw_salesforce_logfile_sync_listing.tnw_salesforce_logfile_sync_listing_data_source
             </item>
         </item>
         <item name="spinner" xsi:type="string">field_log_columns</item>
     </argument>
 
-    <dataSource name="tnw_salesforce_log_file_listing_data_source">
+    <dataSource name="tnw_salesforce_logfile_sync_listing_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
             <argument name="class" xsi:type="string">SynchronizationLogDataProvider</argument>
-            <argument name="name" xsi:type="string">tnw_salesforce_log_file_listing_data_source</argument>
+            <argument name="name" xsi:type="string">tnw_salesforce_logfile_sync_listing_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">id</argument>
             <argument name="requestFieldName" xsi:type="string">id</argument>
             <argument name="data" xsi:type="array">

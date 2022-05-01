@@ -31,6 +31,10 @@ class Config extends DataObject
 
     const SYNC_MAX_ATTEMPT_COUNT_XML = 'tnwsforce_general/synchronization/max_attempt_count';
 
+    public const SALESFORCE_LOG_DIRECTORY = 'sforce';
+
+    private const LOG_LINES_COUNT_XML = 'tnwsforce_general/debug/log_lines_count';
+
     /**
      * Base batch limit for simple sync
      */
@@ -393,6 +397,16 @@ class Config extends DataObject
     public function getLogStatus($websiteId = null)
     {
         return (int)$this->getStoreConfig('tnwsforce_general/debug/logstatus', $websiteId);
+    }
+
+    /**
+     * Get lines count to display.
+     *
+     * @return int
+     */
+    public function getLinesCount(): int
+    {
+        return (int)$this->scopeConfig->getValue(self::LOG_LINES_COUNT_XML);
     }
 
     /**

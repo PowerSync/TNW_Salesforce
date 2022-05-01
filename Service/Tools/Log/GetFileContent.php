@@ -10,6 +10,7 @@ namespace TNW\Salesforce\Service\Tools\Log;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\Io\File;
 use SplFileObject;
+use TNW\Salesforce\Model\Config;
 
 /**
  * Get file content service.

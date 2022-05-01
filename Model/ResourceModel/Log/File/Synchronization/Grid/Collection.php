@@ -7,9 +7,8 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Model\ResourceModel\Log\File\Synchronization\Grid;
 
-use TNW\Salesforce\Model\Log\FileFactory;
+use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\ResourceModel\Log\File\Grid\Collection as BaseCollection;
-use TNW\Salesforce\Service\Tools\Log\Config;
 
 /**
  * Salesforce synchronization log grid collection.
