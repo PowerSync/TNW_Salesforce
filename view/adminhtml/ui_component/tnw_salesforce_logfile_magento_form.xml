@@ -4,7 +4,7 @@
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
             <item name="provider" xsi:type="string">
-                tnw_salesforce_logfile_sync_form.tnw_salesforce_logfile_sync_form_data_source
+                tnw_salesforce_logfile_magento_form.tnw_salesforce_log_magento_listing_data_source
             </item>
         </item>
         <item name="label" xsi:type="string" translate="true">View/Download Log File</item>
@@ -18,13 +18,13 @@
                 <label translate="true">Back</label>
             </button>
         </buttons>
-        <namespace>tnw_salesforce_logfile_sync_form</namespace>
+        <namespace>tnw_salesforce_logfile_magento_form</namespace>
         <dataScope>data</dataScope>
         <deps>
-            <dep>tnw_salesforce_logfile_sync_form.tnw_salesforce_logfile_sync_form_data_source</dep>
+            <dep>tnw_salesforce_logfile_magento_form.tnw_salesforce_log_magento_listing_data_source</dep>
         </deps>
     </settings>
-    <dataSource name="tnw_salesforce_logfile_sync_form_data_source">
+    <dataSource name="tnw_salesforce_log_magento_listing_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
@@ -37,8 +37,8 @@
                 <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
             </item>
         </argument>
-        <dataProvider class="SynchronizationLogFormDataProvider"
-                      name="tnw_salesforce_logfile_sync_form_data_source">
+        <dataProvider class="TNW\Salesforce\Ui\DataProvider\FileLog\Form\DataProvider"
+                      name="tnw_salesforce_log_magento_listing_data_source">
             <settings>
                 <requestFieldName>id</requestFieldName>
                 <primaryFieldName>id</primaryFieldName>

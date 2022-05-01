@@ -4,7 +4,7 @@
     <update handle="editor"/>
     <body>
         <referenceContainer name="content">
-            <uiComponent name="tnw_salesforce_logfile_sync_form"/>
+            <uiComponent name="tnw_salesforce_logfile_magento_form"/>
         </referenceContainer>
     </body>
 </page>

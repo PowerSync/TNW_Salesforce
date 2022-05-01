@@ -9,48 +9,46 @@ namespace TNW\Salesforce\Controller\Adminhtml\LogFile;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
-use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\App\Response\Http\FileFactory as FileResponseFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\View\Result\PageFactory;
 use Throwable;
 use TNW\Salesforce\Model\Log\File;
 use TNW\Salesforce\Model\Log\FileFactory;
 use TNW\Salesforce\Service\Tools\Log\LoadFileData;
 
 /**
- * Base download log file action.
- * @TODO Remove after controller renaiming
+ * View log file base action.
  */
-abstract class AbstractDownload extends Action
+abstract class AbstractView extends Action
 {
-    /** @var string */
-    protected $redirectRoutePath = '*/*/index';
+    /** @var PageFactory */
+    private $resultPageFactory;
 
     /** @var LoadFileData */
     private $loadFileData;
 
-    /** @var FileResponseFactory */
-    private $fileResponseFactory;
-
     /** @var FileFactory */
     private $fileFactory;
 
+    /** @var File[] */
+    private $files;
+
     /**
-     * @param Context             $context
-     * @param FileResponseFactory $fileResponseFactory
-     * @param LoadFileData        $loadFileData
-     * @param FileFactory         $fileFactory
+     * @param Context      $context
+     * @param PageFactory  $resultPageFactory
+     * @param LoadFileData $loadFileData
+     * @param FileFactory  $fileFactory
      */
     public function __construct(
         Context $context,
-        FileResponseFactory $fileResponseFactory,
+        PageFactory $resultPageFactory,
         LoadFileData $loadFileData,
         FileFactory $fileFactory
     ) {
         parent::__construct($context);
+        $this->resultPageFactory = $resultPageFactory;
         $this->loadFileData = $loadFileData;
-        $this->fileResponseFactory = $fileResponseFactory;
         $this->fileFactory = $fileFactory;
     }
 
@@ -59,21 +57,16 @@ abstract class AbstractDownload extends Action
      */
     public function execute()
     {
-        $fileId = (string)$this->getRequest()->getParam('id');
+        $resultPage = $this->resultPageFactory->create();
 
         try {
-            $model = $this->getFileModel($fileId);
-            $content = [
-                'type' => 'filename',
-                'value' => $model->getRelativePath(),
-            ];
-            $response = $this->fileResponseFactory->create($model->getName(), $content, DirectoryList::LOG);
+            $this->initPageConfig($resultPage);
         } catch (Throwable $exception) {
             $this->messageManager->addErrorMessage($exception->getMessage());
-            $response = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath($this->redirectRoutePath);
+            $resultPage = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('*/*/index');
         }
 
-        return $response;
+        return $resultPage;
     }
 
     /**
@@ -82,14 +75,27 @@ abstract class AbstractDownload extends Action
      * @return File
      * @throws FileSystemException
      */
-    private function getFileModel(string $fileId): File
+    protected function getFileModel(string $fileId): File
     {
+        if (isset($this->files[$fileId])) {
+            return $this->files[$fileId];
+        }
+
         $model = $this->fileFactory->create();
         $this->loadFileData->execute($model, $fileId);
         if (!$model->getId()) {
             throw new FileSystemException(__('Requested log file %1 no longer exists.', $fileId));
         }
 
-        return $model;
+        $this->files[$fileId] = $model;
+
+        return $this->files[$fileId];
     }
+
+    /**
+     * Setup page config.
+     *
+     * @param $resultPage
+     */
+    abstract protected function initPageConfig($resultPage): void;
 }

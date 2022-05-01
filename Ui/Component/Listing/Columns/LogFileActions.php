@@ -47,17 +47,17 @@ class LogFileActions extends Column
             return $dataSource;
         }
 
-        $routePart = $this->getData('config', 'routePath') ?? '*/*';
-        $routePart = trim((string)$routePart, '/');
+        $viewUrl = $this->getData('config', 'viewUrl') ?? '*/*/view';
+        $downloadUrl = $this->getData('config', 'downloadUrl') ?? '*/*/download';
         foreach ($dataSource['data']['items'] as &$item) {
             $name = $this->getData('name');
             if (isset($item['id'])) {
                 $item[$name]['view'] = [
-                    'href' => $this->urlBuilder->getUrl("$routePart/view", ['id' => $item['id']]),
+                    'href' => $this->urlBuilder->getUrl($viewUrl, ['id' => $item['id']]),
                     'label' => __('View'),
                 ];
                 $item[$name]['download'] = [
-                    'href' => $this->urlBuilder->getUrl("$routePart/download", ['id' => $item['id']]),
+                    'href' => $this->urlBuilder->getUrl($downloadUrl, ['id' => $item['id']]),
                     'label' => __('Download'),
                 ];
             }

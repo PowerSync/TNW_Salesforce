@@ -4,19 +4,21 @@
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
             <item name="provider" xsi:type="string">
-                tnw_salesforce_log_file_listing.tnw_salesforce_log_file_listing_data_source
+                tnw_salesforce_logfile_magento_listing.tnw_salesforce_log_magento_listing_data_source
             </item>
             <item name="deps" xsi:type="string">
-                tnw_salesforce_log_file_listing.tnw_salesforce_log_file_listing_data_source
+                tnw_salesforce_logfile_magento_listing.tnw_salesforce_log_magento_listing_data_source
             </item>
         </item>
-        <item name="spinner" xsi:type="string">field_log_columns</item>
+        <item name="spinner" xsi:type="string">magento_log_columns</item>
     </argument>
 
-    <dataSource name="tnw_salesforce_log_file_listing_data_source">
+    <dataSource name="tnw_salesforce_log_magento_listing_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">SynchronizationLogDataProvider</argument>
-            <argument name="name" xsi:type="string">tnw_salesforce_log_file_listing_data_source</argument>
+            <argument name="class" xsi:type="string">
+                TNW\Salesforce\Ui\DataProvider\FileLog\DataProvider
+            </argument>
+            <argument name="name" xsi:type="string">tnw_salesforce_log_magento_listing_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">id</argument>
             <argument name="requestFieldName" xsi:type="string">id</argument>
             <argument name="data" xsi:type="array">
@@ -44,7 +46,7 @@
         </filterSearch>
         <paging name="listing_paging"/>
     </listingToolbar>
-    <columns name="field_log_columns">
+    <columns name="magento_log_columns">
         <column name="time" class="Magento\Ui\Component\Listing\Columns\Date"
                 component="Magento_Ui/js/grid/columns/date" sortOrder="10">
             <settings>
@@ -69,7 +71,7 @@
         <actionsColumn name="actions" class="TNW\Salesforce\Ui\Component\Listing\Columns\LogFileActions">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="viewUrl" xsi:type="string">tnw_salesforce/logfile_sync/view</item>
+                    <item name="viewUrl" xsi:type="string">tnw_salesforce/logfile_magento/view</item>
                     <item name="downloadUrl" xsi:type="string">tnw_salesforce/logfile_file/download</item>
                 </item>
             </argument>

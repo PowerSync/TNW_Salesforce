@@ -5,18 +5,18 @@ declare(strict_types=1);
  * See TNW_LICENSE.txt for license details.
  */
 
-namespace TNW\Salesforce\Ui\DataProvider\FileLog\Synchronization\Form;
+namespace TNW\Salesforce\Ui\DataProvider\FileLog\Form;
 
 use Magento\Framework\UrlInterface;
 use Magento\Ui\DataProvider\AbstractDataProvider;
 use Psr\Log\LoggerInterface;
 use Throwable;
 use TNW\Salesforce\Model\Log\File;
-use TNW\Salesforce\Model\ResourceModel\Log\File\Synchronization\Grid\CollectionFactory;
+use TNW\Salesforce\Model\ResourceModel\Log\File\Grid\CollectionFactory;
 use TNW\Salesforce\Service\Tools\Log\GetFileContent;
 
 /**
- * Synchronization file log form data provider.
+ * File log form data provider.
  */
 class DataProvider extends AbstractDataProvider
 {
@@ -88,7 +88,7 @@ class DataProvider extends AbstractDataProvider
      */
     private function getFormData(File $file): array
     {
-        $downloadFileUrl = $this->urlBuilder->getUrl("*/*/download", ['id' => $file->getId()]);
+        $downloadFileUrl = $this->urlBuilder->getUrl("*/logfile_file/download", ['id' => $file->getId()]);
         $ajaxUrl = $this->urlBuilder->getUrl("*/logfile_file/view");
         try {
             $content = $this->getFileContent->execute($file->getAbsolutePath());

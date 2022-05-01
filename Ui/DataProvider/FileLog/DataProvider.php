@@ -1,17 +1,22 @@
 <?php
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+
 declare(strict_types=1);
 /**
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
 
-namespace TNW\Salesforce\Ui\DataProvider\FileLog\Synchronization;
+namespace TNW\Salesforce\Ui\DataProvider\FileLog;
 
 use Magento\Ui\DataProvider\AbstractDataProvider;
-use TNW\Salesforce\Model\ResourceModel\Log\File\Synchronization\Grid\CollectionFactory;
+use TNW\Salesforce\Model\ResourceModel\Log\File\Grid\CollectionFactory;
 
 /**
- * Synchronization file log grid data provider.
+ * File log grid data provider.
  */
 class DataProvider extends AbstractDataProvider
 {

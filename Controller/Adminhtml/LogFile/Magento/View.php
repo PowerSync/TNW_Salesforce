@@ -5,7 +5,7 @@ declare(strict_types=1);
  * See TNW_LICENSE.txt for license details.
  */
 
-namespace TNW\Salesforce\Controller\Adminhtml\LogFile\Sync;
+namespace TNW\Salesforce\Controller\Adminhtml\LogFile\Magento;
 
 use Magento\Framework\Exception\FileSystemException;
 use TNW\Salesforce\Controller\Adminhtml\LogFile\AbstractView;
@@ -22,9 +22,9 @@ class View extends AbstractView
      */
     protected function initPageConfig($resultPage): void
     {
-        $resultPage->setActiveMenu('TNW_Salesforce::tools_sync_log');
+        $resultPage->setActiveMenu('TNW_Salesforce::tools_magento_log');
         $fileId = (string)$this->getRequest()->getParam('id');
         $file = $this->getFileModel($fileId);
-        $resultPage->getConfig()->getTitle()->prepend((__('View Synchronization Log File: %1', $file->getName())));
+        $resultPage->getConfig()->getTitle()->prepend((__('View Magento Log File: %1', $file->getName())));
     }
 }
