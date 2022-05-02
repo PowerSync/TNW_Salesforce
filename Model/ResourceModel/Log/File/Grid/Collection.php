@@ -1,9 +1,4 @@
 <?php
-/**
- * Copyright © 2022 TechNWeb, Inc. All rights reserved.
- * See TNW_LICENSE.txt for license details.
- */
-
 declare(strict_types=1);
 /**
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
@@ -18,7 +13,6 @@ use Magento\Framework\Data\Collection as DataCollection;
 use Magento\Framework\Data\Collection\EntityFactoryInterface;
 use Magento\Framework\Data\Collection\Filesystem as FilesystemCollection;
 use Magento\Framework\Exception\FileSystemException;
-use Magento\Framework\Filesystem;
 use TNW\Salesforce\Model\Log\File;
 use TNW\Salesforce\Model\Log\FileFactory;
 use TNW\Salesforce\Service\Tools\Log\LoadFileData;
@@ -46,29 +40,26 @@ class Collection extends FilesystemCollection
     private $directoryList;
 
     /**
-     * @param LoadFileData                $loadFileData
-     * @param FileFactory                 $fileFactory
-     * @param DirectoryList               $directoryList
-     * @param EntityFactoryInterface|null $entityFactory
-     * @param Filesystem|null             $filesystem
+     * @param EntityFactoryInterface $entityFactory
+     * @param LoadFileData           $loadFileData
+     * @param FileFactory            $fileFactory
+     * @param DirectoryList          $directoryList
      *
      * @throws FileSystemException|Exception
      */
     public function __construct(
+        EntityFactoryInterface $entityFactory,
         LoadFileData $loadFileData,
         FileFactory $fileFactory,
-        DirectoryList $directoryList,
-        EntityFactoryInterface $entityFactory = null,
-        Filesystem $filesystem = null
+        DirectoryList $directoryList
     ) {
-        parent::__construct($entityFactory, $filesystem);
+        parent::__construct($entityFactory);
 
         $this->loadLogFileData = $loadFileData;
         $this->fileFactory = $fileFactory;
         $this->directoryList = $directoryList;
-        $this->setCollectRecursively(false)
-            ->setFilesFilter(self::FILE_MASK)
-            ->addTargetDir($this->getTargetDir());
+
+        $this->init();
     }
 
     /**
@@ -98,6 +89,18 @@ class Collection extends FilesystemCollection
         $fileData = $logFileModel->getData();
 
         return $row + $fileData;
+    }
+
+    /**
+     * Init collection settings.
+     *
+     * @throws FileSystemException|Exception
+     */
+    protected function init(): void
+    {
+        $this->setCollectRecursively(false)
+            ->setFilesFilter(self::FILE_MASK)
+            ->addTargetDir($this->getTargetDir());
     }
 
     /**
