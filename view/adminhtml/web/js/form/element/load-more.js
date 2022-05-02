@@ -29,7 +29,14 @@ define([
                 },
                 insertion: function (receiver, responseText) {
                     let data = JSON.parse(responseText);
-                    receiver.insert(data.content);
+                    let content = data.content;
+                    content.replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;");
+
+                    receiver.insert(content);
                 },
                 onComplete: function (response) {
                     if (response.responseText.empty()) {

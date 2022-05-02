@@ -12,6 +12,7 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Escaper;
 use Magento\Framework\Exception\FileSystemException;
 use Throwable;
 use TNW\Salesforce\Model\Log\FileFactory;
@@ -35,19 +36,24 @@ class View extends Action implements HttpPostActionInterface
     /** @var FileFactory */
     private $fileFactory;
 
+    /** @var Escaper */
+    private $escaper;
+
     /**
      * @param Context        $context
      * @param JsonFactory    $jsonFactory
      * @param GetFileContent $getFileContent
      * @param LoadFileData   $loadFileData
      * @param FileFactory    $fileFactory
+     * @param Escaper        $escaper
      */
     public function __construct(
         Context $context,
         JsonFactory $jsonFactory,
         GetFileContent $getFileContent,
         LoadFileData $loadFileData,
-        FileFactory $fileFactory
+        FileFactory $fileFactory,
+        Escaper $escaper
     ) {
         parent::__construct($context);
 
@@ -55,6 +61,7 @@ class View extends Action implements HttpPostActionInterface
         $this->getFileContent = $getFileContent;
         $this->loadFileData = $loadFileData;
         $this->fileFactory = $fileFactory;
+        $this->escaper = $escaper;
     }
 
     /**
@@ -71,10 +78,11 @@ class View extends Action implements HttpPostActionInterface
         }
 
         $fileId = (string)$request->getParam('id');
-        $page = (int)$request->getParam('page');
+        $currentPage = (int)$request->getParam('page');
+        $currentPage++;
 
         try {
-            $resultData = $this->getContent($fileId, $page);
+            $resultData = $this->getContent($fileId, $currentPage);
         } catch (Throwable $exception) {
             return $result->setHttpResponseCode(Response::STATUS_CODE_500)->setJsonData($exception->getMessage());
         }
@@ -95,6 +103,6 @@ class View extends Action implements HttpPostActionInterface
         $this->loadFileData->execute($file, $fileId);
         $content = $this->getFileContent->execute($file->getAbsolutePath(), $page);
 
-        return ['content' => $content];
+        return ['content' => $this->escaper->escapeHtml($content)];
     }
 }
