@@ -1,10 +1,12 @@
 <?php
 namespace TNW\Salesforce\Synchronize;
 
-use Magento\Framework\Stdlib\DateTime\Timezone;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Stdlib\DateTime\DateTime;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\ResourceModel\Queue\Collection;
 use TNW\Salesforce\Synchronize\Exception as SalesforceException;
+use TNW\Salesforce\Synchronize\Queue\PushMqMessage;
 use Zend_Db_Expr;
 
 /**
@@ -37,11 +39,6 @@ class Queue
      */
     private $uidProcessor;
 
-    /**
-     * @var Timezone
-     */
-    private $timezone;
-
     /** @var [] */
     private $sortGroups;
 
@@ -53,15 +50,20 @@ class Queue
      */
     private $isCheck = false;
 
+    /** @var DateTime */
+    private $dateTime;
+
     /**
      * Queue constructor.
-     * @param Group[] $groups
-     * @param array $phases
-     * @param Model\Config $salesforceConfig
-     * @param Model\ResourceModel\Queue $resourceQueue
+     *
+     * @param Group[]                             $groups
+     * @param array                               $phases
+     * @param Model\Config                        $salesforceConfig
+     * @param Model\ResourceModel\Queue           $resourceQueue
      * @param Model\Logger\Processor\UidProcessor $uidProcessor
-     * @param Timezone $timezone
-     * @param bool $isCheck
+     * @param PushMqMessage                       $pushMqMessage
+     * @param DateTime                            $dateTime
+     * @param bool                                $isCheck
      */
     public function __construct(
         array $groups,
@@ -69,8 +71,8 @@ class Queue
         Model\Config $salesforceConfig,
         Model\ResourceModel\Queue $resourceQueue,
         Model\Logger\Processor\UidProcessor $uidProcessor,
-        Timezone $timezone,
-        \TNW\Salesforce\Synchronize\Queue\PushMqMessage $pushMqMessage,
+        PushMqMessage $pushMqMessage,
+        DateTime $dateTime,
         $isCheck = false
     ) {
         $this->groups = $groups;
@@ -78,9 +80,9 @@ class Queue
         $this->salesforceConfig = $salesforceConfig;
         $this->resourceQueue = $resourceQueue;
         $this->uidProcessor = $uidProcessor;
-        $this->timezone = $timezone;
         $this->pushMqMessage = $pushMqMessage;
         $this->setIsCheck($isCheck);
+        $this->dateTime = $dateTime;
     }
 
     /**
@@ -104,9 +106,11 @@ class Queue
     /**
      * Synchronize
      *
-     * @param $collection Collection
-     * @param $websiteId
-     * @param array $syncJobs
+     * @param Collection $collection
+     * @param            $websiteId
+     * @param array      $syncJobs
+     *
+     * @throws LocalizedException|\Exception
      */
     public function synchronize($collection, $websiteId, $syncJobs = [])
     {
@@ -143,8 +147,8 @@ class Queue
                     'identify' => new Zend_Db_Expr('queue_id')
                 ];
 
-                if ($phase['startStatus'] == Model\Queue::STATUS_NEW) {
-                    $lockData['sync_at'] = $this->timezone->date()->format('c');
+                if ($phase['startStatus'] === Model\Queue::STATUS_NEW) {
+                    $lockData['sync_at'] = $this->dateTime->gmtDate('c');
                 }
 
                 // Mark work
