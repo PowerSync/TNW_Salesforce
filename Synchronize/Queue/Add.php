@@ -320,8 +320,10 @@ class Add
                     }
                 };
 
-                $closure($unit->parents(), $parents);
-                $closure($unit->children(), $children);
+                $parentUnits = $unit->parents();
+                $parentUnits && $closure($parentUnits, $parents);
+                $childrenUnits = $unit->children();
+                $childrenUnits && $closure($childrenUnits, $children);
 
             }
 
@@ -431,6 +433,7 @@ class Add
         try {
             $this->saveQueue($queueDataToSave);
             $this->saveDependency($dependencies);
+            $this->updateRelationsWithErrors($queueDataToSave);
 
 //            $this->buildGraph($queueDataToSave, $dependencies);
 
@@ -558,5 +561,54 @@ class Add
     public function syncType($count, $websiteId)
     {
         return Config::DIRECT_SYNC_TYPE_REALTIME;
+    }
+
+    /**
+     * If any of saved queues have some parent queue with 'error' status,
+     * make such parent queue 'new' to unblock newly added queues.
+     *
+     * @param array $queueDataToSave
+     * @return void
+     */
+    private function updateRelationsWithErrors(array $queueDataToSave): void
+    {
+        if (!empty($queueDataToSave)) {
+            $orWhere = array_map(function (array $queue) {
+                return sprintf(
+                    '(old_queue.identify = \'%s\' AND old_queue.website_id= \'%s\')',
+                    $queue['identify'],
+                    $queue['website_id']
+                );
+            },
+                $queueDataToSave
+            );
+
+            $connection = $this->resourceQueue->getConnection();
+            $queueTable = $connection->getTableName('tnw_salesforce_entity_queue');
+            $relationTable = $connection->getTableName('tnw_salesforce_entity_queue_relation');
+            $select = $connection->select()
+                ->distinct()
+                ->join(
+                    ['relation' => $relationTable],
+                    'relation.parent_id = queue.queue_id',
+                    [
+                        'composite_status' => new \Zend_Db_Expr('\'new\''),
+                        'sync_attempt' => new \Zend_Db_Expr(0),
+                    ]
+                )
+                ->join(
+                    ['old_queue' => $queueTable],
+                    'relation.queue_id = old_queue.queue_id',
+                    []
+                )
+                ->where(
+                    'queue.composite_status = \'error\''
+                )
+                ->where(
+                    implode(' OR ', $orWhere)
+                );
+            $query = $connection->updateFromSelect($select, ['queue' => $queueTable]);
+            $connection->query($query);
+        }
     }
 }
