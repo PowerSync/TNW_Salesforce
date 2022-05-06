@@ -6,6 +6,7 @@
 
 namespace TNW\Salesforce\Observer;
 
+use Exception;
 use Magento\Config\Controller\Adminhtml\System\Config\Edit;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Event\Observer;
@@ -25,6 +26,9 @@ use TNW\Salesforce\Model\Config;
  */
 class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverInterface
 {
+    private const TNW_SECTION_PREFIX = 'tnwsforce_';
+    private const TNW_GENERAL_SECTION = 'tnwsforce_general';
+
     /** @var UrlInterface */
     private $urlBuilder;
 
@@ -73,14 +77,14 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
 
     /**
      * @param Observer $observer
-     *
      * @throws FileSystemException|LocalizedException
+     * @return void
      */
     public function execute(Observer $observer)
     {
         /** @var Http $request */
         $request = $observer->getEvent()->getData('request');
-        if (!in_array($request->getParam('section'), $this->allowSection)) {
+        if (!$this->isAllowedSection((string)$request->getParam('section'))) {
             return;
         }
 
@@ -90,6 +94,7 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
         if (!$this->salesforceClient->getClientStatus()) {
             $this->messageManager->addWarningMessage('Saleseforce Integration is disable');
             $this->redirect($controllerAction);
+
             return;
         }
 
@@ -121,8 +126,9 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
             }
 
             $this->redirect($controllerAction);
+
             return;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->messageManager->addExceptionMessage($e);
             $this->redirect($controllerAction);
         }
@@ -138,5 +144,16 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
         $response = $action->getResponse();
         $url = $this->urlBuilder->getUrl('adminhtml/system_config/edit', ['section'=>'tnwsforce_general']);
         $response->setRedirect($url);
+    }
+
+    /**
+     * @param string $sectionName
+     *
+     * @return bool
+     */
+    private function isAllowedSection(string $sectionName): bool
+    {
+        return (strpos($sectionName, self::TNW_SECTION_PREFIX) !== false)
+            && $sectionName !== self::TNW_GENERAL_SECTION;
     }
 }
