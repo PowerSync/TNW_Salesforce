@@ -108,7 +108,8 @@
             "additional_data": true,
             "created_at": true,
             "identify": true,
-            "updated_at": true
+            "updated_at": true,
+            "composite_status": true
         },
         "index": {
             "TNW_SALESFORCE_ENTITY_QUEUE_CODE_ENTITY_ID_ENTITY_LOAD": true,

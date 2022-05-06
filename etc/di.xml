@@ -774,8 +774,39 @@
             </argument>
         </arguments>
     </type>
+    <type name="TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert\Storage">
+        <plugin name="FormatResponseForArchivedProductsPlugin"
+                type="TNW\Salesforce\Plugin\Synchronize\Transport\Soap\Calls\Upsert\Storage\FormatResponseForArchivedProductsPlugin"
+        />
+    </type>
     <preference for="TNW\Salesforce\Api\Service\Customer\IsSyncDisabledInterface"
                 type="TNW\Salesforce\Service\Customer\IsSyncDisabled"/>
     <preference for="TNW\Salesforce\Api\Service\Customer\GetCustomerIdByQuoteIdInterface"
                 type="TNW\Salesforce\Service\Customer\GetCustomerIdByQuoteId"/>
+    <type name="TNW\Salesforce\Service\GetWebsiteByEntityType">
+        <arguments>
+            <argument name="processors" xsi:type="array">
+                <item name="order" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Order</item>
+                <item name="orderItem" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\OrderItem</item>
+                <item name="customer" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Customer</item>
+                <item name="orderInvoice" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Invoice</item>
+                <item name="orderShipment" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Shipment</item>
+                <item name="store" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Store</item>
+                <item name="quote" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\Quote</item>
+                <item name="quoteItem" xsi:type="object">TNW\Salesforce\Service\GetWebsiteByEntityType\QuoteItem</item>
+            </argument>
+        </arguments>
+    </type>
+    <preference for="TNW\Salesforce\Api\Service\Company\GenerateCompanyNameInterface"
+                type="TNW\Salesforce\Service\Company\GenerateCompanyName"/>
+
+    <preference for="TNW\Salesforce\Api\Service\Admin\AddUniqueExceptionMessageInterface"
+                type="TNW\Salesforce\Service\Admin\AddUniqueExceptionMessage"/>
+    <type name="TNW\Salesforce\Service\Admin\AddUniqueExceptionMessage">
+        <arguments>
+            <argument name="exceptionMessageFactory" xsi:type="object">
+                Magento\Framework\Message\ExceptionMessageLookupFactory
+            </argument>
+        </arguments>
+    </type>
 </config>

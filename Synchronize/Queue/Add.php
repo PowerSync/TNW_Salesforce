@@ -320,8 +320,10 @@ class Add
                     }
                 };
 
-                $closure($unit->parents(), $parents);
-                $closure($unit->children(), $children);
+                $parentUnits = $unit->parents();
+                $parentUnits && $closure($parentUnits, $parents);
+                $childrenUnits = $unit->children();
+                $childrenUnits && $closure($childrenUnits, $children);
 
             }
 
