@@ -92,7 +92,7 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
         $controllerAction = $observer->getEvent()->getData('controller_action');
 
         if (!$this->salesforceClient->getClientStatus()) {
-            $this->messageManager->addWarningMessage('Saleseforce Integration is disable');
+            $this->messageManager->addWarningMessage('Saleseforce Integration is disabled');
             $this->redirect($controllerAction);
 
             return;
