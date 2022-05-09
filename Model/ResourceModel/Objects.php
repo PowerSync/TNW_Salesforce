@@ -116,12 +116,13 @@ class Objects extends AbstractDb
             ->limit(1);
 
         $this->selectPriceBookId = $this->getConnection()->select()
-            ->from($this->getMainTable(), ['object_id', 'salesforce_type'])
-            ->where('magento_type = "PricebookEntry"')
+            ->from($this->getMainTable(), ['GROUP_CONCAT(DISTINCT(object_id) SEPARATOR "\n")'])
+            ->where('magento_type = "Product"')
+            ->where('salesforce_type = "PricebookEntry"')
             ->where('entity_id = :entity_id')
-            ->where('store_id = :store_id')
             ->where('website_id IN(:entity_website_id, :base_website_id)')
-            ->order(new \Zend_Db_Expr('FIELD(website_id, :entity_website_id, :base_website_id)'))
+            ->order('website_id DESC')
+            ->group('website_id')
             ->limit(1);
     }
 
@@ -139,12 +140,17 @@ class Objects extends AbstractDb
      * @param int $entityId
      * @param string $magentoType
      * @param int $websiteId
-     *
+     * @param string|null $salesforceType
      * @return string
      */
-    public function loadObjectId($entityId, $magentoType, $websiteId)
+    public function loadObjectId($entityId, $magentoType, $websiteId, ?string $salesforceType = null)
     {
-        return $this->getConnection()->fetchOne($this->selectObjectId, [
+        $loadObjectIdSelect = clone $this->selectObjectId;
+        if ($salesforceType !== null) {
+            $loadObjectIdSelect->where('salesforce_type = ?', $salesforceType);
+        }
+        
+        return $this->getConnection()->fetchOne($loadObjectIdSelect, [
             'magento_type' => $magentoType,
             'entity_id' => (int)$entityId,
             'entity_website_id' => (int)$websiteId,
@@ -153,22 +159,25 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $productId
-     * @param int $storeId
-     * @param int $websiteId
+     * @param int      $productId
+     * @param int      $websiteId
+     *
+     * @param int|null $storeId
      *
      * @return string
      */
-    public function loadPriceBookId($productId, $storeId, $websiteId)
+    public function loadPriceBookId(int $productId, int $websiteId, int $storeId = null): string
     {
-        $condition = [
+        $loadPricebookIdSelect = clone $this->selectPriceBookId;
+        if ($storeId) {
+            $loadPricebookIdSelect->where('store_id = ?', $storeId);
+        }
+
+        return (string)$this->getConnection()->fetchOne($loadPricebookIdSelect, [
             'entity_id' => $productId,
-            'store_id' => $storeId,
             'entity_website_id' => $websiteId,
             'base_website_id' => $this->baseWebsiteId($websiteId),
-        ];
-
-        return $this->getConnection()->fetchOne($this->selectPriceBookId, $condition);
+        ]);
     }
 
     /**
@@ -203,12 +212,17 @@ class Objects extends AbstractDb
      * @param int $entityId
      * @param string $magentoType
      * @param int $websiteId
-     *
+     * @param string|null $salesforceType
      * @return int
      */
-    public function loadStatus($entityId, $magentoType, $websiteId)
+    public function loadStatus($entityId, $magentoType, $websiteId, ?string $salesforceType = null)
     {
-        return $this->getConnection()->fetchOne($this->selectStatus, [
+        $loadObjectStatusSelect = clone $this->selectStatus;
+        if ($salesforceType !== null) {
+            $loadObjectStatusSelect->where('salesforce_type = ?', $salesforceType);
+        }
+        
+        return $this->getConnection()->fetchOne($loadObjectStatusSelect, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
             'entity_website_id' => $websiteId,

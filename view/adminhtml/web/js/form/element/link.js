@@ -15,12 +15,21 @@ define([
                 return '';
             }
 
-            var explode = value.split(':');
-            if (explode.length === 1) {
-                return '';
+            let explode = value.split(':'),
+                resultPrefix = '';
+            switch (explode.length) {
+                case 2:
+                    resultPrefix = explode[0];
+                    break;
+                case 3:
+                    resultPrefix = explode[0] + ':' + explode[1];
+                    break;
+                default:
+                    resultPrefix = '';
+                    break;
             }
 
-            return explode[0];
+            return resultPrefix;
         },
 
         text: function(value) {
@@ -28,13 +37,9 @@ define([
                 return '';
             }
 
-            var explode = value.split(':');
+            let explodedSForceId = value.split(':');
 
-            if (explode.length === 1) {
-                return explode[0];
-            }
-
-            return explode[1];
+            return explodedSForceId[explodedSForceId.length - 1]
         },
 
         isEmpty: function (value) {
