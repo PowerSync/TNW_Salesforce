@@ -309,6 +309,10 @@ class Input extends Synchronize\Unit\UnitAbstract
                 $object[$fieldName] = (float)$object[$fieldName];
             } elseif (is_string($object[$fieldName])) {
                 $object[$fieldName] = trim($object[$fieldName]);
+                if ($object[$fieldName] === '') {
+                    $object[$fieldName] = null;
+                    continue;
+                }
 
                 if ($fieldProperty->getLength()
                     && $fieldProperty->getLength() < strlen($object[$fieldName])
