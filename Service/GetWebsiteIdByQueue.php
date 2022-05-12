@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Service;
 
+use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Model\Queue;
 
 /**
@@ -27,6 +28,7 @@ class GetWebsiteIdByQueue
      * @param Queue $queue
      *
      * @return int
+     * @throws LocalizedException
      */
     public function execute(Queue $queue): int
     {

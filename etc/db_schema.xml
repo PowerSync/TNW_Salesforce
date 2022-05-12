@@ -128,6 +128,7 @@
         <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="When create" />
         <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="When updated" />
         <column xsi:type="varchar" name="identify" nullable="true" length="64" comment="Identifier allow detect entity added to the queue with specific params" />
+        <column xsi:type="varchar" name="composite_status" nullable="false" length="255" default="new" comment="Composite status, taking into account the status of relatives" />
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="queue_id" />
         </constraint>
