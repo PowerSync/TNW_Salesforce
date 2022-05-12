@@ -16,12 +16,6 @@
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="map_id" />
         </constraint>
-        <constraint xsi:type="unique" referenceId="salesforce_business_mapper_index_unique">
-            <column name="object_type" />
-            <column name="magento_entity_type" />
-            <column name="magento_attribute_name" />
-            <column name="salesforce_attribute_name" />
-        </constraint>
         <constraint xsi:type="unique" referenceId="UNQ_60349F8A9E5C5B146928AD8B9CAF78E7">
             <column name="object_type" />
             <column name="magento_entity_type" />
