@@ -75,7 +75,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         $offset = $this->prepareHash($offset);
         return isset($this->data[$offset]);
@@ -88,7 +88,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      * @return Cache
      * @throws \InvalidArgumentException
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         $offset = $this->prepareHash($offset);
         if (!isset($this->data[$offset])) {
@@ -107,7 +107,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param mixed $value
      * @throws \InvalidArgumentException
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         if (null === $offset) {
             $offset = count($this->data);
@@ -123,7 +123,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param mixed $offset
      * @throws \InvalidArgumentException
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         $offset = $this->prepareHash($offset);
         unset($this->data[$offset]);
@@ -134,7 +134,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @return \ArrayIterator
      */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         return new \ArrayIterator($this->data);
     }
@@ -144,7 +144,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->data);
     }
@@ -155,7 +155,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param Cache|mixed $cache
      * @return bool
      */
-    public static function isEmpty($cache)
+    public static function isEmpty($cache): bool
     {
         if ($cache instanceof self) {
             return $cache->count() === 0;

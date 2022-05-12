@@ -170,7 +170,7 @@ class Input extends SplObjectStorage
      * @param object $object
      * @param array $data
      */
-    public function offsetSet($object, $data = null)
+    public function offsetSet($object, $data = null): void
     {
         $index = count($this->conditions);
         parent::offsetSet($object, $index);
@@ -181,7 +181,7 @@ class Input extends SplObjectStorage
      * @param object $object
      * @return array
      */
-    public function &offsetGet($object)
+    public function &offsetGet($object): array
     {
         if (!$this->contains($object)) {
             $this->offsetSet($object, []);
@@ -193,7 +193,7 @@ class Input extends SplObjectStorage
     /**
      * @return array
      */
-    public function getInfo()
+    public function getInfo():array
     {
         return $this->conditions[parent::getInfo()];
     }
@@ -201,7 +201,7 @@ class Input extends SplObjectStorage
     /**
      * @param array $data
      */
-    public function setInfo($data)
+    public function setInfo($data): void
     {
         $index = count($this->conditions);
         parent::setInfo($index);

@@ -12,7 +12,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * Return the current element
      * @return mixed
      */
-    public function current()
+    public function current(): mixed
     {
         return \current($this->results);
     }
@@ -20,7 +20,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
     /**
      * Move forward to next element
      */
-    public function next()
+    public function next(): void
     {
         \next($this->results);
     }
@@ -29,7 +29,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * Return the key of the current element
      * @return int
      */
-    public function key()
+    public function key(): int
     {
         return \key($this->results);
     }
@@ -38,7 +38,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * Checks if current position is valid
      * @return bool
      */
-    public function valid()
+    public function valid(): bool
     {
         return \key($this->results) !== null;
     }
@@ -46,7 +46,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
     /**
      * Rewind the Iterator to the first element
      */
-    public function rewind()
+    public function rewind(): void
     {
         \reset($this->results);
     }
@@ -56,7 +56,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * @param int $offset
      * @return bool
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return array_key_exists($offset, $this->results);
     }
@@ -66,7 +66,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * @param int $offset
      * @return mixed
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->results[$offset];
     }
@@ -76,7 +76,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * @param int $offset
      * @param mixed $value
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         $this->results[] = $value;
     }
@@ -85,7 +85,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * Offset to unset
      * @param int $offset
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         unset($this->results[$offset]);
     }
@@ -94,7 +94,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * Count elements of an object
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return \count($this->results);
     }

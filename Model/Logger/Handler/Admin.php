@@ -41,7 +41,7 @@ class Admin extends AbstractProcessingHandler
      * @param  array $record
      * @return void
      */
-    protected function write(array $record)
+    protected function write(array $record): void
     {
         if (strcasecmp($this->request->getActionName(), 'inlineEdit') === 0) {
             return;
