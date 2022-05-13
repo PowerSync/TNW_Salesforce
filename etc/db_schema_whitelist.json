@@ -109,6 +109,7 @@
             "created_at": true,
             "identify": true,
             "updated_at": true,
+            "composite_status": true,
             "status_code": true
         },
         "index": {

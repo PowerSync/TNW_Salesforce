@@ -1,5 +1,6 @@
 <?php
 namespace TNW\Salesforce\Lib\Tnw\SoapClient;
+
 /**
  * AssignmentRuleHeader class to set rule during update Lead
  *
@@ -7,23 +8,25 @@ namespace TNW\Salesforce\Lib\Tnw\SoapClient;
  */
 class AssignmentRuleHeader
 {
-    // int
+    /** @var string|int */
     public $assignmentRuleId;
-    // boolean
+
+    /** @var bool */
     public $useDefaultRuleFlag;
 
     /**
      * Constructor.  Only one param can be set.
      *
-     * @param int $id AssignmentRuleId
-     * @param boolean $flag UseDefaultRule flag
+     * @param string|int     $id   AssignmentRuleId
+     * @param boolean|null $flag UseDefaultRule flag
      */
     public function __construct($id = null, $flag = null)
     {
-        if ($id != null) {
+        if ($id !== null) {
             $this->assignmentRuleId = $id;
         }
-        if ($flag != null) {
+
+        if ($flag !== null) {
             $this->useDefaultRuleFlag = $flag;
         }
     }
