@@ -65,7 +65,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
             $record = $record[$field];
         }
 
-        return $record;
+        return $record['value'] ?? null;
     }
 
     /**
@@ -88,16 +88,14 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      * @return Cache
      * @throws \InvalidArgumentException
      */
-    public function offsetGet($offset): Cache
+    public function offsetGet($offset): array
     {
         $offset = $this->prepareHash($offset);
         if (!isset($this->data[$offset])) {
             $this->data[$offset] = [];
         }
 
-        return is_array($this->data[$offset])
-            ? new self($this->data[$offset])
-            : $this->data[$offset];
+        return $this->data[$offset];
     }
 
     /**
@@ -114,7 +112,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
         }
 
         $offset = $this->prepareHash($offset);
-        $this->data[$offset] = $value;
+        $this->data[$offset] = ['value' => $value];
     }
 
     /**
