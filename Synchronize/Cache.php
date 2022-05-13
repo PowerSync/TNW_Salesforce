@@ -88,7 +88,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      * @return Cache
      * @throws \InvalidArgumentException
      */
-    public function offsetGet($offset): mixed
+    public function offsetGet($offset): Cache
     {
         $offset = $this->prepareHash($offset);
         if (!isset($this->data[$offset])) {

@@ -90,7 +90,7 @@ class Output extends \SplObjectStorage
      *
      * @return array
      */
-    public function getInfo(): mixed
+    public function getInfo(): array
     {
         return $this->info[parent::getInfo()];
     }

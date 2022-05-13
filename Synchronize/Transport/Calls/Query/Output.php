@@ -12,7 +12,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * Return the current element
      * @return mixed
      */
-    public function current(): mixed
+    public function current(): array
     {
         return \current($this->results);
     }
@@ -66,7 +66,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * @param int $offset
      * @return mixed
      */
-    public function offsetGet($offset): mixed
+    public function offsetGet($offset): array
     {
         return $this->results[$offset];
     }

@@ -193,7 +193,7 @@ class Input extends SplObjectStorage
     /**
      * @return array
      */
-    public function getInfo():array
+    public function getInfo(): array
     {
         return $this->conditions[parent::getInfo()];
     }
