@@ -305,7 +305,9 @@ class Input extends Synchronize\Unit\UnitAbstract
                     );
                     unset($object[$fieldName]);
                 }
-            } elseif (in_array($fieldProperty->getSoapType(), ['xsd:double'])) {
+            } elseif (isset($object[$fieldName]) &&
+                (string)$fieldProperty->getSoapType() === 'xsd:double'
+            ) {
                 $object[$fieldName] = (float)$object[$fieldName];
             } elseif (is_string($object[$fieldName])) {
                 $object[$fieldName] = trim($object[$fieldName]);
