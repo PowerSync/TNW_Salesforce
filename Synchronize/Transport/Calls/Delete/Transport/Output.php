@@ -65,7 +65,7 @@ class Output extends SplObjectStorage
      * @param object $object
      * @return array
      */
-    public function &offsetGet($object): array
+    public function &offsetGet($object)
     {
         if (!$this->contains($object)) {
             $this->offsetSet($object, []);

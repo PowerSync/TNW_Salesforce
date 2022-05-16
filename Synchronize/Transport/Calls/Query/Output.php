@@ -66,7 +66,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * @param int $offset
      * @return mixed
      */
-    public function offsetGet($offset): array
+    public function offsetGet($offset)
     {
         return $this->results[$offset];
     }
