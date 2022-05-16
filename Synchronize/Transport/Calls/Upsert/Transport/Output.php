@@ -1,6 +1,8 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Upsert\Transport;
 
+use ReturnTypeWillChange;
+
 /**
  * Upsert Transport Output
  */
@@ -76,7 +78,7 @@ class Output extends \SplObjectStorage
      * @param object $object
      * @return array
      */
-    public function &offsetGet($object)
+    #[ReturnTypeWillChange] public function &offsetGet($object)
     {
         if (!$this->contains($object)) {
             $this->offsetSet($object, []);

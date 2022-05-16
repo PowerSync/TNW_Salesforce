@@ -1,6 +1,8 @@
 <?php
 namespace TNW\Salesforce\Synchronize;
 
+use ReturnTypeWillChange;
+
 /**
  * Cache
  */
@@ -85,10 +87,10 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
      * Offset to retrieve
      *
      * @param mixed $offset
-     * @return Cache
+     * @return mixed
      * @throws \InvalidArgumentException
      */
-    public function offsetGet($offset)
+    #[ReturnTypeWillChange] public function offsetGet($offset)
     {
         $offset = $this->prepareHash($offset);
         if (!isset($this->data[$offset])) {

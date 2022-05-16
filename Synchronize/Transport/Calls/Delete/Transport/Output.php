@@ -2,6 +2,7 @@
 
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Delete\Transport;
 
+use ReturnTypeWillChange;
 use SplObjectStorage;
 use function spl_object_hash;
 
@@ -65,7 +66,7 @@ class Output extends SplObjectStorage
      * @param object $object
      * @return array
      */
-    public function &offsetGet($object)
+    #[ReturnTypeWillChange] public function &offsetGet($object)
     {
         if (!$this->contains($object)) {
             $this->offsetSet($object, []);
