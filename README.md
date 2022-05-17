@@ -4,7 +4,7 @@ The simplest and most flexible way of integrating Magento entities with Salesfor
 _NOTE:_ we also do offer [integration between Magneto 1.x and Salesforce](https://powersync.biz/integrations-magento-salesforce/) and you can find more information on our website. 
 
 #### Build Status
-[![CircleCI](https://circleci.com/gh/PowerSync/TNW_Salesforce/tree/master.svg?style=svg&circle-token=e6b9857e0734f52fb1756cbdb92a68dc2dcf1bf0)](https://circleci.com/gh/PowerSync/TNW_Salesforce/tree/master)
+[![CircleCI](https://circleci.com/gh/PowerSync/TNW_Salesforce/tree/master.svg?style=svg)](https://circleci.com/gh/PowerSync/TNW_Salesforce/tree/master)
 
 ## Requirements
 * PHP >= 7.0
