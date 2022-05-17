@@ -1,8 +1,6 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Query;
 
-use ReturnTypeWillChange;
-use function count;
 use RuntimeException;
 use SplObjectStorage;
 
@@ -182,7 +180,7 @@ class Input extends SplObjectStorage
      * @param object $object
      * @return array
      */
-    #[ReturnTypeWillChange] public function &offsetGet($object)
+    public function &offsetGet($object)
     {
         if (!$this->contains($object)) {
             $this->offsetSet($object, []);

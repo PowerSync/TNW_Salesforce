@@ -1,8 +1,6 @@
 <?php
 namespace TNW\Salesforce\Synchronize\Transport\Calls\Query;
 
-use ReturnTypeWillChange;
-
 class Output implements \Countable, \Iterator, \ArrayAccess
 {
     /**
@@ -68,7 +66,7 @@ class Output implements \Countable, \Iterator, \ArrayAccess
      * @param int $offset
      * @return mixed
      */
-    #[ReturnTypeWillChange] public function offsetGet($offset)
+    public function offsetGet($offset)
     {
         return $this->results[$offset];
     }
