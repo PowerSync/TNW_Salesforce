@@ -76,7 +76,7 @@ class Output extends \SplObjectStorage
      * @param object $object
      * @return array
      */
-    public function &offsetGet($object)
+    public function &offsetGet($object): mixed
     {
         if (!$this->contains($object)) {
             $this->offsetSet($object, []);
