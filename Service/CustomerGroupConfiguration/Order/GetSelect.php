@@ -1,12 +1,14 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Service\CustomerGroupConfiguration\Order;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use TNW\Salesforce\Api\Service\GetSelectInterface;
-use TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds;
 
 /**
  *  Order ids filtered by customer group from store configuration
@@ -16,19 +18,12 @@ class GetSelect implements GetSelectInterface
     /** @var ResourceConnection */
     private $resource;
 
-    /** @var GetCustomerGroupIds */
-    private $getCustomerGroupIds;
-
     /**
-     * @param ResourceConnection  $resource
-     * @param GetCustomerGroupIds $getCustomerGroupIds
+     * @param ResourceConnection $resource
      */
-    public function __construct(
-        ResourceConnection    $resource,
-        GetCustomerGroupIds   $getCustomerGroupIds
-    ) {
+    public function __construct(ResourceConnection $resource)
+    {
         $this->resource = $resource;
-        $this->getCustomerGroupIds = $getCustomerGroupIds;
     }
 
     /**
@@ -40,12 +35,16 @@ class GetSelect implements GetSelectInterface
         $select = $connection->select()->from(
             [$this->resource->getTableName('sales_order')],
             [
-                'entity_id'
+                'entity_id',
+                'group_id' => 'customer_group_id'
             ]
         );
-        $select->where('entity_id IN (?)', $entityIds);
-        $customerSyncGroupsIds = $this->getCustomerGroupIds->execute();
-        $customerSyncGroupsIds !== null && $select->where('customer_group_id IN (?)', $customerSyncGroupsIds);
+        $select->join(
+            ['store' => $this->resource->getTableName('store')],
+            'store.store_id = sales_order.store_id',
+            ['website_id']
+        );
+        $select->where('sales_order.entity_id IN (?)', $entityIds);
 
         return $select;
     }
