@@ -12,3 +12,27 @@
         content: @alert-icon__pending__content;
     }
 }
+
+body {
+    .admin__menu {
+        .submenu {
+            .column:only-of-type {
+                .submenu-group-title {
+                    display: block;
+                }
+            }
+        }
+
+        .level-0 {
+            & > .submenu {
+                & > ul {
+                    & > .level-1:only-of-type {
+                        & > .submenu-group-title {
+                            display: block;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

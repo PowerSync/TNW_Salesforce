@@ -6,43 +6,43 @@
 
 namespace TNW\Salesforce\Model\Config\Source\Salesforce;
 
-use TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Base as salesforceEntityRepository;
+use Magento\Framework\DataObject;
+use Magento\Framework\Option\ArrayInterface;
+use Throwable;
+use TNW\Salesforce\Api\Service\Admin\AddUniqueExceptionMessageInterface;
+use TNW\Salesforce\Synchronize\Transport\Calls\Query\Output;
+use TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Base as SalesforceEntityRepository;
+
 /**
  * Class Base
  * @package TNW\Salesforce\Model\Config\Source\Customer
  */
-class Base extends \Magento\Framework\DataObject implements \Magento\Framework\Option\ArrayInterface
+class Base extends DataObject implements ArrayInterface
 {
-
-    /**
-     * @var \Magento\Framework\Message\ManagerInterface
-     */
-    protected $messageManager;
-
-    /**
-     * @var \TNW\Salesforce\Synchronize\Transport\Soap\Entity\Repository\Base
-     */
+    /** @var SalesforceEntityRepository */
     protected $salesforceEntityRepository;
 
+    /** @var AddUniqueExceptionMessageInterface */
+    protected $addUniqueExceptionMessage;
+
     /**
-     * Owner constructor.
-     * @param \Magento\Framework\Message\ManagerInterface $messageManager
-     * @param $salesforceEntityRepository $salesforceEntityRepository
-     * @param array $data
+     * @param AddUniqueExceptionMessageInterface $addUniqueExceptionMessage
+     * @param SalesforceEntityRepository         $salesforceEntityRepository
+     * @param array                              $data
      */
     public function __construct(
-        \Magento\Framework\Message\ManagerInterface $messageManager,
-        salesforceEntityRepository $salesforceEntityRepository,
+        AddUniqueExceptionMessageInterface $addUniqueExceptionMessage,
+        SalesforceEntityRepository $salesforceEntityRepository,
         array $data = []
     ) {
         parent::__construct($data);
 
-        $this->messageManager = $messageManager;
         $this->salesforceEntityRepository = $salesforceEntityRepository;
+        $this->addUniqueExceptionMessage = $addUniqueExceptionMessage;
     }
 
     /**
-     * @return \TNW\Salesforce\Synchronize\Transport\Calls\Query\Output
+     * @return Output|array
      */
     public function getObjects()
     {
@@ -64,8 +64,8 @@ class Base extends \Magento\Framework\DataObject implements \Magento\Framework\O
             foreach($entities as $data) {
                 $options[$data['Id']] = $data['Name'];
             }
-        } catch (\Exception $e) {
-            $this->messageManager->addExceptionMessage($e);
+        } catch (Throwable $e) {
+            $this->addUniqueExceptionMessage->execute($e);
         }
 
         return $options;

@@ -78,7 +78,9 @@ class Input implements Transport\Calls\Upsert\InputInterface
                 $entities[] = $entity;
             }
 
-            $results = $this->factory->client()->upsert($input->externalIdFieldName(), $batch, $input->type());
+            $client = $this->factory->client();
+            $headers = $input->getHeaders();
+            $results = $client->upsert($input->externalIdFieldName(), $batch, $input->type(), $headers);
             foreach ($entities as $key => $entity) {
                 if (empty($results[$key])) {
                     continue;

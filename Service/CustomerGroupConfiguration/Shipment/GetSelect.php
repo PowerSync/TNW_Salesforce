@@ -9,7 +9,6 @@ namespace TNW\Salesforce\Service\CustomerGroupConfiguration\Shipment;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use TNW\Salesforce\Api\Service\GetSelectInterface;
-use TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds;
 
 /**
  *  Shipment ids filtered by customer group from store configuration
@@ -19,19 +18,12 @@ class GetSelect implements GetSelectInterface
     /** @var ResourceConnection */
     private $resource;
 
-    /** @var GetCustomerGroupIds */
-    private $getCustomerGroupIds;
-
     /**
-     * @param ResourceConnection  $resource
-     * @param GetCustomerGroupIds $getCustomerGroupIds
+     * @param ResourceConnection $resource
      */
-    public function __construct(
-        ResourceConnection    $resource,
-        GetCustomerGroupIds   $getCustomerGroupIds
-    ) {
+    public function __construct(ResourceConnection $resource)
+    {
         $this->resource = $resource;
-        $this->getCustomerGroupIds = $getCustomerGroupIds;
     }
 
     /**
@@ -49,11 +41,14 @@ class GetSelect implements GetSelectInterface
         $select->join(
             ['sales_order' => $this->resource->getTableName('sales_order')],
             'sales_order.entity_id = sales_shipment.order_id',
-            []
+            ['group_id' => 'customer_group_id']
+        );
+        $select->join(
+            ['store' => $this->resource->getTableName('store')],
+            'store.store_id = sales_shipment.store_id',
+            ['website_id']
         );
         $select->where('sales_shipment.entity_id IN (?)', $entityIds);
-        $customerSyncGroupsIds = $this->getCustomerGroupIds->execute();
-        $customerSyncGroupsIds !== null && $select->where('sales_order.customer_group_id IN (?)', $customerSyncGroupsIds);
 
         return $select;
     }

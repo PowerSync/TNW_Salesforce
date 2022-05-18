@@ -11,4 +11,7 @@
     <event name="controller_action_predispatch_adminhtml_system_config_edit">
         <observer name="tnw_observer" instance="TNW\Salesforce\Observer\ControllerActionPredispatchAdminhtmlSystemConfigEdit"/>
     </event>
+    <event name="admin_system_config_changed_section_tnwsforce_general">
+        <observer name="tnw_observer_clean_last_error_connection" instance="TNW\Salesforce\Observer\CleanLastErrorConnection"/>
+    </event>
 </config>

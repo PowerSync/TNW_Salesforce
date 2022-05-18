@@ -804,4 +804,14 @@
     </type>
     <preference for="TNW\Salesforce\Api\Service\Company\GenerateCompanyNameInterface"
                 type="TNW\Salesforce\Service\Company\GenerateCompanyName"/>
+
+    <preference for="TNW\Salesforce\Api\Service\Admin\AddUniqueExceptionMessageInterface"
+                type="TNW\Salesforce\Service\Admin\AddUniqueExceptionMessage"/>
+    <type name="TNW\Salesforce\Service\Admin\AddUniqueExceptionMessage">
+        <arguments>
+            <argument name="exceptionMessageFactory" xsi:type="object">
+                Magento\Framework\Message\ExceptionMessageLookupFactory
+            </argument>
+        </arguments>
+    </type>
 </config>

@@ -9,7 +9,6 @@ namespace TNW\Salesforce\Service\CustomerGroupConfiguration\QuoteItem;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use TNW\Salesforce\Api\Service\GetSelectInterface;
-use TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds;
 
 /**
  *  Quote item ids filtered by customer group from store configuration
@@ -19,19 +18,12 @@ class GetSelect implements GetSelectInterface
     /** @var ResourceConnection */
     private $resource;
 
-    /** @var GetCustomerGroupIds */
-    private $getCustomerGroupIds;
-
     /**
-     * @param ResourceConnection  $resource
-     * @param GetCustomerGroupIds $getCustomerGroupIds
+     * @param ResourceConnection $resource
      */
-    public function __construct(
-        ResourceConnection    $resource,
-        GetCustomerGroupIds   $getCustomerGroupIds
-    ) {
+    public function __construct(ResourceConnection $resource)
+    {
         $this->resource = $resource;
-        $this->getCustomerGroupIds = $getCustomerGroupIds;
     }
 
     /**
@@ -42,17 +34,19 @@ class GetSelect implements GetSelectInterface
         $connection = $this->resource->getConnection();
         $select = $connection->select()->from(
             ['quote_item' => $this->resource->getTableName('quote_item')],
-            [
-                'item_id' => 'quote_item.item_id'
-            ]
+            ['entity_id' => 'quote_item.item_id']
         );
         $select->join(
             ['quote' => $this->resource->getTableName('quote')],
-            'quote_item.quote_id = quote.entity_id'
+            'quote_item.quote_id = quote.entity_id',
+            ['group_id' => 'customer_group_id']
+        );
+        $select->join(
+            ['store' => $this->resource->getTableName('store')],
+            'store.store_id = quote_item.store_id',
+            ['website_id']
         );
         $select->where('quote_item.item_id IN (?)', $entityIds);
-        $customerSyncGroupsIds = $this->getCustomerGroupIds->execute();
-        $customerSyncGroupsIds !== null && $select->where('quote.customer_group_id IN (?)', $customerSyncGroupsIds);
 
         return $select;
     }

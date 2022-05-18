@@ -6,15 +6,18 @@
 
 namespace TNW\Salesforce\Client;
 
+use DateTime;
 use Exception;
 use Magento\Framework\App\Cache\State;
 use Magento\Framework\App\Cache\Type\Collection;
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\Serializer\Serialize;
 use Magento\Framework\Serialize\SerializerInterface;
 use stdClass;
+use Throwable;
 use TNW\Salesforce\Model\Logger;
 use TNW\Salesforce\Service\ObjectConvertor;
 use Tnw\SoapClient\Client;
@@ -36,6 +39,10 @@ class Salesforce extends DataObject
     const SFORCE_UPSERT_CHUNK_SIZE = 200;
     const SFORCE_URL_CACHE_IDENTIFIER = 'salesforce_url';
     const SFORCE_DESCRIBE_CACHE_IDENTIFIER = 'salesforce_describe_%s';
+
+    public const LAST_ERROR_CONNECTION_TAG = 'last_connection_error';
+
+    private const MINUTES_TO_NEXT_CONNECT = 16;
 
     /** @var Config  */
     protected $salesforceConfig;
@@ -67,6 +74,9 @@ class Salesforce extends DataObject
     /** @var ObjectConvertor|null */
     private $objectConvertor;
 
+    /** @var DateTime|null */
+    private $dateTime;
+
     /**
      * @param Config                   $salesForceConfig
      * @param Collection               $cacheCollection
@@ -76,6 +86,7 @@ class Salesforce extends DataObject
      * @param ObjectManagerInterface   $objectManager
      * @param SerializerInterface|null $serializer
      * @param ObjectConvertor|null     $objectConvertor
+     * @param DateTime|null            $dateTime
      */
     public function __construct(
         Config $salesForceConfig,
@@ -85,7 +96,8 @@ class Salesforce extends DataObject
         WebsiteDetector $websiteDetector,
         ObjectManagerInterface $objectManager,
         SerializerInterface $serializer = null,
-        ObjectConvertor $objectConvertor = null
+        ObjectConvertor $objectConvertor = null,
+        DateTime $dateTime = null
     ) {
         parent::__construct();
         $this->salesforceConfig = $salesForceConfig;
@@ -95,6 +107,7 @@ class Salesforce extends DataObject
         $this->websiteDetector = $websiteDetector;
         $this->serializer = $serializer ?? $objectManager->get(Serialize::class);
         $this->objectConvertor = $objectConvertor ?? $objectManager->get(ObjectConvertor::class);
+        $this->dateTime = $dateTime ?? $objectManager->get(DateTime::class);
     }
 
     /**
@@ -103,28 +116,62 @@ class Salesforce extends DataObject
      * @param int|null $websiteId
      *
      * @return null|Client
-     * @throws Exception
+     * @throws LocalizedException|FileSystemException|Throwable
      */
     public function getClient($websiteId = null)
     {
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
-        $cacheKey = $this->salesforceConfig->baseWebsiteIdLogin($websiteId);
+        $cacheKey = (int)$this->salesforceConfig->baseWebsiteIdLogin($websiteId);
+        if (!empty($this->client[$cacheKey])) {
+            return $this->client[$cacheKey];
+        }
 
-        if (empty($this->client[$cacheKey])) {
-            try {
-                $this->client[$cacheKey] = $this->buildClient(
-                    $this->salesforceConfig->getSalesforceWsdl($websiteId),
-                    $this->salesforceConfig->getSalesforceUsername($websiteId),
-                    $this->salesforceConfig->getSalesforcePassword($websiteId),
-                    $this->salesforceConfig->getSalesforceToken($websiteId)
-                );
-                $this->loginResult[$cacheKey] = $this->client[$cacheKey]->getLoginResult();
-            } catch (Exception $e) {
-                $this->client[$cacheKey] = null;
-            }
+        if (!$this->isConnectionAllowed($cacheKey)) {
+            return null;
+        }
+
+        try {
+            $this->client[$cacheKey] = $this->buildClient(
+                $this->salesforceConfig->getSalesforceWsdl($websiteId),
+                $this->salesforceConfig->getSalesforceUsername($websiteId),
+                $this->salesforceConfig->getSalesforcePassword($websiteId),
+                $this->salesforceConfig->getSalesforceToken($websiteId)
+            );
+            $this->loginResult[$cacheKey] = $this->client[$cacheKey]->getLoginResult();
+        } catch (Throwable $e) {
+            $this->client[$cacheKey] = null;
+            $this->saveCache(
+                $this->dateTime->getTimestamp(),
+                self::LAST_ERROR_CONNECTION_TAG . $cacheKey,
+                null,
+                [self::LAST_ERROR_CONNECTION_TAG]
+            );
         }
 
         return $this->client[$cacheKey];
+    }
+
+    /**
+     * Check is connection allowed.
+     *
+     * @param int $websiteId
+     *
+     * @return bool
+     * @throws LocalizedException
+     */
+    private function isConnectionAllowed(int $websiteId): bool
+    {
+        $cacheKey = self::LAST_ERROR_CONNECTION_TAG . $websiteId;
+        $timestamp = $this->loadCache($cacheKey);
+        if (!$timestamp) {
+            return true;
+        }
+
+        $lastErrorConnection = new DateTime();
+        $lastErrorConnection->setTimestamp($timestamp);
+        $minutes = (int)$this->dateTime->diff($lastErrorConnection)->format('%i');
+
+        return $minutes > self::MINUTES_TO_NEXT_CONNECT;
     }
 
     /**
@@ -194,13 +241,14 @@ class Salesforce extends DataObject
     /**
      * Save cache
      *
-     * @param String $value
-     * @param String $identifier
-     * @param int|null $websiteId
+     * @param       $value
+     * @param       $identifier
+     * @param null  $websiteId
+     * @param array $tags
      *
      * @throws LocalizedException
      */
-    protected function saveCache($value, $identifier, $websiteId = null)
+    protected function saveCache($value, $identifier, $websiteId = null, array $tags = []): void
     {
         $websiteId = $this->websiteDetector->detectCurrentWebsite($websiteId);
 
@@ -208,10 +256,10 @@ class Salesforce extends DataObject
 
             /** @var mixed $serialized */
             $serialized = $this->serializer->serialize($value);
-
             $this->cacheCollection->save(
                 $serialized,
-                self::CACHE_TAG . $identifier . '_' . $websiteId
+                self::CACHE_TAG . $identifier . '_' . $websiteId,
+                $tags
             );
         } else {
             $this->handCache[$identifier . '_' . $websiteId] = $value;

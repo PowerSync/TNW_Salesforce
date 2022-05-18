@@ -121,19 +121,19 @@ class Client extends \Tnw\SoapClient\Client
      * Set Assignment rule to created/updated Lead
      *
      * @param AssignmentRuleHeader $header
+     *
      * @return $this
      */
-    public function setAssignmentRuleHeader($header)
+    public function setAssignmentRuleHeader(AssignmentRuleHeader $header)
     {
-        if ($header != null) {
-            $data = [
-                'AssignmentRuleHeader' => [
-                    'assignmentRuleId' => $header->assignmentRuleId,
-                    'useDefaultRule' => $header->useDefaultRuleFlag
-                ]
-            ];
-            $this->setSoapHeaders($data);
-        }
+        $data = [
+            'AssignmentRuleHeader' => [
+                'assignmentRuleId' => $header->assignmentRuleId,
+                'useDefaultRule' => $header->useDefaultRuleFlag
+            ]
+        ];
+
+        $this->setSoapHeaders($data);
 
         return $this;
     }

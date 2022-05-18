@@ -16,6 +16,11 @@ class Input extends \SplObjectStorage
     private $info = [];
 
     /**
+     * @var array
+     */
+    private $headers = [];
+
+    /**
      * @var string
      */
     protected $externalIdFieldName = '';
@@ -116,5 +121,27 @@ class Input extends \SplObjectStorage
     {
         unset($this->info[parent::offsetGet($object)]);
         parent::offsetUnset($object);
+    }
+
+    /**
+     * Get headers for transport.
+     *
+     * @return array
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    /**
+     * Set headers.
+     *
+     * @param array $headers
+     */
+    public function setHeaders(array $headers): void
+    {
+        foreach ($headers as $name => $value) {
+            $this->headers[$name] = $value;
+        }
     }
 }

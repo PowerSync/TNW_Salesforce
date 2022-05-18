@@ -52,7 +52,7 @@ class Raw extends Column
                 continue;
             }
 
-            $item["{$name}_html"] = sprintf('<div style="white-space: pre-wrap">%s</div>', $this->escaper->escapeHtml($item[$name], ['a']));
+            $item["{$name}_html"] = sprintf('<div style="white-space: pre-wrap">%s</div>', $this->escaper->escapeHtml($item[$name]));
         }
 
         return $dataSource;
