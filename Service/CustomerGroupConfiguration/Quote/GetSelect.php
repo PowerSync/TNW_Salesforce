@@ -6,7 +6,6 @@ namespace TNW\Salesforce\Service\CustomerGroupConfiguration\Quote;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use TNW\Salesforce\Api\Service\GetSelectInterface;
-use TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds;
 
 /**
  *  Quote ids filtered by customer group from store configuration
@@ -16,19 +15,12 @@ class GetSelect implements GetSelectInterface
     /** @var ResourceConnection */
     private $resource;
 
-    /** @var GetCustomerGroupIds */
-    private $getCustomerGroupIds;
-
     /**
-     * @param ResourceConnection  $resource
-     * @param GetCustomerGroupIds $getCustomerGroupIds
+     * @param ResourceConnection $resource
      */
-    public function __construct(
-        ResourceConnection    $resource,
-        GetCustomerGroupIds   $getCustomerGroupIds
-    ) {
+    public function __construct(ResourceConnection $resource)
+    {
         $this->resource = $resource;
-        $this->getCustomerGroupIds = $getCustomerGroupIds;
     }
 
     /**
@@ -40,12 +32,16 @@ class GetSelect implements GetSelectInterface
         $select = $connection->select()->from(
             [$this->resource->getTableName('quote')],
             [
-                'entity_id'
+                'entity_id',
+                'group_id' => 'customer_group_id'
             ]
         );
+        $select->join(
+            ['store' => $this->resource->getTableName('store')],
+            'store.store_id = quote.store_id',
+            ['website_id']
+        );
         $select->where('entity_id IN (?)', $entityIds);
-        $customerSyncGroupsIds = $this->getCustomerGroupIds->execute();
-        $customerSyncGroupsIds !== null && $select->where('customer_group_id IN (?)', $customerSyncGroupsIds);
 
         return $select;
     }

@@ -1,6 +1,7 @@
 <?php
-
 namespace TNW\Salesforce\Api\Service;
+
+use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
  * Interface GetIdsFilteredByCustomerGroupConfigurationInterface
@@ -13,6 +14,7 @@ interface GetIdsFilteredByCustomerGroupConfigurationInterface
      * @param array $entityIds
      *
      * @return array
+     * @throws NoSuchEntityException
      */
     public function execute(array $entityIds): array;
 }
