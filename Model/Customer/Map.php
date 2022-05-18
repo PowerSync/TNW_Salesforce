@@ -196,7 +196,7 @@ class Map
         if($billingAddress = $this->getDefaultBillingAddress($customer)){
             $this->addAddressDataToTransferObject(
                 $billingAddress,
-                $mapArray['customer_address/billing'],
+                $mapArray['customer_address/billing'] ?? [],
                 $transferObject,
                 $objectType
             );
@@ -206,7 +206,7 @@ class Map
         if ($shippingAddress = $this->getDefaultShippingAddress($customer)) {
             $this->addAddressDataToTransferObject(
                 $shippingAddress,
-                $mapArray['customer_address/shipping'],
+                $mapArray['customer_address/shipping'] ?? [],
                 $transferObject,
                 $objectType
             );

@@ -56,7 +56,7 @@ class Output extends \SplObjectStorage
      *
      * @return string
      */
-    public function type()
+    public function type(): string
     {
         return $this->type;
     }
@@ -67,7 +67,7 @@ class Output extends \SplObjectStorage
      * @param object $object
      * @param array $data
      */
-    public function offsetSet($object, $data = null)
+    public function offsetSet($object, $data = null): void
     {
         $index = \spl_object_hash($object);
         parent::offsetSet($object, $index);
@@ -80,7 +80,7 @@ class Output extends \SplObjectStorage
      * @param object $object
      * @return array
      */
-    public function &offsetGet($object)
+    public function &offsetGet($object): mixed
     {
         if (!$this->contains($object)) {
             $this->offsetSet($object, []);
@@ -94,7 +94,7 @@ class Output extends \SplObjectStorage
      *
      * @return array
      */
-    public function getInfo()
+    public function getInfo(): array
     {
         return $this->info[parent::getInfo()];
     }
@@ -104,7 +104,7 @@ class Output extends \SplObjectStorage
      *
      * @param array $data
      */
-    public function setInfo($data)
+    public function setInfo($data): void
     {
         $index = \spl_object_hash($this->current());
         parent::setInfo($index);
@@ -116,7 +116,7 @@ class Output extends \SplObjectStorage
      *
      * @param object $object
      */
-    public function offsetUnset($object)
+    public function offsetUnset($object): void
     {
         unset($this->info[parent::offsetGet($object)]);
         parent::offsetUnset($object);

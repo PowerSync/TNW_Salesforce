@@ -126,6 +126,16 @@ class Group
     }
 
     /**
+     * Get object manager
+     *
+     * @return ObjectManagerInterface
+     */
+    public function getObjectManager(): ObjectManagerInterface
+    {
+        return $this->objectManager;
+    }
+
+    /**
      * Create Units
      *
      * @param \TNW\Salesforce\Model\Queue[] $queues
