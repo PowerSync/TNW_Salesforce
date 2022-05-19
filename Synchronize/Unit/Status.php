@@ -135,6 +135,7 @@ class Status extends Synchronize\Unit\UnitAbstract
 
                     $this->cache[$entity]['status'] = Queue::STATUS_ERROR;
                     $this->cache[$entity]['message'] = $upsertOutput->get('%s/message', $entity);
+                    $this->cache[$entity]['status_code'] = $upsertOutput->get('%s/status_code', $entity);
                     break;
             }
 
