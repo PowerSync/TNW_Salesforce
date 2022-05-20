@@ -38,15 +38,8 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
     /** @var Salesforce */
     private $salesforceClient;
 
-    /** @var array */
-    protected $allowSection = [
-        'tnwsforce_customer',
-        'tnwsforce_product',
-        'tnwsforce_order',
-        'tnwsforce_invoice',
-        'tnwsforce_shipment',
-        'tnwsforce_picklists',
-    ];
+    /** @var string[] */
+    private $allowSection;
 
     /** @var StoreManagerInterface */
     private $storeManager;
@@ -55,24 +48,27 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
     private $salesforceConfig;
 
     /**
-     * @param UrlInterface          $urlBuilder
-     * @param ManagerInterface      $messageManager
-     * @param Salesforce            $salesforceClient
-     * @param Config                $salesforceConfig
+     * @param UrlInterface $urlBuilder
+     * @param ManagerInterface $messageManager
+     * @param Salesforce $salesforceClient
+     * @param Config $salesforceConfig
      * @param StoreManagerInterface $storeManager
+     * @param array $allowSection
      */
     public function __construct(
         UrlInterface $urlBuilder,
         ManagerInterface $messageManager,
         Salesforce $salesforceClient,
         Config $salesforceConfig,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        array $allowSection = []
     ) {
         $this->urlBuilder = $urlBuilder;
         $this->messageManager = $messageManager;
         $this->salesforceClient = $salesforceClient;
         $this->storeManager = $storeManager;
         $this->salesforceConfig = $salesforceConfig;
+        $this->allowSection = $allowSection;
     }
 
     /**
@@ -109,15 +105,15 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
         } catch (SoapFault $e) {
             switch (true) {
                 case strcasecmp($e->faultcode, 'sf:INVALID_OPERATION_WITH_EXPIRED_PASSWORD') === 0:
-                    $this->messageManager->addErrorMessage(__('You Salesforce password is expired. Login to Salesforce, update password. Put new Password and token in our module configuration.'));
+                    $this->messageManager->addErrorMessage(__('Your Salesforce password has expired. Please login to Salesforce and update the password. Put a new password and token in our module configuration.'));
                     break;
 
                 case strcasecmp($e->faultcode, 'sf:INVALID_LOGIN') === 0:
-                    $this->messageManager->addErrorMessage(__('Defined Salesforce login, password or token is incorrect. Please defined valid information.'));
+                    $this->messageManager->addErrorMessage(__('Provided Salesforce login, password, or token is incorrect. Please provide valid information.'));
                     break;
 
                 case strcasecmp($e->faultcode, 'WSDL') === 0:
-                    $this->messageManager->addErrorMessage(__('The WSDL file is no available or corrupted. Upload new wsdl file.'));
+                    $this->messageManager->addErrorMessage(__('The WSDL file is not available or corrupted. Please, upload a new WSDL file.'));
                     break;
 
                 default:
