@@ -85,4 +85,9 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Backend\Block\Menu">
+        <plugin name="tnw_salesforce_split_submenu_to_columns_plugin"
+                type="TNW\Salesforce\Plugin\BlockMenu\SplitSubmenuToColumns"
+                sortOrder="110"/>
+    </type>
 </config>
