@@ -134,10 +134,12 @@ class Input extends SplObjectStorage
      * @param $value
      * @return string
      */
-    protected function soqlQuote($value)
+    protected function soqlQuote($value): string
     {
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
+        } else {
+            $value = (string)$value;
         }
 
         $value = addslashes($value);

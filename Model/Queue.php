@@ -69,12 +69,20 @@ class Queue extends AbstractModel
 
     protected $salesforceConfig = [];
 
+    /**
+     * @param Context               $context
+     * @param Registry              $registry
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null       $resourceCollection
+     * @param Config|null           $salesforceConfig
+     * @param array                 $data
+     */
     public function __construct(
         Context $context,
         Registry $registry,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
-        Config $salesforceConfig,
+        Config $salesforceConfig = null,
         array $data = []
     ) {
         $this->salesforceConfig = $salesforceConfig;

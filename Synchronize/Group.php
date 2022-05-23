@@ -211,6 +211,7 @@ class Group
         if (substr_count($arguments[0], '%') > (count($arguments) - 1)) {
             $arguments[0] = str_replace('%', '%%', $arguments[0]);
         }
+        $arguments[0] = preg_replace('/%\d/', '%s', $arguments[0]);
 
         /** @var string $message */
         $message = sprintf(...$arguments);
@@ -278,7 +279,9 @@ class Group
         }
 
         if (is_scalar($argument)) {
-            return (string) $argument;
+            $argument = (string)$argument;
+
+            return str_replace("\"", "", $argument);
         }
 
         return print_r($argument, true);
