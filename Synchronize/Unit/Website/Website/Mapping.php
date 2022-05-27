@@ -42,6 +42,7 @@ class Mapping extends Synchronize\Unit\Mapping
      */
     public function prepareValue($entity, $attributeCode)
     {
+        $attributeCode = (string)$attributeCode;
         if ($entity instanceof Website && strcasecmp($attributeCode, 'sforce_id') === 0) {
             return $this->lookup()->get('%s/record/Id', $entity);
         }

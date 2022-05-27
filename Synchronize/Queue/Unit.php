@@ -421,7 +421,7 @@ class Unit
     public function findGenerator($type)
     {
         foreach ($this->generators as $generator) {
-            if (strcasecmp($generator->createBy(), $type) !== 0) {
+            if (strcasecmp((string)$generator->createBy(), (string)$type) !== 0) {
                 continue;
             }
 
