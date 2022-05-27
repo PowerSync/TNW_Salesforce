@@ -213,7 +213,7 @@ class Wsdl extends Value
     public function getAPIVersion($serviceNode)
     {
         // https://login.salesforce.com/services/Soap/c/46.0/0DF1p000000HDYU
-        $location = $this->arrayFindValueByKey($serviceNode, 'location');
+        $location = (string)$this->arrayFindValueByKey($serviceNode, 'location');
         $locationArray = explode('/', $location);
 
         $apiversion = $locationArray[6];
