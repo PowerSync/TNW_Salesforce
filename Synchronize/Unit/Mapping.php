@@ -125,9 +125,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      *
      * @return string
      */
-    public function objectType()
+    public function objectType(): string
     {
-        return $this->objectType;
+        return (string)$this->objectType;
     }
 
     /**

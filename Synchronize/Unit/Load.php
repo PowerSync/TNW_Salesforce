@@ -297,7 +297,7 @@ class Load extends Synchronize\Unit\UnitAbstract
     private function loaderBy($type)
     {
         foreach ($this->loaders as $loader) {
-            if (strcasecmp($loader->loadBy(), $type) !== 0) {
+            if (strcasecmp((string)$loader->loadBy(), $type) !== 0) {
                 continue;
             }
 

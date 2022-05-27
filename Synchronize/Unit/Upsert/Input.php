@@ -133,9 +133,9 @@ class Input extends Synchronize\Unit\UnitAbstract
      *
      * @return string
      */
-    public function salesforceType()
+    public function salesforceType(): string
     {
-        return $this->salesforceType;
+        return (string)$this->salesforceType;
     }
 
     /**

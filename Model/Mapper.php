@@ -49,21 +49,21 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     /**
      * Get Magento Attribute Name
      *
-     * @return String
+     * @return string
      */
-    public function getMagentoAttributeName()
+    public function getMagentoAttributeName(): string
     {
-        return $this->_getData('magento_attribute_name');
+        return (string)$this->_getData('magento_attribute_name');
     }
 
     /**
      * Get Salesforce Attribute Name
      *
-     * @return String
+     * @return string
      */
-    public function getSalesforceAttributeName()
+    public function getSalesforceAttributeName(): string
     {
-        return $this->_getData('salesforce_attribute_name');
+        return (string)$this->_getData('salesforce_attribute_name');
     }
 
     /**
