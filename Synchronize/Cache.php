@@ -61,7 +61,7 @@ class Cache implements \ArrayAccess, \IteratorAggregate, \Countable
         $objects = array_map([$this, 'prepareHash'], $objects);
 
         $record = $this->data;
-        foreach (explode('/', sprintf($path, ...$objects)) as $field) {
+        foreach (explode('/', sprintf((string)$path, ...$objects)) as $field) {
             if (!isset($record[$field])) {
                 return null;
             }

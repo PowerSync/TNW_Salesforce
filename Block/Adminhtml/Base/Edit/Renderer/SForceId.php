@@ -110,11 +110,11 @@ abstract class SForceId extends \Magento\Framework\Data\Form\Element\Link
 
         $field = !empty($salesforceIds[$salesforceObject])? $salesforceIds[$salesforceObject]: '';
 
-        foreach (explode("\n", $field) as $value) {
+        foreach (explode("\n", (string)$field) as $value) {
 
             $addition = '';
-            if (strpos($value, ':') !== false) {
-                $tmp = explode(':', $value);
+            if (strpos((string)$value, ':') !== false) {
+                $tmp = explode(':', (string)$value);
                 $addition = $tmp[1] . ': ';
                 $value = $tmp[2];
             }

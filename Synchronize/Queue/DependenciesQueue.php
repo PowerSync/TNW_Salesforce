@@ -115,11 +115,11 @@ class DependenciesQueue
      */
     public function parseDependencyString($descendantStr)
     {
-        $descendantsTmp = explode('&', $descendantStr);
+        $descendantsTmp = explode('&', (string)$descendantStr);
         $descendants = [];
         foreach ($descendantsTmp as $descendantTmp) {
             try {
-                list($key, $value) = explode('=', $descendantTmp);
+                list($key, $value) = explode('=', (string)$descendantTmp);
                 $descendants[$key] = $value;
             } catch (\Exception $e) {
                 continue;

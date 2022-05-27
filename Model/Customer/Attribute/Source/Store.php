@@ -24,6 +24,7 @@ class Store extends \Magento\Customer\Model\Customer\Attribute\Source\Store
         if (!$value) {
             $value = '0';
         }
+        $value = (string)$value;
         $isMultiple = false;
         if (strpos($value, ',') !== false) {
             $isMultiple = true;

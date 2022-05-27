@@ -93,6 +93,7 @@ class Sforceid extends Column
         foreach (explode("\n", $field) as $value) {
             $currency = '';
 
+            $value = (string)$value;
             if (strpos($value, ':') !== false) {
                 if (substr_count($value,':') === 2) {
                     [$storeId, $currency, $value] = explode(':', $value);

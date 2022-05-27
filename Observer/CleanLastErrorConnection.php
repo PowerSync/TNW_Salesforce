@@ -42,7 +42,7 @@ class CleanLastErrorConnection implements ObserverInterface
         }
 
         foreach ($changedPaths as $path) {
-            $pathParts = explode('/', $path);
+            $pathParts = explode('/', (string)$path);
             $groupId = $pathParts[1] ?? null;
             if ($groupId === self::APPLICABLE_GROUP_ID) {
                 $this->cleanCache();
