@@ -6,6 +6,7 @@
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls\Upsert;
 
 use TNW\Salesforce\Synchronize\Transport;
+use Tnw\SoapClient\Result\Error;
 
 /**
  * Upsert Output
@@ -65,7 +66,8 @@ class Output implements Transport\Calls\Upsert\OutputInterface
                     'skipped' => true,
                     'success' => false,
                     'created' => false,
-                    'message' => ''
+                    'message' => '',
+                    'status_code' => null
                 ]);
 
                 continue;
@@ -75,7 +77,8 @@ class Output implements Transport\Calls\Upsert\OutputInterface
                 'salesforce' => $result->getId(),
                 'success' => $result->isSuccess(),
                 'created' => $result->isCreated(),
-                'message' => implode("\n", array_filter(array_map([$this, 'message'], (array)$result->getErrors())))
+                'message' => implode("\n", array_filter(array_map([$this, 'message'], (array)$result->getErrors()))),
+                'status_code' => implode(PHP_EOL, array_filter(array_map([$this, 'statusCode'], (array)$result->getErrors())))
             ]);
         }
 
@@ -85,10 +88,10 @@ class Output implements Transport\Calls\Upsert\OutputInterface
     /**
      * Message
      *
-     * @param \Tnw\SoapClient\Result\Error $error
+     * @param Error $error
      * @return string
      */
-    public function message(\Tnw\SoapClient\Result\Error $error)
+    public function message(Error $error)
     {
         $message = $error->getMessage();
         if (count($fields = (array)$error->getFields()) !== 0) {
@@ -96,5 +99,16 @@ class Output implements Transport\Calls\Upsert\OutputInterface
         }
 
         return $message;
+    }
+
+    /**
+     * Status code
+     *
+     * @param Error $error
+     * @return string
+     */
+    public function statusCode(Error $error): string
+    {
+        return (string)$error->getStatusCode();
     }
 }
