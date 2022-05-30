@@ -226,13 +226,15 @@ class Objects extends AbstractDb
         if ($salesforceType !== null) {
             $loadObjectStatusSelect->where('salesforce_type = ?', $salesforceType);
         }
-        
-        return $this->getConnection()->fetchOne($loadObjectStatusSelect, [
+
+        $result = $this->getConnection()->fetchOne($loadObjectStatusSelect, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
             'entity_website_id' => $websiteId,
             'base_website_id' => $this->baseWebsiteId($websiteId),
         ]);
+
+        return (int)$result;
     }
 
     /**
