@@ -198,7 +198,7 @@ class Input extends SplObjectStorage
     /**
      * @return array
      */
-    public function getInfo(): array
+    public function getInfo(): mixed
     {
         return $this->conditions[parent::getInfo()];
     }
