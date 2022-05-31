@@ -138,7 +138,8 @@ class Mapping extends Synchronize\Unit\Mapping
             }
 
             $owner = $this->objectByEntityType($entity, 'customer')->getSforceAccountOwnerId();
-            return $owner ?: $this->customerConfig->getDefaultOwner($entity->getData('config_website'));
+            $owner = $owner ?: $this->lookup()->get('%s/record/Account/OwnerId', $entity);
+            return $owner ?: $this->customerConfig->defaultOwner($entity->getData('config_website'));
         }
 
         return parent::defaultValue($entity, $mapper);

@@ -76,6 +76,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         $this->input->columns[] = 'OwnerId';
         $this->input->columns[] = $magentoIdField;
         $this->input->columns[] = $magentoWebsiteField;
+        $this->input->columns[] = 'Account.OwnerId';
 
         foreach ($this->entities() as $entity) {
             $this->input[$entity]['AND']['EaW']['AND']['Email']['='] = strtolower($entity->getEmail());
