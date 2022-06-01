@@ -136,7 +136,9 @@ class Load extends Synchronize\Unit\UnitAbstract
                     continue;
                 }
 
-                $entity_id = $entity->getData($entity->getIdFieldName());
+                $entity_id = null;
+                $idFieldName = $entity->getIdFieldName();
+                $idFieldName && $entity_id = $entity->getData($idFieldName);
                 if (!isset($entity_id) && !$entity->getData('generated')) {
                     $syncDetails = __('The related Magento record is not available');
                     $message[] = $syncDetails;
