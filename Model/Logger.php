@@ -154,7 +154,7 @@ class Logger
         $message = sprintf(...$arguments);
 
         /** switch level */
-        switch (strtolower(substr($name, 7))) {
+        switch (strtolower((string)substr($name, 7))) {
             case 'error':
                 $this->systemLogger->error($message);
                 break;

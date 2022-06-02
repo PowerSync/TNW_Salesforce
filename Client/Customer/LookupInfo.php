@@ -110,7 +110,7 @@ class LookupInfo
             foreach ($lookupResult as $result) {
                 if (
                     (property_exists($contactObj, 'Email') && property_exists($result, 'Email'))
-                    && strtolower($result->Email) == strtolower($contactObj->Email)
+                    && strtolower((string)$result->Email) == strtolower((string)$contactObj->Email)
                     && (!$perWebsite || (!$result->{$websiteIdBusiness}
                             || $result->{$websiteIdBusiness} == $contactObj->{$websiteIdBusiness}))
                 ) {
@@ -267,12 +267,12 @@ class LookupInfo
 
             // Search by email
             if ($email) {
-                $email = strtolower($email);
+                $email = strtolower((string)$email);
                 // Search for exact website first
                 if ($websiteSforceId) {
                     foreach ($response as $result) {
                         $this->defineProperty($result, $fieldsToDefine);
-                        if (strtolower($result->{$emailField}) == $email
+                        if (strtolower((string)$result->{$emailField}) == $email
                             && $result->{$websiteIdField} == $websiteSforceId
                             && (!$source || $result->LeadSource == $source)
                         ) {
@@ -284,7 +284,7 @@ class LookupInfo
                 if (empty($resultsEmail)) {
                     foreach ($response as $result) {
                         $this->defineProperty($result, $fieldsToDefine);
-                        if (strtolower($result->{$emailField}) == $email
+                        if (strtolower((string)$result->{$emailField}) == $email
                             && (!$websiteSforceId || !$result->{$websiteIdField})
                             && (!$source || $result->LeadSource == $source)
                         ) {

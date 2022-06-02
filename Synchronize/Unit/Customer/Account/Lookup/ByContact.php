@@ -36,7 +36,7 @@ class ByContact extends Lookup
 
         foreach ($this->entities() as $entity) {
             $this->input[$entity]['AND']['CoM']['AND']['EaW']['AND']['Email']['=']
-                = strtolower($entity->getEmail());
+                = strtolower((string)$entity->getEmail());
 
             if ($this->customerConfigShare->isWebsiteScope()) {
                 $this->input[$entity]['AND']['CoM']['AND']['EaW']['AND'][$magentoWebsiteField]['IN']
@@ -108,9 +108,9 @@ class ByContact extends Lookup
                 }
             }
 
-            if (!in_array(strtolower('Account.' . $map->getSalesforceAttributeName()), $definedColumns)) {
+            if (!in_array(strtolower((string)'Account.' . $map->getSalesforceAttributeName()), $definedColumns)) {
                 $this->input->columns[] = 'Account.' . $map->getSalesforceAttributeName();
-                $definedColumns[] = strtolower('Account.' . $map->getSalesforceAttributeName());
+                $definedColumns[] = strtolower((string)'Account.' . $map->getSalesforceAttributeName());
             }
         }
     }

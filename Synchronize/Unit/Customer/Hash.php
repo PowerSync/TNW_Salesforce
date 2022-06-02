@@ -40,6 +40,6 @@ class Hash implements Synchronize\Unit\HashInterface
             $hash .= ":{$entity->getWebsiteId()}";
         }
 
-        return strtolower($hash);
+        return strtolower((string)$hash);
     }
 }

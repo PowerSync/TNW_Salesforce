@@ -206,9 +206,9 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
                 }
             }
 
-            if (!in_array(strtolower($map->getSalesforceAttributeName()), $definedColumns)) {
+            if (!in_array(strtolower((string)$map->getSalesforceAttributeName()), $definedColumns)) {
                 $this->input->columns[] = $map->getSalesforceAttributeName();
-                $definedColumns[] = strtolower($map->getSalesforceAttributeName());
+                $definedColumns[] = strtolower((string)$map->getSalesforceAttributeName());
             }
         }
     }

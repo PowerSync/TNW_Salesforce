@@ -366,7 +366,7 @@ class Salesforce extends DataObject
      */
     public function describeSObject($objectName)
     {
-        $cacheKey = sprintf(self::SFORCE_DESCRIBE_CACHE_IDENTIFIER, strtolower($objectName));
+        $cacheKey = sprintf(self::SFORCE_DESCRIBE_CACHE_IDENTIFIER, strtolower((string)$objectName));
 
         /** @var string|null $url */
         $describeData = $this->loadCache($cacheKey);

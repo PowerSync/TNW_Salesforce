@@ -47,7 +47,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         $searchIndex = [];
         foreach ($this->output as $key => $record) {
             if (!empty($record[$codeField])) {
-                $searchIndex['code'][$key] = strtolower($record[$codeField]);
+                $searchIndex['code'][$key] = strtolower((string)$record[$codeField]);
             }
         }
 
@@ -66,7 +66,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         $recordsIds = [];
         if (!empty($searchIndex['code'])) {
             // Priority 1
-            $recordsIds[10] = array_keys($searchIndex['code'], strtolower($entity->getCode()));
+            $recordsIds[10] = array_keys($searchIndex['code'], strtolower((string)$entity->getCode()));
         }
 
         return $recordsIds;
