@@ -137,8 +137,13 @@ class Mapping extends Synchronize\Unit\Mapping
                 return $this->customerConfig->defaultOwner($entity->getData('config_website'));
             }
 
-            $owner = $this->objectByEntityType($entity, 'customer')->getSforceAccountOwnerId();
-            $owner = $owner ?: $this->lookup()->get('%s/record/Account/OwnerId', $entity);
+            /** @var \Magento\Customer\Model\Backend\Customer $customer */
+            $customer = $this->objectByEntityType($entity, 'customer');
+            $owner = $customer->getSforceAccountOwnerId();
+            $companyObject = $customer->getCompanyObject();
+            if ($companyObject && $companyObject->getSforceAccountOwnerId()) {
+                $owner = $companyObject->getSforceAccountOwnerId();
+            }
             return $owner ?: $this->customerConfig->defaultOwner($entity->getData('config_website'));
         }
 
