@@ -82,7 +82,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         $this->input->columns[] = $magentoWebsiteField;
 
         foreach ($this->entities() as $entity) {
-            $this->input[$entity]['AND']['EaW']['AND']['Email']['='] = strtolower($entity->getEmail());
+            $this->input[$entity]['AND']['EaW']['AND']['Email']['='] = strtolower((string)$entity->getEmail());
             if ($this->customerConfigShare->isWebsiteScope()) {
                 $this->input[$entity]['AND']['EaW']['AND'][$magentoWebsiteField]['IN']
                     = ['', $this->load()->entityByType($entity, 'website')->getData('salesforce_id')];
@@ -116,11 +116,11 @@ class Lookup extends Synchronize\Unit\LookupAbstract
             }
 
             if (!empty($record['Email'])) {
-                $searchIndex['eaw'][$key] = strtolower("{$record['Email']}:{$websiteId}");
+                $searchIndex['eaw'][$key] = strtolower((string)"{$record['Email']}:{$websiteId}");
             }
 
             if (!empty($record[$magentoIdField])) {
-                $searchIndex['magentoId'][$key] = strtolower($record[$magentoIdField]);
+                $searchIndex['magentoId'][$key] = strtolower((string)$record[$magentoIdField]);
             }
         }
 
@@ -138,16 +138,16 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     {
         $recordsIds = [];
         if (!empty($searchIndex['magentoId'])) {
-            $recordsIds[10] = array_keys($searchIndex['magentoId'], strtolower($entity->getId()));
+            $recordsIds[10] = array_keys($searchIndex['magentoId'], strtolower((string)$entity->getId()));
         }
 
         if (!empty($searchIndex['eaw'])) {
             if ($this->customerConfigShare->isWebsiteScope()) {
                 $websiteId = $this->load()->entityByType($entity, 'website')->getData('salesforce_id');
-                $recordsIds[20] = array_keys($searchIndex['eaw'], strtolower("{$entity->getEmail()}:{$websiteId}"));
+                $recordsIds[20] = array_keys($searchIndex['eaw'], strtolower((string)"{$entity->getEmail()}:{$websiteId}"));
             }
 
-            $recordsIds[25] = array_keys($searchIndex['eaw'], strtolower("{$entity->getEmail()}:"));
+            $recordsIds[25] = array_keys($searchIndex['eaw'], strtolower((string)"{$entity->getEmail()}:"));
         }
 
         return $recordsIds;
