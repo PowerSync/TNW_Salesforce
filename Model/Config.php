@@ -237,7 +237,7 @@ class Config extends DataObject
     {
         $dir = $this->getStoreConfig('tnwsforce_general/salesforce/wsdl', $websiteId);
 
-        if (strpos(trim($dir), '{var}') === 0) {
+        if (strpos(trim((string)$dir), '{var}') === 0) {
             $varDir = $this->filesystem->getDirectoryRead(DirectoryList::VAR_DIR);
             return $varDir->getAbsolutePath(str_replace('{var}', '', $dir));
         }

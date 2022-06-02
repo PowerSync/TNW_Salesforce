@@ -104,7 +104,7 @@ class Config extends \TNW\Salesforce\Model\Config
         $value = (string)($this->getStoreConfig('tnwsforce_customer/general/customer_group', $websiteId));
 
         $result = [];
-        $value = trim($value);
+        $value = trim((string)$value);
         if ($value !== '') {
             $result = array_unique(
                 array_filter(

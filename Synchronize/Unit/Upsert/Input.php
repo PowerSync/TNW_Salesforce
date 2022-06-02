@@ -314,7 +314,7 @@ class Input extends Synchronize\Unit\UnitAbstract
             ) {
                 $object[$fieldName] = (float)$object[$fieldName];
             } elseif (is_string($object[$fieldName])) {
-                $object[$fieldName] = trim($object[$fieldName]);
+                $object[$fieldName] = trim((string)$object[$fieldName]);
                 if ($object[$fieldName] === '') {
                     $object[$fieldName] = null;
                     continue;
