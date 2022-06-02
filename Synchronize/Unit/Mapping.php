@@ -248,7 +248,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
                 break;
         }
 
-        if (null === $value || (is_string($value) && '' === trim($value))) {
+        if (null === $value || (is_string($value) && '' === trim((string)$value))) {
             $value = $this->defaultValue($entity, $mapper);
         }
 

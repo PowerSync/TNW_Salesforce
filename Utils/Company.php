@@ -27,6 +27,6 @@ class Company
         $firstName = trim((string)$entity->getFirstname());
         $lastName = trim((string)$entity->getLastname());
 
-        return trim(sprintf('%s %s', $firstName, $lastName));
+        return trim((string)sprintf('%s %s', $firstName, $lastName));
     }
 }
