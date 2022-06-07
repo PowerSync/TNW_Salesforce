@@ -235,7 +235,7 @@ class Config extends DataObject
      */
     public function getSalesforceWsdl($websiteId = null)
     {
-        $dir = $this->getStoreConfig('tnwsforce_general/salesforce/wsdl', $websiteId);
+        $dir = (string)$this->getStoreConfig('tnwsforce_general/salesforce/wsdl', $websiteId);
 
         if (strpos(trim((string)$dir), '{var}') === 0) {
             $varDir = $this->filesystem->getDirectoryRead(DirectoryList::VAR_DIR);

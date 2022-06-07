@@ -231,6 +231,7 @@ class SalesforceIdStorage
      */
     public function valueByAttribute($entity, $attributeName)
     {
+        $attributeName = (string)$attributeName;
         $method = 'get' . str_replace(' ', '', ucwords(str_replace('_', ' ', $attributeName)));
         if (method_exists($entity, $method)) {
             return $entity->{$method}();
