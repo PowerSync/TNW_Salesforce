@@ -209,9 +209,9 @@ class Group
 
         //FIX: Too few argument
         if (substr_count($arguments[0], '%') > (count($arguments) - 1)) {
-            $arguments[0] = str_replace('%', '%%', $arguments[0]);
+            $arguments[0] = str_replace('%', '%%', (string)($arguments[0] ?? ''));
         }
-        $arguments[0] = preg_replace('/%\d/', '%s', $arguments[0]);
+        $arguments[0] = preg_replace('/%\d/', '%s', (string)($arguments[0] ?? ''));
 
         /** @var string $message */
         $message = sprintf(...$arguments);

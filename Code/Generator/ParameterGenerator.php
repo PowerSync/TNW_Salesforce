@@ -37,8 +37,8 @@ class ParameterGenerator extends \Zend\Code\Generator\ParameterGenerator
     public function generate()
     {
         $output = parent::generate();
-        if (false === strpos($output, "...") && $this->variadic) {
-            $output = str_replace('$', '... $', $output);
+        if ($this->variadic && false === strpos($output, "...")) {
+            $output = str_replace('$', '... $', (string)$output);
         }
 
         return $output;

@@ -137,8 +137,7 @@ class DependenciesQueue
     public function parseDependencyStringWithReplace($descendantStr)
     {
         $descendants = $this->parseDependencyString($descendantStr);
-        $descendants = str_replace('_', '.', array_keys($descendants));
 
-        return $descendants;
+        return str_replace('_', '.', is_array($descendants) ? array_keys($descendants) : []);
     }
 }

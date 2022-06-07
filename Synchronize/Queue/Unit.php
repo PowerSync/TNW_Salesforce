@@ -293,7 +293,7 @@ class Unit
             $replace[] = $identifier;
         }
 
-        return str_replace($search, $replace, $this->description);
+        return str_replace($search, $replace, (string)$this->description);
     }
 
     /**

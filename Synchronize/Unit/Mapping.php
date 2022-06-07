@@ -343,6 +343,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function prepareValue($entity, $attributeCode)
     {
+        $attributeCode = (string)$attributeCode;
         if (
             $entity->getResource() instanceof AbstractEntity &&
             $entity->getResource()->getAttribute($attributeCode) &&

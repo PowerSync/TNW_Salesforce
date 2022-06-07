@@ -372,7 +372,7 @@ class LookupInfo
      */
     public function soqlQuote($value)
     {
-        $value = str_replace("'", "\'", $value);
+        $value = str_replace("'", "\'", (string)$value);
         return "'$value'";
     }
     #endregion Misc
