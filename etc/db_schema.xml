@@ -120,6 +120,7 @@
         <column xsi:type="datetime" name="sync_at" on_update="false" nullable="true" comment="When synced" />
         <column xsi:type="varchar" name="status" nullable="false" length="255" default="new" comment="Status" />
         <column xsi:type="text" name="message" nullable="true" comment="Message" />
+        <column xsi:type="varchar" name="status_code" nullable="true" comment="Status code"/>
         <column xsi:type="varchar" name="code" nullable="false" length="255" comment="Code" />
         <column xsi:type="varchar" name="description" nullable="false" length="255" comment="Description" />
         <column xsi:type="smallint" name="website_id" padding="5" unsigned="true" nullable="false" identity="false" comment="Website Id" />
