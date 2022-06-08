@@ -73,7 +73,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         Synchronize\Transport\Calls\Query\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\QueryInterface $process,
         array $dependents = [],
-        $skipMappingFields = false
+        bool $skipMappingFields = false
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load]));
 
