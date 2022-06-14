@@ -97,7 +97,10 @@ class Customer extends Salesforce
         } else {
             $client = $this->getClient();
         }
-        $data = $client->query($query);
+        $data = [];
+        if ($client) {
+            $data = $client->query($query);
+        }
         $result = [];
         foreach ($data as $account) {
             $result[$account->Id] = $account->Name;
