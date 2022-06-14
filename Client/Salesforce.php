@@ -316,7 +316,10 @@ class Salesforce extends DataObject
 
         $this->logger->messageDebug("Upsert type \"%s\", key \"%s\". Data:\n%s", $type, $key, $data);
         foreach (array_chunk($data, self::SFORCE_UPSERT_CHUNK_SIZE) as $chunk) {
-            $chunkResult[] = $this->getClient()->upsert($key, $chunk, $type);
+            $client = $this->getClient();
+            if ($client) {
+                $chunkResult[] = $client->upsert($key, $chunk, $type);
+            }
         }
 
         $result = isset($chunkResult)
@@ -336,6 +339,9 @@ class Salesforce extends DataObject
     protected function prepareSObject($type, stdClass $object)
     {
         $describe = $this->describeSObject($type);
+        if ($describe === null) {
+            return;
+        }
         foreach (get_object_vars($object) as $field => $value) {
             $describeField = $describe->getField($field);
             if (!$describeField instanceof Field) {
@@ -361,7 +367,7 @@ class Salesforce extends DataObject
 
     /**
      * @param $objectName
-     * @return DescribeSObjectResult
+     * @return DescribeSObjectResult|null
      * @throws Exception
      */
     public function describeSObject($objectName)
@@ -370,12 +376,16 @@ class Salesforce extends DataObject
 
         /** @var string|null $url */
         $describeData = $this->loadCache($cacheKey);
+        $describe = null;
         if ($describeData) {
             $describe = $this->objectConvertor->toObject($describeData);
         } else {
-            $describe = $this->getClient()->describeSObjects([$objectName])[0];
-            $describeData = $this->objectConvertor->toArray($describe);
-            $this->saveCache($describeData, $cacheKey);
+            $client = $this->getClient();
+            if ($client) {
+                $describe = $client->describeSObjects([$objectName])[0];
+                $describeData = $this->objectConvertor->toArray($describe);
+                $this->saveCache($describeData, $cacheKey);
+            }
         }
 
         return $describe;

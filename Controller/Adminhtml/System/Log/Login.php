@@ -42,13 +42,17 @@ class Login extends \Magento\Backend\App\Action
         $websiteId = $this->_request->getParam('website_id');
 
         try {
-            $loginResult = $this->salesforce->getClient($websiteId)->getLoginResult();
-            return $this->resultRedirectFactory->create()
-                ->setUrl(sprintf(
-                    'https://%s.salesforce.com/secur/frontdoor.jsp?sid=%s',
-                    $loginResult->getServerInstance(),
-                    $loginResult->getSessionId()
-                ));
+            $client = $this->salesforce->getClient($websiteId);
+            if ($client) {
+                $loginResult = $client->getLoginResult();
+
+                return $this->resultRedirectFactory->create()
+                    ->setUrl(sprintf(
+                        'https://%s.salesforce.com/secur/frontdoor.jsp?sid=%s',
+                        $loginResult->getServerInstance(),
+                        $loginResult->getSessionId()
+                    ));
+            }
         } catch (\Exception $e) {
             $this->messageManager->addExceptionMessage($e);
         }

@@ -76,10 +76,14 @@ class LookupInfo
         }
 
         $this->logger->messageDebug("Lookup Contact:\n%s", $lookupQuery);
-        $result = $this->client->getClient()->query($lookupQuery);
+        $client = $this->client->getClient();
+        $result = null;
+        if ($client) {
+            $result = $client->query($lookupQuery);
+        }
         $this->logger->messageDebug("Lookup Contact, Data:\n%s", $result);
 
-        return $result->getQueryResult()->getRecords();
+        return $result ? $result->getQueryResult()->getRecords() : null;
     }
     #endregion Lookup Records from SF
 
@@ -153,12 +157,19 @@ class LookupInfo
             $query . " Name = {$this->soqlQuote($name)}";
 
         $this->logger->messageDebug("Lookup Account:\n%s", $query);
-        $result = $this->client->getClient()->query($query);
+        $client = $this->client->getClient();
+        $result = null;
+        if ($client) {
+            $result = $client->query($query);
+        }
         $this->logger->messageDebug("Lookup Account, Data:\n%s", $result);
 
-        $resultRows = $result->getQueryResult()->getRecords();
-        $resultRows = $this->merge->mergeDuplicateRecords($resultRows, $this->client->salesforceAccountObjectName());
-        $resultRows = array_values($resultRows);
+        $resultRows = [];
+        if ($result) {
+            $resultRows = $result->getQueryResult()->getRecords();
+            $resultRows = $this->merge->mergeDuplicateRecords($resultRows, $this->client->salesforceAccountObjectName());
+            $resultRows = array_values($resultRows);
+        }
 
         if (count($resultRows) > 0) {
             $accountObj->Id = $resultRows[0]->Id;
@@ -208,25 +219,30 @@ class LookupInfo
         );
 
         $this->logger->messageDebug("Lookup Contact:\n%s", $lookupQuery);
-        /** @var \Tnw\SoapClient\Result\RecordIterator $response */
-        $response = $this->client->getClient()->query($lookupQuery);
+        $client = $this->client->getClient();
+        $response = null;
+        if ($client) {
+            /** @var \Tnw\SoapClient\Result\RecordIterator $response */
+            $response = $client->query($lookupQuery);
+        }
         $this->logger->messageDebug("Lookup Contact, Data:\n%s", $response);
 
-        $results = $this->lookupFindInResults(
-            $response,
-            'Email',
-            $magentoIdField,
-            $websiteIdField,
-            $email,
-            $magentoId,
-            $salesForceId,
-            $websiteSforceId
-        );
+        $results = [];
+        if ($response) {
+            $results = $this->lookupFindInResults(
+                $response,
+                'Email',
+                $magentoIdField,
+                $websiteIdField,
+                $email,
+                $magentoId,
+                $salesForceId,
+                $websiteSforceId
+            );
+        }
 
-        $results = $this->merge->mergeDuplicateRecords($results,
+        return $this->merge->mergeDuplicateRecords($results,
             $this->client->salesforceContactObjectName());
-
-        return $results;
     }
 
     /**
