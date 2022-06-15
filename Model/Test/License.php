@@ -47,9 +47,10 @@ class License extends \TNW\Salesforce\Model\Test
 
         try {
             /** @comment try to take object from our package */
-            $salesforceWebsiteDescr = $this->clientSalesforce
-                ->getClient()
-                ->describeSObjects(array (\TNW\Salesforce\Client\Website::SFORCE_WEBSITE_OBJECT));
+            $client = $this->clientSalesforce->getClient();
+            if ($client) {
+                $salesforceWebsiteDescr = $client->describeSObjects(array(\TNW\Salesforce\Client\Website::SFORCE_WEBSITE_OBJECT));
+            }
         } catch (\Exception $e) {
             $result = parent::STATUS_FAILED;
         }
