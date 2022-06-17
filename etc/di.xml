@@ -809,15 +809,4 @@
             </argument>
         </arguments>
     </type>
-
-    <type name="TNW\Salesforce\Synchronize\Queue\Website\CreateByCustomer">
-        <arguments>
-            <argument name="resourceCustomer" xsi:type="object">Magento\Customer\Model\ResourceModel\Customer\Proxy</argument>
-        </arguments>
-    </type>
-    <type name="TNW\Salesforce\Synchronize\Queue\Customer\CreateByCustomer">
-        <arguments>
-            <argument name="resourceCustomer" xsi:type="object">Magento\Customer\Model\ResourceModel\Customer\Proxy</argument>
-        </arguments>
-    </type>
 </config>
