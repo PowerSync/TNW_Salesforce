@@ -99,11 +99,11 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     /**
      * Get Default Attribute Type
      *
-     * @return String
+     * @return string
      */
-    public function getAttributeType()
+    public function getAttributeType(): string
     {
-        return $this->_getData('attribute_type');
+        return (string)$this->_getData('attribute_type');
     }
 
     /**
