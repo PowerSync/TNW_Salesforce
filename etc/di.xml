@@ -485,7 +485,7 @@
         <arguments>
             <argument name="name" xsi:type="string">tnw_synchronize</argument>
             <argument name="handlers" xsi:type="array">
-                <item name="1" xsi:type="object">TNW\Salesforce\Model\Logger\Handler\Filesystem</item>
+                <item name="1" xsi:type="object">TNW\Salesforce\Model\Logger\Handler\Filesystem\Proxy</item>
                 <item name="2" xsi:type="object">TNW\Salesforce\Model\Logger\Handler\Database</item>
                 <item name="3" xsi:type="object">TNW\Salesforce\Model\Logger\Handler\Admin</item>
             </argument>
@@ -673,6 +673,11 @@
     </type>
 
     <preference for="TNW\Salesforce\Api\MessageQueue\PublisherAdapter" type="TNW\Salesforce\MessageQueue\PublisherAdapter"/>
+    <type name="TNW\Salesforce\MessageQueue\PublisherAdapter">
+        <arguments>
+            <argument name="publisher" xsi:type="object">Magento\Framework\MessageQueue\PublisherInterface\Proxy</argument>
+        </arguments>
+    </type>
 
     <type name="\TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg">
         <plugin name="tnw_salesforce"
