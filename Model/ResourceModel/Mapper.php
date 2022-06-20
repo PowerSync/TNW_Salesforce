@@ -1,7 +1,9 @@
 <?php
 namespace  TNW\Salesforce\Model\ResourceModel;
 
+use Magento\Framework\Exception\LocalizedException;
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use TNW\Salesforce\Model\Mapper as ModelMapper;
 
 /**
  * Class Mapper
@@ -14,6 +16,38 @@ class Mapper extends AbstractDb
     public function _construct()
     {
         $this->_init('tnw_salesforce_mapper', 'map_id');
+    }
+
+    /**
+     * Safe loader
+     *
+     * @param ModelMapper $object
+     * @param string      $objectType
+     * @param string      $magentoEntityType
+     * @param string      $magentoAttributeName
+     * @param string      $salesForceAttributeName
+     *
+     * @return void
+     * @throws LocalizedException
+     */
+    public function loadByUniqueFields(
+        ModelMapper $object,
+        string      $objectType,
+        string      $magentoEntityType,
+        string      $magentoAttributeName,
+        string      $salesForceAttributeName
+    ): void
+    {
+        $connection = $this->getConnection();
+        $select = $connection->select()->from($this->getMainTable(), ['map_id']);
+        $select->where('object_type = ?', $objectType);
+        $select->where('magento_entity_type = ?', $magentoEntityType);
+        $select->where('magento_attribute_name = ?', $magentoAttributeName);
+        $select->where('salesforce_attribute_name = ?', $salesForceAttributeName);
+        $mapId = $this->getConnection()->fetchOne($select);
+        if ($mapId) {
+            $this->load($object, $mapId, 'map_id');
+        }
     }
 
     /**
