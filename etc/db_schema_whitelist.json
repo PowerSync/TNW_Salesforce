@@ -114,7 +114,11 @@
         },
         "index": {
             "TNW_SALESFORCE_ENTITY_QUEUE_CODE_ENTITY_ID_ENTITY_LOAD": true,
-            "TNW_SALESFORCE_ENTT_QUEUE_TRANSACTION_UID_CODE_STS_WS_ID": true
+            "TNW_SALESFORCE_ENTT_QUEUE_TRANSACTION_UID_CODE_STS_WS_ID": true,
+            "TNW_SALESFORCE_ENTITY_QUEUE_ENTITY_TYPE_ENTITY_ID_WEBSITE_ID": true,
+            "TNW_SALESFORCE_ENTITY_QUEUE_STATUS": true,
+            "TNW_SALESFORCE_ENTITY_QUEUE_ENTITY_ID": true,
+            "TNW_SALESFORCE_ENTITY_QUEUE_ENTITY_TYPE": true
         },
         "constraint": {
             "PRIMARY": true,
