@@ -566,6 +566,11 @@ jobs:
 
   deploy-244:
     <<: *base-deploy
+    steps:
+      - run:
+          name: Deploy Over SSH
+          command: |
+            ssh $SSH_USER@$SSH_HOST "./release244"
   tag-release-244:
     <<: *base-tag-release
   marketplace-submit-244:
