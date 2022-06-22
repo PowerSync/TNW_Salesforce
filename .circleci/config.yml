@@ -675,6 +675,7 @@ workflows:
       - update-wiki-244:
           context: powersync
           requires:
+            - deploy-244
 #            - check-composer-installation-244
           filters:
             branches:
