@@ -4,7 +4,7 @@
     "require": {
         "magento/framework": ">102",
         "tnw/soap-client": "~1",
-        "tnw/marketing": "2.0.5"
+        "tnw/marketing": "~2.7.0"
     },
     "license": [
         "gpl-3.0"
