@@ -651,49 +651,49 @@ workflows:
             branches:
               only: master
 
-      #      - m244-commerce-php81:
-      #          context: powersync
-      #          filters:
-      #            branches:
-      #              only: /.*-2\.4\.4/
-      #      - magento-coding-standard-244:
-      #          context: powersync
-      #          filters:
-      #            branches:
-      #              only: master-2.4.4
-      #      - deploy-244:
-      #          context: powersync
-      #          requires:
-      #            - tag-release-244
-      #          filters:
-      #            branches:
-      #              only: master-2.4.4
-      #      - tag-release-244:
-      #          context: powersync
-      #          requires:
-      #            - m244-commerce-php81
-      #            - magento-coding-standard-244
-      #          filters:
-      #            branches:
-      #              only: master-2.4.4
-      - check-composer-installation-244:
+      - m244-commerce-php81:
           context: powersync
-          requires:
-          #            - deploy-244
+          filters:
+            branches:
+              only: /.*-2\.4\.4/
+      - magento-coding-standard-244:
+          context: powersync
           filters:
             branches:
               only: master-2.4.4
-#      - update-wiki-244:
-#          context: powersync
-#          requires:
-#            - check-composer-installation-244
-#          filters:
-#            branches:
-#              only: master-2.4.4
-#      - marketplace-submit-244:
-#          context: powersync
-#          requires:
-#            - tag-release-244
-#          filters:
-#            branches:
-#              only: master-2.4.4
+      - deploy-244:
+          context: powersync
+          requires:
+            - tag-release-244
+          filters:
+            branches:
+              only: master-2.4.4
+      - tag-release-244:
+          context: powersync
+          requires:
+            - m244-commerce-php81
+            - magento-coding-standard-244
+          filters:
+            branches:
+              only: master-2.4.4
+      - check-composer-installation-244:
+          context: powersync
+          requires:
+            - deploy-244
+          filters:
+            branches:
+              only: master-2.4.4
+      - update-wiki-244:
+          context: powersync
+          requires:
+            - check-composer-installation-244
+          filters:
+            branches:
+              only: master-2.4.4
+      - marketplace-submit-244:
+          context: powersync
+          requires:
+            - tag-release-244
+          filters:
+            branches:
+              only: master-2.4.4
