@@ -156,7 +156,7 @@ class Queue
                 }
 
                 // Mark work
-                $countUpdate = $lockCollection->updateLock($lockData, $group->code(), $websiteId);
+                $countUpdate = $lockCollection->updateLock($lockData, $group->code(), (int)$websiteId);
 
                 if (0 === $countUpdate) {
                     continue;
