@@ -54,10 +54,10 @@ class FilterBlockedQueueRecords
     /**
      * @param array $queueIds
      * @param string $groupCode
-     * @param string $websiteId
+     * @param int $websiteId
      * @return array
      */
-    public function execute(array $queueIds, string $groupCode, string $websiteId): array
+    public function execute(array $queueIds, string $groupCode, int $websiteId): array
     {
         if (!empty($queueIds)) {
             $connection = $this->resourceConnection->getConnection();
