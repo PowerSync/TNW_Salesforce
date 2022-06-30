@@ -208,10 +208,12 @@ class Collection extends AbstractCollection
      * Update Lock
      *
      * @param array $data
+     * @param string $groupCode
+     * @param int $websiteId
      * @return int
      * @throws \Exception
      */
-    public function updateLock(array $data, string $groupCode, string $websiteId)
+    public function updateLock(array $data, string $groupCode, int $websiteId)
     {
         $this->getSelect()->group('identify');
 
