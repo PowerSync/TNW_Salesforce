@@ -139,7 +139,7 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
             cd /var/www/html/magento/
             composer --no-plugins config allow-plugins true
       - run:
@@ -224,7 +224,7 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
             cd /var/www/html/magento/
             composer --no-plugins config allow-plugins true
       - run:
@@ -286,7 +286,7 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
             mkdir -p ~/.composer/
             echo '{}'>~/.composer/composer.json
             composer config -g http-basic.dist.powersync.biz $TECHWEB_REPO_LOGIN $TECHNWEB_REPO_PASSWORD
@@ -363,7 +363,7 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
             cd /var/www/html/magento/
             composer --no-plugins config allow-plugins true
       - run:
@@ -449,7 +449,7 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
             cd /var/www/html/magento/
             composer --no-plugins config allow-plugins true
       - run:
@@ -511,7 +511,7 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
             mkdir -p ~/.composer/
             echo '{}'>~/.composer/composer.json
             composer config -g http-basic.dist.powersync.biz $TECHWEB_REPO_LOGIN $TECHNWEB_REPO_PASSWORD
