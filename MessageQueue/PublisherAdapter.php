@@ -31,6 +31,7 @@ class PublisherAdapter implements \TNW\Salesforce\Api\MessageQueue\PublisherAdap
     /**
      * Publisher constructor.
      * @param PublisherInterface $publisher
+     * @param Config $config
      */
     public function __construct(
         PublisherInterface $publisher,
@@ -57,7 +58,7 @@ class PublisherAdapter implements \TNW\Salesforce\Api\MessageQueue\PublisherAdap
 
     /**
      * @param $topicName
-     * @return mixed
+     * @return string
      */
     public function adaptTopic($topicName)
     {
@@ -73,6 +74,10 @@ class PublisherAdapter implements \TNW\Salesforce\Api\MessageQueue\PublisherAdap
     public function publish($topicName, $data)
     {
         $topicName = $this->adaptTopic($topicName);
+
+        if (!$this->config->getSalesforceStatus()) {
+            return;
+        }
 
         $this->publisher->publish($topicName, $data);
     }
