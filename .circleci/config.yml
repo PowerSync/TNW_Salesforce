@@ -139,7 +139,7 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
             cd /var/www/html/magento/
             composer --no-plugins config allow-plugins true
       - run:
@@ -224,7 +224,7 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
             cd /var/www/html/magento/
             composer --no-plugins config allow-plugins true
       - run:
@@ -286,7 +286,7 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
             mkdir -p ~/.composer/
             echo '{}'>~/.composer/composer.json
             composer config -g http-basic.dist.powersync.biz $TECHWEB_REPO_LOGIN $TECHNWEB_REPO_PASSWORD
@@ -363,9 +363,9 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
             cd /var/www/html/magento/
-            composer --no-plugins config allow-plugins true
+            composer config --no-plugins allow-plugins.magento/magento-composer-installer true
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
@@ -449,9 +449,9 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
             cd /var/www/html/magento/
-            composer --no-plugins config allow-plugins true
+            composer config --no-plugins allow-plugins.magento/magento-composer-installer true
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
@@ -511,7 +511,7 @@ jobs:
           command: |
             cd ~
             curl -sS https://getcomposer.org/installer -o composer-setup.php
-            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.1.14
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
             mkdir -p ~/.composer/
             echo '{}'>~/.composer/composer.json
             composer config -g http-basic.dist.powersync.biz $TECHWEB_REPO_LOGIN $TECHNWEB_REPO_PASSWORD
