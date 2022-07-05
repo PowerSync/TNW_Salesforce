@@ -365,7 +365,7 @@ jobs:
             curl -sS https://getcomposer.org/installer -o composer-setup.php
             sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
             cd /var/www/html/magento/
-            composer --no-plugins config allow-plugins true
+            composer config --no-plugins allow-plugins.magento/magento-composer-installer true
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
@@ -451,7 +451,7 @@ jobs:
             curl -sS https://getcomposer.org/installer -o composer-setup.php
             sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
             cd /var/www/html/magento/
-            composer --no-plugins config allow-plugins true
+            composer config --no-plugins allow-plugins.magento/magento-composer-installer true
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
