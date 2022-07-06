@@ -1,11 +1,23 @@
 <?php
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\ResourceModel;
 
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Event\Manager;
 use Magento\Framework\Exception\LocalizedException;
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use Magento\Framework\Model\ResourceModel\Db\Context;
+use TNW\Salesforce\Model\Config;
 
 class Objects extends AbstractDb
 {
+    public const RECORDS_KEY = 'records';
+
     /**
      * @var \Magento\Framework\DB\Select
      */
@@ -42,23 +54,31 @@ class Objects extends AbstractDb
     private $selectPriceBookId;
 
     /**
-     * @var \TNW\Salesforce\Model\Config
+     * @var Manager
+     */
+    private $eventManager;
+
+    /**
+     * @var Config
      */
     private $config;
 
     /**
      * Objects constructor.
      *
-     * @param \Magento\Framework\Model\ResourceModel\Db\Context $context
-     * @param \TNW\Salesforce\Model\Config $config
+     * @param Context $context
+     * @param Config $config
      * @param null $connectionName
+     * @param ?Manager $eventManager
      */
     public function __construct(
-        \Magento\Framework\Model\ResourceModel\Db\Context $context,
-        \TNW\Salesforce\Model\Config $config,
-        $connectionName = null
+        Context $context,
+        Config $config,
+        $connectionName = null,
+        Manager $eventManager = null
     ) {
         parent::__construct($context, $connectionName);
+        $this->eventManager = $eventManager ?? ObjectManager::getInstance()->get(Manager::class);
         $this->config = $config;
     }
 
@@ -149,7 +169,7 @@ class Objects extends AbstractDb
         if ($salesforceType !== null) {
             $loadObjectIdSelect->where('salesforce_type = ?', $salesforceType);
         }
-        
+
         return $this->getConnection()->fetchOne($loadObjectIdSelect, [
             'magento_type' => $magentoType,
             'entity_id' => (int)$entityId,
@@ -221,7 +241,7 @@ class Objects extends AbstractDb
         if ($salesforceType !== null) {
             $loadObjectStatusSelect->where('salesforce_type = ?', $salesforceType);
         }
-        
+
         return $this->getConnection()->fetchOne($loadObjectStatusSelect, [
             'magento_type' => $magentoType,
             'entity_id' => $entityId,
@@ -287,9 +307,10 @@ class Objects extends AbstractDb
                 'additional'
             ]));
         }, $records);
-
+        $this->eventManager->dispatch('tnw_salesforce_objects_save_before', [self::RECORDS_KEY => $records]);
         $this->getConnection()
             ->insertOnDuplicate($this->getMainTable(), $records);
+        $this->eventManager->dispatch('tnw_salesforce_objects_save_after', [self::RECORDS_KEY => $records]);
     }
 
     /**
