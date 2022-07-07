@@ -29,7 +29,7 @@ class Salesforceids extends AbstractDb
 
     /**
      * @param Context $context
-     * @param $connectionName
+     * @param string $connectionName
      * @param Manager|null $eventManager
      */
     public function __construct(
