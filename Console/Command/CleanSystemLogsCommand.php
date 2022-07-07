@@ -27,7 +27,7 @@ class CleanSystemLogsCommand extends Command
     private $salesforceConfig;
 
     /**
-    * @var \Psr\Log\LoggerInterface\Log
+    * @var \Psr\Log\LoggerInterface
     */
     private $_logger;
 
@@ -80,6 +80,9 @@ class CleanSystemLogsCommand extends Command
     {
 
         try {
+            if (!$this->salesforceConfig->getSalesforceStatus()) {
+                return;
+            }
 
             if (!$this->salesforceConfig->getClearSystemLogs()) {
                 $output->writeln($this->getDateTime() . ': ' .' Clear System logs not configured.');
@@ -94,12 +97,12 @@ class CleanSystemLogsCommand extends Command
             );
 
             $executeClearDebuglog = $this->clearSystemLogCron->execute();
-            
+
             if($executeClearDebuglog){
                 $output->writeln($this->getDateTime() . ': ' .'Cleared logs successfully.');
             }
-            
-           
+
+
         } catch (\Exception $e) {
             $output->writeln($this->getDateTime() . ': ' . $e->getMessage());
         }

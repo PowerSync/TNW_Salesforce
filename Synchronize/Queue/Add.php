@@ -74,6 +74,9 @@ class Add
     /** @var State */
     protected $state;
 
+    /** @var Config  */
+    protected $salesforceConfig;
+
     /**
      * @var PublisherAdapter
      */
@@ -104,6 +107,7 @@ class Add
         PreQueue $resourcePreQueue,
         ManagerInterface $messageManager,
         State $state,
+        Config $salesforceConfig,
         PublisherAdapter $publisher
     ) {
         $this->resolves = $resolves;
@@ -116,6 +120,7 @@ class Add
         $this->resourcePreQueue = $resourcePreQueue;
         $this->messageManager = $messageManager;
         $this->state = $state;
+        $this->salesforceConfig = $salesforceConfig;
         $this->publisher = $publisher;
     }
 
@@ -127,6 +132,10 @@ class Add
      */
     public function addToQueue(array $entityIds)
     {
+        if (!$this->salesforceConfig->getSalesforceStatus()) {
+            return;
+        }
+
         if (empty($entityIds)) {
             return;
         }
