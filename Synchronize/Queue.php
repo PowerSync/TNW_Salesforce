@@ -120,6 +120,10 @@ class Queue
      */
     public function synchronize($collection, $websiteId, $syncJobs = [])
     {
+        if (!$this->salesforceConfig->getSalesforceStatus()) {
+            return;
+        }
+
         // Collection Clear
         $collection->clear();
 
