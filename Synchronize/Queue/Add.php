@@ -453,7 +453,7 @@ class Add
             $connection->commit();
         } catch (Exception $e) {
             $connection->rollBack();
-            throw new Exception($e->getMessage());
+            throw $e;
         }
     }
 

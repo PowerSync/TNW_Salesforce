@@ -32,6 +32,16 @@
     <preference for="TNW\Salesforce\Synchronize\Transport\Calls\Delete\InputInterface" type="TNW\Salesforce\Synchronize\Transport\Soap\Calls\Delete\Input" />
     <preference for="TNW\Salesforce\Synchronize\Transport\Calls\Delete\OutputInterface" type="TNW\Salesforce\Synchronize\Transport\Soap\Calls\Delete\Output" />
 
+    <type name="TNW\Salesforce\Model\ResourceModel\FilterBlockedQueueRecords">
+        <arguments>
+            <argument name="processStatuses" xsi:type="const">TNW\Salesforce\Model\Queue::PROCESS_STATUSES</argument>
+            <argument name="errorStatuses" xsi:type="const">TNW\Salesforce\Model\Queue::ERROR_STATUSES</argument>
+            <argument name="newStatuses" xsi:type="array">
+                <item name="new" xsi:type="const">TNW\Salesforce\Model\Queue::STATUS_NEW</item>
+            </argument>
+        </arguments>
+    </type>
+
     <!-- Salesforce Id Storage -->
     <virtualType name="TNW\Salesforce\Model\Entity\Object\Website" type="TNW\Salesforce\Model\Entity\SalesforceIdStorage">
         <arguments>
