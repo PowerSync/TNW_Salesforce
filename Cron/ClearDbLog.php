@@ -38,6 +38,10 @@ class ClearDbLog
      */
     public function execute()
     {
+        if (!$this->salesforceConfig->getSalesforceStatus()) {
+            return;
+        }
+
         $connection = $this->logResource->clear();
     }
 
