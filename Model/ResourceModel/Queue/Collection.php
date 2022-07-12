@@ -32,22 +32,21 @@ class Collection extends AbstractCollection
      * @param LoggerInterface $logger
      * @param FetchStrategyInterface $fetchStrategy
      * @param ManagerInterface $eventManager
+     * @param FilterBlockedQueueRecords $filterBlockedQueueRecords
      * @param AdapterInterface|null $connection
      * @param AbstractDb|null $resource
-     * @param FilterBlockedQueueRecords|null $filterBlockedQueueRecords
      */
     public function __construct(
         EntityFactoryInterface    $entityFactory,
         LoggerInterface           $logger,
         FetchStrategyInterface    $fetchStrategy,
         ManagerInterface          $eventManager,
+        FilterBlockedQueueRecords $filterBlockedQueueRecords,
         AdapterInterface          $connection = null,
-        AbstractDb                $resource = null,
-        FilterBlockedQueueRecords $filterBlockedQueueRecords = null
+        AbstractDb                $resource = null
     ) {
         parent::__construct($entityFactory, $logger, $fetchStrategy, $eventManager, $connection, $resource);
-        $this->filterBlockedQueueRecords = $filterBlockedQueueRecords
-            ?? ObjectManager::getInstance()->get(FilterBlockedQueueRecords::class);
+        $this->filterBlockedQueueRecords = $filterBlockedQueueRecords;
     }
 
     /**
