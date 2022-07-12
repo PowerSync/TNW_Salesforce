@@ -175,6 +175,13 @@
         <index referenceId="TNW_SALESFORCE_ENTITY_ENTITY_TYPE" indexType="btree">
             <column name="entity_type" />
         </index>
+        <index referenceId="TNW_SALESFORCE_ENTITY_CODE" indexType="btree">
+            <column name="code" />
+        </index>
+        <index referenceId="TNW_SALESFORCE_ENTITY_STATUS_WEBSITE_ID" indexType="btree">
+            <column name="status" />
+            <column name="website_id" />
+        </index>
     </table>
     <table name="tnw_salesforce_entity_queue_relation" resource="default" engine="innodb" comment="tnw_salesforce_entity_queue_relation">
         <column xsi:type="varchar" name="queue_id" nullable="false" length="32" />
