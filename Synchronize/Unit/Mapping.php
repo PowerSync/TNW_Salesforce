@@ -24,6 +24,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 {
     const PARENT_ENTITY = '__parent_entity';
 
+    private const DATE_BACKEND_TYPES = [
+        'datetime',
+        'date'
+    ];
+
     /**
      * @deprecated
      * @var string
@@ -352,6 +357,10 @@ class Mapping extends Synchronize\Unit\UnitAbstract
             /** @var Attribute $attribute */
             $attribute = $entity->getResource()->getAttribute($attributeCode);
             $value = (string)$attribute->getFrontend()->getValue($entity);
+
+            if ($value && in_array($attribute->getBackendType(), self::DATE_BACKEND_TYPES, true)) {
+                $value = $entity->getData($attributeCode);
+            }
 
             if (!empty($value)) {
                 if ($attribute->getFrontendInput() === 'multiselect') {
