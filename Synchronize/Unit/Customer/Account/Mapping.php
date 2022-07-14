@@ -9,6 +9,7 @@ use TNW\Salesforce\Api\Service\Company\GenerateCompanyNameInterface;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\Customer\Config;
 use TNW\Salesforce\Model\Mapper;
+use TNW\Salesforce\Service\Synchronize\Unit\Customer\Account\Mapping\GetDefaultOwnerId;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Utils\Company;
 
@@ -17,13 +18,11 @@ use TNW\Salesforce\Utils\Company;
  */
 class Mapping extends Synchronize\Unit\Mapping
 {
-    /**
-     * @var Config
-     */
-    private $customerConfig;
-
     /** @var GenerateCompanyNameInterface */
     private $generateCompanyName;
+
+    /** @var GetDefaultOwnerId */
+    private $getDefaultOwnerId;
 
     /**
      * Mapping constructor.
@@ -38,6 +37,7 @@ class Mapping extends Synchronize\Unit\Mapping
      * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
      * @param Config                                       $customerConfig
      * @param GenerateCompanyNameInterface                 $generateCompanyName
+     * @param GetDefaultOwnerId                            $getDefaultOwnerId
      * @param array                                        $dependents
      */
     public function __construct(
@@ -51,6 +51,7 @@ class Mapping extends Synchronize\Unit\Mapping
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
         Config $customerConfig,
         GenerateCompanyNameInterface $generateCompanyName,
+        GetDefaultOwnerId $getDefaultOwnerId,
         array $dependents = []
     ) {
         parent::__construct(
@@ -65,8 +66,8 @@ class Mapping extends Synchronize\Unit\Mapping
             $dependents
         );
 
-        $this->customerConfig = $customerConfig;
         $this->generateCompanyName = $generateCompanyName;
+        $this->getDefaultOwnerId = $getDefaultOwnerId;
     }
 
     /**
@@ -130,7 +131,7 @@ class Mapping extends Synchronize\Unit\Mapping
         }
 
         if (strcasecmp($mapper->getSalesforceAttributeName(), 'OwnerId') === 0) {
-            return $this->customerConfig->defaultOwner($entity->getData('config_website'));
+            return $this->getDefaultOwnerId->execute($this, $entity);
         }
 
         return $default;
