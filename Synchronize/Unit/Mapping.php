@@ -25,9 +25,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     const PARENT_ENTITY = '__parent_entity';
 
     private const DATE_BACKEND_TYPES = [
-        'datetime',
-        'date'
+        self::ATTRIBUTE_TYPE_DATETIME,
+        self::ATTRIBUTE_TYPE_DATE
     ];
+    private const ATTRIBUTE_TYPE_DATETIME = 'datetime';
+    private const ATTRIBUTE_TYPE_DATE = 'date';
 
     /**
      * @deprecated
@@ -360,6 +362,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 
             if ($value && in_array($attribute->getBackendType(), self::DATE_BACKEND_TYPES, true)) {
                 $value = $entity->getData($attributeCode);
+                if($attribute->getFrontendInput() === self::ATTRIBUTE_TYPE_DATE) {
+                    $dateTime = new \DateTime($value);
+                    $dateTime->add(new \DateInterval('PT12H'));
+                    $value = $dateTime->format('Y-m-d H:i:s');
+                }
             }
 
             if (!empty($value)) {
