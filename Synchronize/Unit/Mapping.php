@@ -362,7 +362,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 
             if ($value && in_array($attribute->getBackendType(), self::DATE_BACKEND_TYPES, true)) {
                 $value = $entity->getData($attributeCode);
-                if($attribute->getFrontendInput() === self::ATTRIBUTE_TYPE_DATE) {
+                if ($attribute->getFrontendInput() === self::ATTRIBUTE_TYPE_DATE) {
+                    $dateTime = new \DateTime($value);
+                    $value = $dateTime->format('Y-m-d');
                     $dateTime = new \DateTime($value);
                     $dateTime->add(new \DateInterval('PT12H'));
                     $value = $dateTime->format('Y-m-d H:i:s');
