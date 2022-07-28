@@ -53,13 +53,18 @@ class Uninstall implements UninstallInterface
             'tnw_salesforce_log',
             'salesforce_objects',
             'tnw_salesforce_objects',
-            'tnw_salesforce_entity_queue',
             'tnw_salesforce_entity_queue_relation',
+            'tnw_salesforce_entity_queue',
             'tnw_salesforce_entity_prequeue',
         ];
         $columnsToDrop = [
             'store_website' => [
                 'salesforce_id',
+            ],
+            'customer_grid_flat' => [
+                'sforce_sync_status',
+                'sforce_id',
+                'sforce_account_id',
             ],
         ];
         $indexesToDrop = [];
