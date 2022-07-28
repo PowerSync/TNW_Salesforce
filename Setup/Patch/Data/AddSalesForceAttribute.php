@@ -6,9 +6,8 @@ use Magento\Customer\Model\Customer;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Framework\Setup\Patch\PatchVersionInterface;
 
-class AddSalesForceAttribute implements DataPatchInterface, PatchVersionInterface
+class AddSalesForceAttribute implements DataPatchInterface
 {
     /**
      * ModuleDataSetupInterface
@@ -256,14 +255,5 @@ class AddSalesForceAttribute implements DataPatchInterface, PatchVersionInterfac
                 $magento_attr
             );
         }
-    }
-
-    /**
-     *
-     * @return string
-     */
-    public static function getVersion()
-    {
-        return '0.0.1';
     }
 }
