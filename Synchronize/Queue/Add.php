@@ -20,6 +20,7 @@ use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteEmulator;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\PreQueue;
+use TNW\Salesforce\Service\Synchronize\Queue\Add\AddDependenciesForProcessingRows;
 use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool;
 
 /**
@@ -86,6 +87,9 @@ class Add
      */
     protected $publisher;
 
+    /** @var AddDependenciesForProcessingRows */
+    private $addDependenciesForProcessingRows;
+
     /**
      * Add constructor.
      * @param $entityType
@@ -112,7 +116,8 @@ class Add
         ManagerInterface $messageManager,
         State $state,
         Config $salesforceConfig,
-        PublisherAdapter $publisher
+        PublisherAdapter $publisher,
+        AddDependenciesForProcessingRows $addDependenciesForProcessingRows
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -126,6 +131,7 @@ class Add
         $this->state = $state;
         $this->salesforceConfig = $salesforceConfig;
         $this->publisher = $publisher;
+        $this->addDependenciesForProcessingRows = $addDependenciesForProcessingRows;
     }
 
     /**
@@ -429,6 +435,8 @@ class Add
         );
 
         $queueDataToSave = $this->getInsertArray($queues, $syncType, $websiteId);
+
+        $dependencies = $this->addDependenciesForProcessingRows->execute($queueDataToSave, $dependencies);
 
         $this->saveData($queueDataToSave, $dependencies);
 

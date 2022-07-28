@@ -20,6 +20,8 @@ use Magento\Framework\Registry;
  */
 class Queue extends AbstractModel
 {
+    public const UNIQUE_HASH = 'unique_hash';
+
     const STATUS_NEW = 'new';
     const STATUS_ERROR = 'error';
     const STATUS_COMPLETE = 'complete';
