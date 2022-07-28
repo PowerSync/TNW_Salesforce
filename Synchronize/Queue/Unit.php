@@ -236,6 +236,15 @@ class Unit
         array $additionalLoad = [],
         array $additionalToHash = []
     ) {
+        $uniqueHash = hash('sha256', (sprintf(
+            '%s/%s/%s/%s/%s/%s',
+            $this->code(),
+            $this->entityType,
+            $entityId,
+            $this->serializer->serialize($additionalLoad),
+            $this->objectType,
+            $this->serializer->serialize($additionalToHash)
+        )));
         $queue = $this->queueFactory->create(['data' => [
             'queue_id' => uniqid('', true),
             'code' => $this->code,
@@ -249,15 +258,8 @@ class Unit
             'transaction_uid' => '0',
             'sync_attempt' => 0,
             '_base_entity_id' => [$baseEntityId],
-            'identify' => hash('sha256', (sprintf(
-                '%s/%s/%s/%s/%s/%s',
-                $this->code(),
-                $this->entityType,
-                $entityId,
-                $this->serializer->serialize($additionalLoad),
-                $this->objectType,
-                $this->serializer->serialize($additionalToHash)
-            )))
+            'identify' => $uniqueHash,
+            Queue::UNIQUE_HASH => $uniqueHash
         ]]);
 
         if ($this->skipQueue($queue)) {
