@@ -135,6 +135,7 @@
         <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="When updated" />
         <column xsi:type="varchar" name="identify" nullable="true" length="64" comment="Identifier allow detect entity added to the queue with specific params" />
         <column xsi:type="varchar" name="composite_status" nullable="false" length="255" default="new" comment="Composite status, taking into account the status of relatives" />
+        <column xsi:type="varchar" name="unique_hash" nullable="true" length="64" comment="Unique hash for record based on unique data for object." />
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="queue_id" />
         </constraint>
@@ -181,6 +182,10 @@
         <index referenceId="TNW_SALESFORCE_ENTITY_STATUS_WEBSITE_ID" indexType="btree">
             <column name="status" />
             <column name="website_id" />
+        </index>
+        <index referenceId="TNW_SALESFORCE_ENTITY_UNIQUE_HASH_STATUS" indexType="btree">
+            <column name="unique_hash" />
+            <column name="status" />
         </index>
     </table>
     <table name="tnw_salesforce_entity_queue_relation" resource="default" engine="innodb" comment="tnw_salesforce_entity_queue_relation">
