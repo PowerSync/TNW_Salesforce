@@ -10,13 +10,14 @@ use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 use TNW\Salesforce\Model\Customer\Attribute\Source\SyncStatus;
 use TNW\Salesforce\Model\Customer\Map;
 use TNW\Salesforce\Setup\SalesforceSetup;
 use TNW\Salesforce\Setup\SalesforceSetupFactory;
 use Zend_Db_Expr;
 
-class UpdateAttributeSalesForce implements DataPatchInterface
+class UpdateAttributeSalesForce implements DataPatchInterface, PatchRevertableInterface
 {
     /**
      * ModuleDataSetupInterface
@@ -833,5 +834,10 @@ class UpdateAttributeSalesForce implements DataPatchInterface
                     $customerToContactAndAccount
                 );
         }
+    }
+
+    public function revert()
+    {
+        // TODO: Implement revert() method.
     }
 }

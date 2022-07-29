@@ -6,8 +6,9 @@ use Magento\Customer\Model\Customer;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 
-class AddSalesForceAttribute implements DataPatchInterface
+class AddSalesForceAttribute implements DataPatchInterface, PatchRevertableInterface
 {
     /**
      * ModuleDataSetupInterface
@@ -255,5 +256,10 @@ class AddSalesForceAttribute implements DataPatchInterface
                 $magento_attr
             );
         }
+    }
+
+    public function revert()
+    {
+        // TODO: Implement revert() method.
     }
 }
