@@ -599,7 +599,7 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchRevertableIn
      */
     protected function versionTwoThreeEleven()
     {
-        $this->_moduleDataSetup->getConnection()->insert(
+        $this->_moduleDataSetup->getConnection()->insertOnDuplicate(
             $this->_moduleDataSetup->getTable('core_config_data'),
             [
                 'scope' => 'default',
