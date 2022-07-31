@@ -119,14 +119,45 @@ class Load extends Synchronize\Unit\UnitAbstract
     }
 
     /**
+     * @return void
+     */
+    public function reset()
+    {
+        parent::reset();
+
+        foreach ($this->entityLoaders as $entityType => $entityLoader) {
+            if (method_exists($entityLoader, 'reset')) {
+                $entityLoader->reset();
+            } else {
+                $this->group()->messageDebug('Need to implement the "reset" method for the class %s', get_class($entityLoader));
+            }
+        }
+
+        foreach ($this->loaders as $loader) {
+            if (method_exists($loader, 'reset')) {
+                $loader->reset();
+            } else {
+                $this->group()->messageDebug('Need to implement the "reset" method for the class %s', get_class($loader));
+            }
+        }
+        gc_collect_cycles();
+    }
+
+    /**
      * Process
      */
     public function process()
     {
-        $this->cache['entities'] = $index = [];
+        $this->reset();
+        $index = [];
+        $i = 0;
         foreach ($this->queues as $queue) {
             try {
+                $i++;
+                $this->group()->messageDebug('>>> Load Entity progress: %s of %s', $i, count($this->queues));
+                $this->group()->messageDebug('>>> Load Entity %s', $this->description());
                 $entity = $this->loadEntity($queue);
+                $this->group()->messageDebug('<<< Loaded Entity %s', $this->description());
                 if (empty($entity)) {
                     $message[] = __('QueueId item %1 is not available anymore', $queue->getId());
                     continue;
@@ -146,7 +177,10 @@ class Load extends Synchronize\Unit\UnitAbstract
                 $this->cache[$entity]['queue'] = $queue;
 
                 foreach ($this->entityLoaders as $entityType => $entityLoader) {
+                    $this->group()->messageDebug('>>> >>> Load SUB Entity: %s', get_class($entityLoader));
                     $subEntity = $entityLoader->get($entity);
+                    $this->group()->messageDebug('<<< <<< Loaded SUB Entity: %s', get_class($entityLoader));
+
                     if (!empty($subEntity)) {
                         if (!empty($entityLoader->getSalesforceIdStorage()) && !$subEntity->getData($subEntity->getIdFieldName())) {
                             $salesforceIds = $this->objects->loadObjectIds(
