@@ -88,8 +88,15 @@ class Uninstall implements UninstallInterface
 
     private function dropForeignKey(SchemaSetupInterface $setup, array $constraintsData): void
     {
-        array_walk(
+        $filteredData = array_filter(
             $constraintsData,
+            function (string $table) use ($setup) {
+                return $setup->getConnection()->isTableExists($setup->getTable($table));
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        array_walk(
+            $filteredData,
             function (array $constraints, string $table) use ($setup) {
                 array_map(
                     function (string $constraint) use ($setup, $table) {
@@ -103,8 +110,15 @@ class Uninstall implements UninstallInterface
 
     private function dropIndexes(SchemaSetupInterface $setup, array $indexesData): void
     {
-        array_walk(
+        $filteredData = array_filter(
             $indexesData,
+            function (string $table) use ($setup) {
+                return $setup->getConnection()->isTableExists($setup->getTable($table));
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        array_walk(
+            $filteredData,
             function (array $indexes, string $table) use ($setup) {
                 array_map(
                     function (string $index) use ($setup, $table) {
@@ -118,8 +132,15 @@ class Uninstall implements UninstallInterface
 
     private function dropColumns(SchemaSetupInterface $setup, array $columnsData): void
     {
-        array_walk(
+        $filteredData = array_filter(
             $columnsData,
+            function (string $table) use ($setup) {
+                return $setup->getConnection()->isTableExists($setup->getTable($table));
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        array_walk(
+            $filteredData,
             function (array $columns, string $table) use ($setup) {
                 array_map(
                     function (string $column) use ($setup, $table) {
