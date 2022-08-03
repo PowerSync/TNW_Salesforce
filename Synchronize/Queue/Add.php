@@ -230,9 +230,10 @@ class Add
     }
 
     /**
-     * @param $current
-     * @param $parents
-     * @param $children
+     * @param Queue[] $current
+     * @param Queue[] $parents
+     * @param string  $unitCode
+     *
      * @return array
      */
     public function buildDependency($current, $parents, $unitCode)
@@ -586,6 +587,14 @@ class Add
     public function syncType($count, $websiteId)
     {
         return Config::DIRECT_SYNC_TYPE_REALTIME;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEntityType(): string
+    {
+        return $this->entityType;
     }
 
     /**
