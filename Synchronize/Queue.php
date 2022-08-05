@@ -46,7 +46,7 @@ class Queue
     /** @var [] */
     private $sortGroups;
 
-    /** @var Queue\PushMqMessage  */
+    /** @var Queue\PushMqMessage */
     private $pushMqMessage;
 
     /**
@@ -60,24 +60,24 @@ class Queue
     /**
      * Queue constructor.
      *
-     * @param Group[]                             $groups
-     * @param array                               $phases
-     * @param Model\Config                        $salesforceConfig
-     * @param Model\ResourceModel\Queue           $resourceQueue
+     * @param Group[] $groups
+     * @param array $phases
+     * @param Model\Config $salesforceConfig
+     * @param Model\ResourceModel\Queue $resourceQueue
      * @param Model\Logger\Processor\UidProcessor $uidProcessor
-     * @param PushMqMessage                       $pushMqMessage
-     * @param DateTime                            $dateTime
-     * @param bool                                $isCheck
+     * @param PushMqMessage $pushMqMessage
+     * @param DateTime $dateTime
+     * @param bool $isCheck
      */
     public function __construct(
-        array $groups,
-        array $phases,
-        Model\Config $salesforceConfig,
-        Model\ResourceModel\Queue $resourceQueue,
+        array                               $groups,
+        array                               $phases,
+        Model\Config                        $salesforceConfig,
+        Model\ResourceModel\Queue           $resourceQueue,
         Model\Logger\Processor\UidProcessor $uidProcessor,
-        PushMqMessage $pushMqMessage,
-        DateTime $dateTime,
-        $isCheck = false
+        PushMqMessage                       $pushMqMessage,
+        DateTime                            $dateTime,
+                                            $isCheck = false
     ) {
         $this->groups = $groups;
         $this->phases = array_filter($phases);
@@ -112,12 +112,16 @@ class Queue
      *
      * @param Collection $collection
      * @param            $websiteId
-     * @param array      $syncJobs
+     * @param array $syncJobs
      *
      * @throws LocalizedException|\Exception
      */
     public function synchronize($collection, $websiteId, $syncJobs = [])
     {
+        if (!$this->salesforceConfig->getSalesforceStatus()) {
+            return;
+        }
+
         // Collection Clear
         $collection->clear();
 
@@ -143,8 +147,6 @@ class Queue
                 $lockCollection->addFilterToCode($group->code());
                 $lockCollection->addFilterToStatus($phase['startStatus']);
                 $lockCollection->addFilterToNotTransactionUid($this->uidProcessor->uid());
-                $lockCollection->addFilterDependent();
-
                 $lockData = [
                     'status' => $phase['processStatus'],
                     'transaction_uid' => $this->uidProcessor->uid(),
@@ -156,7 +158,7 @@ class Queue
                 }
 
                 // Mark work
-                $countUpdate = $lockCollection->updateLock($lockData);
+                $countUpdate = $lockCollection->updateLock($lockData, $group->code(), (int)$websiteId);
 
                 if (0 === $countUpdate) {
                     continue;

@@ -42,5 +42,6 @@ class CurrentUnit
     public function clear():void
     {
         $this->unit = null;
+        gc_collect_cycles();
     }
 }

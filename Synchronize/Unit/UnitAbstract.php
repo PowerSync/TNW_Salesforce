@@ -74,6 +74,15 @@ abstract class UnitAbstract implements Synchronize\Unit\UnitInterface
     }
 
     /**
+     * @return void
+     */
+    public function reset()
+    {
+        $cacheStorage = [];
+        $this->cache = new Synchronize\Cache($cacheStorage);
+    }
+
+    /**
      * Name
      *
      * @return string
