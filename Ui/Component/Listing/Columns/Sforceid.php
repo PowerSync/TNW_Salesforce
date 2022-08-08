@@ -90,7 +90,7 @@ class Sforceid extends Column
         $result = [];
 
         $url = $this->client->getSalesForceUrl($websiteId);
-        foreach (explode("\n", $field) as $value) {
+        foreach (explode("\n", (string)$field) as $value) {
             $currency = '';
 
             $value = (string)$value;
