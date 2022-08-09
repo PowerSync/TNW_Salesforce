@@ -155,17 +155,20 @@ class Add
         if (empty($entityIds)) {
             return;
         }
-        $this->addToQueueDirectly($entityIds);
 
-        if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
+        $this->addToPreQueue($entityIds);
 
-            /** @var MessageInterface $message */
-            $message = $this->messageManager
-                ->createMessage(MessageInterface::TYPE_SUCCESS)
-                ->setText('Item(s) were added to the Salesforce sync queue');
-
-            $this->messageManager->addUniqueMessages([$message]);
-        }
+//        $this->addToQueueDirectly($entityIds);
+//
+//        if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
+//
+//            /** @var MessageInterface $message */
+//            $message = $this->messageManager
+//                ->createMessage(MessageInterface::TYPE_SUCCESS)
+//                ->setText('Item(s) were added to the Salesforce sync queue');
+//
+//            $this->messageManager->addUniqueMessages([$message]);
+//        }
     }
 
     /**
