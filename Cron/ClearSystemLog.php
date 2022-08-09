@@ -40,10 +40,20 @@ class ClearSystemLog
     protected $_filesystem;
 
     /**
+     * @var Config
+     */
+    protected $salesforceConfig;
+
+    /**
      * UpdateCurrencyRates constructor.
      *
-     * @param Logger $logger
+     * @param LoggerInterface $logger
+     * @param Config $salesforceConfig
+     * @param File $file
+     * @param Filesystem\DirectoryList $dir
+     * @param TimezoneInterface $timezone
      * @param Config $config
+     * @param Filesystem $filesystem
      */
     public function __construct(
         //CleanSystemLogsCommand $cleanSystemLogsCommand,
@@ -78,6 +88,10 @@ class ClearSystemLog
     public function execute()
     {
         try {
+            if (!$this->salesforceConfig->getSalesforceStatus()) {
+                return;
+            }
+
             if (!$this->salesforceConfig->getClearSystemLogs()) {
                 $this->logger->info($this->getDateTime() . ': ' . ' Clear System logs not configured');
                 return;

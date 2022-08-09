@@ -1,13 +1,54 @@
 <?php
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+declare(strict_types=1);
+
 namespace TNW\Salesforce\Model\ResourceModel\Queue;
 
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Data\Collection\Db\FetchStrategyInterface;
+use Magento\Framework\Data\Collection\EntityFactoryInterface;
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
+use Psr\Log\LoggerInterface;
+use TNW\Salesforce\Model\ResourceModel\FilterBlockedQueueRecords;
 
 /**
  * Queue Collection
  */
 class Collection extends AbstractCollection
 {
+    /**
+     * @var FilterBlockedQueueRecords
+     */
+    private $filterBlockedQueueRecords;
+
+    /**
+     * @param EntityFactoryInterface $entityFactory
+     * @param LoggerInterface $logger
+     * @param FetchStrategyInterface $fetchStrategy
+     * @param ManagerInterface $eventManager
+     * @param FilterBlockedQueueRecords $filterBlockedQueueRecords
+     * @param AdapterInterface|null $connection
+     * @param AbstractDb|null $resource
+     */
+    public function __construct(
+        EntityFactoryInterface    $entityFactory,
+        LoggerInterface           $logger,
+        FetchStrategyInterface    $fetchStrategy,
+        ManagerInterface          $eventManager,
+        FilterBlockedQueueRecords $filterBlockedQueueRecords,
+        AdapterInterface          $connection = null,
+        AbstractDb                $resource = null
+    ) {
+        parent::__construct($entityFactory, $logger, $fetchStrategy, $eventManager, $connection, $resource);
+        $this->filterBlockedQueueRecords = $filterBlockedQueueRecords;
+    }
+
     /**
      * @var string
      */
@@ -95,26 +136,6 @@ class Collection extends AbstractCollection
     }
 
     /**
-     * Add Filter Dependent
-     *
-     * @return $this
-     */
-    public function addFilterDependent()
-    {
-        $connection = $this->getConnection();
-        $select = $connection->select()
-            ->from(['queue' => $this->getTable('tnw_salesforce_entity_queue')], [])
-            ->joinInner(
-                ['relation' => $this->getTable('tnw_salesforce_entity_queue_relation')],
-                'relation.parent_id = queue.queue_id',
-                ['queue_id']
-            )
-            ->where('queue.status NOT IN (?)', ['complete', 'skipped']);
-
-        return $this->addFieldToFilter('queue_id', ['nin' => $select]);
-    }
-
-    /**
      * Join table to collection select
      *
      * @param string|array $table
@@ -186,17 +207,19 @@ class Collection extends AbstractCollection
      * Update Lock
      *
      * @param array $data
+     * @param string $groupCode
+     * @param int $websiteId
      * @return int
      * @throws \Exception
      */
-    public function updateLock(array $data)
+    public function updateLock(array $data, string $groupCode, int $websiteId)
     {
         $this->getSelect()->group('identify');
 
         $this->_conn->beginTransaction();
         try {
 //            $this->_select->forUpdate();
-            $queueIds = $this->getAllIds();
+            $queueIds = $this->filterBlockedQueueRecords->execute($this->getAllIds(), $groupCode, $websiteId);
 //            $this->_select->forUpdate(false);
 
             if (!empty($queueIds)) {

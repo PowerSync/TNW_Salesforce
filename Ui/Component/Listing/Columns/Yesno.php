@@ -56,6 +56,6 @@ class Yesno extends Column
     {
         $labels = $this->getOptions()->toArray();
 
-        return $labels[$key];
+        return $labels[$key] ?? __('Undefined');
     }
 }

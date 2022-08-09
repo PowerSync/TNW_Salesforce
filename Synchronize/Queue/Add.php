@@ -16,6 +16,7 @@ use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteEmulator;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\PreQueue;
+use TNW\Salesforce\Service\Synchronize\Queue\Add\AddDependenciesForProcessingRows;
 use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool;
 
 /**
@@ -74,10 +75,16 @@ class Add
     /** @var State */
     protected $state;
 
+    /** @var Config  */
+    protected $salesforceConfig;
+
     /**
      * @var PublisherAdapter
      */
     protected $publisher;
+
+    /** @var AddDependenciesForProcessingRows */
+    private $addDependenciesForProcessingRows;
 
     /**
      * Add constructor.
@@ -104,7 +111,9 @@ class Add
         PreQueue $resourcePreQueue,
         ManagerInterface $messageManager,
         State $state,
-        PublisherAdapter $publisher
+        Config $salesforceConfig,
+        PublisherAdapter $publisher,
+        AddDependenciesForProcessingRows $addDependenciesForProcessingRows
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -116,7 +125,9 @@ class Add
         $this->resourcePreQueue = $resourcePreQueue;
         $this->messageManager = $messageManager;
         $this->state = $state;
+        $this->salesforceConfig = $salesforceConfig;
         $this->publisher = $publisher;
+        $this->addDependenciesForProcessingRows = $addDependenciesForProcessingRows;
     }
 
     /**
@@ -127,6 +138,10 @@ class Add
      */
     public function addToQueue(array $entityIds)
     {
+        if (!$this->salesforceConfig->getSalesforceStatus()) {
+            return;
+        }
+
         if (empty($entityIds)) {
             return;
         }
@@ -417,6 +432,8 @@ class Add
 
         $queueDataToSave = $this->getInsertArray($queues, $syncType, $websiteId);
 
+        $dependencies = $this->addDependenciesForProcessingRows->execute($queueDataToSave, $dependencies);
+
         $this->saveData($queueDataToSave, $dependencies);
 
 //        $this->closeGraph();
@@ -440,7 +457,7 @@ class Add
             $connection->commit();
         } catch (Exception $e) {
             $connection->rollBack();
-            throw new Exception($e->getMessage());
+            throw $e;
         }
     }
 

@@ -98,6 +98,8 @@ class Group
      */
     public function synchronize(array $queues)
     {
+        $this->messageDebug('======== START SYNC %s ========', $this->code());
+
         $units = $this->createUnits($queues)->sort();
         /** @var Unit\UnitInterface $unit */
         foreach ($units as $unit) {
@@ -112,11 +114,18 @@ class Group
 
             $this->messageDebug('----------------------------------------------------');
             $this->messageDebug('%s. Unit name %s', $unit->description(), $unit->name());
+
+            $this->messageDebug('>>> START >>> %s. Unit name %s', $unit->description(), $unit->name());
+
             $unit->status($unit::PROCESS);
             $unit->process();
             $unit->status($unit::COMPLETE);
+            $this->messageDebug('<<< STOP <<< %s. Unit name %s', $unit->description(), $unit->name());
+
+
         }
         $this->currentUnit->clear();
+        $this->messageDebug('======== END SYNC %s ========', $this->code());
 
         return $units;
     }
