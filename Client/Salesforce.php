@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
@@ -372,7 +372,7 @@ class Salesforce extends DataObject
      */
     public function describeSObject($objectName)
     {
-        $cacheKey = sprintf(self::SFORCE_DESCRIBE_CACHE_IDENTIFIER, strtolower($objectName));
+        $cacheKey = sprintf(self::SFORCE_DESCRIBE_CACHE_IDENTIFIER, strtolower((string)$objectName));
 
         /** @var string|null $url */
         $describeData = $this->loadCache($cacheKey);

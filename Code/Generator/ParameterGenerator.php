@@ -1,4 +1,9 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+
 namespace TNW\Salesforce\Code\Generator;
 
 class ParameterGenerator extends \Zend\Code\Generator\ParameterGenerator
@@ -32,8 +37,8 @@ class ParameterGenerator extends \Zend\Code\Generator\ParameterGenerator
     public function generate()
     {
         $output = parent::generate();
-        if (false === strpos($output, "...") && $this->variadic) {
-            $output = str_replace('$', '... $', $output);
+        if ($this->variadic && false === strpos($output, "...")) {
+            $output = str_replace('$', '... $', (string)$output);
         }
 
         return $output;

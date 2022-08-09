@@ -1,4 +1,9 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+
 namespace TNW\Salesforce\Model;
 
 use Magento\Framework\Data\Collection\AbstractDb;
@@ -66,17 +71,25 @@ class Queue extends AbstractModel
 
     protected $salesforceConfig = [];
 
+    /**
+     * @param Context               $context
+     * @param Registry              $registry
+     * @param Config                $salesforceConfig
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null       $resourceCollection
+     * @param array                 $data
+     */
     public function __construct(
         Context $context,
         Registry $registry,
+        Config $salesforceConfig,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
-        Config $salesforceConfig,
         array $data = []
     ) {
-        $this->salesforceConfig = $salesforceConfig;
 
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
+        $this->salesforceConfig = $salesforceConfig;
     }
 
     /**
@@ -132,9 +145,9 @@ class Queue extends AbstractModel
      *
      * @return string
      */
-    public function getEntityLoad()
+    public function getEntityLoad(): string
     {
-        return $this->_getData('entity_load');
+        return (string)$this->_getData('entity_load');
     }
 
     /**
@@ -213,9 +226,9 @@ class Queue extends AbstractModel
      *
      * @return string
      */
-    public function getStatus()
+    public function getStatus(): string
     {
-        return $this->_getData('status');
+        return (string)$this->_getData('status');
     }
 
     /**
@@ -260,7 +273,7 @@ class Queue extends AbstractModel
      */
     public function isError()
     {
-        return in_array($this->_getData('status'), self::ERROR_STATUSES, true);
+        return in_array($this->getStatus(), self::ERROR_STATUSES, true);
     }
 
     /**
@@ -270,7 +283,7 @@ class Queue extends AbstractModel
      */
     public function isSuccess()
     {
-        return in_array($this->_getData('status'), self::SUCCESS_STATUSES, true);
+        return in_array($this->getStatus(), self::SUCCESS_STATUSES, true);
     }
 
     /**
@@ -280,7 +293,7 @@ class Queue extends AbstractModel
      */
     public function isProcess()
     {
-        return in_array($this->_getData('status'), self::PROCESS_STATUSES, true);
+        return in_array($this->getStatus(), self::PROCESS_STATUSES, true);
     }
 
     /**
@@ -290,7 +303,7 @@ class Queue extends AbstractModel
      */
     public function isSkipped()
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_SKIPPED) === 0;
+        return strcasecmp($this->getStatus(), self::STATUS_SKIPPED) === 0;
     }
 
     /**
@@ -298,9 +311,14 @@ class Queue extends AbstractModel
      *
      * @return bool
      */
-    public function isComplete()
+    public function isComplete(): bool
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_COMPLETE) === 0;
+        $status = $this->getStatus();
+        if(!$status) {
+            return false;
+        }
+
+        return strcasecmp($status, self::STATUS_COMPLETE) === 0;
     }
 
     /**
@@ -310,7 +328,7 @@ class Queue extends AbstractModel
      */
     public function isWaitingUpsert()
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_WAITING_UPSERT) === 0;
+        return strcasecmp($this->getStatus(), self::STATUS_WAITING_UPSERT) === 0;
     }
 
     /**
@@ -320,7 +338,7 @@ class Queue extends AbstractModel
      */
     public function isProcessInputUpsert()
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_PROCESS_INPUT_UPSERT) === 0;
+        return strcasecmp($this->getStatus(), self::STATUS_PROCESS_INPUT_UPSERT) === 0;
     }
 
     /**
@@ -330,7 +348,7 @@ class Queue extends AbstractModel
      */
     public function isProcessOutputUpsert()
     {
-        return strcasecmp($this->_getData('status'), self::STATUS_PROCESS_OUTPUT_UPSERT) === 0;
+        return strcasecmp($this->getStatus(), self::STATUS_PROCESS_OUTPUT_UPSERT) === 0;
     }
 
     /**

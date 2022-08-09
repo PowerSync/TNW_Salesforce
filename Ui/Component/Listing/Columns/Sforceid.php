@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 namespace TNW\Salesforce\Ui\Component\Listing\Columns;
 
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
@@ -86,9 +90,10 @@ class Sforceid extends Column
         $result = [];
 
         $url = $this->client->getSalesForceUrl($websiteId);
-        foreach (explode("\n", $field) as $value) {
+        foreach (explode("\n", (string)$field) as $value) {
             $currency = '';
 
+            $value = (string)$value;
             if (strpos($value, ':') !== false) {
                 if (substr_count($value,':') === 2) {
                     [$storeId, $currency, $value] = explode(':', $value);

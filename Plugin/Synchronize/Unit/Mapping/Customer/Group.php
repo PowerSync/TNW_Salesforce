@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\Customer;
 
@@ -40,7 +44,7 @@ class Group
         $entity,
         $attributeCode) {
 
-        if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp($attributeCode, 'group_label') === 0) {
+        if ($entity instanceof \Magento\Customer\Model\Customer && strcasecmp((string)$attributeCode, 'group_label') === 0) {
             $groupCode = '';
             try {
                 $groupCode = $this->groupRepository->getById($entity->getGroupId())->getCode();

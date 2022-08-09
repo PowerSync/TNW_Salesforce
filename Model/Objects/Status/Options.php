@@ -1,8 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 /**
- * Copyright © 2021 TechNWeb, Inc. All rights reserved.
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
+
 namespace TNW\Salesforce\Model\Objects\Status;
 
 use Magento\Framework\Data\OptionSourceInterface;

@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use InvalidArgumentException;
@@ -128,9 +132,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      *
      * @return string
      */
-    public function objectType()
+    public function objectType(): string
     {
-        return $this->objectType;
+        return (string)$this->objectType;
     }
 
     /**
@@ -251,7 +255,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
                 break;
         }
 
-        if (null === $value || (is_string($value) && '' === trim($value))) {
+        if (null === $value || (is_string($value) && '' === trim((string)$value))) {
             $value = $this->defaultValue($entity, $mapper);
         }
 
@@ -346,6 +350,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     public function prepareValue($entity, $attributeCode)
     {
+        $attributeCode = (string)$attributeCode;
         if (
             $entity->getResource() instanceof AbstractEntity &&
             $entity->getResource()->getAttribute($attributeCode) &&

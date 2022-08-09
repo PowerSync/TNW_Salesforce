@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Synchronize\Unit\Upsert;
 
@@ -129,9 +133,9 @@ class Input extends Synchronize\Unit\UnitAbstract
      *
      * @return string
      */
-    public function salesforceType()
+    public function salesforceType(): string
     {
-        return $this->salesforceType;
+        return (string)$this->salesforceType;
     }
 
     /**
@@ -310,7 +314,7 @@ class Input extends Synchronize\Unit\UnitAbstract
             ) {
                 $object[$fieldName] = (float)$object[$fieldName];
             } elseif (is_string($object[$fieldName])) {
-                $object[$fieldName] = trim($object[$fieldName]);
+                $object[$fieldName] = trim((string)$object[$fieldName]);
                 if ($object[$fieldName] === '') {
                     $object[$fieldName] = null;
                     continue;
