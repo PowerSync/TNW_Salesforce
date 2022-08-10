@@ -16,7 +16,6 @@ use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteEmulator;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\PreQueue;
-use TNW\Salesforce\Service\CleanLocalCacheForInstances;
 use TNW\Salesforce\Service\Synchronize\Queue\Add\AddDependenciesForProcessingRows;
 use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool;
 
@@ -87,22 +86,22 @@ class Add
     /** @var AddDependenciesForProcessingRows */
     private $addDependenciesForProcessingRows;
 
-    /** @var CleanLocalCacheForInstances */
-    private $cleanLocalCacheForInstances;
-
     /**
      * Add constructor.
-     * @param $entityType
-     * @param array $resolves
-     * @param StoreManagerInterface $storeManager
-     * @param Pool $dividerPool
-     * @param WebsiteEmulator $websiteEmulator
-     * @param Synchronize $synchronizeEntity
+     *
+     * @param                                           $entityType
+     * @param array                                     $resolves
+     * @param StoreManagerInterface                     $storeManager
+     * @param Pool                                      $dividerPool
+     * @param WebsiteEmulator                           $websiteEmulator
+     * @param Synchronize                               $synchronizeEntity
      * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
-     * @param PreQueue $resourcePreQueue
-     * @param ManagerInterface $messageManager
-     * @param State $state
-     * @param PublisherAdapter $publisher
+     * @param PreQueue                                  $resourcePreQueue
+     * @param ManagerInterface                          $messageManager
+     * @param State                                     $state
+     * @param Config                                    $salesforceConfig
+     * @param PublisherAdapter                          $publisher
+     * @param AddDependenciesForProcessingRows          $addDependenciesForProcessingRows
      */
     public function __construct(
         $entityType,
@@ -117,8 +116,7 @@ class Add
         State $state,
         Config $salesforceConfig,
         PublisherAdapter $publisher,
-        AddDependenciesForProcessingRows $addDependenciesForProcessingRows,
-        CleanLocalCacheForInstances $cleanLocalCacheForInstances
+        AddDependenciesForProcessingRows $addDependenciesForProcessingRows
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -133,7 +131,6 @@ class Add
         $this->salesforceConfig = $salesforceConfig;
         $this->publisher = $publisher;
         $this->addDependenciesForProcessingRows = $addDependenciesForProcessingRows;
-        $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
     }
 
     /**
@@ -211,8 +208,6 @@ class Add
      */
     public function addToQueueByWebsite(array $entityIds, $website = null, $syncType = null)
     {
-        $this->cleanLocalCacheForInstances->execute();
-
         $websiteId = $this->storeManager->getWebsite($website)->getId();
 
         if ($syncType === null) {
