@@ -88,9 +88,8 @@ abstract class ProcessingAbstract extends Synchronize\Unit\UnitAbstract
      */
     public function entities()
     {
-        $objects = $this->load()->get('entities');
-
-        return array_filter($objects, [$this, 'filter']);
+        $entities = $this->load()->get('entities') ?? [];
+        return array_filter($entities, [$this, 'filter']);
     }
 
     /**
