@@ -136,7 +136,8 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     protected function entities()
     {
-        return array_filter($entities = $this->unit('load')->get('entities'), [$this, 'filter']);
+        $entities = $this->unit('load')->get('entities') ?? [];
+        return array_filter($entities, [$this, 'filter']);
     }
 
     /**
