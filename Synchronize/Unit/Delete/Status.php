@@ -99,7 +99,8 @@ class Status extends Synchronize\Unit\UnitAbstract
      */
     protected function entities()
     {
-        return $this->load()->get('entities');
+        $entities = $this->load()->get('entities') ?? [];
+        return $entities;
     }
 
     /**

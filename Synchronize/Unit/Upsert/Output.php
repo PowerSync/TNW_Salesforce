@@ -201,7 +201,8 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function entities()
     {
-        return array_filter($this->load()->get('entities'), [$this, 'filter']);
+        $entities = $this->load()->get('entities') ?? [];
+        return array_filter($entities, [$this, 'filter']);
     }
 
     /**
