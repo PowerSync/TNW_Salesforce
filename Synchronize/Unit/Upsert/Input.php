@@ -191,7 +191,8 @@ class Input extends Synchronize\Unit\UnitAbstract
      */
     public function entities()
     {
-        $entities = array_filter($this->load()->get('entities'), [$this, 'filter']);
+        $entities = $this->load()->get('entities') ?? [];
+        $entities = array_filter($entities, [$this, 'filter']);
         $entities = array_filter($entities, [$this, 'needUpdate']);
 
         return $entities;
