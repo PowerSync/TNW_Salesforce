@@ -67,7 +67,7 @@ class Query implements Transport\Calls\QueryInterface
 
             for (/*unused*/; $input->valid(); $input->next()) {
                 $entities[] = $input->current();
-                $testQuery = $input->query($entities);
+                $testQuery = (string)$input->query($entities);
                 if (mb_strlen($testQuery) >= self::MAX_LENGTH) {
                     break;
                 }
