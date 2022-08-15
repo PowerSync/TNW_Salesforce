@@ -10,6 +10,7 @@ use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 use Magento\Framework\Setup\Patch\PatchVersionInterface;
 use TNW\Salesforce\Model\Customer\Attribute\Source\SyncStatus;
 use TNW\Salesforce\Model\Customer\Map;
@@ -17,7 +18,7 @@ use TNW\Salesforce\Setup\SalesforceSetup;
 use TNW\Salesforce\Setup\SalesforceSetupFactory;
 use Zend_Db_Expr;
 
-class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInterface
+class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInterface, PatchRevertableInterface
 {
     /**
      * ModuleDataSetupInterface
@@ -843,5 +844,10 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
     public static function getVersion()
     {
         return '0.0.1';
+    }
+
+    public function revert()
+    {
+        // Nothing to revert here
     }
 }
