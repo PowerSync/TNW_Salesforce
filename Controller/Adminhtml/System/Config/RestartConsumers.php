@@ -48,7 +48,7 @@ class RestartConsumers extends Action
             $this->messageManager->addErrorMessage($e->getMessage());
         }
 
-        $resultRedirect->setPath('admin/system_config/edit', ['section' => 'tnwsforce_general']);
+        $resultRedirect->setPath('adminhtml/system_config/edit', ['section' => 'tnwsforce_general']);
 
         return $resultRedirect;
     }
