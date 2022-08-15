@@ -6,16 +6,23 @@
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use InvalidArgumentException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use OutOfBoundsException;
 use TNW\Salesforce\Model\ResourceModel\Mapper\Collection;
-use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Synchronize\Group;
+use TNW\Salesforce\Synchronize\Transport\Calls\Query\Input as QueryInput;
+use TNW\Salesforce\Synchronize\Transport\Calls\Query\InputFactory;
+use TNW\Salesforce\Synchronize\Transport\Calls\Query\Output;
+use TNW\Salesforce\Synchronize\Transport\Calls\Query\OutputFactory;
+use TNW\Salesforce\Synchronize\Transport\Calls\QueryInterface;
 use TNW\Salesforce\Synchronize\Unit\Upsert\Input;
+use TNW\Salesforce\Synchronize\Units;
 
 /**
  * Lookup Abstract
  */
-abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
+abstract class LookupAbstract extends UnitAbstract
 {
     /**
      * @var string
@@ -25,27 +32,27 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     protected $skipMappingFields = false;
 
     /**
-     * @var Synchronize\Transport\Calls\Query\InputFactory
+     * @var InputFactory
      */
     protected $inputFactory;
 
     /**
-     * @var Synchronize\Transport\Calls\Query\OutputFactory
+     * @var OutputFactory
      */
     protected $outputFactory;
 
     /**
-     * @var Synchronize\Transport\Calls\Query\Input
+     * @var QueryInput
      */
     protected $input;
 
     /**
-     * @var Synchronize\Transport\Calls\Query\Output
+     * @var Output
      */
     protected $output;
 
     /**
-     * @var Synchronize\Transport\Calls\QueryInterface
+     * @var QueryInterface
      */
     protected $process;
 
@@ -58,24 +65,24 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      * LookupAbstract constructor.
      * @param string $name
      * @param string $load
-     * @param Synchronize\Units $units
-     * @param Synchronize\Group $group
+     * @param Units $units
+     * @param Group $group
      * @param IdentificationInterface $identification
-     * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
-     * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
-     * @param Synchronize\Transport\Calls\QueryInterface $process
+     * @param InputFactory $inputFactory
+     * @param OutputFactory $outputFactory
+     * @param QueryInterface $process
      * @param bool $skipMappingFields
      * @param array $dependents
      */
     public function __construct(
         $name,
         $load,
-        Synchronize\Units $units,
-        Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
-        Synchronize\Transport\Calls\Query\InputFactory $inputFactory,
-        Synchronize\Transport\Calls\Query\OutputFactory $outputFactory,
-        Synchronize\Transport\Calls\QueryInterface $process,
+        Units $units,
+        Group $group,
+        IdentificationInterface $identification,
+        InputFactory $inputFactory,
+        OutputFactory $outputFactory,
+        QueryInterface $process,
         array $dependents = [],
         $skipMappingFields = false
     ) {
@@ -100,7 +107,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Input
      *
-     * @return Synchronize\Transport\Calls\Query\Input
+     * @return QueryInput
      */
     public function input()
     {
@@ -110,7 +117,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Output
      *
-     * @return Synchronize\Transport\Calls\Query\Output
+     * @return Output
      */
     public function output()
     {
@@ -120,8 +127,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     /**
      * Process
      *
-     * @throws InvalidArgumentException
-     * @throws OutOfBoundsException
+     * @throws LocalizedException
      */
     public function process()
     {
@@ -150,7 +156,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     abstract public function processInput();
 
     /**
-     * @return Synchronize\Unit\UnitInterface
+     * @return UnitInterface
      */
     public function getMappingUnit()
     {
@@ -158,7 +164,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
     }
 
     /**
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function addMappingFieldsToSelect()
     {
@@ -190,7 +196,7 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
         }
 
         $definedColumns = $this->input->columns;
-        // TODO : change it to the compareIgnoreFields as defined for \TNW\Salesforce\Synchronize\Unit\Upsert\Input
+        // TODO : change it to the compareIgnoreFields as defined for \TNW\Salesforce\Unit\Upsert\Input
         $definedColumns[] = 'tnw_mage_enterp__disableMagentoSync__c';
 
         $definedColumns = array_map('strtolower', $definedColumns);
@@ -303,7 +309,8 @@ abstract class LookupAbstract extends Synchronize\Unit\UnitAbstract
      */
     public function entities()
     {
-        return array_filter($this->load()->get('entities'), [$this, 'filter']);
+        $entities = $this->load()->get('entities') ?? [];
+        return array_filter($entities, [$this, 'filter']);
     }
 
     /**

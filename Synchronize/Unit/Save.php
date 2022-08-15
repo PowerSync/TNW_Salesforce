@@ -188,7 +188,8 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function entities()
     {
-        return array_filter($this->load()->get('entities'), [$this, 'filter']);
+        $entities = $this->load()->get('entities') ?? [];
+        return array_filter($entities, [$this, 'filter']);
     }
 
     /**
@@ -220,7 +221,8 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function skippedEntities()
     {
-        return array_filter($this->load()->get('entities'), [$this, 'skipped']);
+        $entities = $this->load()->get('entities') ?? [];
+        return array_filter($entities, [$this, 'skipped']);
     }
 
     /**
