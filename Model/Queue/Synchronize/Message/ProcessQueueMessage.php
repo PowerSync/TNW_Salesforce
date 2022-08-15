@@ -5,6 +5,7 @@ namespace TNW\Salesforce\Model\Queue\Synchronize\Message;
 use Exception;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteEmulator;
+use TNW\Salesforce\Service\CleanLocalCacheForInstances;
 use TNW\Salesforce\Synchronize\Queue\Synchronize;
 
 class ProcessQueueMessage
@@ -24,20 +25,27 @@ class ProcessQueueMessage
      */
     protected $salesforceConfig;
 
+    /** @var CleanLocalCacheForInstances */
+    private $cleanLocalCacheForInstances;
+
     /**
      * ProcessQueueMessage constructor.
-     * @param Synchronize $synchronizeEntity
-     * @param Config $salesforceConfig
-     * @param WebsiteEmulator $websiteEmulator
+     *
+     * @param Synchronize                 $synchronizeEntity
+     * @param Config                      $salesforceConfig
+     * @param WebsiteEmulator             $websiteEmulator
+     * @param CleanLocalCacheForInstances $cleanLocalCacheForInstances
      */
     public function __construct(
-        Synchronize $synchronizeEntity,
-        Config $salesforceConfig,
-        WebsiteEmulator $websiteEmulator
+        Synchronize                 $synchronizeEntity,
+        Config                      $salesforceConfig,
+        WebsiteEmulator             $websiteEmulator,
+        CleanLocalCacheForInstances $cleanLocalCacheForInstances
     ) {
         $this->synchronizeEntity = $synchronizeEntity;
         $this->salesforceConfig = $salesforceConfig;
         $this->websiteEmulator = $websiteEmulator;
+        $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
     }
 
     /**
@@ -51,6 +59,8 @@ class ProcessQueueMessage
         if (!$this->salesforceConfig->getSalesforceStatus()) {
             return;
         }
+
+        $this->cleanLocalCacheForInstances->execute();
 
         $this->websiteEmulator->wrapEmulationWebsite(
             [$this->synchronizeEntity, 'synchronizeToWebsite'],
