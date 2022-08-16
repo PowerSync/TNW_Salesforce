@@ -148,7 +148,7 @@ class AddSalesForceAttribute implements DataPatchInterface, PatchRevertableInter
             );
             $magento_attr['attribute_id'] = $attribute['attribute_id'];
             $magento_attr['magento_entity_type'] = 'customer';
-            $this->_moduleDataSetup->getConnection()->insert(
+            $this->_moduleDataSetup->getConnection()->insertOnDuplicate(
                 $this->_moduleDataSetup->getTable('tnw_salesforce_mapper'),
                 $magento_attr
             );
@@ -195,7 +195,7 @@ class AddSalesForceAttribute implements DataPatchInterface, PatchRevertableInter
             );
             $magento_attr['magento_entity_type'] = 'customer_address/shipping';
             $magento_attr['attribute_id'] = $attribute['attribute_id'];
-            $this->_moduleDataSetup->getConnection()->insert(
+            $this->_moduleDataSetup->getConnection()->insertOnDuplicate(
                 $this->_moduleDataSetup->getTable('tnw_salesforce_mapper'),
                 $magento_attr
             );
@@ -251,7 +251,7 @@ class AddSalesForceAttribute implements DataPatchInterface, PatchRevertableInter
             );
             $magento_attr['attribute_id'] = $attribute['attribute_id'];
             $magento_attr['magento_entity_type'] = 'customer_address/billing';
-            $this->_moduleDataSetup->getConnection()->insert(
+            $this->_moduleDataSetup->getConnection()->insertOnDuplicate(
                 $this->_moduleDataSetup->getTable('tnw_salesforce_mapper'),
                 $magento_attr
             );
