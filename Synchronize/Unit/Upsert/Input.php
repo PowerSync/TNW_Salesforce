@@ -321,15 +321,16 @@ class Input extends Synchronize\Unit\UnitAbstract
                     continue;
                 }
 
+                $value = (string)($object[$fieldName] ?? '');
                 if ($fieldProperty->getLength()
-                    && $fieldProperty->getLength() < strlen($object[$fieldName])
+                    && $fieldProperty->getLength() < strlen($value)
                 ) {
                     $limit = $fieldProperty->getLength();
                     if ($fieldProperty->getType() === 'reference') {
-                        $object[$fieldName] = mb_strcut($object[$fieldName], 0, $limit);
+                        $object[$fieldName] = mb_strcut($value, 0, $limit);
                     } else {
                         $this->group()->messageNotice('Salesforce field "%s" value truncated.', $fieldName);
-                        $object[$fieldName] = mb_strcut($object[$fieldName], 0, $limit - 3) . '...';
+                        $object[$fieldName] = mb_strcut($value, 0, $limit - 3) . '...';
                     }
                 }
             }

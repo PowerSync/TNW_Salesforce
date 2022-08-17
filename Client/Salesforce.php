@@ -343,6 +343,7 @@ class Salesforce extends DataObject
             return;
         }
         foreach (get_object_vars($object) as $field => $value) {
+            $value = (string)$value;
             $describeField = $describe->getField($field);
             if (!$describeField instanceof Field) {
                 $this->logger->messageDebug('Field "%s::%s" not found in SF! Skipped field.', $type, $field);
