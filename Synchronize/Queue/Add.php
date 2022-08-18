@@ -92,17 +92,20 @@ class Add
 
     /**
      * Add constructor.
-     * @param $entityType
-     * @param array $resolves
-     * @param StoreManagerInterface $storeManager
-     * @param Pool $dividerPool
-     * @param WebsiteEmulator $websiteEmulator
-     * @param Synchronize $synchronizeEntity
+     *
+     * @param                                           $entityType
+     * @param array                                     $resolves
+     * @param StoreManagerInterface                     $storeManager
+     * @param Pool                                      $dividerPool
+     * @param WebsiteEmulator                           $websiteEmulator
+     * @param Synchronize                               $synchronizeEntity
      * @param \TNW\Salesforce\Model\ResourceModel\Queue $resourceQueue
-     * @param PreQueue $resourcePreQueue
-     * @param ManagerInterface $messageManager
-     * @param State $state
-     * @param PublisherAdapter $publisher
+     * @param PreQueue                                  $resourcePreQueue
+     * @param ManagerInterface                          $messageManager
+     * @param State                                     $state
+     * @param Config                                    $salesforceConfig
+     * @param PublisherAdapter                          $publisher
+     * @param AddDependenciesForProcessingRows          $addDependenciesForProcessingRows
      */
     public function __construct(
         $entityType,
@@ -149,17 +152,20 @@ class Add
         if (empty($entityIds)) {
             return;
         }
-        $this->addToQueueDirectly($entityIds);
 
-        if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
+        $this->addToPreQueue($entityIds);
 
-            /** @var MessageInterface $message */
-            $message = $this->messageManager
-                ->createMessage(MessageInterface::TYPE_SUCCESS)
-                ->setText('Item(s) were added to the Salesforce sync queue');
-
-            $this->messageManager->addUniqueMessages([$message]);
-        }
+//        $this->addToQueueDirectly($entityIds);
+//
+//        if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
+//
+//            /** @var MessageInterface $message */
+//            $message = $this->messageManager
+//                ->createMessage(MessageInterface::TYPE_SUCCESS)
+//                ->setText('Item(s) were added to the Salesforce sync queue');
+//
+//            $this->messageManager->addUniqueMessages([$message]);
+//        }
     }
 
     /**
@@ -226,9 +232,10 @@ class Add
     }
 
     /**
-     * @param $current
-     * @param $parents
-     * @param $children
+     * @param Queue[] $current
+     * @param Queue[] $parents
+     * @param string  $unitCode
+     *
      * @return array
      */
     public function buildDependency($current, $parents, $unitCode)
@@ -582,6 +589,14 @@ class Add
     public function syncType($count, $websiteId)
     {
         return Config::DIRECT_SYNC_TYPE_REALTIME;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEntityType(): string
+    {
+        return $this->entityType;
     }
 
     /**
