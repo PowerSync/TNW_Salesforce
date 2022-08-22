@@ -41,12 +41,16 @@ class Uninstall implements UninstallInterface
 
         $connection->delete($setup->getTable('eav_attribute'), [
             $connection->prepareSqlCondition('entity_type_id', $customerType['entity_type_id']),
-            $connection->prepareSqlCondition('attribute_code', ['in'=>[
+            $connection->prepareSqlCondition('attribute_code', ['in' => [
                 'sforce_sync_status',
                 'sforce_account_id',
                 'sforce_id',
             ]]),
         ]);
+
+        $configsToDrop = [
+            'tnwsforce%',
+        ];
 
         $tablesToDrop = [
             'tnw_salesforce_mapper',
@@ -70,7 +74,21 @@ class Uninstall implements UninstallInterface
         $indexesToDrop = [];
         $constraintsToDrop = [];
 
+        $this->dropConfigs($setup, $configsToDrop);
         $this->dropSchema($setup, $constraintsToDrop, $indexesToDrop, $columnsToDrop, $tablesToDrop);
+    }
+
+    private function dropConfigs(SchemaSetupInterface $setup, array $configs): void
+    {
+        array_map(
+            function (string $config) use ($setup) {
+                $setup->getConnection()->delete(
+                    $setup->getTable('core_config_data'),
+                    $setup->getConnection()->quoteInto('value like ?', $config)
+                );
+            },
+            $configs
+        );
     }
 
     private function dropSchema(
