@@ -84,7 +84,7 @@ class Uninstall implements UninstallInterface
             function (string $config) use ($setup) {
                 $setup->getConnection()->delete(
                     $setup->getTable('core_config_data'),
-                    $setup->getConnection()->quoteInto('value like ?', $config)
+                    $setup->getConnection()->quoteInto('path like ?', $config)
                 );
             },
             $configs
