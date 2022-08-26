@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
@@ -108,15 +108,15 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
             $this->salesforceClient->checkConnection($wsdl, $userName, $password, $token);
         } catch (SoapFault $e) {
             switch (true) {
-                case strcasecmp($e->faultcode, 'sf:INVALID_OPERATION_WITH_EXPIRED_PASSWORD') === 0:
+                case strcasecmp((string)$e->faultcode, 'sf:INVALID_OPERATION_WITH_EXPIRED_PASSWORD') === 0:
                     $this->messageManager->addErrorMessage(__('You Salesforce password is expired. Login to Salesforce, update password. Put new Password and token in our module configuration.'));
                     break;
 
-                case strcasecmp($e->faultcode, 'sf:INVALID_LOGIN') === 0:
+                case strcasecmp((string)$e->faultcode, 'sf:INVALID_LOGIN') === 0:
                     $this->messageManager->addErrorMessage(__('Defined Salesforce login, password or token is incorrect. Please defined valid information.'));
                     break;
 
-                case strcasecmp($e->faultcode, 'WSDL') === 0:
+                case strcasecmp((string)$e->faultcode, 'WSDL') === 0:
                     $this->messageManager->addErrorMessage(__('The WSDL file is no available or corrupted. Upload new wsdl file.'));
                     break;
 

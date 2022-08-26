@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use InvalidArgumentException;
@@ -208,9 +212,9 @@ abstract class LookupAbstract extends UnitAbstract
                 }
             }
 
-            if (!in_array(strtolower($map->getSalesforceAttributeName()), $definedColumns)) {
+            if (!in_array(strtolower((string)$map->getSalesforceAttributeName()), $definedColumns)) {
                 $this->input->columns[] = $map->getSalesforceAttributeName();
-                $definedColumns[] = strtolower($map->getSalesforceAttributeName());
+                $definedColumns[] = strtolower((string)$map->getSalesforceAttributeName());
             }
         }
     }
