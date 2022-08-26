@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Synchronize\Transport\Soap\Calls;
 
@@ -63,7 +67,7 @@ class Query implements Transport\Calls\QueryInterface
 
             for (/*unused*/; $input->valid(); $input->next()) {
                 $entities[] = $input->current();
-                $testQuery = $input->query($entities);
+                $testQuery = (string)$input->query($entities);
                 if (mb_strlen($testQuery) >= self::MAX_LENGTH) {
                     break;
                 }

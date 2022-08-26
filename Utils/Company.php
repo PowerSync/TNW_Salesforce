@@ -1,5 +1,8 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Utils;
 
@@ -24,6 +27,6 @@ class Company
         $firstName = trim((string)$entity->getFirstname());
         $lastName = trim((string)$entity->getLastname());
 
-        return trim(sprintf('%s %s', $firstName, $lastName));
+        return trim((string)sprintf('%s %s', $firstName, $lastName));
     }
 }

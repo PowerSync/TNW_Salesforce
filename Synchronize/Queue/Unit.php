@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
@@ -291,7 +295,7 @@ class Unit
             $replace[] = $identifier;
         }
 
-        return str_replace($search, $replace, $this->description);
+        return str_replace($search, $replace, (string)$this->description);
     }
 
     /**
@@ -419,7 +423,7 @@ class Unit
     public function findGenerator($type)
     {
         foreach ($this->generators as $generator) {
-            if (strcasecmp($generator->createBy(), $type) !== 0) {
+            if (strcasecmp((string)$generator->createBy(), (string)$type) !== 0) {
                 continue;
             }
 

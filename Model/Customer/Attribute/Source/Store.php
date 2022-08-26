@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Model\Customer\Attribute\Source;
 
@@ -20,6 +24,7 @@ class Store extends \Magento\Customer\Model\Customer\Attribute\Source\Store
         if (!$value) {
             $value = '0';
         }
+        $value = (string)$value;
         $isMultiple = false;
         if (strpos($value, ',') !== false) {
             $isMultiple = true;

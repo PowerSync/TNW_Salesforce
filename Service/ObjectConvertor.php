@@ -1,5 +1,8 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Service;
 
@@ -159,7 +162,7 @@ class ObjectConvertor
                 $value = $value ? $this->convertToObject($value) : [];
             }
 
-            $name = trim($name);
+            $name = trim((string)$name);
             if ($destinationReflection->hasProperty($name)) {
                 $propertyDest = $destinationReflection->getProperty($name);
                 $propertyDest->setAccessible(true);
