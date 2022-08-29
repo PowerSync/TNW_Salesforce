@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup;
 
 use TNW\Salesforce\Synchronize;
@@ -121,7 +125,7 @@ class ByName extends Synchronize\Unit\LookupAbstract
         $searchIndex = [];
         foreach ($this->output as $key => $record) {
             if (!empty($record['Name'])) {
-                $searchIndex['name'][$key] = strtolower($record['Name']);
+                $searchIndex['name'][$key] = strtolower((string)$record['Name']);
             }
         }
 
@@ -142,7 +146,7 @@ class ByName extends Synchronize\Unit\LookupAbstract
     {
         $recordsIds = [];
         if (!empty($searchIndex['name'])) {
-            $recordsIds[10] = array_keys($searchIndex['name'], strtolower($this->valueCompany($entity)));
+            $recordsIds[10] = array_keys($searchIndex['name'], strtolower((string)$this->valueCompany($entity)));
         }
 
         return $recordsIds;

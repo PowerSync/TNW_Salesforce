@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use Exception;
@@ -327,7 +331,7 @@ class Load extends Synchronize\Unit\UnitAbstract
     private function loaderBy($type)
     {
         foreach ($this->loaders as $loader) {
-            if (strcasecmp($loader->loadBy(), $type) !== 0) {
+            if (strcasecmp((string)$loader->loadBy(), $type) !== 0) {
                 continue;
             }
 

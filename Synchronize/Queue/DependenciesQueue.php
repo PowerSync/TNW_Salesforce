@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Synchronize\Queue;
 
@@ -111,11 +115,11 @@ class DependenciesQueue
      */
     public function parseDependencyString($descendantStr)
     {
-        $descendantsTmp = explode('&', $descendantStr);
+        $descendantsTmp = explode('&', (string)$descendantStr);
         $descendants = [];
         foreach ($descendantsTmp as $descendantTmp) {
             try {
-                list($key, $value) = explode('=', $descendantTmp);
+                list($key, $value) = explode('=', (string)$descendantTmp);
                 $descendants[$key] = $value;
             } catch (\Exception $e) {
                 continue;
@@ -133,8 +137,7 @@ class DependenciesQueue
     public function parseDependencyStringWithReplace($descendantStr)
     {
         $descendants = $this->parseDependencyString($descendantStr);
-        $descendants = str_replace('_', '.', array_keys($descendants));
 
-        return $descendants;
+        return str_replace('_', '.', is_array($descendants) ? array_keys($descendants) : []);
     }
 }

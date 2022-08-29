@@ -1,3 +1,8 @@
+<!--
+  ~ Copyright © 2022 TechNWeb, Inc. All rights reserved.
+  ~ See TNW_LICENSE.txt for license details.
+  -->
+
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
     <topic name="tnw_salesforce.sync.realtime.amqp" is_synchronous="false" request="string"/>
     <topic name="tnw_salesforce.sync.realtime.db" is_synchronous="false" request="string"/>

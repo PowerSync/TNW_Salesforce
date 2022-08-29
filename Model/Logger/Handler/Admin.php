@@ -1,4 +1,9 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+
 namespace TNW\Salesforce\Model\Logger\Handler;
 
 use Monolog\Handler\AbstractProcessingHandler;
@@ -41,9 +46,9 @@ class Admin extends AbstractProcessingHandler
      * @param  array $record
      * @return void
      */
-    protected function write(array $record)
+    protected function write(array $record): void
     {
-        if (strcasecmp($this->request->getActionName(), 'inlineEdit') === 0) {
+        if (strcasecmp((string)$this->request->getActionName(), 'inlineEdit') === 0) {
             return;
         }
 

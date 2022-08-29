@@ -1,4 +1,9 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+
 namespace TNW\Salesforce\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -230,9 +235,9 @@ class Config extends DataObject
      */
     public function getSalesforceWsdl($websiteId = null)
     {
-        $dir = $this->getStoreConfig('tnwsforce_general/salesforce/wsdl', $websiteId);
+        $dir = (string)$this->getStoreConfig('tnwsforce_general/salesforce/wsdl', $websiteId);
 
-        if (strpos(trim($dir), '{var}') === 0) {
+        if (strpos(trim((string)$dir), '{var}') === 0) {
             $varDir = $this->filesystem->getDirectoryRead(DirectoryList::VAR_DIR);
             return $varDir->getAbsolutePath(str_replace('{var}', '', $dir));
         }
