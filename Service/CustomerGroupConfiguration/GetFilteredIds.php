@@ -71,9 +71,9 @@ class GetFilteredIds implements GetIdsFilteredByCustomerGroupConfigurationInterf
         }
 
         $data = $this->getEntitiesData($missedIds);
-        $gorupedData = $this->groupByWebsite($data);
-        foreach ($gorupedData as $websiteId => $entities) {
-            $allowedCustomerGroups = $this->getCustomerGroupIds->execute((int)$websiteId);
+        $groupedData = $this->groupByWebsite($data);
+        foreach ($groupedData as $websiteId => $entities) {
+            $allowedCustomerGroups = $this->getCustomerGroupIds->execute($websiteId == '' ? null : $websiteId);
             if ($allowedCustomerGroups === null) {
                 $this->addDataToCache($entityType, $entities);
                 continue;
