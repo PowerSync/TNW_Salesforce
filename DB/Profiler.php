@@ -26,7 +26,7 @@ use Magento\Framework\Filesystem\Directory\WriteInterface;
  *
  * Partial profile after "Start profile":
  *
- * $code = 'some_code';
+ * $code = __METHOD__ . ':' . __LINE__;
  * \TNW\Salesforce\DB\Profiler::startPartial($code);
  *  ... Code here ...
  * \TNW\Salesforce\DB\Profiler::stopPartial($code);
@@ -40,6 +40,7 @@ class Profiler extends BaseProfiler
     private const PARTIAL_MEMORY_USAGE_KEY = 'memory_usage';
     private const PARTIAL_SPECIFIC_QUERIES_KEY = 'specific_queries';
     private const PARTIAL_ENABLED_KEY = 'enabled';
+    private const PARTIAL_REAL_CODE_KEY = 'real_code';
 
     /** @var bool */
     protected $_enabled = true;
@@ -115,20 +116,21 @@ class Profiler extends BaseProfiler
     }
 
     /**
-     * @param string $code
+     * @param string $realCode
      *
      * @return void
      */
-    public static function startPartial(string $code): void
+    public static function startPartial(string $realCode): void
     {
         if (!self::$enabled) {
             return;
         }
-        $code = str_replace("\\", '_', $code);
+        $code = str_replace("\\", '_', $realCode);
 
         self::$partialProfileInfo[$code][self::PARTIAL_START_TIME_KEY] = hrtime(true);
         self::$partialProfileInfo[$code][self::PARTIAL_MEMORY_USAGE_START_KEY] = memory_get_usage(true);
         self::$partialProfileInfo[$code][self::PARTIAL_ENABLED_KEY] = true;
+        self::$partialProfileInfo[$code][self::PARTIAL_REAL_CODE_KEY] = $realCode;
     }
 
     /**
@@ -325,11 +327,11 @@ class Profiler extends BaseProfiler
         $tableData .= '<td>' . $this->getTotalNumQueries() . '</td>';
         $tableData .= '<td>1</td>';
         $tableData .= '</tr>';
-        foreach (self::$partialProfileInfo as $code => $info) {
+        foreach (self::$partialProfileInfo as $info) {
             $queries = $info['queries'] ?? [];
             $tableData .= '<tr>';
             $memoryUsage = (int)($info[self::PARTIAL_MEMORY_USAGE_KEY] ?? 0);
-            $tableData .= '<td>' . $code . '</td>';
+            $tableData .= '<td>' . (string)($info[self::PARTIAL_REAL_CODE_KEY] ?? '') . '</td>';
             $tableData .= '<td>' . (string)((($memoryUsage) / 1024) / 1024) . 'Mb' . '</td>';
             $timeUsage = (int)($info[self::PARTIAL_TIME_KEY] ?? 0);
             $tableData .= '<td>' . (string)(($timeUsage) / 1e9) . ' s.' . '</td>';
