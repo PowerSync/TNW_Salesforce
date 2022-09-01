@@ -7,6 +7,8 @@
 namespace TNW\Salesforce\Model\Queue\Synchronize\Message;
 
 use Exception;
+use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteEmulator;
 use TNW\Salesforce\Service\CleanLocalCacheForInstances;
@@ -32,6 +34,9 @@ class ProcessQueueMessage
     /** @var CleanLocalCacheForInstances */
     private $cleanLocalCacheForInstances;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
      * ProcessQueueMessage constructor.
      *
@@ -39,36 +44,45 @@ class ProcessQueueMessage
      * @param Config                      $salesforceConfig
      * @param WebsiteEmulator             $websiteEmulator
      * @param CleanLocalCacheForInstances $cleanLocalCacheForInstances
+     * @param LoggerInterface             $logger
      */
     public function __construct(
         Synchronize                 $synchronizeEntity,
         Config                      $salesforceConfig,
         WebsiteEmulator             $websiteEmulator,
-        CleanLocalCacheForInstances $cleanLocalCacheForInstances
+        CleanLocalCacheForInstances $cleanLocalCacheForInstances,
+        LoggerInterface             $logger
     ) {
         $this->synchronizeEntity = $synchronizeEntity;
         $this->salesforceConfig = $salesforceConfig;
         $this->websiteEmulator = $websiteEmulator;
         $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
+        $this->logger = $logger;
     }
 
     /**
      * process
+     *
      * @param $websiteId
+     *
      * @return void
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function process($websiteId)
     {
-        if (!$this->salesforceConfig->getSalesforceStatus()) {
-            return;
+        try {
+            if (!$this->salesforceConfig->getSalesforceStatus()) {
+                return;
+            }
+            $this->websiteEmulator->wrapEmulationWebsite(
+                [$this->synchronizeEntity, 'synchronizeToWebsite'],
+                $websiteId
+            );
+        } catch (Exception $e) {
+            $this->logger->critical($e->getMessage());
+            throw $e;
+        } finally {
+            $this->cleanLocalCacheForInstances->execute();
         }
-
-        $this->cleanLocalCacheForInstances->execute();
-
-        $this->websiteEmulator->wrapEmulationWebsite(
-            [$this->synchronizeEntity, 'synchronizeToWebsite'],
-            $websiteId
-        );
     }
 }

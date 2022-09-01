@@ -9,9 +9,12 @@ namespace TNW\Salesforce\Synchronize\Queue;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Api\Service\PreloaderEntityIdsInterface;
 use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Model\QueueFactory;
 use TNW\Salesforce\Model\ResourceModel\Objects;
 
 /**
@@ -99,22 +102,27 @@ class Unit
      */
     private $serializer;
 
+    /** @var PreloaderEntityIdsInterface[] */
+    private $preLoaders;
+
     /**
      * Queue constructor.
-     * @param string $code
-     * @param string $description
-     * @param string $entityType
-     * @param string $objectType
-     * @param array $generators
-     * @param \TNW\Salesforce\Model\QueueFactory $queueFactory
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param Objects $resourceObjects
-     * @param StoreManagerInterface $storeManager
-     * @param RequestInterface $request
-     * @param array $skipRules
-     * @param array $parents
-     * @param array $children
-     * @param $ignoreFindGeneratorException
+     *
+     * @param string                   $code
+     * @param string                   $description
+     * @param string                   $entityType
+     * @param string                   $objectType
+     * @param array                    $generators
+     * @param QueueFactory             $queueFactory
+     * @param ObjectManagerInterface   $objectManager
+     * @param Objects                  $resourceObjects
+     * @param StoreManagerInterface    $storeManager
+     * @param RequestInterface         $request
+     * @param array                    $skipRules
+     * @param array                    $parents
+     * @param array                    $children
+     * @param array                    $preLoaders
+     * @param bool                     $ignoreFindGeneratorException
      * @param SerializerInterface|null $serializer
      */
     public function __construct(
@@ -131,7 +139,8 @@ class Unit
         array $skipRules = [],
         array $parents = [],
         array $children = [],
-        $ignoreFindGeneratorException = false,
+        array $preLoaders = [],
+        bool $ignoreFindGeneratorException = false,
         SerializerInterface $serializer= null
     ) {
         $this->code = $code;
@@ -149,6 +158,7 @@ class Unit
         $this->children = $children;
         $this->ignoreFindGeneratorException = $ignoreFindGeneratorException;
         $this->serializer = $serializer ?? $objectManager->get(SerializerInterface::class);
+        $this->preLoaders = $preLoaders;
     }
 
     /**
@@ -209,13 +219,15 @@ class Unit
      */
     public function skipQueue($queue)
     {
+        $result = false;
         foreach ($this->skipRules as $rule) {
             if ($rule->apply($queue) !== false) {
-                return true;
+                $result = true;
+                break;
             }
         }
 
-        return false;
+        return $result;
     }
 
     /**
@@ -275,7 +287,7 @@ class Unit
                     ->unsetPendingStatus($entityId, $this->entityType, $websiteId, $this->objectType);
             }
 
-            return [];
+            $queue = [];
         }
 
         return $queue;
@@ -312,6 +324,12 @@ class Unit
     {
         $generator = $this->findGenerator($loadBy);
         if ($generator instanceof CreateInterface) {
+            $preLoaders = $this->preLoaders[$loadBy] ?? [];
+            $preLoaders && array_map(static function($preLoader) use ($entityIds) {
+                if($preLoader instanceof PreloaderEntityIdsInterface) {
+                    $preLoader->execute($entityIds);
+                }
+            } , $preLoaders);
             $queues = $generator->process($entityIds, $additional, [$this, 'createQueue'], $websiteId);
 
             $queues = array_filter($queues);
