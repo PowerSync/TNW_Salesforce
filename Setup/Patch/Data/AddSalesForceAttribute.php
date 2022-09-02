@@ -10,9 +10,9 @@ use Magento\Customer\Model\Customer;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Framework\Setup\Patch\PatchVersionInterface;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 
-class AddSalesForceAttribute implements DataPatchInterface, PatchVersionInterface
+class AddSalesForceAttribute implements DataPatchInterface, PatchRevertableInterface
 {
     /**
      * ModuleDataSetupInterface
@@ -152,7 +152,7 @@ class AddSalesForceAttribute implements DataPatchInterface, PatchVersionInterfac
             );
             $magento_attr['attribute_id'] = $attribute['attribute_id'];
             $magento_attr['magento_entity_type'] = 'customer';
-            $this->_moduleDataSetup->getConnection()->insert(
+            $this->_moduleDataSetup->getConnection()->insertOnDuplicate(
                 $this->_moduleDataSetup->getTable('tnw_salesforce_mapper'),
                 $magento_attr
             );
@@ -199,7 +199,7 @@ class AddSalesForceAttribute implements DataPatchInterface, PatchVersionInterfac
             );
             $magento_attr['magento_entity_type'] = 'customer_address/shipping';
             $magento_attr['attribute_id'] = $attribute['attribute_id'];
-            $this->_moduleDataSetup->getConnection()->insert(
+            $this->_moduleDataSetup->getConnection()->insertOnDuplicate(
                 $this->_moduleDataSetup->getTable('tnw_salesforce_mapper'),
                 $magento_attr
             );
@@ -255,19 +255,15 @@ class AddSalesForceAttribute implements DataPatchInterface, PatchVersionInterfac
             );
             $magento_attr['attribute_id'] = $attribute['attribute_id'];
             $magento_attr['magento_entity_type'] = 'customer_address/billing';
-            $this->_moduleDataSetup->getConnection()->insert(
+            $this->_moduleDataSetup->getConnection()->insertOnDuplicate(
                 $this->_moduleDataSetup->getTable('tnw_salesforce_mapper'),
                 $magento_attr
             );
         }
     }
 
-    /**
-     *
-     * @return string
-     */
-    public static function getVersion()
+    public function revert()
     {
-        return '0.0.1';
+        // TODO: Implement revert() method.
     }
 }
