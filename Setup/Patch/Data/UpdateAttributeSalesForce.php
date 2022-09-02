@@ -14,14 +14,14 @@ use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Framework\Setup\Patch\PatchVersionInterface;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 use TNW\Salesforce\Model\Customer\Attribute\Source\SyncStatus;
 use TNW\Salesforce\Model\Customer\Map;
 use TNW\Salesforce\Setup\SalesforceSetup;
 use TNW\Salesforce\Setup\SalesforceSetupFactory;
 use Zend_Db_Expr;
 
-class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInterface
+class UpdateAttributeSalesForce implements DataPatchInterface, PatchRevertableInterface
 {
     /**
      * ModuleDataSetupInterface
@@ -603,7 +603,7 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
      */
     protected function versionTwoThreeEleven()
     {
-        $this->_moduleDataSetup->getConnection()->insert(
+        $this->_moduleDataSetup->getConnection()->insertOnDuplicate(
             $this->_moduleDataSetup->getTable('core_config_data'),
             [
                 'scope' => 'default',
@@ -840,12 +840,8 @@ class UpdateAttributeSalesForce implements DataPatchInterface, PatchVersionInter
         }
     }
 
-    /**
-     *
-     * @return string
-     */
-    public static function getVersion()
+    public function revert()
     {
-        return '0.0.1';
+        // TODO: Implement revert() method.
     }
 }
