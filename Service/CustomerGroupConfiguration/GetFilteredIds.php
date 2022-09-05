@@ -1,5 +1,8 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Service\CustomerGroupConfiguration;
 
@@ -68,9 +71,9 @@ class GetFilteredIds implements GetIdsFilteredByCustomerGroupConfigurationInterf
         }
 
         $data = $this->getEntitiesData($missedIds);
-        $gorupedData = $this->groupByWebsite($data);
-        foreach ($gorupedData as $websiteId => $entities) {
-            $allowedCustomerGroups = $this->getCustomerGroupIds->execute($websiteId);
+        $groupedData = $this->groupByWebsite($data);
+        foreach ($groupedData as $websiteId => $entities) {
+            $allowedCustomerGroups = $this->getCustomerGroupIds->execute($websiteId == '' ? null : $websiteId);
             if ($allowedCustomerGroups === null) {
                 $this->addDataToCache($entityType, $entities);
                 continue;

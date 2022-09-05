@@ -1,4 +1,9 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+
 namespace TNW\Salesforce\Model;
 
 /**
@@ -142,14 +147,14 @@ class Logger
 
         //FIX: Too few argument
         if (substr_count($arguments[0], '%') > (count($arguments) - 1)) {
-            $arguments[0] = str_replace('%', '%%', $arguments[0]);
+            $arguments[0] = str_replace('%', '%%', (string)($arguments[0] ?? ''));
         }
 
         /** @var string $message */
         $message = sprintf(...$arguments);
 
         /** switch level */
-        switch (strtolower(substr($name, 7))) {
+        switch (strtolower((string)substr($name, 7))) {
             case 'error':
                 $this->systemLogger->error($message);
                 break;

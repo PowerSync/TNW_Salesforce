@@ -1,13 +1,18 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Setup\Patch\Schema;
 
 use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\Patch\SchemaPatchInterface;
 use Zend_Db_Statement_Interface;
 
-class QueueAddIndex implements SchemaPatchInterface
+class QueueAddIndex implements SchemaPatchInterface, PatchRevertableInterface
 {
     /**
      * @var SchemaSetupInterface
@@ -74,5 +79,10 @@ class QueueAddIndex implements SchemaPatchInterface
     public function getAliases()
     {
         return [];
+    }
+
+    public function revert()
+    {
+        // Please check \Magento\Framework\Setup\Patch\PatchRevertableInterface comments before adding any code here.
     }
 }

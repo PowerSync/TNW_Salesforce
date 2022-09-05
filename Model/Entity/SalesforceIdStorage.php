@@ -1,4 +1,9 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+
 namespace TNW\Salesforce\Model\Entity;
 
 use Exception;
@@ -226,6 +231,7 @@ class SalesforceIdStorage
      */
     public function valueByAttribute($entity, $attributeName)
     {
+        $attributeName = (string)$attributeName;
         $method = 'get' . str_replace(' ', '', ucwords(str_replace('_', ' ', $attributeName)));
         if (method_exists($entity, $method)) {
             return $entity->{$method}();

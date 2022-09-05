@@ -1,4 +1,9 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
+
 namespace TNW\Salesforce\Model\Config\Backend;
 
 use Exception;
@@ -145,9 +150,9 @@ class Wsdl extends Value
                 $loadedxmlfile = $result['path'] . '/' . $result['file'];
 
                 /** Disable external entity loading to prevent possible vulnerability */
-                $previousLoaderState = libxml_disable_entity_loader(true);
+                $previousLoaderState = @libxml_disable_entity_loader(true);
 
-                libxml_disable_entity_loader($previousLoaderState);
+                @libxml_disable_entity_loader($previousLoaderState);
 
                 $parsedXMLData = $this->xmlParser->load($loadedxmlfile)->xmlToArray();
 
@@ -208,7 +213,7 @@ class Wsdl extends Value
     public function getAPIVersion($serviceNode)
     {
         // https://login.salesforce.com/services/Soap/c/46.0/0DF1p000000HDYU
-        $location = $this->arrayFindValueByKey($serviceNode, 'location');
+        $location = (string)$this->arrayFindValueByKey($serviceNode, 'location');
         $locationArray = explode('/', $location);
 
         $apiversion = $locationArray[6];

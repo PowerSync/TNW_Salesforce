@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account;
 
 use Magento\Customer\Model\Address;
@@ -104,6 +108,7 @@ class Mapping extends Synchronize\Unit\Mapping
      */
     public function prepareValue($entity, $attributeCode)
     {
+        $attributeCode = (string)$attributeCode;
         if ($entity instanceof Customer && strcasecmp($attributeCode, 'sforce_id') === 0) {
             return $this->units()->get('lookup')->get('%s/record/Id', $entity);
         }

@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * Copyright © 2022 TechNWeb, Inc. All rights reserved.
+ * See TNW_LICENSE.txt for license details.
+ */
 
 namespace TNW\Salesforce\Setup;
 
@@ -34,12 +38,6 @@ class Uninstall implements UninstallInterface
 
         $customerType = $connection->fetchRow($entityTypeSelect);
 
-        $setup->getConnection()
-            ->dropColumn($setup->getTable('store_website'), 'salesforce_id');
-
-        $setup->getConnection()
-            ->dropTable($setup->getTable('tnw_salesforce_mapper'));
-
         $connection->delete($setup->getTable('eav_attribute_group'), [
             $connection->prepareSqlCondition('attribute_group_name', 'Salesforce'),
             $connection->prepareSqlCondition('attribute_set_id', $customerType['default_attribute_set_id']),
@@ -47,14 +45,142 @@ class Uninstall implements UninstallInterface
 
         $connection->delete($setup->getTable('eav_attribute'), [
             $connection->prepareSqlCondition('entity_type_id', $customerType['entity_type_id']),
-            $connection->prepareSqlCondition('attribute_code', ['in'=>[
+            $connection->prepareSqlCondition('attribute_code', ['in' => [
                 'sforce_sync_status',
                 'sforce_account_id',
                 'sforce_id',
             ]]),
         ]);
 
-        $connection->dropTable($setup->getTable('tnw_salesforce_log'));
-        $connection->dropTable($setup->getTable('tnw_salesforce_objects'));
+        $configsToDrop = [
+            'tnwsforce%',
+        ];
+
+        $tablesToDrop = [
+            'tnw_salesforce_mapper',
+            'tnw_salesforce_log',
+            'salesforce_objects',
+            'tnw_salesforce_objects',
+            'tnw_salesforce_entity_queue_relation',
+            'tnw_salesforce_entity_queue',
+            'tnw_salesforce_entity_prequeue',
+        ];
+        $columnsToDrop = [
+            'store_website' => [
+                'salesforce_id',
+            ],
+            'customer_grid_flat' => [
+                'sforce_sync_status',
+                'sforce_id',
+                'sforce_account_id',
+            ],
+        ];
+        $indexesToDrop = [];
+        $constraintsToDrop = [];
+
+        $this->dropConfigs($setup, $configsToDrop);
+        $this->dropSchema($setup, $constraintsToDrop, $indexesToDrop, $columnsToDrop, $tablesToDrop);
+    }
+
+    private function dropConfigs(SchemaSetupInterface $setup, array $configs): void
+    {
+        array_map(
+            function (string $config) use ($setup) {
+                $setup->getConnection()->delete(
+                    $setup->getTable('core_config_data'),
+                    $setup->getConnection()->quoteInto('path like ?', $config)
+                );
+            },
+            $configs
+        );
+    }
+
+    private function dropSchema(
+        SchemaSetupInterface $setup,
+        array                $constraintsToDrop,
+        array                $indexesToDrop,
+        array                $columnsToDrop,
+        array                $tablesToDrop
+    ): void {
+        $this->dropForeignKey($setup, $constraintsToDrop);
+        $this->dropIndexes($setup, $indexesToDrop);
+        $this->dropColumns($setup, $columnsToDrop);
+        $this->dropTables($setup, $tablesToDrop);
+    }
+
+    private function dropForeignKey(SchemaSetupInterface $setup, array $constraintsData): void
+    {
+        $filteredData = array_filter(
+            $constraintsData,
+            function (string $table) use ($setup) {
+                return $setup->getConnection()->isTableExists($setup->getTable($table));
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        array_walk(
+            $filteredData,
+            function (array $constraints, string $table) use ($setup) {
+                array_map(
+                    function (string $constraint) use ($setup, $table) {
+                        $setup->getConnection()->dropForeignKey($setup->getTable($table), $constraint);
+                    },
+                    $constraints
+                );
+            }
+        );
+    }
+
+    private function dropIndexes(SchemaSetupInterface $setup, array $indexesData): void
+    {
+        $filteredData = array_filter(
+            $indexesData,
+            function (string $table) use ($setup) {
+                return $setup->getConnection()->isTableExists($setup->getTable($table));
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        array_walk(
+            $filteredData,
+            function (array $indexes, string $table) use ($setup) {
+                array_map(
+                    function (string $index) use ($setup, $table) {
+                        $setup->getConnection()->dropIndex($setup->getTable($table), $index);
+                    },
+                    $indexes
+                );
+            }
+        );
+    }
+
+    private function dropColumns(SchemaSetupInterface $setup, array $columnsData): void
+    {
+        $filteredData = array_filter(
+            $columnsData,
+            function (string $table) use ($setup) {
+                return $setup->getConnection()->isTableExists($setup->getTable($table));
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        array_walk(
+            $filteredData,
+            function (array $columns, string $table) use ($setup) {
+                array_map(
+                    function (string $column) use ($setup, $table) {
+                        $setup->getConnection()->dropColumn($setup->getTable($table), $column);
+                    },
+                    $columns
+                );
+            }
+        );
+    }
+
+    private function dropTables(SchemaSetupInterface $setup, array $tables): void
+    {
+        array_map(
+            function (string $table) use ($setup) {
+                $setup->getConnection()->dropTable($setup->getTable($table));
+            },
+            $tables
+        );
     }
 }

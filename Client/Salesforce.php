@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
@@ -343,6 +343,7 @@ class Salesforce extends DataObject
             return;
         }
         foreach (get_object_vars($object) as $field => $value) {
+            $value = (string)$value;
             $describeField = $describe->getField($field);
             if (!$describeField instanceof Field) {
                 $this->logger->messageDebug('Field "%s::%s" not found in SF! Skipped field.', $type, $field);
@@ -372,7 +373,7 @@ class Salesforce extends DataObject
      */
     public function describeSObject($objectName)
     {
-        $cacheKey = sprintf(self::SFORCE_DESCRIBE_CACHE_IDENTIFIER, strtolower($objectName));
+        $cacheKey = sprintf(self::SFORCE_DESCRIBE_CACHE_IDENTIFIER, strtolower((string)$objectName));
 
         /** @var string|null $url */
         $describeData = $this->loadCache($cacheKey);
