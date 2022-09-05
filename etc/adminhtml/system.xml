@@ -87,6 +87,10 @@
                         <field id="tnwsforce_general/synchronization/developer_mode">1</field>
                     </depends>
                 </field>
+                <field id="restart_consumers" translate="label" type="button" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Restart Consumers</label>
+                    <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\ButtonField</frontend_model>
+                </field>
             </group>
 
             <group id="debug" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
