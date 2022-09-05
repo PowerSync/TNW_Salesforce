@@ -9,9 +9,10 @@ namespace TNW\Salesforce\Setup\Patch\Data;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 use TNW\Salesforce\Setup\SalesforceSetupFactory;
 
-class UpdateAccountMapping implements DataPatchInterface
+class UpdateAccountMapping implements DataPatchInterface, PatchRevertableInterface
 {
     /**
      * ModuleDataSetupInterface
@@ -103,5 +104,10 @@ class UpdateAccountMapping implements DataPatchInterface
         );
 
         $setup->endSetup();
+    }
+
+    public function revert()
+    {
+        // TODO: Implement revert() method.
     }
 }
