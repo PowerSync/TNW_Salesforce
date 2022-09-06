@@ -16,6 +16,7 @@ use TNW\Salesforce\Api\Service\PreloaderEntityIdsInterface;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\QueueFactory;
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Synchronize\Queue\Unit\CreateQueue\UnsetPendingStatusPool;
 
 /**
  * Sync Unit
@@ -105,6 +106,9 @@ class Unit
     /** @var PreloaderEntityIdsInterface[] */
     private $preLoaders;
 
+    /** @var UnsetPendingStatusPool */
+    private $pendingStatusPool;
+
     /**
      * Queue constructor.
      *
@@ -136,6 +140,7 @@ class Unit
         Objects $resourceObjects,
         StoreManagerInterface $storeManager,
         RequestInterface $request,
+        UnsetPendingStatusPool $pendingStatusPool,
         array $skipRules = [],
         array $parents = [],
         array $children = [],
@@ -159,6 +164,7 @@ class Unit
         $this->ignoreFindGeneratorException = $ignoreFindGeneratorException;
         $this->serializer = $serializer ?? $objectManager->get(SerializerInterface::class);
         $this->preLoaders = $preLoaders;
+        $this->pendingStatusPool = $pendingStatusPool;
     }
 
     /**
@@ -282,10 +288,12 @@ class Unit
             $storeId = (int) $this->request->getParam('store', 0);
             $store = $this->storeManager->getStore($storeId);
             $websiteId = $store->getWebsiteId();
-            if (count($this->resourceObjects->loadObjectIds($entityId, $this->entityType, $websiteId))) {
-                $this->resourceObjects
-                    ->unsetPendingStatus($entityId, $this->entityType, $websiteId, $this->objectType);
-            }
+            $this->pendingStatusPool->addItem(
+                (string)$this->objectType,
+                (string)$this->entityType,
+                (int)$websiteId,
+                (int)$entityId
+            );
 
             $queue = [];
         }

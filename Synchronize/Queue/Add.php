@@ -21,6 +21,7 @@ use TNW\Salesforce\Model\Config\WebsiteEmulator;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\PreQueue;
 use TNW\Salesforce\Service\Synchronize\Queue\Add\AddDependenciesForProcessingRows;
+use TNW\Salesforce\Service\Synchronize\Queue\Add\UnsetPendingStatusFromPool;
 use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool;
 
 /**
@@ -90,6 +91,9 @@ class Add
     /** @var AddDependenciesForProcessingRows */
     private $addDependenciesForProcessingRows;
 
+    /** @var UnsetPendingStatusFromPool */
+    private $unsetPendingStatusFromPool;
+
     /**
      * Add constructor.
      *
@@ -120,7 +124,8 @@ class Add
         State $state,
         Config $salesforceConfig,
         PublisherAdapter $publisher,
-        AddDependenciesForProcessingRows $addDependenciesForProcessingRows
+        AddDependenciesForProcessingRows $addDependenciesForProcessingRows,
+        UnsetPendingStatusFromPool $unsetPendingStatusFromPool
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -135,6 +140,7 @@ class Add
         $this->salesforceConfig = $salesforceConfig;
         $this->publisher = $publisher;
         $this->addDependenciesForProcessingRows = $addDependenciesForProcessingRows;
+        $this->unsetPendingStatusFromPool = $unsetPendingStatusFromPool;
     }
 
     /**
@@ -440,6 +446,8 @@ class Add
             $websiteId,
             $dependencies
         );
+
+        $this->unsetPendingStatusFromPool->execute();
 
         $queueDataToSave = $this->getInsertArray($queues, $syncType, $websiteId);
 
