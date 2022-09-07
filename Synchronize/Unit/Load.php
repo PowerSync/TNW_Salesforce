@@ -378,14 +378,18 @@ class Load extends Synchronize\Unit\UnitAbstract
     private function preloadObjectIds(): void
     {
         $groupedByWebsiteIds = [];
+        $magentoTypeFromEntityObject = $this->entityObject ? $this->entityObject->getMagentoType() : null;
         foreach ($this->queues as $queue) {
             $websiteId = $queue->getWebsiteId();
             $magentoType = $queue->getEntityLoad();
             $entityId = (int)$queue->getEntityId();
             $groupedByWebsiteIds[$websiteId][$magentoType][$entityId] = $entityId;
+            if ($magentoTypeFromEntityObject && (string)$magentoTypeFromEntityObject !== (string)$magentoType) {
+                $groupedByWebsiteIds[$websiteId][$magentoTypeFromEntityObject][$entityId] = $entityId;
+            }
         }
 
-        if($groupedByWebsiteIds) {
+        if ($groupedByWebsiteIds) {
             foreach ($groupedByWebsiteIds as $websiteId => $groupedByMagentoTypes) {
                 foreach ($groupedByMagentoTypes as $magentoType => $entityIds) {
                     $entityIds = array_values($entityIds);
