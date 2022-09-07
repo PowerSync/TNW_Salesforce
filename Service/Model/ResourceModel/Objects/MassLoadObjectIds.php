@@ -64,15 +64,16 @@ class MassLoadObjectIds implements CleanableInstanceInterface
             $entityIds = array_map('intval', $entityIds);
             $entityIds = array_unique($entityIds);
             $missedEntityIds = [];
+            $baseWebsiteId = $this->config->baseWebsiteIdLogin($websiteId);
             foreach ($entityIds as $entityId) {
-                if (!isset($this->cache[$websiteId][$magentoType][$entityId])) {
+                if (!isset($this->cache[$baseWebsiteId][$magentoType][$entityId])) {
                     $missedEntityIds[] = $entityId;
+                    $this->cache[$baseWebsiteId][$magentoType][$entityId] = [];
                 }
             }
             $connection = $this->objectsResource->getConnection();
             $select = $connection->select();
             $mainTable = $this->objectsResource->getMainTable();
-            $baseWebsite = $this->config->baseWebsiteIdLogin($websiteId);
             $select->from($mainTable, ['entity_id', 'object_id', 'salesforce_type']);
             $select->where('magento_type = :magento_type');
             $select->where('website_id IN (:base_website_id, :entity_website_id)');
@@ -86,27 +87,23 @@ class MassLoadObjectIds implements CleanableInstanceInterface
                     [
                         'magento_type' => $magentoType,
                         'entity_website_id' => $websiteId,
-                        'base_website_id' => $baseWebsite
+                        'base_website_id' => $baseWebsiteId
                     ]
                 );
                 foreach ($items as $data) {
                     $entityId = $data['entity_id'];
                     $objectId = $data['object_id'];
                     $salesforceType = $data['salesforce_type'];
-                    if (!isset($this->cache[$websiteId][$magentoType][$entityId][$salesforceType])) {
-                        $this->cache[$websiteId][$magentoType][$entityId][$salesforceType] = $objectId;
+                    if (!isset($this->cache[$baseWebsiteId][$magentoType][$entityId][$salesforceType])) {
+                        $this->cache[$baseWebsiteId][$magentoType][$entityId][$salesforceType] = $objectId;
                     } else {
-                        $this->cache[$websiteId][$magentoType][$entityId][$salesforceType] .= "\n" . $objectId;
+                        $this->cache[$baseWebsiteId][$magentoType][$entityId][$salesforceType] .= "\n" . $objectId;
                     }
                 }
             }
             $result = [];
             foreach ($entityIds as $entityId) {
-                if (isset($this->cache[$websiteId][$magentoType][$entityId])) {
-                    $result[$entityId] = $this->cache[$websiteId][$magentoType][$entityId];
-                } else {
-                    $result[$entityId] = [];
-                }
+                $result[$entityId] = $this->cache[$baseWebsiteId][$magentoType][$entityId] ?? [];
             }
         } catch (Throwable $e) {
             $this->logger->critical($e->getMessage());
