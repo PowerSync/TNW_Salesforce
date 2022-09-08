@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize;
 
+use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use TNW\Salesforce\Model;
@@ -62,14 +63,14 @@ class Queue
     /**
      * Queue constructor.
      *
-     * @param Group[] $groups
-     * @param array $phases
-     * @param Model\Config $salesforceConfig
-     * @param Model\ResourceModel\Queue $resourceQueue
+     * @param Group[]                             $groups
+     * @param array                               $phases
+     * @param Model\Config                        $salesforceConfig
+     * @param Model\ResourceModel\Queue           $resourceQueue
      * @param Model\Logger\Processor\UidProcessor $uidProcessor
-     * @param PushMqMessage $pushMqMessage
-     * @param DateTime $dateTime
-     * @param bool $isCheck
+     * @param PushMqMessage                       $pushMqMessage
+     * @param DateTime                            $dateTime
+     * @param bool                                $isCheck
      */
     public function __construct(
         array                               $groups,
@@ -93,6 +94,7 @@ class Queue
 
     /**
      * @param $groupCollection Collection
+     *
      * @return mixed
      */
     public function getSyncType($groupCollection)
@@ -106,6 +108,7 @@ class Queue
         }
 
         $item = $tmpCollection->getFirstItem();
+
         return $item->getSyncType();
     }
 
@@ -114,7 +117,7 @@ class Queue
      *
      * @param Collection $collection
      * @param            $websiteId
-     * @param array $syncJobs
+     * @param array      $syncJobs
      *
      * @throws LocalizedException|\Exception
      */
@@ -140,14 +143,26 @@ class Queue
 
         ksort($this->phases);
 
+        $codesAndStatuses = $this->fillCodesAndStatuses($collection);
+
         foreach ($this->sortGroup($syncJobs) as $groupKey => $group) {
+            $groupCode = $group->code();
+            $allowedStatuses = $codesAndStatuses[$groupCode] ?? [];
+            if (!$allowedStatuses) {
+                continue;
+            }
             // refresh uid
             $this->uidProcessor->refresh();
 
             foreach ($this->phases as $phase) {
+                $startStatus = $phase['startStatus'] ?? '';
+                if (!in_array($startStatus, $allowedStatuses, true)) {
+                    continue;
+                }
+
                 $lockCollection = clone $collection;
-                $lockCollection->addFilterToCode($group->code());
-                $lockCollection->addFilterToStatus($phase['startStatus']);
+                $lockCollection->addFilterToCode($groupCode);
+                $lockCollection->addFilterToStatus($startStatus);
                 $lockCollection->addFilterToNotTransactionUid($this->uidProcessor->uid());
                 $lockData = [
                     'status' => $phase['processStatus'],
@@ -155,12 +170,12 @@ class Queue
                     'identify' => new Zend_Db_Expr('queue_id')
                 ];
 
-                if ($phase['startStatus'] === Model\Queue::STATUS_NEW) {
+                if ($startStatus === Model\Queue::STATUS_NEW) {
                     $lockData['sync_at'] = $this->dateTime->gmtDate('c');
                 }
 
                 // Mark work
-                $countUpdate = $lockCollection->updateLock($lockData, $group->code(), (int)$websiteId);
+                $countUpdate = $lockCollection->updateLock($lockData, $groupCode, (int)$websiteId);
 
                 if (0 === $countUpdate) {
                     continue;
@@ -178,15 +193,15 @@ class Queue
 
                     $group->messageDebug(
                         'Start job "%s", phase "%s" for website %s',
-                        $group->code(),
+                        $groupCode,
                         $phase['phaseName'],
                         $websiteId
                     );
 
                     try {
-                            $groupCollection->each('incSyncAttempt');
-                            $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
-                            $group->synchronize($groupCollection->getItems());
+                        $groupCollection->each('incSyncAttempt');
+                        $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
+                        $group->synchronize($groupCollection->getItems());
 
                     } catch (\Exception $e) {
 
@@ -211,7 +226,7 @@ class Queue
 
                     $group->messageDebug(
                         'Stop job "%s", phase "%s" for website %s',
-                        $group->code(),
+                        $groupCode,
                         $phase['phaseName'],
                         $websiteId
                     );
@@ -303,5 +318,46 @@ class Queue
     public function isCheck()
     {
         return $this->isCheck;
+    }
+
+    /**
+     * @param Collection $collection
+     *
+     * @return array
+     */
+    public function fillCodesAndStatuses(Collection $collection): array
+    {
+        $statusesCollection = clone $collection;
+
+        $select = $statusesCollection->getSelect();
+        $select->reset(Select::COLUMNS);
+        $select->group('main_table.code');
+        $select->group('main_table.status');
+        $select->columns(
+            [
+                'code' => 'main_table.code',
+                'status' => 'main_table.status',
+            ]
+        );
+        $allowedStatuses = [];
+        foreach ($this->phases as $phase) {
+            $startStatus = $phase['startStatus'] ?? '';
+            if ($startStatus) {
+                $allowedStatuses[] = $startStatus;
+            }
+        }
+        $select->where('main_table.status IN (?)',$allowedStatuses);
+
+        $connection = $collection->getResource()->getConnection();
+
+        $items = $connection->fetchAll($select);
+        $result = [];
+        foreach ($items as $item) {
+            $code = $item['code'] ?? '';
+            $status = (string)($item['status'] ?? '');
+            $result[$code][] = $status;
+        }
+
+        return $result;
     }
 }
