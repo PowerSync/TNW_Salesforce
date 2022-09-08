@@ -7,14 +7,34 @@
 namespace  TNW\Salesforce\Model\ResourceModel;
 
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use Magento\Framework\Model\ResourceModel\Db\Context;
 use TNW\Salesforce\Model\Mapper as ModelMapper;
+use TNW\Salesforce\Service\MessageQueue\RestartConsumers;
 
 /**
  * Class Mapper
  */
 class Mapper extends AbstractDb
 {
+    /** @var RestartConsumers */
+    private $restartConsumers;
+
+    /**
+     * @param Context          $context
+     * @param RestartConsumers $restartConsumers
+     * @param null             $connectionName
+     */
+    public function __construct(
+        Context $context,
+        RestartConsumers $restartConsumers,
+        $connectionName = null
+    ) {
+        parent::__construct($context, $connectionName);
+        $this->restartConsumers = $restartConsumers;
+    }
+
     /**
      * Construct
      */
@@ -41,8 +61,7 @@ class Mapper extends AbstractDb
         string      $magentoEntityType,
         string      $magentoAttributeName,
         string      $salesForceAttributeName
-    ): void
-    {
+    ): void {
         $connection = $this->getConnection();
         $select = $connection->select()->from($this->getMainTable(), ['map_id']);
         $select->where('object_type = ?', $objectType);
@@ -73,6 +92,18 @@ class Mapper extends AbstractDb
                 __('Salesforce Attribute')
             )
         ]];
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function _afterSave(AbstractModel $object)
+    {
+        parent::_afterSave($object);
+
+        $this->restartConsumers->execute();
 
         return $this;
     }
