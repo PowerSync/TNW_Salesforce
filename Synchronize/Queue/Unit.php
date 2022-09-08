@@ -9,11 +9,15 @@ namespace TNW\Salesforce\Synchronize\Queue;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Api\Service\PreloaderEntityIdsInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Model\QueueFactory;
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Synchronize\Queue\Unit\CreateQueue\UnsetPendingStatusPool;
 
 /**
  * Sync Unit
@@ -98,22 +102,30 @@ class Unit implements CleanableInstanceInterface
      */
     private $serializer;
 
+    /** @var PreloaderEntityIdsInterface[] */
+    private $preLoaders;
+
+    /** @var UnsetPendingStatusPool */
+    private $pendingStatusPool;
+
     /**
      * Queue constructor.
-     * @param string $code
-     * @param string $description
-     * @param string $entityType
-     * @param string $objectType
-     * @param array $generators
-     * @param \TNW\Salesforce\Model\QueueFactory $queueFactory
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param Objects $resourceObjects
-     * @param StoreManagerInterface $storeManager
-     * @param RequestInterface $request
-     * @param array $skipRules
-     * @param array $parents
-     * @param array $children
-     * @param $ignoreFindGeneratorException
+     *
+     * @param string                   $code
+     * @param string                   $description
+     * @param string                   $entityType
+     * @param string                   $objectType
+     * @param array                    $generators
+     * @param QueueFactory             $queueFactory
+     * @param ObjectManagerInterface   $objectManager
+     * @param Objects                  $resourceObjects
+     * @param StoreManagerInterface    $storeManager
+     * @param RequestInterface         $request
+     * @param array                    $skipRules
+     * @param array                    $parents
+     * @param array                    $children
+     * @param array                    $preLoaders
+     * @param bool                     $ignoreFindGeneratorException
      * @param SerializerInterface|null $serializer
      */
     public function __construct(
@@ -127,10 +139,12 @@ class Unit implements CleanableInstanceInterface
         Objects $resourceObjects,
         StoreManagerInterface $storeManager,
         RequestInterface $request,
+        UnsetPendingStatusPool $pendingStatusPool,
         array $skipRules = [],
         array $parents = [],
         array $children = [],
-        $ignoreFindGeneratorException = false,
+        array $preLoaders = [],
+        bool $ignoreFindGeneratorException = false,
         SerializerInterface $serializer= null
     ) {
         $this->code = $code;
@@ -148,6 +162,8 @@ class Unit implements CleanableInstanceInterface
         $this->children = $children;
         $this->ignoreFindGeneratorException = $ignoreFindGeneratorException;
         $this->serializer = $serializer ?? $objectManager->get(SerializerInterface::class);
+        $this->preLoaders = $preLoaders;
+        $this->pendingStatusPool = $pendingStatusPool;
     }
 
     /**
@@ -208,13 +224,15 @@ class Unit implements CleanableInstanceInterface
      */
     public function skipQueue($queue)
     {
+        $result = false;
         foreach ($this->skipRules as $rule) {
             if ($rule->apply($queue) !== false) {
-                return true;
+                $result = true;
+                break;
             }
         }
 
-        return false;
+        return $result;
     }
 
     /**
@@ -269,12 +287,14 @@ class Unit implements CleanableInstanceInterface
             $storeId = (int) $this->request->getParam('store', 0);
             $store = $this->storeManager->getStore($storeId);
             $websiteId = $store->getWebsiteId();
-            if (count($this->resourceObjects->loadObjectIds($entityId, $this->entityType, $websiteId))) {
-                $this->resourceObjects
-                    ->unsetPendingStatus($entityId, $this->entityType, $websiteId, $this->objectType);
-            }
+            $this->pendingStatusPool->addItem(
+                (string)$this->objectType,
+                (string)$this->entityType,
+                (int)$websiteId,
+                (int)$entityId
+            );
 
-            return [];
+            $queue = [];
         }
 
         return $queue;
@@ -311,6 +331,12 @@ class Unit implements CleanableInstanceInterface
     {
         $generator = $this->findGenerator($loadBy);
         if ($generator instanceof CreateInterface) {
+            $preLoaders = $this->preLoaders[$loadBy] ?? [];
+            $preLoaders && array_map(static function($preLoader) use ($entityIds) {
+                if($preLoader instanceof PreloaderEntityIdsInterface) {
+                    $preLoader->execute($entityIds);
+                }
+            } , $preLoaders);
             $queues = $generator->process($entityIds, $additional, [$this, 'createQueue'], $websiteId);
 
             $queues = array_filter($queues);

@@ -21,19 +21,21 @@ use TNW\Salesforce\Model\ResourceModel\FilterBlockedQueueRecords;
  */
 class Collection extends AbstractCollection
 {
+    private const UPDATE_CHUNK = 500;
+
     /**
      * @var FilterBlockedQueueRecords
      */
     private $filterBlockedQueueRecords;
 
     /**
-     * @param EntityFactoryInterface $entityFactory
-     * @param LoggerInterface $logger
-     * @param FetchStrategyInterface $fetchStrategy
-     * @param ManagerInterface $eventManager
+     * @param EntityFactoryInterface    $entityFactory
+     * @param LoggerInterface           $logger
+     * @param FetchStrategyInterface    $fetchStrategy
+     * @param ManagerInterface          $eventManager
      * @param FilterBlockedQueueRecords $filterBlockedQueueRecords
-     * @param AdapterInterface|null $connection
-     * @param AbstractDb|null $resource
+     * @param AdapterInterface|null     $connection
+     * @param AbstractDb|null           $resource
      */
     public function __construct(
         EntityFactoryInterface    $entityFactory,
@@ -77,6 +79,7 @@ class Collection extends AbstractCollection
      * Add Filter To Sync Type
      *
      * @param int $syncType
+     *
      * @return Collection
      */
     public function addFilterToSyncType($syncType)
@@ -88,6 +91,7 @@ class Collection extends AbstractCollection
      * Add Filter To Code
      *
      * @param string $code
+     *
      * @return Collection
      */
     public function addFilterToCode($code)
@@ -99,6 +103,7 @@ class Collection extends AbstractCollection
      * Add Filter To Code
      *
      * @param string $code
+     *
      * @return Collection
      */
     public function addFilterToStatus($code)
@@ -110,6 +115,7 @@ class Collection extends AbstractCollection
      * Add Filter To Transaction Uid
      *
      * @param string $uid
+     *
      * @return Collection
      */
     public function addFilterToTransactionUid($uid)
@@ -121,6 +127,7 @@ class Collection extends AbstractCollection
      * Add Filter To Not Transaction Uid
      *
      * @param string $uid
+     *
      * @return Collection
      */
     public function addFilterToNotTransactionUid($uid)
@@ -138,8 +145,9 @@ class Collection extends AbstractCollection
      * Join table to collection select
      *
      * @param string|array $table
-     * @param string $cond
+     * @param string       $cond
      * @param string|array $cols
+     *
      * @return $this
      */
     public function joinLeft($table, $cond, $cols = '*')
@@ -166,6 +174,7 @@ class Collection extends AbstractCollection
      * Add Filter To WebsiteId
      *
      * @param string $code
+     *
      * @return Collection
      */
     public function addFilterToWebsiteId($code)
@@ -188,6 +197,7 @@ class Collection extends AbstractCollection
             ->addFieldToSelect('website_id');
 
         $collection->getSelect()->group('website_id');
+
         return array_column($collection->getData(), 'website_id');
     }
 
@@ -199,45 +209,47 @@ class Collection extends AbstractCollection
     public function clear()
     {
         $this->_totalRecords = null;
+
         return parent::clear();
     }
 
     /**
      * Update Lock
      *
-     * @param array $data
+     * @param array  $data
      * @param string $groupCode
-     * @param int $websiteId
+     * @param int    $websiteId
+     *
      * @return int
      * @throws \Exception
      */
     public function updateLock(array $data, string $groupCode, int $websiteId)
     {
         $this->getSelect()->group('identify');
+        $queueIds = $this->filterBlockedQueueRecords->execute($this->getAllIds(), $groupCode, $websiteId);
 
-        $this->_conn->beginTransaction();
         try {
-//            $this->_select->forUpdate();
-            $queueIds = $this->filterBlockedQueueRecords->execute($this->getAllIds(), $groupCode, $websiteId);
-//            $this->_select->forUpdate(false);
-
-            if (!empty($queueIds)) {
-                $this->_conn->update(
-                    $this->getMainTable(),
-                    $data,
-                    $this->_conn->prepareSqlCondition('queue_id', ['in' => $queueIds])
-                );
-
-                /** @var \TNW\Salesforce\Model\Queue $queue */
-                foreach ($this as $queue) {
-                    $queue->addData($data);
+            if ($queueIds) {
+                $this->_conn->beginTransaction();
+                foreach (array_chunk($queueIds, self::UPDATE_CHUNK) as $queueIdsChunk) {
+                    $this->_conn->update(
+                        $this->getMainTable(),
+                        $data,
+                        $this->_conn->prepareSqlCondition('queue_id', ['in' => $queueIdsChunk])
+                    );
                 }
+                $this->_conn->commit();
             }
-
-            $this->_conn->commit();
         } catch (\Exception $e) {
             $this->_conn->rollBack();
             throw $e;
+        }
+
+        if ($queueIds) {
+            /** @var \TNW\Salesforce\Model\Queue $queue */
+            foreach ($this as $queue) {
+                $queue->addData($data);
+            }
         }
 
         return count($queueIds);
@@ -247,11 +259,13 @@ class Collection extends AbstractCollection
      * Before Add Loaded Item
      *
      * @param \Magento\Framework\DataObject $item
+     *
      * @return \Magento\Framework\DataObject
      */
     protected function beforeAddLoadedItem(\Magento\Framework\DataObject $item)
     {
         $this->getResource()->unserializeFields($item);
+
         return parent::beforeAddLoadedItem($item);
     }
 
