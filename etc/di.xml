@@ -844,6 +844,7 @@
         <arguments>
             <argument name="instances" xsi:type="array">
                 <item name="TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds" xsi:type="object">TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds</item>
+                <item name="TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList" xsi:type="object">TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList</item>
             </argument>
         </arguments>
     </type>

@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace TNW\Salesforce\Service;
 
 use TNW\Salesforce\Api\CleanableInstanceInterface;
+use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
 
 /**
  *  Class CleanLocalCacheForInstances
@@ -18,12 +19,18 @@ class CleanLocalCacheForInstances
     /** @var CleanableInstanceInterface[] */
     private $instances;
 
+    /** @var CleanableObjectsList */
+    private $objectsList;
+
     /**
-     * @param CleanableInstanceInterface[] $instances
+     * @param CleanableObjectsList $objectsList
+     * @param array                $instances
      */
     public function __construct(
-        array $instances = []
+        CleanableObjectsList $objectsList,
+        array                $instances = []
     ) {
+        $this->objectsList = $objectsList;
         $this->instances = $instances;
     }
 
@@ -32,6 +39,10 @@ class CleanLocalCacheForInstances
      */
     public function execute(): void
     {
+        foreach ($this->objectsList->getList() as $instance) {
+            $instance->clearLocalCache();
+        }
+
         foreach ($this->instances as $instance) {
             $instance->clearLocalCache();
         }
