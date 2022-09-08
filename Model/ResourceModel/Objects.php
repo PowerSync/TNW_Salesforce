@@ -12,11 +12,14 @@ use Magento\Framework\Event\Manager;
 use Magento\Framework\Exception\LocalizedException;
 use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\Model\ResourceModel\Db\Context;
+use Psr\Log\LoggerInterface;
 use TNW\Salesforce\Model\Config;
+use TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds;
 
 class Objects extends AbstractDb
 {
     public const RECORDS_KEY = 'records';
+    private const CHUNK_SIZE = 500;
 
     /**
      * @var \Magento\Framework\DB\Select
@@ -63,23 +66,35 @@ class Objects extends AbstractDb
      */
     private $config;
 
+    /** @var MassLoadObjectIds */
+    private $massLoadObjectIds;
+
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
      * Objects constructor.
      *
-     * @param Context $context
-     * @param Config $config
-     * @param null $connectionName
-     * @param ?Manager $eventManager
+     * @param Context           $context
+     * @param Config            $config
+     * @param MassLoadObjectIds $massLoadObjectIds
+     * @param LoggerInterface   $logger
+     * @param null              $connectionName
+     * @param ?Manager          $eventManager
      */
     public function __construct(
-        Context $context,
-        Config $config,
-        $connectionName = null,
-        Manager $eventManager = null
+        Context           $context,
+        Config            $config,
+        MassLoadObjectIds $massLoadObjectIds,
+        LoggerInterface   $logger,
+                          $connectionName = null,
+        Manager           $eventManager = null
     ) {
         parent::__construct($context, $connectionName);
         $this->eventManager = $eventManager ?? ObjectManager::getInstance()->get(Manager::class);
         $this->config = $config;
+        $this->massLoadObjectIds = $massLoadObjectIds;
+        $this->logger = $logger;
     }
 
     /**
@@ -157,10 +172,11 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $entityId
-     * @param string $magentoType
-     * @param int $websiteId
+     * @param int         $entityId
+     * @param string      $magentoType
+     * @param int         $websiteId
      * @param string|null $salesforceType
+     *
      * @return string
      */
     public function loadObjectId($entityId, $magentoType, $websiteId, ?string $salesforceType = null)
@@ -201,38 +217,35 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $entityId
+     * @param int    $entityId
      * @param string $magentoType
-     * @param int $websiteId
+     * @param int    $websiteId
      *
      * @return array
      */
     public function loadObjectIds($entityId, $magentoType, $websiteId)
     {
-
-        $ids = $this->getConnection()->fetchPairs($this->selectObjectIds, [
-            'magento_type' => $magentoType,
-            'entity_id' => $entityId,
-            'entity_website_id' => $websiteId,
-            'base_website_id' => $this->baseWebsiteId($websiteId),
-        ]);
-        $result = [];
-        foreach ($ids as $id => $type) {
-            if (!isset($result[$type])) {
-                $result[$type] = $id;
-            } else {
-                $result[$type] .= "\n" . $id;
-            }
-        }
-
-        return $result;
+        return $this->massLoadObjectIds->execute([$entityId], (string)$magentoType, (int)$websiteId)[$entityId] ?? [];
     }
 
     /**
-     * @param int $entityId
+     * @param array  $entityIds
      * @param string $magentoType
-     * @param int $websiteId
+     * @param int    $websiteId
+     *
+     * @return array
+     */
+    public function massLoadObjectIds(array $entityIds, string $magentoType, int $websiteId): array
+    {
+        return $this->massLoadObjectIds->execute($entityIds, $magentoType, $websiteId);
+    }
+
+    /**
+     * @param int         $entityId
+     * @param string      $magentoType
+     * @param int         $websiteId
      * @param string|null $salesforceType
+     *
      * @return int
      */
     public function loadStatus($entityId, $magentoType, $websiteId, ?string $salesforceType = null)
@@ -255,7 +268,7 @@ class Objects extends AbstractDb
     /**
      * @param string $objectId
      * @param string $salesforceType
-     * @param int $websiteId
+     * @param int    $websiteId
      *
      * @return int
      */
@@ -272,7 +285,7 @@ class Objects extends AbstractDb
     /**
      * @param string $objectId
      * @param string $salesforceType
-     * @param int $websiteId
+     * @param int    $websiteId
      *
      * @return array
      */
@@ -316,10 +329,10 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $entityId
+     * @param int    $entityId
      * @param string $magentoType
-     * @param int $status
-     * @param int $websiteId
+     * @param int    $status
+     * @param int    $websiteId
      *
      * @throws LocalizedException
      */
@@ -334,57 +347,89 @@ class Objects extends AbstractDb
     }
 
     /**
-     * @param int $entityId
-     * @param string $magentoType
-     * @param int $websiteId
+     * @param int|array $entityId
+     * @param string    $magentoType
+     * @param int       $websiteId
      *
      * @throws LocalizedException
      */
     public function setPendingStatus($entityId, $magentoType, $websiteId)
     {
-        $this->getConnection()
-            ->update(
-                $this->getMainTable(),
-                ['status' => new \Zend_Db_Expr('(status + 10)')],
-                new \Zend_Db_Expr(sprintf(
-                    'entity_id = %d AND magento_type = \'%s\' AND website_id = %d AND status < 10',
-                    $entityId,
-                    $magentoType,
-                    $websiteId
-                ))
-            );
+        if (!$entityId) {
+            return;
+        }
+
+        $entityIds = !is_array($entityId) ? [$entityId] : $entityId;
+        $entityIds = array_map('intval', $entityIds);
+
+        $connection = $this->getConnection();
+        foreach (array_chunk($entityIds, self::CHUNK_SIZE) as $entityIdsChunk) {
+            try {
+                $connection->beginTransaction();
+                $connection->update(
+                    $this->getMainTable(),
+                    ['status' => new \Zend_Db_Expr('(status + 10)')],
+                    new \Zend_Db_Expr(
+                        sprintf(
+                            'entity_id IN (%s) AND magento_type = \'%s\' AND website_id = %d AND status < 10',
+                            implode(',', $entityIdsChunk),
+                            $magentoType,
+                            $websiteId
+                        )
+                    )
+                );
+                $connection->commit();
+            } catch (\Throwable $e) {
+                $this->logger->critical($e->getMessage());
+                $connection->rollBack();
+            }
+        }
     }
 
     /**
-     * @param int $entityId
-     * @param string $magentoType
-     * @param int $websiteId
+     * @param int|array   $entityId
+     * @param string      $magentoType
+     * @param int         $websiteId
      * @param string|null $salesforceType
-     *
-     * @throws LocalizedException
      */
     public function unsetPendingStatus($entityId, $magentoType, $websiteId, $salesforceType = null)
     {
-        $whereCondition = 'entity_id = %d AND magento_type = \'%s\' AND website_id = %d AND status > 9';
-        if ($salesforceType) {
-            $whereCondition .= ' AND salesforce_type = \'%s\'';
-            $where = new \Zend_Db_Expr(sprintf($whereCondition, $entityId, $magentoType, $websiteId, $salesforceType));
-        } else {
-            $where = new \Zend_Db_Expr(sprintf($whereCondition, $entityId, $magentoType, $websiteId));
+        if (!$entityId) {
+            return;
         }
 
-        $this->getConnection()->update(
-            $this->getMainTable(),
-            ['status' => new \Zend_Db_Expr('status - 10')],
-            $where
-        );
+        $entityIds = !is_array($entityId) ? [$entityId] : $entityId;
+        $entityIds = array_map('intval', $entityIds);
+
+        $connection = $this->getConnection();
+        foreach (array_chunk($entityIds, self::CHUNK_SIZE) as $entityIdsChunk) {
+            $whereCondition = 'entity_id IN (%s) AND magento_type = \'%s\' AND website_id = %d AND status > 9';
+            if ($salesforceType) {
+                $whereCondition .= ' AND salesforce_type = \'%s\'';
+                $where = new \Zend_Db_Expr(sprintf($whereCondition, implode(',', $entityIdsChunk), $magentoType, $websiteId, $salesforceType));
+            } else {
+                $where = new \Zend_Db_Expr(sprintf($whereCondition, implode(',', $entityIdsChunk), $magentoType, $websiteId));
+            }
+            try {
+                $connection->beginTransaction();
+                $connection->update(
+                    $this->getMainTable(),
+                    ['status' => new \Zend_Db_Expr('status - 10')],
+                    $where
+                );
+                $connection->commit();
+            } catch (\Throwable $e) {
+                $this->logger->critical($e->getMessage());
+                $connection->rollBack();
+            }
+        }
     }
 
     /**
      * @param string $objectId
      * @param string $magentoType
      * @param string $salesforceType
-     * @param int $websiteId
+     * @param int    $websiteId
      *
      * @return array
      */

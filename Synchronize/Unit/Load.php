@@ -3,6 +3,7 @@
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use Exception;
@@ -65,18 +66,19 @@ class Load extends Synchronize\Unit\UnitAbstract
 
     /**
      * Load constructor.
-     * @param string $name
-     * @param string $magentoType
-     * @param Queue[] $queues
-     * @param LoadLoaderInterface[] $loaders
-     * @param Synchronize\Units $units
-     * @param Synchronize\Group $group
+     *
+     * @param string                                   $name
+     * @param string                                   $magentoType
+     * @param Queue[]                                  $queues
+     * @param LoadLoaderInterface[]                    $loaders
+     * @param Synchronize\Units                        $units
+     * @param Synchronize\Group                        $group
      * @param Synchronize\Unit\IdentificationInterface $identification
-     * @param Synchronize\Unit\HashInterface $hash
-     * @param Objects $objects
-     * @param SalesforceIdStorage|null $entityObject
-     * @param EntityLoaderAbstract[] $entityLoaders
-     * @param array $entityTypeMapping
+     * @param Synchronize\Unit\HashInterface           $hash
+     * @param Objects                                  $objects
+     * @param SalesforceIdStorage|null                 $entityObject
+     * @param EntityLoaderAbstract[]                   $entityLoaders
+     * @param array                                    $entityTypeMapping
      */
     public function __construct(
         $name,
@@ -155,6 +157,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->reset();
         $index = [];
         $i = 0;
+        $this->preloadObjectIds();
         foreach ($this->queues as $queue) {
             try {
                 $i++;
@@ -222,8 +225,8 @@ class Load extends Synchronize\Unit\UnitAbstract
                                 $additional[$type][$id] = $id;
                             }
                         }
-                        $additional = array_map(function($item) {
-                            return is_array($item)? implode("\n", $item): $item;
+                        $additional = array_map(function ($item) {
+                            return is_array($item) ? implode("\n", $item) : $item;
                         }, $additional);
                         $subEntity->addData($additional);
 
@@ -265,6 +268,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * Website Id
      *
      * @param AbstractModel $entity
+     *
      * @return int
      */
     public function websiteId($entity)
@@ -276,6 +280,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * Entity Type Map
      *
      * @param string $entityType
+     *
      * @return mixed
      */
     private function entityTypeMap($entityType)
@@ -291,13 +296,15 @@ class Load extends Synchronize\Unit\UnitAbstract
      * Object By Entity Type
      *
      * @param AbstractModel $entity
-     * @param string $entityType
+     * @param string        $entityType
+     *
      * @return AbstractModel|null
      */
     public function entityByType($entity, $entityType)
     {
         if (empty($this->cache[$entity]['entities'][$entityType])) {
             $this->group()->messageDebug('Undefined magento entity type %s', $entityType);
+
             return null;
         }
 
@@ -308,6 +315,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * Load Entity
      *
      * @param Queue $queue
+     *
      * @return AbstractModel
      * @throws LocalizedException
      */
@@ -327,6 +335,7 @@ class Load extends Synchronize\Unit\UnitAbstract
      * Loader By
      *
      * @param string $type
+     *
      * @return LoadLoaderInterface
      * @throws LocalizedException
      */
@@ -357,10 +366,43 @@ class Load extends Synchronize\Unit\UnitAbstract
      * Skipped
      *
      * @param AbstractModel $entity
+     *
      * @return bool
      */
     public function skipped($entity)
     {
         return empty($this->cache['entities'][$entity]);
+    }
+
+    /**
+     * @return void
+     */
+    private function preloadObjectIds(): void
+    {
+        $groupedByWebsiteIds = [];
+        $magentoTypeFromEntityObject = $this->entityObject ? $this->entityObject->getMagentoType() : null;
+        foreach ($this->queues as $queue) {
+            $websiteId = $queue->getWebsiteId();
+            $magentoType = $queue->getEntityLoad();
+            $entityId = (int)$queue->getEntityId();
+            $groupedByWebsiteIds[$websiteId][$magentoType][$entityId] = $entityId;
+            if ($magentoTypeFromEntityObject && (string)$magentoTypeFromEntityObject !== (string)$magentoType) {
+                $groupedByWebsiteIds[$websiteId][$magentoTypeFromEntityObject][$entityId] = $entityId;
+            }
+        }
+
+        if ($groupedByWebsiteIds) {
+            foreach ($groupedByWebsiteIds as $websiteId => $groupedByMagentoTypes) {
+                foreach ($groupedByMagentoTypes as $magentoType => $entityIds) {
+                    $entityIds = array_values($entityIds);
+
+                    $this->objects->massLoadObjectIds(
+                        $entityIds,
+                        (string)$magentoType,
+                        (int)$websiteId
+                    );
+                }
+            }
+        }
     }
 }
