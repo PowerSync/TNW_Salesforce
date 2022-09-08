@@ -11,13 +11,14 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
 
 /**
  * Sync Unit
  */
-class Unit
+class Unit implements CleanableInstanceInterface
 {
     /**
      * @var string
@@ -74,10 +75,8 @@ class Unit
      */
     private $ignoreFindGeneratorException;
 
-    /**
-     * @var Queue[]
-     */
-    private $queues = [];
+    /** @var array  */
+    private $queuesByUnitCodeAndBaseEntityId = [];
 
     /**
      * @var Objects
@@ -434,28 +433,38 @@ class Unit
     }
 
     /**
-     * @return Queue[]
+     * @param string $unitCode
+     *
+     * @return array
      */
-    public function getQueues(): array
+    public function getQueuesGroupedByBaseEntityIds(string $unitCode): array
     {
-        return $this->queues;
+        return $this->queuesByUnitCodeAndBaseEntityId[$unitCode] ?? [];
     }
 
-    /**
-     * @param Queue[] $queues
-     */
-    public function setQueues(array $queues): void
-    {
-        $this->queues = $queues;
-    }
     /**
      * @param Queue[] $queues
      */
     public function addQueues(array $queues): void
     {
         foreach ($queues as $queue) {
-            $this->queues[$queue->getIdentify()] = $queue;
+            $identify = $queue->getIdentify();
+            $baseEntityIdsByUnitCodes = $queue->getData('_base_entity_id') ?? [];
+            $baseEntityIdsByUnitCodes = is_array($baseEntityIdsByUnitCodes) ? $baseEntityIdsByUnitCodes : [];
+            foreach ($baseEntityIdsByUnitCodes as $unitCode => $baseEntityIds) {
+                $baseEntityIds = is_array($baseEntityIds) ? $baseEntityIds : [];
+                foreach ($baseEntityIds as $baseEntityId) {
+                    $this->queuesByUnitCodeAndBaseEntityId[$unitCode][$baseEntityId][$identify] = $queue;
+                }
+            }
         }
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function clearLocalCache(): void
+    {
+        $this->queuesByUnitCodeAndBaseEntityId = [];
+    }
 }
