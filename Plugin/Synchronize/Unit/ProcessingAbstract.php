@@ -52,7 +52,7 @@ class ProcessingAbstract
     {
         $storeId = (int) $this->request->getParam('store', 0);
         $store = $this->storeManager->getStore($storeId);
-        $websiteId = $store->getWebsiteId();
+        $websiteId = (int)$store->getWebsiteId();
 
         $entityIdsByType = [];
         foreach ($subject->entities() as $entity) {
