@@ -7,17 +7,23 @@
 namespace TNW\Salesforce\Synchronize\Queue\OrderInvoice\SkipRules;
 
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
+use TNW\Salesforce\Api\ChunkSizeInterface;
+use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Api\Service\Customer\IsSyncDisabledInterface;
 use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Synchronize\Queue\Skip\PreloadQueuesDataInterface;
 use TNW\Salesforce\Synchronize\Queue\SkipInterface;
 
 /**
  * Skip order invoice sync by customer rule.
  */
-class SkipByCustomer implements SkipInterface
+class SkipByCustomer implements SkipInterface, CleanableInstanceInterface, PreloadQueuesDataInterface
 {
+    private const CHUNK_SIZE = ChunkSizeInterface::CHUNK_SIZE;
+
     /** @var IsSyncDisabledInterface */
     private $isSyncDisabled;
 
@@ -28,8 +34,8 @@ class SkipByCustomer implements SkipInterface
     private $resourceConnection;
 
     /**
-     * @param IsSyncDisabledInterface     $isSyncDisabled
-     * @param ResourceConnection $resourceConnection
+     * @param IsSyncDisabledInterface $isSyncDisabled
+     * @param ResourceConnection      $resourceConnection
      */
     public function __construct(IsSyncDisabledInterface $isSyncDisabled, ResourceConnection $resourceConnection)
     {
@@ -48,25 +54,100 @@ class SkipByCustomer implements SkipInterface
             return false;
         }
 
-        $customerId = $this->getCustomerId((int)$queue->getEntityId());
+        $entityId = (int)$queue->getEntityId();
+        $customerId = $this->getCustomerIds([$entityId])[$entityId] ?? null;
         if (!$customerId) {
             return false;
         }
 
-        return $this->isSyncDisabled->execute($customerId);
+        return $this->isSyncDisabled->execute([$customerId])[$customerId] ?? false;
     }
 
     /**
-     * @param int $salesInvoiceId
-     *
-     * @return int
+     * @inheritDoc
      */
-    private function getCustomerId(int $salesInvoiceId): int
+    public function clearLocalCache(): void
     {
-        if (isset($this->cache[$salesInvoiceId])) {
-            return $this->cache[$salesInvoiceId];
+        $this->cache = [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function preload(array $queues): void
+    {
+        $entityIds = [];
+        foreach ($queues as $queue) {
+            if (strcasecmp($queue->getEntityLoad(), 'orderInvoice') !== 0) {
+                continue;
+            }
+            $entityId = (int)$queue->getEntityId();
+            $entityIds[] = $entityId;
         }
 
+        $customerIdsResult = $this->getCustomerIds($entityIds);
+
+        $customerIds = [];
+        foreach ($customerIdsResult as $customerId) {
+            if ($customerId) {
+                $customerIds[] = $customerId;
+            }
+        }
+
+        $this->isSyncDisabled->execute($customerIds);
+    }
+
+    /**
+     * @param array $entityIds
+     *
+     * @return array
+     */
+    private function getCustomerIds(array $entityIds): array
+    {
+        if (!$entityIds) {
+            return [];
+        }
+
+        $entityIds = array_map('intval', $entityIds);
+        $entityIds = array_unique($entityIds);
+
+        $missedEntityIds = [];
+        foreach ($entityIds as $entityId) {
+            if (!isset($this->cache[$entityId])) {
+                $missedEntityIds[] = $entityId;
+                $this->cache[$entityId] = null;
+            }
+        }
+
+        if ($missedEntityIds) {
+            $select = $this->getSelect();
+            $connection = $this->resourceConnection->getConnection();
+            foreach (array_chunk($missedEntityIds, self::CHUNK_SIZE) as $missedEntityIdsChunk) {
+                $batchSelect = clone $select;
+                $batchSelect->where('sales_invoice.entity_id IN(?)', $missedEntityIdsChunk);
+
+                $items = $connection->fetchAll($batchSelect);
+                foreach ($items as $item) {
+                    $entityId = (int)($item['entity_id'] ?? 0);
+                    $value = (int)($item['value'] ?? 0);
+                    $this->cache[$entityId] = $value;
+                }
+            }
+        }
+
+        $result = [];
+        foreach ($entityIds as $entityId) {
+            $result[$entityId] = $this->cache[$entityId] ?? null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return Select
+     */
+    private function getSelect(): Select
+    {
         $connection = $this->resourceConnection->getConnection();
         $orderInvoiceTable = $connection->getTableName('sales_invoice');
         $orderTable = $connection->getTableName('sales_order');
@@ -74,11 +155,17 @@ class SkipByCustomer implements SkipInterface
             ->from(['main_table' => $orderTable], [OrderInterface::CUSTOMER_ID])
             ->joinInner(
                 ['sales_invoice' => $orderInvoiceTable],
-                'main_table.entity_id = sales_invoice.order_id AND sales_invoice.entity_id = ' . $salesInvoiceId,
+                'main_table.entity_id = sales_invoice.order_id',
                 []
             );
-        $this->cache[$salesInvoiceId] = (int)$connection->fetchOne($select);
+        $select->reset(Select::COLUMNS);
+        $select->columns(
+            [
+                'entity_id' => 'sales_invoice.entity_id',
+                'value' => 'main_table.customer_id',
+            ]
+        );
 
-        return $this->cache[$salesInvoiceId];
+        return $select;
     }
 }

@@ -8,12 +8,13 @@ namespace TNW\Salesforce\Service;
 
 use Magento\Framework\Exception\LocalizedException;
 use RuntimeException;
+use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Api\Service\GetWebsiteByEntityType\GetWebsiteIdByEntityIdsInterface;
 
 /**
  *  Class GetWebsiteByEntityType
  */
-class GetWebsiteByEntityType
+class GetWebsiteByEntityType implements CleanableInstanceInterface
 {
     private const PROCESSED = 1;
 
@@ -78,5 +79,14 @@ class GetWebsiteByEntityType
         }
 
         return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function clearLocalCache(): void
+    {
+        $this->cache = [];
+        $this->processed = [];
     }
 }

@@ -16,10 +16,10 @@ interface IsSyncDisabledInterface
     /**
      * Return true if customer sync is disabled.
      *
-     * @param int $customerId
+     * @param array $entityIds
      *
-     * @return bool
+     * @return array
      * @throws LocalizedException
      */
-    public function execute(int $customerId): bool;
+    public function execute(array $entityIds): array;
 }

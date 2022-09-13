@@ -7,13 +7,16 @@
 namespace TNW\Salesforce\Synchronize\Queue\Customer\SkipRules;
 
 use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Synchronize\Queue\Skip\PreloadQueuesDataInterface;
 use TNW\Salesforce\Synchronize\Queue\SkipInterface;
 
 /**
  * Rules which allow or disallow adding customer entity to synchronization queue.
  */
-class SkipByCustomerGroup implements SkipInterface
+class SkipByCustomerGroup implements SkipInterface,PreloadQueuesDataInterface
 {
+    private const CUSTOMER = 'customer';
+
     /**
      * @var SkipInterface[]
      */
@@ -34,8 +37,27 @@ class SkipByCustomerGroup implements SkipInterface
     public function apply(Queue $queue)
     {
         $skipRule = $this->skipRulesByQueueLoadFromEntityType[$queue->getEntityLoad()]
-            ?? $this->skipRulesByQueueLoadFromEntityType['customer'];
+            ?? $this->skipRulesByQueueLoadFromEntityType[self::CUSTOMER];
 
         return $skipRule->apply($queue);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function preload(array $queues): void
+    {
+        $queuesByKey = [];
+        foreach ($queues as $queue) {
+            $key = isset($this->skipRulesByQueueLoadFromEntityType[$queue->getEntityLoad()]) ? $queue->getEntityLoad() : self::CUSTOMER;
+            $queuesByKey[$key][] = $queue;
+        }
+
+        foreach ($queuesByKey as $key => $groupedQueues) {
+            $skipRule = $this->skipRulesByQueueLoadFromEntityType[$key] ?? null;
+            if ($skipRule instanceof PreloadQueuesDataInterface) {
+                $skipRule->preload($groupedQueues);
+            }
+        }
     }
 }
