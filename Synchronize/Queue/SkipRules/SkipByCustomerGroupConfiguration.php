@@ -9,12 +9,13 @@ namespace TNW\Salesforce\Synchronize\Queue\SkipRules;
 use Magento\Framework\Exception\NoSuchEntityException;
 use TNW\Salesforce\Api\Service\GetIdsFilteredByCustomerGroupConfigurationInterface;
 use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Synchronize\Queue\Skip\PreloadQueuesDataInterface;
 use TNW\Salesforce\Synchronize\Queue\SkipInterface;
 
 /**
  * Skip by customer group configuration rule.
  */
-class SkipByCustomerGroupConfiguration implements SkipInterface
+class SkipByCustomerGroupConfiguration implements SkipInterface, PreloadQueuesDataInterface
 {
     /** @var GetIdsFilteredByCustomerGroupConfigurationInterface */
     private $getIdsFilteredByCustomerGroupConfiguration;
@@ -49,5 +50,21 @@ class SkipByCustomerGroupConfiguration implements SkipInterface
         $serviceResult = $this->getIdsFilteredByCustomerGroupConfiguration->execute([$entityId]);
 
         return !isset($serviceResult[$entityId]);
+    }
+
+    /**
+     * @param array $queues
+     *
+     * @return void
+     * @throws NoSuchEntityException
+     */
+    public function preload(array $queues): void
+    {
+        $entityIds = [];
+        foreach ($queues as $queue) {
+            $entityIds[] = (int)$queue->getEntityId();
+        }
+
+        $this->getIdsFilteredByCustomerGroupConfiguration->execute($entityIds);
     }
 }
