@@ -8,12 +8,13 @@ namespace TNW\Salesforce\Service;
 
 use Magento\Framework\App\ResourceConnection;
 use RuntimeException;
+use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Api\Service\GetSelectInterface;
 
 /**
  *  Filter ids by select
  */
-class GetFilteredIdsWithoutOrderZeroGrandTotal
+class GetFilteredIdsWithoutOrderZeroGrandTotal implements CleanableInstanceInterface
 {
     /** @var GetSelectInterface[] */
     private $getSelectProcessors;
@@ -91,5 +92,13 @@ class GetFilteredIdsWithoutOrderZeroGrandTotal
         }
 
         return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function clearLocalCache(): void
+    {
+        $this->cache = [];
     }
 }

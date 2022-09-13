@@ -9,12 +9,13 @@ namespace TNW\Salesforce\Synchronize\Queue\Customer\SkipRules;
 use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Api\Service\Customer\IsSyncDisabledInterface;
 use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Synchronize\Queue\Skip\PreloadQueuesDataInterface;
 use TNW\Salesforce\Synchronize\Queue\SkipInterface;
 
 /**
  * Disabled customer sync skip rule.
  */
-class SkipDisabledSync implements SkipInterface
+class SkipDisabledSync implements SkipInterface, PreloadQueuesDataInterface
 {
     /** @var IsSyncDisabledInterface */
     private $isSyncDisabled;
@@ -40,6 +41,23 @@ class SkipDisabledSync implements SkipInterface
 
         $customerId = (int)$queue->getEntityId();
 
-        return $this->isSyncDisabled->execute($customerId);
+        return $this->isSyncDisabled->execute([$customerId])[$customerId] ?? false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function preload(array $queues): void
+    {
+        $customerIds = [];
+
+        foreach ($queues as $queue) {
+            if (strcasecmp($queue->getEntityLoad(), 'customer') !== 0) {
+                continue;
+            }
+            $customerIds[] = (int)$queue->getEntityId();
+        }
+
+        $this->isSyncDisabled->execute($customerIds);
     }
 }

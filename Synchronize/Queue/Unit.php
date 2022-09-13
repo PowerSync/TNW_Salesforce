@@ -12,11 +12,13 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 use TNW\Salesforce\Api\Service\PreloaderEntityIdsInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\QueueFactory;
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Synchronize\Queue\Skip\PreloadQueuesDataInterface;
 use TNW\Salesforce\Synchronize\Queue\Unit\CreateQueue\UnsetPendingStatusPool;
 
 /**
@@ -50,12 +52,12 @@ class Unit implements CleanableInstanceInterface
     private $generators;
 
     /**
-     * @var \TNW\Salesforce\Model\QueueFactory
+     * @var QueueFactory
      */
     private $queueFactory;
 
     /**
-     * @var \Magento\Framework\ObjectManagerInterface
+     * @var ObjectManagerInterface
      */
     private $objectManager;
 
@@ -69,9 +71,7 @@ class Unit implements CleanableInstanceInterface
      */
     private $parents;
 
-    /**
-     * @var array
-     */
+    /** @var SkipInterface[]  */
     private $skipRules;
 
     /**
@@ -108,6 +108,9 @@ class Unit implements CleanableInstanceInterface
     /** @var UnsetPendingStatusPool */
     private $pendingStatusPool;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
      * Queue constructor.
      *
@@ -121,6 +124,8 @@ class Unit implements CleanableInstanceInterface
      * @param Objects                  $resourceObjects
      * @param StoreManagerInterface    $storeManager
      * @param RequestInterface         $request
+     * @param UnsetPendingStatusPool   $pendingStatusPool
+     * @param LoggerInterface          $logger
      * @param array                    $skipRules
      * @param array                    $parents
      * @param array                    $children
@@ -134,12 +139,13 @@ class Unit implements CleanableInstanceInterface
         $entityType,
         $objectType,
         array $generators,
-        \TNW\Salesforce\Model\QueueFactory $queueFactory,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
+        QueueFactory $queueFactory,
+        ObjectManagerInterface $objectManager,
         Objects $resourceObjects,
         StoreManagerInterface $storeManager,
         RequestInterface $request,
         UnsetPendingStatusPool $pendingStatusPool,
+        LoggerInterface $logger,
         array $skipRules = [],
         array $parents = [],
         array $children = [],
@@ -164,6 +170,7 @@ class Unit implements CleanableInstanceInterface
         $this->serializer = $serializer ?? $objectManager->get(SerializerInterface::class);
         $this->preLoaders = $preLoaders;
         $this->pendingStatusPool = $pendingStatusPool;
+        $this->logger = $logger;
     }
 
     /**
@@ -217,25 +224,6 @@ class Unit implements CleanableInstanceInterface
     }
 
     /**
-     * Skip
-     *
-     * @param Queue $queue
-     * @return bool
-     */
-    public function skipQueue($queue)
-    {
-        $result = false;
-        foreach ($this->skipRules as $rule) {
-            if ($rule->apply($queue) !== false) {
-                $result = true;
-                break;
-            }
-        }
-
-        return $result;
-    }
-
-    /**
      * Create
      *
      * @param string $loadBy
@@ -266,7 +254,8 @@ class Unit implements CleanableInstanceInterface
             $this->objectType,
             $this->serializer->serialize($additionalToHash)
         )));
-        $queue = $this->queueFactory->create(['data' => [
+
+        return $this->queueFactory->create(['data' => [
             'queue_id' => uniqid('', true),
             'code' => $this->code,
             'description' => $this->description($identifiers),
@@ -282,22 +271,6 @@ class Unit implements CleanableInstanceInterface
             'identify' => $uniqueHash,
             Queue::UNIQUE_HASH => $uniqueHash
         ]]);
-
-        if ($this->skipQueue($queue)) {
-            $storeId = (int) $this->request->getParam('store', 0);
-            $store = $this->storeManager->getStore($storeId);
-            $websiteId = $store->getWebsiteId();
-            $this->pendingStatusPool->addItem(
-                (string)$this->objectType,
-                (string)$this->entityType,
-                (int)$websiteId,
-                (int)$entityId
-            );
-
-            $queue = [];
-        }
-
-        return $queue;
     }
 
     /**
@@ -332,14 +305,15 @@ class Unit implements CleanableInstanceInterface
         $generator = $this->findGenerator($loadBy);
         if ($generator instanceof CreateInterface) {
             $preLoaders = $this->preLoaders[$loadBy] ?? [];
-            $preLoaders && array_map(static function($preLoader) use ($entityIds) {
-                if($preLoader instanceof PreloaderEntityIdsInterface) {
+            $preLoaders && array_map(static function ($preLoader) use ($entityIds) {
+                if ($preLoader instanceof PreloaderEntityIdsInterface) {
                     $preLoader->execute($entityIds);
                 }
-            } , $preLoaders);
+            }, $preLoaders);
+
             $queues = $generator->process($entityIds, $additional, [$this, 'createQueue'], $websiteId);
 
-            $queues = array_filter($queues);
+            $queues = $this->skipQueues($queues);
 
             if (!empty($queues)) {
                 $queues = $this->correctBaseEntityId($queues, $relatedUnitCode);
@@ -492,5 +466,61 @@ class Unit implements CleanableInstanceInterface
     public function clearLocalCache(): void
     {
         $this->queuesByUnitCodeAndBaseEntityId = [];
+    }
+
+    /**
+     * @param Queue[] $queues
+     *
+     * @return Queue[]
+     * @throws NoSuchEntityException
+     */
+    private function skipQueues(array $queues): array
+    {
+        $filteredQueues = [];
+        if (!$queues) {
+            return $filteredQueues;
+        }
+        $storeId = (int)$this->request->getParam('store', 0);
+        $store = $this->storeManager->getStore($storeId);
+        $websiteId = (int)$store->getWebsiteId();
+        $filteredQueues = $queues;
+        foreach ($this->skipRules as $skipRule) {
+            if ($skipRule instanceof PreloadQueuesDataInterface) {
+                $skipRule->preload($filteredQueues);
+            }
+
+            foreach ($filteredQueues as $index => $queue) {
+                $skipResult = $skipRule->apply($queue);
+                if ($skipResult !== false) {
+                    $entityId = (int)$queue->getEntityId();
+                    $this->pendingStatusPool->addItem(
+                        $this->objectType,
+                        $this->entityType,
+                        $websiteId,
+                        $entityId
+                    );
+                    unset($filteredQueues[$index]);
+                    $message = [
+                        'Queue is skipped!',
+                        'Entity id: ',
+                        $queue->getEntityId(),
+                        'Entity type: ',
+                        $queue->getEntityType(),
+                        'Entity load: ',
+                        $queue->getEntityLoad(),
+                        'Skip rule result: ',
+                        $skipResult === true ? 'true' : (string)$skipResult
+                    ];
+                    $this->logger->debug(
+                        implode(
+                            PHP_EOL,
+                            $message
+                        )
+                    );
+                }
+            }
+        }
+
+        return $filteredQueues;
     }
 }

@@ -16,10 +16,10 @@ interface GetCustomerIdByQuoteIdInterface
     /**
      * Retrieve customer id.
      *
-     * @param int $quoteId
+     * @param array $entityIds
      *
-     * @return int|null
+     * @return array
      * @throws LocalizedException
      */
-    public function execute(int $quoteId): ?int;
+    public function execute(array $entityIds): array;
 }

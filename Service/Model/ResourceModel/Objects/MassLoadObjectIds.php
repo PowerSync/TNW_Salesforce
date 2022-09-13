@@ -10,6 +10,7 @@ namespace TNW\Salesforce\Service\Model\ResourceModel\Objects;
 
 use Psr\Log\LoggerInterface;
 use Throwable;
+use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\ResourceModel\Objects;
@@ -19,7 +20,7 @@ use TNW\Salesforce\Model\ResourceModel\Objects;
  */
 class MassLoadObjectIds implements CleanableInstanceInterface
 {
-    private const CHUNK_SIZE = 1000;
+    private const CHUNK_SIZE = ChunkSizeInterface::CHUNK_SIZE;
 
     /** @var array */
     private $cache = [];
