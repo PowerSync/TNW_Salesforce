@@ -502,6 +502,8 @@ class Unit implements CleanableInstanceInterface
                     unset($filteredQueues[$index]);
                     $message = [
                         'Queue is skipped!',
+                        'Skip rule class:',
+                        get_class($skipRule),
                         'Entity id: ',
                         $queue->getEntityId(),
                         'Entity type: ',
