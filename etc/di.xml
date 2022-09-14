@@ -887,6 +887,9 @@
                 <item name="TNW\Salesforce\Service\Product\IsSyncDisabled" xsi:type="object">
                     TNW\Salesforce\Service\Product\IsSyncDisabled
                 </item>
+                <item name="TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds" xsi:type="object">
+                    TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds
+                </item>
             </argument>
         </arguments>
     </type>
