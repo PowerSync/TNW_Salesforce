@@ -183,6 +183,7 @@ class GetFilteredIds implements GetIdsFilteredByCustomerGroupConfigurationInterf
      */
     public function clearLocalCache(): void
     {
+        $this->processedIds = [];
         $this->cache = [];
     }
 }
