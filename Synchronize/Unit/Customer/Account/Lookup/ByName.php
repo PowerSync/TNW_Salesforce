@@ -5,8 +5,15 @@
  */
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup;
 
+use TNW\Salesforce\Service\Synchronize\Unit\Customer\Account\Lookup\ByName\GetMapperName;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Model;
+use TNW\Salesforce\Synchronize\Group;
+use TNW\Salesforce\Synchronize\Transport\Calls\Query\InputFactory;
+use TNW\Salesforce\Synchronize\Transport\Calls\Query\OutputFactory;
+use TNW\Salesforce\Synchronize\Transport\Calls\QueryInterface;
+use TNW\Salesforce\Synchronize\Unit\IdentificationInterface;
+use TNW\Salesforce\Synchronize\Units;
 
 /**
  * Account Lookup By Name
@@ -15,23 +22,22 @@ use TNW\Salesforce\Model;
  */
 class ByName extends Synchronize\Unit\LookupAbstract
 {
-    /**
-     * @var Model\ResourceModel\Mapper\CollectionFactory
-     */
-    private $mapperCollectionFactory;
+    /** @var GetMapperName */
+    private $getMapperName;
 
     /**
      * ByName constructor.
-     * @param string $name
-     * @param string $load
-     * @param Synchronize\Units $units
-     * @param Synchronize\Group $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
-     * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
-     * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
-     * @param Synchronize\Transport\Calls\QueryInterface $process
-     * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
-     * @param array $dependents
+     *
+     * @param string                  $name
+     * @param string                  $load
+     * @param Units                   $units
+     * @param Group                   $group
+     * @param IdentificationInterface $identification
+     * @param InputFactory            $inputFactory
+     * @param OutputFactory           $outputFactory
+     * @param QueryInterface          $process
+     * @param GetMapperName           $getMapperName
+     * @param array                   $dependents
      */
     public function __construct(
         $name,
@@ -42,7 +48,7 @@ class ByName extends Synchronize\Unit\LookupAbstract
         Synchronize\Transport\Calls\Query\InputFactory $inputFactory,
         Synchronize\Transport\Calls\Query\OutputFactory $outputFactory,
         Synchronize\Transport\Calls\QueryInterface $process,
-        Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
+        GetMapperName $getMapperName,
         array $dependents = []
     ) {
         parent::__construct(
@@ -56,26 +62,20 @@ class ByName extends Synchronize\Unit\LookupAbstract
             $process,
             $dependents
         );
-
-        $this->mapperCollectionFactory = $mapperCollectionFactory;
+        $this->getMapperName = $getMapperName;
     }
 
     /**
-     * Mapper Name
+     * @param $websiteId
      *
-     * @param int $websiteId
-     * @return bool|\Magento\Framework\DataObject|\Magento\Framework\Model\AbstractModel|Model\Mapper
+     * @return Model\Mapper|null
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Zend_Db_Select_Exception
      * @throws \Zend_Db_Statement_Exception
      */
     public function mapperName($websiteId)
     {
-        return $this->mapperCollectionFactory->create()
-                ->addObjectToFilter('Account')
-                ->addFieldToFilter('salesforce_attribute_name', 'Name')
-                ->applyUniquenessByWebsite($websiteId)
-                ->fetchItem();
+        return $this->getMapperName->execute((int)$websiteId);
     }
 
     /**
