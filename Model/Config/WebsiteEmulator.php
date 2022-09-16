@@ -6,6 +6,8 @@
 
 namespace TNW\Salesforce\Model\Config;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * Class Owner
  * @package TNW\Salesforce\Model\Config\Source\Customer
@@ -22,6 +24,9 @@ class WebsiteEmulator
     /** @var \Magento\Framework\App\State */
     protected $appState;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
      * WebsiteEmulator constructor.
      * @param WebsiteDetector $websiteDetector
@@ -31,11 +36,13 @@ class WebsiteEmulator
     public function __construct(
         WebsiteDetector $websiteDetector,
         \Magento\Store\Model\App\Emulation $storeEmulator,
-        \Magento\Framework\App\State $appState
+        \Magento\Framework\App\State $appState,
+        LoggerInterface $logger
     ) {
         $this->websiteDetector = $websiteDetector;
         $this->storeEmulator = $storeEmulator;
         $this->appState = $appState;
+        $this->logger = $logger;
     }
 
     /**
@@ -88,6 +95,13 @@ class WebsiteEmulator
                     $callback,
                     array_merge([$websiteId], $params)
                 );
+
+        } catch (\Throwable $e) {
+            $message = [
+                $e->getMessage(),
+                $e->getTraceAsString()
+            ];
+            $this->logger->critical(implode(PHP_EOL, $message));
         } finally {
             $this->stopEnvironmentEmulation();
         }

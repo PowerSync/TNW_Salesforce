@@ -5,15 +5,22 @@
  */
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader;
 
+use Magento\Customer\Model\CustomerFactory;
+use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory;
+use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
+use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
+use TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface;
+
 /**
  * Load By Customer
  */
-class Customer implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
+class Customer implements LoadLoaderInterface, PreLoaderInterface
 {
     const LOAD_BY = 'customer';
 
     /**
-     * @var \Magento\Customer\Model\CustomerFactory
+     * @var CustomerFactory
      */
     private $customerFactory;
 
@@ -22,17 +29,27 @@ class Customer implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
      */
     private $resourceCustomer;
 
+    /** @var CollectionFactory */
+    private $collectionFactory;
+
+    /** @var PreLoadEntities */
+    private $preLoadEntities;
+
     /**
      * ByCustomer constructor.
-     * @param \Magento\Customer\Model\CustomerFactory $customerFactory
+     * @param CustomerFactory $customerFactory
      * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
      */
     public function __construct(
-        \Magento\Customer\Model\CustomerFactory $customerFactory,
-        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+        CustomerFactory $customerFactory,
+        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer,
+        CollectionFactory $collectionFactory,
+        PreLoadEntities $preLoadEntities
     ) {
         $this->customerFactory = $customerFactory;
         $this->resourceCustomer = $resourceCustomer;
+        $this->collectionFactory = $collectionFactory;
+        $this->preLoadEntities = $preLoadEntities;
     }
 
     /**
@@ -54,9 +71,22 @@ class Customer implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
      */
     public function load($entityId, array $additional)
     {
+        $entity = $this->preLoadEntities->execute($this, [$entityId])[$entityId] ?? null;
+        if ($entity) {
+            return $entity;
+        }
+
         $customer = $this->customerFactory->create();
         $this->resourceCustomer->load($customer, $entityId);
 
         return $customer;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCollection(): \Magento\Framework\Data\Collection\AbstractDb
+    {
+        return $this->collectionFactory->create();
     }
 }

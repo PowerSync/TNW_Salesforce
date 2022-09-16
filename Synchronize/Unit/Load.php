@@ -12,7 +12,10 @@ use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
 use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Synchronize\Unit\Load\EntityLoader\EntityPreLoaderInterface;
+use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
 
 /**
  * Load
@@ -64,6 +67,9 @@ class Load extends Synchronize\Unit\UnitAbstract
      */
     protected $objects;
 
+    /** @var PreLoadEntities */
+    private $preLoadEntities;
+
     /**
      * Load constructor.
      *
@@ -91,6 +97,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         Synchronize\Unit\HashInterface $hash,
         Objects $objects,
         SalesforceIdStorage $entityObject = null,
+        PreLoadEntities $preLoadEntities,
         array $entityLoaders = [],
         array $entityTypeMapping = []
     ) {
@@ -104,6 +111,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->entityObject = $entityObject;
         $this->entityLoaders = $entityLoaders;
         $this->entityTypeMapping = $entityTypeMapping;
+        $this->preLoadEntities = $preLoadEntities;
     }
 
     /**
@@ -157,6 +165,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->reset();
         $index = [];
         $i = 0;
+        $this->preloadEntities();
         $this->preloadObjectIds();
         foreach ($this->queues as $queue) {
             try {
@@ -399,6 +408,35 @@ class Load extends Synchronize\Unit\UnitAbstract
                         (string)$magentoType,
                         (int)$websiteId
                     );
+                }
+            }
+        }
+    }
+
+    /**
+     * @return void
+     * @throws LocalizedException
+     */
+    private function preloadEntities(): void
+    {
+        $queuesByEntityLoad = [];
+        foreach ($this->queues as $queue) {
+            $queuesByEntityLoad[$queue->getEntityLoad()][] = $queue;
+        }
+        foreach ($queuesByEntityLoad as $entityLoad => $queues) {
+            $loader = $this->loaderBy($entityLoad);
+            if ($loader instanceof PreLoaderInterface) {
+                $entityIds = array_map(
+                    static function ($queue) {
+                        return (int)$queue->getEntityId();
+                    },
+                    $queues
+                );
+                $entities = $this->preLoadEntities->execute($loader, $entityIds);
+                foreach ($this->entityLoaders as $entityLoader) {
+                    if ($entityLoader instanceof EntityPreLoaderInterface) {
+                        $entityLoader->preload($entities);
+                    }
                 }
             }
         }

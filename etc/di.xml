@@ -890,6 +890,10 @@
                 <item name="TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds" xsi:type="object">
                     TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds
                 </item>
+                <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities" xsi:type="object">
+                    TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities
+                </item>
+
             </argument>
         </arguments>
     </type>
