@@ -6,6 +6,9 @@
 
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use DateInterval;
+use DateTime;
+use Exception;
 use InvalidArgumentException;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Eav\Model\Entity\AbstractEntity;
@@ -221,7 +224,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
                 }
 
                 $object[$salesforceAttributeName] = $value;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->group()->messageError('The "%s" field mapping error: %s', $salesforceAttributeName, $e->getMessage());
             }
         }
@@ -239,8 +242,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
     /**
      * Value
      *
-     * @param AbstractModel $entity
-     * @param Model\Mapper  $mapper
+     * @param DataObject   $entity
+     * @param Model\Mapper $mapper
      *
      * @return mixed|null
      */
@@ -385,10 +388,10 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
             if ($value && in_array($attribute->getBackendType(), self::DATE_BACKEND_TYPES, true)) {
                 $value = $entity->getData($attributeCode);
                 if ($attribute->getFrontendInput() === self::ATTRIBUTE_TYPE_DATE) {
-                    $dateTime = new \DateTime($value);
+                    $dateTime = new DateTime($value);
                     $value = $dateTime->format('Y-m-d');
-                    $dateTime = new \DateTime($value);
-                    $dateTime->add(new \DateInterval('PT12H'));
+                    $dateTime = new DateTime($value);
+                    $dateTime->add(new DateInterval('PT12H'));
                     $value = $dateTime->format('Y-m-d H:i:s');
                 }
             }
@@ -478,12 +481,12 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
     }
 
     /**
-     * @param AbstractModel $entity
-     * @param Mapper        $mapper
+     * @param DataObject $entity
+     * @param Mapper     $mapper
      *
      * @return mixed
      */
-    private function getCachedValue(AbstractModel $entity, Model\Mapper $mapper)
+    private function getCachedValue(DataObject $entity, Model\Mapper $mapper)
     {
         $entityId = $entity->getId();
         $objectType = $this->objectType;
