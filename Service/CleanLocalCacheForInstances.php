@@ -46,5 +46,7 @@ class CleanLocalCacheForInstances
         foreach ($this->instances as $instance) {
             $instance->clearLocalCache();
         }
+
+        gc_collect_cycles();
     }
 }

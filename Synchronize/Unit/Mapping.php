@@ -3,8 +3,12 @@
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
+
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use DateInterval;
+use DateTime;
+use Exception;
 use InvalidArgumentException;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Eav\Model\Entity\AbstractEntity;
@@ -13,14 +17,18 @@ use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use OutOfBoundsException;
+use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model;
+use TNW\Salesforce\Model\Mapper;
 use TNW\Salesforce\Model\ResourceModel\Mapper\CollectionFactory;
 use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Synchronize\Group;
+use TNW\Salesforce\Synchronize\Units;
 
 /**
  * Mapping Abstract
  */
-class Mapping extends Synchronize\Unit\UnitAbstract
+class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstanceInterface
 {
     const PARENT_ENTITY = '__parent_entity';
 
@@ -63,18 +71,24 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      */
     protected $collectionCache;
 
+    /** @var array */
+    private $values = [];
+
+    /** @var array  */
+    private $valuesProcessed = [];
+
     /**
      * Mapping constructor.
      *
-     * @param string $name
-     * @param string $load
-     * @param string $lookup
-     * @param string $objectType
-     * @param Synchronize\Units $units
-     * @param Synchronize\Group $group
+     * @param string                  $name
+     * @param string                  $load
+     * @param string                  $lookup
+     * @param string                  $objectType
+     * @param Units                   $units
+     * @param Group                   $group
      * @param IdentificationInterface $identification
-     * @param CollectionFactory $mapperCollectionFactory
-     * @param array $dependents
+     * @param CollectionFactory       $mapperCollectionFactory
+     * @param array                   $dependents
      */
     public function __construct(
         $name,
@@ -189,8 +203,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Generate Object
      *
-     * @param AbstractModel $entity
+     * @param AbstractModel                         $entity
      * @param Model\ResourceModel\Mapper\Collection $mappers
+     *
      * @return array
      * @throws OutOfBoundsException
      * @throws LocalizedException
@@ -201,15 +216,16 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 
         /** @var Model\Mapper $mapper */
         foreach ($mappers as $mapper) {
+            $salesforceAttributeName = $mapper->getSalesforceAttributeName();
             try {
-                $value = $this->value($entity, $mapper);
+                $value = $this->getCachedValue($entity, $mapper);
                 if (null === $value && $mapper->getSkipBlankValues()) {
                     continue;
                 }
 
-                $object[$mapper->getSalesforceAttributeName()] = $value;
-            } catch (\Exception $e) {
-                $this->group()->messageError('The "%s" field mapping error: %s', $mapper->getSalesforceAttributeName(), $e->getMessage());
+                $object[$salesforceAttributeName] = $value;
+            } catch (Exception $e) {
+                $this->group()->messageError('The "%s" field mapping error: %s', $salesforceAttributeName, $e->getMessage());
             }
         }
 
@@ -226,8 +242,9 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     /**
      * Value
      *
-     * @param AbstractModel $entity
+     * @param DataObject   $entity
      * @param Model\Mapper $mapper
+     *
      * @return mixed|null
      */
     public function value($entity, $mapper)
@@ -266,6 +283,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * Find Salesforce
      *
      * @param AbstractModel $entity
+     *
      * @return mixed
      * @throws OutOfBoundsException
      */
@@ -276,6 +294,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 
     /**
      * @param $entity
+     *
      * @return string
      */
     public function getUpdateInsertFlag($entity)
@@ -287,6 +306,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * Mappers
      *
      * @param AbstractModel $entity
+     *
      * @return Model\ResourceModel\Mapper\Collection
      */
     public function mappers($entity)
@@ -313,6 +333,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
     protected function entities()
     {
         $entities = $this->load()->get('entities') ?? [];
+
         return array_filter($entities, [$this, 'filter']);
     }
 
@@ -320,6 +341,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * Filter
      *
      * @param AbstractModel $entity
+     *
      * @return bool
      * @throws OutOfBoundsException
      */
@@ -334,7 +356,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * Object By Entity Type
      *
      * @param AbstractModel $entity
-     * @param string $magentoEntityType
+     * @param string        $magentoEntityType
+     *
      * @return AbstractModel
      */
     public function objectByEntityType($entity, $magentoEntityType)
@@ -346,7 +369,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * Prepare Value
      *
      * @param AbstractModel $entity
-     * @param string $attributeCode
+     * @param string        $attributeCode
+     *
      * @return mixed
      */
     public function prepareValue($entity, $attributeCode)
@@ -364,10 +388,10 @@ class Mapping extends Synchronize\Unit\UnitAbstract
             if ($value && in_array($attribute->getBackendType(), self::DATE_BACKEND_TYPES, true)) {
                 $value = $entity->getData($attributeCode);
                 if ($attribute->getFrontendInput() === self::ATTRIBUTE_TYPE_DATE) {
-                    $dateTime = new \DateTime($value);
+                    $dateTime = new DateTime($value);
                     $value = $dateTime->format('Y-m-d');
-                    $dateTime = new \DateTime($value);
-                    $dateTime->add(new \DateInterval('PT12H'));
+                    $dateTime = new DateTime($value);
+                    $dateTime->add(new DateInterval('PT12H'));
                     $value = $dateTime->format('Y-m-d H:i:s');
                 }
             }
@@ -377,6 +401,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
                     $value = explode(',', $value);
                     $value = implode(';', $value);
                 }
+
                 return (string)$value;
             }
         }
@@ -399,6 +424,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 
                     break 2;
                 }
+
                 return implode('\n', $value);
         }
 
@@ -415,7 +441,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract
      * Default Value
      *
      * @param AbstractModel $entity
-     * @param Model\Mapper $mapper
+     * @param Model\Mapper  $mapper
+     *
      * @return mixed
      */
     protected function defaultValue($entity, $mapper)
@@ -436,10 +463,43 @@ class Mapping extends Synchronize\Unit\UnitAbstract
 
     /**
      * @param $id
+     *
      * @return string
      */
     public static function getPrepareId($id)
     {
         return $id;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function clearLocalCache(): void
+    {
+        $this->valuesProcessed = [];
+        $this->values = [];
+    }
+
+    /**
+     * @param DataObject $entity
+     * @param Mapper     $mapper
+     *
+     * @return mixed
+     */
+    private function getCachedValue(DataObject $entity, Model\Mapper $mapper)
+    {
+        $entityId = $entity->getId();
+        $objectType = $this->objectType;
+        $magentoAttributeName = $mapper->getMagentoAttributeName();
+        $salesforceAttributeName = $mapper->getSalesforceAttributeName();
+        if (isset($this->valuesProcessed[$objectType][$entityId][$magentoAttributeName][$salesforceAttributeName])) {
+            $value = $this->values[$objectType][$entityId][$magentoAttributeName][$salesforceAttributeName];
+        } else {
+            $value = $this->value($entity, $mapper);
+            $this->valuesProcessed[$objectType][$entityId][$magentoAttributeName][$salesforceAttributeName] = 1;
+            $this->values[$objectType][$entityId][$magentoAttributeName][$salesforceAttributeName] = $value;
+        }
+
+        return $value;
     }
 }

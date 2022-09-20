@@ -6,7 +6,13 @@
 
 namespace TNW\Salesforce\Model\Config;
 
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Message\ManagerInterface;
+use Magento\Store\Model\App\Emulation;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
  * Class Owner
@@ -15,41 +21,47 @@ use Psr\Log\LoggerInterface;
 class WebsiteEmulator
 {
 
-    /** @var \Magento\Store\Model\App\Emulation */
+    /** @var Emulation */
     protected $storeEmulator;
 
     /** @var WebsiteDetector */
     protected $websiteDetector;
 
-    /** @var \Magento\Framework\App\State */
+    /** @var State */
     protected $appState;
 
+    /** @var ManagerInterface */
+    private $messageManager;
+
     /** @var LoggerInterface */
-    private $logger;
+    private $systemLogger;
 
     /**
      * WebsiteEmulator constructor.
      * @param WebsiteDetector $websiteDetector
-     * @param \Magento\Store\Model\App\Emulation $storeEmulator
-     * @param \Magento\Framework\App\State $appState
+     * @param Emulation $storeEmulator
+     * @param State $appState
      */
     public function __construct(
         WebsiteDetector $websiteDetector,
-        \Magento\Store\Model\App\Emulation $storeEmulator,
-        \Magento\Framework\App\State $appState,
-        LoggerInterface $logger
+        Emulation $storeEmulator,
+        State $appState,
+        ManagerInterface $messageManager,
+        LoggerInterface $systemLogger
+
     ) {
         $this->websiteDetector = $websiteDetector;
         $this->storeEmulator = $storeEmulator;
         $this->appState = $appState;
-        $this->logger = $logger;
+        $this->messageManager = $messageManager;
+        $this->systemLogger = $systemLogger;
     }
 
     /**
      * Emulate specific store
      *
      * @param int $websiteId
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function startEnvironmentEmulation($websiteId)
     {
@@ -68,7 +80,7 @@ class WebsiteEmulator
     }
 
     /**
-     * @return \Magento\Store\Model\App\Emulation
+     * @return Emulation
      */
     public function stopEnvironmentEmulation()
     {
@@ -82,26 +94,31 @@ class WebsiteEmulator
      * @param int $websiteId
      * @param array $params
      * @return mixed
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function execInWebsite($callback, $websiteId, $params = [])
     {
         $this->startEnvironmentEmulation($websiteId);
 
+        $result = null;
         try {
             $result = $this->appState
                 ->emulateAreaCode(
-                    \Magento\Framework\App\Area::AREA_FRONTEND,
+                    Area::AREA_FRONTEND,
                     $callback,
                     array_merge([$websiteId], $params)
                 );
-
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $message = [
                 $e->getMessage(),
-                $e->getTraceAsString()
+                $e->getTraceAsString(),
             ];
-            $this->logger->critical(implode(PHP_EOL, $message));
+            $this->systemLogger->error(
+                implode(PHP_EOL, $message)
+            );
+            if ($this->appState->getAreaCode() == Area::AREA_ADMINHTML) {
+                $this->messageManager->addErrorMessage($e->getMessage());
+            }
         } finally {
             $this->stopEnvironmentEmulation();
         }
@@ -117,7 +134,7 @@ class WebsiteEmulator
      * @param array $params
      * @return mixed
      * @see execInWebsite
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function wrapEmulationWebsite($callback, $websiteId, $params = [])
     {

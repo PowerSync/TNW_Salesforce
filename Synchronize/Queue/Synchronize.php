@@ -12,6 +12,7 @@ use Magento\Framework\App\State;
 use Magento\Framework\Data\Collection;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Store\Api\WebsiteRepositoryInterface;
+use Psr\Log\LoggerInterface;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteEmulator;
 use TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory;
@@ -65,14 +66,22 @@ class Synchronize
     /** @var State */
     private $state;
 
+    /** @var LoggerInterface */
+    private $systemLogger;
+
     /**
      * Queue constructor.
-     * @param int $type
-     * @param Queue $synchronizeQueue
-     * @param CollectionFactory $collectionQueueFactory
+     *
+     * @param int                        $type
+     * @param Queue                      $synchronizeQueue
+     * @param CollectionFactory          $collectionQueueFactory
      * @param WebsiteRepositoryInterface $websiteRepository
-     * @param WebsiteEmulator $websiteEmulator
-     * @param ManagerInterface $messageManager
+     * @param WebsiteEmulator            $websiteEmulator
+     * @param ManagerInterface           $messageManager
+     * @param Config                     $salesforceConfig
+     * @param State                      $state
+     * @param LoggerInterface            $systemLogger
+     * @param bool                       $isCheck
      */
     public function __construct(
         $type,
@@ -83,6 +92,7 @@ class Synchronize
         ManagerInterface $messageManager,
         Config $salesforceConfig,
         State $state,
+        LoggerInterface $systemLogger,
         $isCheck = false
     ) {
         $this->type = $type;
@@ -94,6 +104,7 @@ class Synchronize
         $this->salesforceConfig = $salesforceConfig;
         $this->state = $state;
         $this->setIsCheck($isCheck);
+        $this->systemLogger = $systemLogger;
     }
 
     /**
@@ -163,7 +174,14 @@ class Synchronize
 
         try {
             $this->synchronizeQueue->synchronize($collection, $websiteId, $syncJobs);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
+            $message = [
+                $e->getMessage(),
+                $e->getTraceAsString(),
+            ];
+            $this->systemLogger->error(
+                implode(PHP_EOL, $message)
+            );
             if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
                 $this->messageManager->addErrorMessage($e->getMessage());
             }
