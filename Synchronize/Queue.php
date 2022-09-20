@@ -1,9 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
-declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize;
 
@@ -11,6 +10,8 @@ use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use TNW\Salesforce\Model;
+use TNW\Salesforce\Model\Config;
+use TNW\Salesforce\Model\Logger\Processor\UidProcessor;
 use TNW\Salesforce\Model\ResourceModel\Queue\Collection;
 use TNW\Salesforce\Synchronize\Exception as SalesforceException;
 use TNW\Salesforce\Synchronize\Queue\PushMqMessage;
@@ -63,14 +64,14 @@ class Queue
     /**
      * Queue constructor.
      *
-     * @param Group[]                             $groups
-     * @param array                               $phases
-     * @param Model\Config                        $salesforceConfig
-     * @param Model\ResourceModel\Queue           $resourceQueue
-     * @param Model\Logger\Processor\UidProcessor $uidProcessor
-     * @param PushMqMessage                       $pushMqMessage
-     * @param DateTime                            $dateTime
-     * @param bool                                $isCheck
+     * @param array                       $groups
+     * @param array                       $phases
+     * @param Config                      $salesforceConfig
+     * @param Model\ResourceModel\Queue   $resourceQueue
+     * @param UidProcessor                $uidProcessor
+     * @param PushMqMessage               $pushMqMessage
+     * @param DateTime                    $dateTime
+     * @param bool                        $isCheck
      */
     public function __construct(
         array                               $groups,
@@ -232,7 +233,7 @@ class Queue
                     );
 
                     // Save change status
-                    $groupCollection->each([$groupCollection->getResource(), 'save']);
+                    $groupCollection->save();
 
                     gc_collect_cycles();
                 }
@@ -346,7 +347,7 @@ class Queue
                 $allowedStatuses[] = $startStatus;
             }
         }
-        $select->where('main_table.status IN (?)',$allowedStatuses);
+        $select->where('main_table.status IN (?)', $allowedStatuses);
 
         $connection = $collection->getResource()->getConnection();
 
