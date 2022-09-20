@@ -906,4 +906,14 @@
             <argument name="logger" xsi:type="object">TNW\Logger</argument>
         </arguments>
     </type>
+    <type name="TNW\Salesforce\Synchronize\Queue\Synchronize">
+        <arguments>
+            <argument name="systemLogger" xsi:type="object">TNW\Logger</argument>
+        </arguments>
+    </type>
+    <type name="TNW\Salesforce\Model\Config\WebsiteEmulator">
+        <arguments>
+            <argument name="systemLogger" xsi:type="object">TNW\Logger</argument>
+        </arguments>
+    </type>
 </config>
