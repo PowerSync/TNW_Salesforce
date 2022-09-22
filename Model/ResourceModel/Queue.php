@@ -283,6 +283,8 @@ class Queue extends AbstractDb
     /**
      * Dependence Id By Entity Type
      *
+     * @see \TNW\Salesforce\Service\Model\ResourceModel\Queue\GetDependenceIdsByEntityType
+     *
      * @param int $queueId
      * @param string $entityType
      * @return int[]

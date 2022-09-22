@@ -269,10 +269,10 @@ class SalesforceIdStorage
      * @return int
      * @throws LocalizedException
      */
-    public function prepareWebsiteId($website)
+    public function prepareWebsiteId($website): int
     {
         $websiteId = $this->storeManager->getWebsite($website)->getId();
-        return $this->config->baseWebsiteIdLogin($websiteId);
+        return (int)$this->config->baseWebsiteIdLogin($websiteId);
     }
 
     /**
@@ -314,6 +314,31 @@ class SalesforceIdStorage
 
         return $this->resourceObjects->loadObjectIds(
             $entity->getId(),
+            $this->magentoType,
+            $this->prepareWebsiteId($website)
+        );
+    }
+
+    /**
+     * @param array $entities
+     * @param       $website
+     *
+     * @return array
+     * @throws LocalizedException
+     */
+    public function massLoadObjectIds(array $entities, $website = null)
+    {
+        if (empty($this->magentoType)) {
+            throw new Exception('magentoType was not defined!');
+        }
+
+        $entityIds = [];
+        foreach ($entities as $entity) {
+            $entityIds[] = $entity->getId();
+        }
+
+        return $this->resourceObjects->massLoadObjectIds(
+            $entityIds,
             $this->magentoType,
             $this->prepareWebsiteId($website)
         );

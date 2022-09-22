@@ -12,10 +12,14 @@ use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetDependenceIdsByEntityType;
+use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
 use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Synchronize\Group;
 use TNW\Salesforce\Synchronize\Unit\Load\EntityLoader\EntityPreLoaderInterface;
 use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
+use TNW\Salesforce\Synchronize\Units;
 
 /**
  * Load
@@ -70,21 +74,30 @@ class Load extends Synchronize\Unit\UnitAbstract
     /** @var PreLoadEntities */
     private $preLoadEntities;
 
+    /** @var GetDependenceIdsByEntityType */
+    private $getDependenceIdsByEntityType;
+
+    /** @var GetQueuesByIds */
+    private $getQueuesByIds;
+
     /**
      * Load constructor.
      *
-     * @param string                                   $name
-     * @param string                                   $magentoType
-     * @param Queue[]                                  $queues
-     * @param LoadLoaderInterface[]                    $loaders
-     * @param Synchronize\Units                        $units
-     * @param Synchronize\Group                        $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
-     * @param Synchronize\Unit\HashInterface           $hash
-     * @param Objects                                  $objects
-     * @param SalesforceIdStorage|null                 $entityObject
-     * @param EntityLoaderAbstract[]                   $entityLoaders
-     * @param array                                    $entityTypeMapping
+     * @param string                       $name
+     * @param string                       $magentoType
+     * @param Queue                        $queues
+     * @param LoadLoaderInterface          $loaders
+     * @param Units                        $units
+     * @param Group                        $group
+     * @param IdentificationInterface      $identification
+     * @param HashInterface                $hash
+     * @param Objects                      $objects
+     * @param SalesforceIdStorage|null     $entityObject
+     * @param PreLoadEntities              $preLoadEntities
+     * @param GetDependenceIdsByEntityType $getDependenceIdsByEntityType
+     * @param GetQueuesByIds               $getQueuesByIds
+     * @param EntityLoaderAbstract         $entityLoaders
+     * @param array                        $entityTypeMapping
      */
     public function __construct(
         $name,
@@ -98,6 +111,8 @@ class Load extends Synchronize\Unit\UnitAbstract
         Objects $objects,
         SalesforceIdStorage $entityObject = null,
         PreLoadEntities $preLoadEntities,
+        GetDependenceIdsByEntityType $getDependenceIdsByEntityType,
+        GetQueuesByIds $getQueuesByIds,
         array $entityLoaders = [],
         array $entityTypeMapping = []
     ) {
@@ -112,6 +127,8 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->entityLoaders = $entityLoaders;
         $this->entityTypeMapping = $entityTypeMapping;
         $this->preLoadEntities = $preLoadEntities;
+        $this->getDependenceIdsByEntityType = $getDependenceIdsByEntityType;
+        $this->getQueuesByIds = $getQueuesByIds;
     }
 
     /**
@@ -167,6 +184,8 @@ class Load extends Synchronize\Unit\UnitAbstract
         $i = 0;
         $this->preloadEntities();
         $this->preloadObjectIds();
+        $this->preloadDependedQueues();
+
         foreach ($this->queues as $queue) {
             try {
                 $i++;
@@ -218,7 +237,8 @@ class Load extends Synchronize\Unit\UnitAbstract
                         }
 
                         $additional = [];
-                        foreach ($queue->dependenciesByEntityType($this->entityTypeMap($entityType)) as $_queue) {
+                        $mappedEntityType = $this->entityTypeMap($entityType);
+                        foreach ($this->getDependedQueues((string)$queue->getId(), (string)$mappedEntityType) as $_queue) {
                             if (
                                 (!$subEntity->getGenerated() && $subEntity->getId() != $_queue->getEntityId())
                                 || ($subEntity->getGenerated() && $subEntity->getGeneratedEntityId() != $_queue->getEntityId())
@@ -440,5 +460,47 @@ class Load extends Synchronize\Unit\UnitAbstract
                 }
             }
         }
+    }
+
+    /**
+     * @return void
+     */
+    private function preloadDependedQueues(): void
+    {
+        $entityTypes = array_keys($this->entityLoaders);
+        $queueIds = [];
+        if (!$entityTypes) {
+            return;
+        }
+        foreach ($this->queues as $queue) {
+            $queueIds[] = $queue->getId();
+        }
+        $dependedQueueIdByEntityType = [];
+        foreach ($entityTypes as $entityType) {
+            $entityType = $this->entityTypeMap($entityType);
+            $dependedQueueIdByEntityType[$entityType] = $this->getDependenceIdsByEntityType->execute($queueIds, (string)$entityType);
+        }
+        $dependedQueueIdsToLoad = [];
+        foreach ($dependedQueueIdByEntityType as $dependedIdsByParent) {
+            foreach ($dependedIdsByParent as $dependedIds) {
+                $dependedQueueIdsToLoad[] = $dependedIds;
+            }
+        }
+
+        $dependedQueueIdsToLoad = array_merge([], ...$dependedQueueIdsToLoad);
+        $this->getQueuesByIds->execute($dependedQueueIdsToLoad);
+    }
+
+    /**
+     * @param string $queueId
+     * @param string $entityType
+     *
+     * @return Queue[]
+     */
+    private function getDependedQueues(string $queueId, string $entityType)
+    {
+        $dependedQueueIds = $this->getDependenceIdsByEntityType->execute([$queueId], (string)$entityType)[$queueId] ?? [];
+
+        return $this->getQueuesByIds->execute($dependedQueueIds);
     }
 }

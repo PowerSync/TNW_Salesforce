@@ -8,9 +8,13 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Service\Synchronize\Unit\Load;
 
+use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
+use TNW\Salesforce\Synchronize\Unit\Load\PreLoader\AfterPreLoadExecutorsInterface;
 use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
+use TNW\Salesforce\Synchronize\Unit\Loader\EntityAbstract;
+use TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface;
 
 class PreLoadEntities implements CleanableInstanceInterface
 {
@@ -19,24 +23,25 @@ class PreLoadEntities implements CleanableInstanceInterface
     /** @var array */
     private $cache = [];
 
-    /** @var array  */
+    /** @var array */
     private $processed = [];
 
     /**
-     * @param PreLoaderInterface $preLoader
+     * @param  LoadLoaderInterface $preLoader
      * @param array              $entityIds
      *
      * @return array
+     * @throws LocalizedException
      */
-    public function execute(PreLoaderInterface $preLoader, array $entityIds)
+    public function execute(LoadLoaderInterface $preLoader, array $entityIds)
     {
-        if (!$entityIds) {
+        if (!$entityIds || !($preLoader instanceof PreLoaderInterface)) {
             return [];
         }
 
         $entityIds = array_map('intval', $entityIds);
         $entityIds = array_unique($entityIds);
-        $type = get_class($preLoader);
+        $type = $preLoader->loadBy();
 
         $missedEntityIds = [];
         foreach ($entityIds as $entityId) {
@@ -47,16 +52,26 @@ class PreLoadEntities implements CleanableInstanceInterface
         }
 
         if ($missedEntityIds) {
-            $collection = $preLoader->getCollection();
             foreach (array_chunk($missedEntityIds, self::CHUNK_SIZE) as $missedEntityIdsChunk) {
-                $batchCollection = clone $collection;
+                $collection = $preLoader->createCollectionInstance();
 
-                $batchCollection->addFieldToFilter(
+                $collection->addFieldToFilter(
                     $collection->getIdFieldName(),
                     ['in' => $missedEntityIdsChunk]
                 );
-                foreach ($batchCollection as $item) {
-                    $this->cache[$type][$item->getId()] = $item;
+                $missedItems = [];
+                foreach ($collection as $item) {
+                    $itemId = $item->getId();
+                    $this->cache[$type][$itemId] = $item;
+                    $missedItems[$itemId] = $item;
+                }
+                if ($preLoader instanceof EntityAbstract) {
+                    $preLoader->preloadSalesforceIds($collection->getItems());
+                }
+                if ($preLoader instanceof AfterPreLoadExecutorsInterface) {
+                    foreach ($preLoader->getAfterPreLoadExecutors() as $afterLoadExecutor) {
+                        $afterLoadExecutor->execute($missedItems);
+                    }
                 }
             }
         }
@@ -66,6 +81,8 @@ class PreLoadEntities implements CleanableInstanceInterface
             $item = $this->cache[$type][$entityId] ?? null;
             $item && $result[$entityId] = $item;
         }
+
+
 
         return $result;
     }

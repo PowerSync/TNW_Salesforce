@@ -6,13 +6,16 @@
 
 namespace TNW\Salesforce\Synchronize\Unit\Load;
 
+use Magento\Framework\Data\Collection\AbstractDb;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\AfterLoadExecutorInterface;
+
 /**
  * Interface PreLoaderInterface
  */
 interface PreLoaderInterface
 {
     /**
-     * @return \Magento\Framework\Data\Collection\AbstractDb
+     * @return AbstractDb
      */
-    public function getCollection(): \Magento\Framework\Data\Collection\AbstractDb;
+    public function createCollectionInstance(): AbstractDb;
 }
