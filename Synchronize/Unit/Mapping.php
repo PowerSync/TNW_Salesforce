@@ -161,7 +161,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
     public function process()
     {
         $message = [];
-        foreach ($this->entities() as $entity) {
+        foreach ($this->entities() as $hash => $entity) {
+            $entity->setData('tnw_unique_hash', $hash);
             $mappers = $this->mappers($entity);
             $count = 0;
             $message[] = __(
@@ -183,7 +184,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
                 }))
             );
 
-            $this->cache[$entity] = $this->generateObject($entity, $mappers);
+            $this->cache[$entity] = $this->generateObject($entity, $mappers, $hash);
             $message[] = __(
                 "Entity %1 mapping result:\n%2",
                 $this->identification->printEntity($entity),
@@ -492,12 +493,20 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
         $objectType = $this->objectType;
         $magentoAttributeName = $mapper->getMagentoAttributeName();
         $salesforceAttributeName = $mapper->getSalesforceAttributeName();
-        if (isset($this->valuesProcessed[$objectType][$entityId][$magentoAttributeName][$salesforceAttributeName])) {
-            $value = $this->values[$objectType][$entityId][$magentoAttributeName][$salesforceAttributeName];
+        $entityUniqueHash = $entity->getData('tnw_unique_hash');
+        $key = hash('sha256', (sprintf(
+            '%s/%s/%s/%s',
+            $entityId,
+            $magentoAttributeName,
+            $salesforceAttributeName,
+            $entityUniqueHash
+        )));
+        if (isset($this->valuesProcessed[$objectType][$key])) {
+            $value = $this->values[$objectType][$key];
         } else {
             $value = $this->value($entity, $mapper);
-            $this->valuesProcessed[$objectType][$entityId][$magentoAttributeName][$salesforceAttributeName] = 1;
-            $this->values[$objectType][$entityId][$magentoAttributeName][$salesforceAttributeName] = $value;
+            $this->valuesProcessed[$objectType][$key] = 1;
+            $this->values[$objectType][$key] = $value;
         }
 
         return $value;
