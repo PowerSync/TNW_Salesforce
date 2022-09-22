@@ -29,7 +29,10 @@ class IsSyncDisabled implements IsSyncDisabledInterface, CleanableInstanceInterf
     private $eavConfig;
 
     /** @var bool[] */
-    private $cache;
+    private $cache = [];
+
+    /** @var array  */
+    private $processed = [];
 
     /**
      * @param ResourceConnection $resourceConnection
@@ -55,9 +58,10 @@ class IsSyncDisabled implements IsSyncDisabledInterface, CleanableInstanceInterf
 
         $missedCustomerIds = [];
         foreach ($entityIds as $customerId) {
-            if (!isset($this->cache[$customerId])) {
+            if (!isset($this->processed[$customerId])) {
                 $missedCustomerIds[] = $customerId;
                 $this->cache[$customerId] = false;
+                $this->processed[$customerId] = 1;
             }
         }
 
@@ -101,5 +105,6 @@ class IsSyncDisabled implements IsSyncDisabledInterface, CleanableInstanceInterf
     public function clearLocalCache(): void
     {
         $this->cache = [];
+        $this->processed = [];
     }
 }
