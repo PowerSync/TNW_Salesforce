@@ -241,11 +241,11 @@ class Queue
 
                     // Save change status
                     $groupCollection->save();
-                    $this->cleanLocalCacheForInstances->execute();
 
                     gc_collect_cycles();
                 }
             }
+            $this->cleanLocalCacheForInstances->execute();
         }
 
         return;
