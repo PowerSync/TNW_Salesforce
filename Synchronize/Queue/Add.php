@@ -15,6 +15,7 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Message\MessageInterface;
 use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\MessageQueue\PublisherAdapter;
 use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
 use TNW\Salesforce\Model\Config;
@@ -628,42 +629,44 @@ class Add
     private function updateRelationsWithErrors(array $queueDataToSave): void
     {
         if (!empty($queueDataToSave)) {
-            $orWhere = array_map(function (array $queue) {
-                return sprintf(
-                    '(old_queue.identify = \'%s\' AND old_queue.website_id= \'%s\')',
-                    $queue['identify'],
-                    $queue['website_id']
-                );
-            },
-                $queueDataToSave
-            );
 
-            $connection = $this->resourceQueue->getConnection();
-            $queueTable = $connection->getTableName('tnw_salesforce_entity_queue');
-            $relationTable = $connection->getTableName('tnw_salesforce_entity_queue_relation');
-            $select = $connection->select()
-                ->distinct()
-                ->join(
-                    ['relation' => $relationTable],
-                    'relation.parent_id = queue.queue_id',
-                    [
-                        'composite_status' => new \Zend_Db_Expr('\'new\''),
-                        'sync_attempt' => new \Zend_Db_Expr(0),
-                    ]
-                )
-                ->join(
-                    ['old_queue' => $queueTable],
-                    'relation.queue_id = old_queue.queue_id',
-                    []
-                )
-                ->where(
-                    'queue.composite_status = \'error\''
-                )
-                ->where(
-                    implode(' OR ', $orWhere)
+            foreach (array_chunk($queueDataToSave, ChunkSizeInterface::CHUNK_SIZE_200) as $queueDataToSaveBatch) {
+                $orWhere = array_map(function (array $queue) {
+                    return sprintf(
+                        '(old_queue.identify = \'%s\' AND old_queue.website_id= \'%s\')',
+                        $queue['identify'],
+                        $queue['website_id']
+                    );
+                },
+                    $queueDataToSaveBatch
                 );
-            $query = $connection->updateFromSelect($select, ['queue' => $queueTable]);
-            $connection->query($query);
+                $connection = $this->resourceQueue->getConnection();
+                $queueTable = $connection->getTableName('tnw_salesforce_entity_queue');
+                $relationTable = $connection->getTableName('tnw_salesforce_entity_queue_relation');
+                $select = $connection->select()
+                    ->distinct()
+                    ->join(
+                        ['relation' => $relationTable],
+                        'relation.parent_id = queue.queue_id',
+                        [
+                            'composite_status' => new \Zend_Db_Expr('\'new\''),
+                            'sync_attempt' => new \Zend_Db_Expr(0),
+                        ]
+                    )
+                    ->join(
+                        ['old_queue' => $queueTable],
+                        'relation.queue_id = old_queue.queue_id',
+                        []
+                    )
+                    ->where(
+                        'queue.composite_status = \'error\''
+                    )
+                    ->where(
+                        implode(' OR ', $orWhere)
+                    );
+                $query = $connection->updateFromSelect($select, ['queue' => $queueTable]);
+                $connection->query($query);
+            }
         }
     }
 }
