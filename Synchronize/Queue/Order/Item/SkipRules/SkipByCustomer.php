@@ -27,7 +27,10 @@ class SkipByCustomer implements SkipInterface, CleanableInstanceInterface, Prelo
     private $isSyncDisabled;
 
     /** @var int[] */
-    private $cache;
+    private $cache = [];
+
+    /** @var array  */
+    private $processed = [];
 
     /** @var ResourceConnection */
     private $resourceConnection;
@@ -68,6 +71,7 @@ class SkipByCustomer implements SkipInterface, CleanableInstanceInterface, Prelo
     public function clearLocalCache(): void
     {
         $this->cache = [];
+        $this->processed = [];
     }
 
     /**
@@ -112,9 +116,10 @@ class SkipByCustomer implements SkipInterface, CleanableInstanceInterface, Prelo
 
         $missedEntityIds = [];
         foreach ($entityIds as $entityId) {
-            if (!isset($this->cache[$entityId])) {
+            if (!isset($this->processed[$entityId])) {
                 $missedEntityIds[] = $entityId;
                 $this->cache[$entityId] = null;
+                $this->processed[$entityId] = 1;
             }
         }
 

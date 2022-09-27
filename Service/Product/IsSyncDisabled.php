@@ -28,7 +28,10 @@ class IsSyncDisabled implements CleanableInstanceInterface
     private $eavConfig;
 
     /** @var bool[] */
-    private $cache;
+    private $cache = [];
+
+    /** @var array  */
+    private $processed = [];
 
     /**
      * @param \Magento\Catalog\Model\ResourceModel\Product $resourceConnection
@@ -44,12 +47,11 @@ class IsSyncDisabled implements CleanableInstanceInterface
 
     /**
      * @param array $entityIds
-     * @param int   $storeId
      *
      * @return array
      * @throws LocalizedException
      */
-    public function execute(array $entityIds, int $storeId): array
+    public function execute(array $entityIds): array
     {
         if (!$entityIds) {
             return [];
@@ -60,9 +62,10 @@ class IsSyncDisabled implements CleanableInstanceInterface
 
         $missedEntityIds = [];
         foreach ($entityIds as $entityId) {
-            if (!isset($this->cache[$entityId])) {
+            if (!isset($this->processed[$entityId])) {
                 $missedEntityIds[] = $entityId;
                 $this->cache[$entityId] = false;
+                $this->processed[$entityId] = 1;
             }
         }
 
@@ -79,7 +82,7 @@ class IsSyncDisabled implements CleanableInstanceInterface
             $select->from($table, [$linkField]);
             $select->where('attribute_id = ?', $attribute->getId());
             $select->where('value = 1');
-            $select->where('store_id = ?', $storeId);
+            $select->where('store_id = 0');
 
             foreach (array_chunk($missedEntityIds, self::CHUNK_SIZE) as $missedEntityIdsChunk) {
                 $batchSelect = clone $select;
@@ -108,5 +111,6 @@ class IsSyncDisabled implements CleanableInstanceInterface
     public function clearLocalCache(): void
     {
         $this->cache = [];
+        $this->processed = [];
     }
 }

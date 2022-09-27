@@ -164,6 +164,14 @@ class Collection extends AbstractCollection
     }
 
     /**
+     * @return \TNW\Salesforce\Model\Queue[]
+     */
+    public function getItemsWithoutLoad()
+    {
+        return $this->_items;
+    }
+
+    /**
      * Add Filter To Sync Type
      *
      * @param int $syncType

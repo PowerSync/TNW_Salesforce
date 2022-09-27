@@ -24,7 +24,10 @@ class GetCustomerIdByQuoteId implements GetCustomerIdByQuoteIdInterface, Cleanab
     private $quoteResource;
 
     /** @var int[] */
-    private $cache;
+    private $cache = [];
+
+    /** @var array  */
+    private $processed = [];
 
     /**
      * @param QuoteResource $quoteResource
@@ -48,9 +51,10 @@ class GetCustomerIdByQuoteId implements GetCustomerIdByQuoteIdInterface, Cleanab
 
         $missedEntityIds = [];
         foreach ($entityIds as $entityId) {
-            if (!isset($this->cache[$entityId])) {
+            if (!isset($this->processed[$entityId])) {
                 $missedEntityIds[] = $entityId;
                 $this->cache[$entityId] = null;
+                $this->processed[$entityId] = 1;
             }
         }
 
@@ -84,6 +88,7 @@ class GetCustomerIdByQuoteId implements GetCustomerIdByQuoteIdInterface, Cleanab
     public function clearLocalCache(): void
     {
         $this->cache = [];
+        $this->processed = [];
     }
 
     /**

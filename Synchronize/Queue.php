@@ -13,6 +13,7 @@ use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Logger\Processor\UidProcessor;
 use TNW\Salesforce\Model\ResourceModel\Queue\Collection;
+use TNW\Salesforce\Service\CleanLocalCacheForInstances;
 use TNW\Salesforce\Synchronize\Exception as SalesforceException;
 use TNW\Salesforce\Synchronize\Queue\PushMqMessage;
 use Zend_Db_Expr;
@@ -61,6 +62,9 @@ class Queue
     /** @var DateTime */
     private $dateTime;
 
+    /** @var CleanLocalCacheForInstances */
+    private $cleanLocalCacheForInstances;
+
     /**
      * Queue constructor.
      *
@@ -71,6 +75,7 @@ class Queue
      * @param UidProcessor                $uidProcessor
      * @param PushMqMessage               $pushMqMessage
      * @param DateTime                    $dateTime
+     * @param CleanLocalCacheForInstances $cleanLocalCacheForInstances
      * @param bool                        $isCheck
      */
     public function __construct(
@@ -81,6 +86,7 @@ class Queue
         Model\Logger\Processor\UidProcessor $uidProcessor,
         PushMqMessage                       $pushMqMessage,
         DateTime                            $dateTime,
+        CleanLocalCacheForInstances         $cleanLocalCacheForInstances,
                                             $isCheck = false
     ) {
         $this->groups = $groups;
@@ -91,6 +97,7 @@ class Queue
         $this->pushMqMessage = $pushMqMessage;
         $this->setIsCheck($isCheck);
         $this->dateTime = $dateTime;
+        $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
     }
 
     /**
@@ -238,6 +245,7 @@ class Queue
                     gc_collect_cycles();
                 }
             }
+            $this->cleanLocalCacheForInstances->execute();
         }
 
         return;

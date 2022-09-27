@@ -25,6 +25,9 @@ class MassLoadObjectIds implements CleanableInstanceInterface
     /** @var array */
     private $cache = [];
 
+    /** @var array  */
+    private $processed = [];
+
     /** @var Objects */
     private $objectsResource;
 
@@ -67,9 +70,10 @@ class MassLoadObjectIds implements CleanableInstanceInterface
             $missedEntityIds = [];
             $baseWebsiteId = $this->config->baseWebsiteIdLogin($websiteId);
             foreach ($entityIds as $entityId) {
-                if (!isset($this->cache[$baseWebsiteId][$magentoType][$entityId])) {
+                if (!isset($this->processed[$baseWebsiteId][$magentoType][$entityId])) {
                     $missedEntityIds[] = $entityId;
                     $this->cache[$baseWebsiteId][$magentoType][$entityId] = [];
+                    $this->processed[$baseWebsiteId][$magentoType][$entityId] = 1;
                 }
             }
             $connection = $this->objectsResource->getConnection();
@@ -120,5 +124,6 @@ class MassLoadObjectIds implements CleanableInstanceInterface
     public function clearLocalCache(): void
     {
         $this->cache = [];
+        $this->processed = [];
     }
 }
