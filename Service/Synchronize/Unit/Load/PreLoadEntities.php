@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace TNW\Salesforce\Service\Synchronize\Unit\Load;
 
 use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Synchronize\Unit\Load\PreLoader\AfterPreLoadExecutorsInterface;
@@ -16,6 +17,9 @@ use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
 use TNW\Salesforce\Synchronize\Unit\Loader\EntityAbstract;
 use TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface;
 
+/**
+ *  Class PreLoadEntities
+ */
 class PreLoadEntities implements CleanableInstanceInterface
 {
     private const CHUNK_SIZE = ChunkSizeInterface::CHUNK_SIZE;
@@ -26,62 +30,83 @@ class PreLoadEntities implements CleanableInstanceInterface
     /** @var array */
     private $processed = [];
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
-     * @param  LoadLoaderInterface $preLoader
-     * @param array              $entityIds
+     * @param LoggerInterface $logger
+     */
+    public function __construct(
+        LoggerInterface $logger
+    ) {
+        $this->logger = $logger;
+    }
+
+    /**
+     * @param LoadLoaderInterface $preLoader
+     * @param array               $entityIds
      *
      * @return array
-     * @throws LocalizedException
      */
-    public function execute(LoadLoaderInterface $preLoader, array $entityIds)
+    public function execute(LoadLoaderInterface $preLoader, array $entityIds): array
     {
         if (!$entityIds || !($preLoader instanceof PreLoaderInterface)) {
             return [];
         }
 
-        $entityIds = array_map('intval', $entityIds);
-        $entityIds = array_unique($entityIds);
-        $type = $preLoader->loadBy();
-
-        $missedEntityIds = [];
-        foreach ($entityIds as $entityId) {
-            if (!isset($this->processed[$type][$entityId])) {
-                $missedEntityIds[] = $entityId;
-                $this->processed[$type][$entityId] = 1;
+        try {
+            $entityIds = array_map('intval', $entityIds);
+            $entityIds = array_unique($entityIds);
+            $type = $preLoader->loadBy();
+            $missedEntityIds = [];
+            foreach ($entityIds as $entityId) {
+                if (!isset($this->processed[$type][$entityId])) {
+                    $missedEntityIds[] = $entityId;
+                    $this->processed[$type][$entityId] = 1;
+                }
             }
-        }
+            if ($missedEntityIds) {
+                foreach (array_chunk($missedEntityIds, self::CHUNK_SIZE) as $missedEntityIdsChunk) {
+                    $collection = $preLoader->createCollectionInstance();
 
-        if ($missedEntityIds) {
-            foreach (array_chunk($missedEntityIds, self::CHUNK_SIZE) as $missedEntityIdsChunk) {
-                $collection = $preLoader->createCollectionInstance();
-
-                $collection->addFieldToFilter(
-                    $collection->getIdFieldName(),
-                    ['in' => $missedEntityIdsChunk]
-                );
-                $missedItems = [];
-                foreach ($collection as $item) {
-                    $itemId = $item->getId();
-                    $this->cache[$type][$itemId] = $item;
-                    $missedItems[$itemId] = $item;
-                }
-                if ($preLoader instanceof EntityAbstract) {
-                    $preLoader->preloadSalesforceIds($collection->getItems());
-                }
-                if ($preLoader instanceof AfterPreLoadExecutorsInterface) {
-                    foreach ($preLoader->getAfterPreLoadExecutors() as $afterLoadExecutor) {
-                        $afterLoadExecutor->execute($missedItems);
+                    $collection->addFieldToFilter(
+                        $collection->getIdFieldName(),
+                        ['in' => $missedEntityIdsChunk]
+                    );
+                    $missedItems = [];
+                    foreach ($collection as $item) {
+                        $itemId = $item->getId();
+                        $missedItems[$itemId] = $item;
+                    }
+                    if ($preLoader instanceof EntityAbstract) {
+                        $preLoader->preloadSalesforceIds($collection->getItems());
+                    }
+                    if ($preLoader instanceof AfterPreLoadExecutorsInterface) {
+                        foreach ($preLoader->getAfterPreLoadExecutors() as $afterLoadExecutor) {
+                           $missedItems = $afterLoadExecutor->execute($missedItems);
+                        }
+                    }
+                    foreach ($missedItems as $itemId => $missedItem) {
+                        $this->cache[$type][$itemId] = $missedItem;
                     }
                 }
             }
-        }
+            $result = [];
+            foreach ($entityIds as $entityId) {
+                $item = $this->cache[$type][$entityId] ?? null;
+                $item && $result[$entityId] = $item;
+            }
+        } catch (\Throwable $e) {
+            $result = [];
+            $messages = [
+                $e->getMessage(),
+                $e->getTraceAsString()
+            ];
 
-        $result = [];
-        foreach ($entityIds as $entityId) {
-            $item = $this->cache[$type][$entityId] ?? null;
-            $item && $result[$entityId] = $item;
+            $this->logger->critical(
+                implode(PHP_EOL, $messages)
+            );
         }
-
 
 
         return $result;

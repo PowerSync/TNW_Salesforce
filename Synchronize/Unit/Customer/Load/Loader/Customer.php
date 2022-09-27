@@ -8,7 +8,6 @@ namespace TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory;
 use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use TNW\Salesforce\Model\Mapper;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;

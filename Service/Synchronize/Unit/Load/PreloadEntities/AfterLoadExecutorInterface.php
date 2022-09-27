@@ -16,5 +16,5 @@ interface AfterLoadExecutorInterface
      *
      * @return void
      */
-    public function execute(array $result):void;
+    public function execute(array $result): array;
 }
