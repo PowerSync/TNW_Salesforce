@@ -90,7 +90,7 @@ class Collection extends AbstractCollection
             $exceptionMessages[] = implode(PHP_EOL, $message);
         }
 
-        foreach (array_chunk($itemsToInsert, ChunkSizeInterface::CHUNK_SIZE) as $itemsToInsertChunk) {
+        foreach (array_chunk($itemsToInsert, ChunkSizeInterface::CHUNK_SIZE_200) as $itemsToInsertChunk) {
             try {
                 $connection->beginTransaction();
                 $connection->insertOnDuplicate($this->getMainTable(), $itemsToInsertChunk);
@@ -143,7 +143,7 @@ class Collection extends AbstractCollection
         $connection = $this->getConnection();
         $tableName = $this->getTable('tnw_salesforce_entity_queue_relation');
         $exceptionMessages = [];
-        foreach (array_chunk($itemsToInsert, ChunkSizeInterface::CHUNK_SIZE) as $itemsToInsertChunk) {
+        foreach (array_chunk($itemsToInsert, ChunkSizeInterface::CHUNK_SIZE_200) as $itemsToInsertChunk) {
             try {
                 $connection->beginTransaction();
                 $connection->insertOnDuplicate($tableName, $itemsToInsertChunk);
