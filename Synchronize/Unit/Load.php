@@ -446,13 +446,14 @@ class Load extends Synchronize\Unit\UnitAbstract
         foreach ($queuesByEntityLoad as $entityLoad => $queues) {
             $loader = $this->loaderBy($entityLoad);
             if ($loader instanceof PreLoaderInterface) {
-                $entityIds = array_map(
-                    static function ($queue) {
-                        return (int)$queue->getEntityId();
-                    },
-                    $queues
-                );
-                $entities = $this->preLoadEntities->execute($loader, $entityIds);
+                $entityIds = [];
+                $entityLoadAdditional = [];
+                foreach ($queues as $queue) {
+                    $entityId = (int)$queue->getEntityId();
+                    $entityIds[] = $entityId;
+                    $entityLoadAdditional[$entityId] = $queue->getEntityLoadAdditional() ?? [];
+                }
+                $entities = $this->preLoadEntities->execute($loader, $entityIds, $entityLoadAdditional);
                 foreach ($this->entityLoaders as $entityLoader) {
                     if ($entityLoader instanceof EntityPreLoaderInterface) {
                         $entityLoader->preload($entities);

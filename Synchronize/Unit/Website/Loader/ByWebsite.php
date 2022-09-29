@@ -7,55 +7,46 @@
 namespace TNW\Salesforce\Synchronize\Unit\Website\Loader;
 
 use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\DataObject;
 use Magento\Store;
-use Magento\Store\Api\Data\WebsiteInterface;
+use Magento\Store\Model\ResourceModel\Website;
+use Magento\Store\Model\ResourceModel\Website\CollectionFactory;
+use Magento\Store\Model\WebsiteFactory;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
+use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
 use TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface;
 
 /**
  * Load By Website
  */
-class ByWebsite implements LoadLoaderInterface, \TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface
+class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
 {
     const LOAD_BY = 'website';
 
-    /**
-     * @var Store\Model\WebsiteFactory
-     */
-    private $websiteFactory;
-
-    /**
-     * @var Store\Model\ResourceModel\Website
-     */
-    private $resourceWebsite;
-
-    /** @var \TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities */
+    /** @var PreLoadEntities */
     private $preLoadEntities;
 
-    /** @var Store\Model\ResourceModel\Website\CollectionFactory */
+    /** @var CollectionFactory */
     private $collectionFactory;
 
     /**
      * ByWebsite constructor.
      *
-     * @param Store\Model\WebsiteFactory        $websiteFactory
-     * @param Store\Model\ResourceModel\Website $resourceWebsite
+     * @param WebsiteFactory    $websiteFactory
+     * @param Website           $resourceWebsite
+     * @param PreLoadEntities   $preLoadEntities
+     * @param CollectionFactory $collectionFactory
      */
     public function __construct(
-        Store\Model\WebsiteFactory                                    $websiteFactory,
-        Store\Model\ResourceModel\Website                             $resourceWebsite,
-        \TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities $preLoadEntities,
-        \Magento\Store\Model\ResourceModel\Website\CollectionFactory  $collectionFactory
+        PreLoadEntities $preLoadEntities,
+        CollectionFactory  $collectionFactory
     ) {
-        $this->websiteFactory = $websiteFactory;
-        $this->resourceWebsite = $resourceWebsite;
         $this->preLoadEntities = $preLoadEntities;
         $this->collectionFactory = $collectionFactory;
     }
 
     /**
-     * Load Type
-     *
-     * @return string
+     * @inheritDoc
      */
     public function loadBy()
     {
@@ -63,23 +54,11 @@ class ByWebsite implements LoadLoaderInterface, \TNW\Salesforce\Synchronize\Unit
     }
 
     /**
-     * Load
-     *
-     * @param int   $entityId
-     * @param array $additional
-     *
-     * @return WebsiteInterface
+     * @inheritDoc
      */
     public function load($entityId, array $additional)
     {
-        $entity = $this->preLoadEntities->execute($this, [$entityId])[$entityId] ?? null;
-        if ($entity) {
-            return $entity;
-        }
-        $website = $this->websiteFactory->create();
-        $this->resourceWebsite->load($website, $entityId);
-
-        return $website;
+        return $this->preLoadEntities->execute($this, [$entityId])[$entityId] ?? null;
     }
 
     /**

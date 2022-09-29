@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Service\Synchronize\Unit\Load;
 
-use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
 use Psr\Log\LoggerInterface;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
@@ -45,10 +45,11 @@ class PreLoadEntities implements CleanableInstanceInterface
     /**
      * @param LoadLoaderInterface $preLoader
      * @param array               $entityIds
+     * @param array               $entityAdditional
      *
-     * @return array
+     * @return AbstractModel[]
      */
-    public function execute(LoadLoaderInterface $preLoader, array $entityIds): array
+    public function execute(LoadLoaderInterface $preLoader, array $entityIds, array $entityAdditional = []): array
     {
         if (!$entityIds || !($preLoader instanceof PreLoaderInterface)) {
             return [];
@@ -74,16 +75,18 @@ class PreLoadEntities implements CleanableInstanceInterface
                         ['in' => $missedEntityIdsChunk]
                     );
                     $missedItems = [];
+                    $missedEntityAdditional = [];
                     foreach ($collection as $item) {
                         $itemId = $item->getId();
                         $missedItems[$itemId] = $item;
+                        $missedEntityAdditional[$itemId] = $entityAdditional[$itemId] ?? [];
                     }
                     if ($preLoader instanceof EntityAbstract) {
                         $preLoader->preloadSalesforceIds($collection->getItems());
                     }
                     if ($preLoader instanceof AfterPreLoadExecutorsInterface) {
                         foreach ($preLoader->getAfterPreLoadExecutors() as $afterLoadExecutor) {
-                           $missedItems = $afterLoadExecutor->execute($missedItems);
+                           $missedItems = $afterLoadExecutor->execute($missedItems, $missedEntityAdditional);
                         }
                     }
                     foreach ($missedItems as $itemId => $missedItem) {

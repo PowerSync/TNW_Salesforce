@@ -36,7 +36,7 @@ abstract class EntityAbstract implements \TNW\Salesforce\Synchronize\Unit\LoadLo
      */
     public function loadSalesforceId($entity)
     {
-        if (null !== $this->salesforceIdStorage && null !== $entity->getId()) {
+        if (null !== $this->salesforceIdStorage && $entity && null !== $entity->getId()) {
             $this->salesforceIdStorage->load($entity, $entity->getData('config_website'));
         }
 

@@ -5,13 +5,12 @@
  */
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader;
 
-use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory;
 use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\DataObject;
 use TNW\Salesforce\Model\Mapper;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
-use TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\AfterLoadExecutorInterface;
 use TNW\Salesforce\Synchronize\Unit\Load\PreLoader\AfterPreLoadExecutorsInterface;
 use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
 use TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface;
@@ -22,16 +21,6 @@ use TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface;
 class Customer implements LoadLoaderInterface, PreLoaderInterface, AfterPreLoadExecutorsInterface
 {
     const LOAD_BY = 'customer';
-
-    /**
-     * @var CustomerFactory
-     */
-    private $customerFactory;
-
-    /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer
-     */
-    private $resourceCustomer;
 
     /** @var CollectionFactory */
     private $collectionFactory;
@@ -48,23 +37,17 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface, AfterPreLoadE
     /**
      * ByCustomer constructor.
      *
-     * @param CustomerFactory                                $customerFactory
-     * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
      * @param CollectionFactory                              $collectionFactory
      * @param PreLoadEntities                                $preLoadEntities
      * @param GetMappedAttributeCodesByMagentoType           $getMappedAttributeCodesByMagentoType
      * @param array                                          $afterPreLoadLoadExecutors
      */
     public function __construct(
-        CustomerFactory $customerFactory,
-        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer,
         CollectionFactory $collectionFactory,
         PreLoadEntities $preLoadEntities,
         GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType,
         array $afterPreLoadLoadExecutors = []
     ) {
-        $this->customerFactory = $customerFactory;
-        $this->resourceCustomer = $resourceCustomer;
         $this->collectionFactory = $collectionFactory;
         $this->preLoadEntities = $preLoadEntities;
         $this->getMappedAttributeCodesByMagentoType = $getMappedAttributeCodesByMagentoType;
@@ -72,9 +55,7 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface, AfterPreLoadE
     }
 
     /**
-     * Load Type
-     *
-     * @return string
+     * @inheritDoc
      */
     public function loadBy()
     {
@@ -82,23 +63,11 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface, AfterPreLoadE
     }
 
     /**
-     * Load
-     *
-     * @param int $entityId
-     * @param array $additional
-     * @return \Magento\Customer\Model\Customer
+     * @inheritDoc
      */
     public function load($entityId, array $additional)
     {
-        $entity = $this->preLoadEntities->execute($this, [$entityId])[$entityId] ?? null;
-        if ($entity) {
-            return $entity;
-        }
-
-        $customer = $this->customerFactory->create();
-        $this->resourceCustomer->load($customer, $entityId);
-
-        return $customer;
+        return $this->preLoadEntities->execute($this, [$entityId])[$entityId] ?? null;
     }
 
     /**

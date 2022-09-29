@@ -12,9 +12,9 @@ namespace TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities;
 interface AfterLoadExecutorInterface
 {
     /**
-     * @param array $result
+     * @param array $entities
      *
      * @return void
      */
-    public function execute(array $result): array;
+    public function execute(array $entities, array $entityAdditionalByEntityId = []): array;
 }

@@ -5,6 +5,8 @@
  */
 namespace TNW\Salesforce\Synchronize\Unit;
 
+use Magento\Framework\Model\AbstractModel;
+
 interface LoadLoaderInterface
 {
     /**
@@ -19,7 +21,7 @@ interface LoadLoaderInterface
      *
      * @param int $entityId
      * @param array $additional
-     * @return \Magento\Framework\Model\AbstractModel
+     * @return AbstractModel
      */
     public function load($entityId, array $additional);
 }
