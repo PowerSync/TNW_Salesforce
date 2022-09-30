@@ -7,9 +7,7 @@
 namespace TNW\Salesforce\Synchronize\Unit\Website\Loader;
 
 use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\DataObject;
-use Magento\Store;
-use Magento\Store\Model\ResourceModel\Website;
+use Magento\Framework\Model\AbstractModel;
 use Magento\Store\Model\ResourceModel\Website\CollectionFactory;
 use Magento\Store\Model\WebsiteFactory;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
@@ -29,18 +27,21 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
     /** @var CollectionFactory */
     private $collectionFactory;
 
+    /** @var WebsiteFactory */
+    private $factory;
+
     /**
      * ByWebsite constructor.
      *
-     * @param WebsiteFactory    $websiteFactory
-     * @param Website           $resourceWebsite
      * @param PreLoadEntities   $preLoadEntities
      * @param CollectionFactory $collectionFactory
      */
     public function __construct(
-        PreLoadEntities $preLoadEntities,
-        CollectionFactory  $collectionFactory
+        WebsiteFactory    $factory,
+        PreLoadEntities   $preLoadEntities,
+        CollectionFactory $collectionFactory
     ) {
+        $this->factory = $factory;
         $this->preLoadEntities = $preLoadEntities;
         $this->collectionFactory = $collectionFactory;
     }
@@ -58,7 +59,7 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
      */
     public function load($entityId, array $additional)
     {
-        return $this->preLoadEntities->execute($this, [$entityId])[$entityId] ?? null;
+        return $this->preLoadEntities->execute($this, [$entityId], [$entityId => $additional])[$entityId] ?? null;
     }
 
     /**
@@ -67,5 +68,13 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
     public function createCollectionInstance(): AbstractDb
     {
         return $this->collectionFactory->create();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function createEmptyEntity(): AbstractModel
+    {
+        return $this->factory->create();
     }
 }

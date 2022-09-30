@@ -5,9 +5,10 @@
  */
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader;
 
+use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory;
 use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\DataObject;
+use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Model\Mapper;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
@@ -34,20 +35,26 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface, AfterPreLoadE
     /** @var array */
     private $afterPreLoadLoadExecutors;
 
+    /** @var CustomerFactory */
+    private $factory;
+
     /**
      * ByCustomer constructor.
      *
-     * @param CollectionFactory                              $collectionFactory
-     * @param PreLoadEntities                                $preLoadEntities
-     * @param GetMappedAttributeCodesByMagentoType           $getMappedAttributeCodesByMagentoType
-     * @param array                                          $afterPreLoadLoadExecutors
+     * @param CustomerFactory                      $factory
+     * @param CollectionFactory                    $collectionFactory
+     * @param PreLoadEntities                      $preLoadEntities
+     * @param GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType
+     * @param array                                $afterPreLoadLoadExecutors
      */
     public function __construct(
+        CustomerFactory $factory,
         CollectionFactory $collectionFactory,
         PreLoadEntities $preLoadEntities,
         GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType,
         array $afterPreLoadLoadExecutors = []
     ) {
+        $this->factory = $factory;
         $this->collectionFactory = $collectionFactory;
         $this->preLoadEntities = $preLoadEntities;
         $this->getMappedAttributeCodesByMagentoType = $getMappedAttributeCodesByMagentoType;
@@ -67,7 +74,7 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface, AfterPreLoadE
      */
     public function load($entityId, array $additional)
     {
-        return $this->preLoadEntities->execute($this, [$entityId])[$entityId] ?? null;
+        return $this->preLoadEntities->execute($this, [$entityId], [$entityId => $additional])[$entityId] ?? null;
     }
 
     /**
@@ -90,5 +97,13 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface, AfterPreLoadE
     public function getAfterPreLoadExecutors(): array
     {
         return $this->afterPreLoadLoadExecutors;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function createEmptyEntity(): AbstractModel
+    {
+        return $this->factory->create();
     }
 }

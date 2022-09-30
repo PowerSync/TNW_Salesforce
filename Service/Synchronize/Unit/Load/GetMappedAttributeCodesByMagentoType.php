@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Service\Synchronize\Unit\Load;
 
+use Magento\Catalog\Model\Product;
 use Magento\Customer\Model\Customer;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
@@ -18,7 +19,8 @@ use TNW\Salesforce\Model\Mapper;
 class GetMappedAttributeCodesByMagentoType implements CleanableInstanceInterface
 {
     private const ENTITY_TYPE_MAP = [
-        Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER => Customer::ENTITY
+        Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER => Customer::ENTITY,
+        Mapper::MAGENTO_ENTITY_TYPE_PRODUCT => Product::ENTITY,
     ];
 
     /** @var array */

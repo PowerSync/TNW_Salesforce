@@ -7,6 +7,7 @@
 namespace TNW\Salesforce\Synchronize\Unit\Load;
 
 use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\AfterLoadExecutorInterface;
 
 /**
@@ -18,4 +19,9 @@ interface PreLoaderInterface
      * @return AbstractDb
      */
     public function createCollectionInstance(): AbstractDb;
+
+    /**
+     * @return AbstractModel
+     */
+    public function createEmptyEntity(): AbstractModel;
 }

@@ -96,7 +96,7 @@ class PreLoadEntities implements CleanableInstanceInterface
             }
             $result = [];
             foreach ($entityIds as $entityId) {
-                $item = $this->cache[$type][$entityId] ?? null;
+                $item = $this->cache[$type][$entityId] ?? $preLoader->createEmptyEntity();
                 $item && $result[$entityId] = $item;
             }
         } catch (\Throwable $e) {
