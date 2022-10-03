@@ -14,7 +14,7 @@ use TNW\Salesforce\Synchronize\Transport;
  */
 class Query implements Transport\Calls\QueryInterface
 {
-    const MAX_LENGTH = 7000;
+    const MAX_LENGTH = 20000;
 
     /**
      * @var \Magento\Framework\Event\Manager
