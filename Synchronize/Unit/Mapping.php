@@ -384,7 +384,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
         ) {
             /** @var Attribute $attribute */
             $attribute = $entity->getResource()->getAttribute($attributeCode);
-            $value = (string)$attribute->getFrontend()->getValue($entity);
+            $value = $attribute->getFrontend()->getValue($entity);
 
             if ($value && in_array($attribute->getBackendType(), self::DATE_BACKEND_TYPES, true)) {
                 $value = $entity->getData($attributeCode);
@@ -399,6 +399,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
 
             if (!empty($value)) {
                 if ($attribute->getFrontendInput() === 'multiselect') {
+                    $value = is_array($value) ? implode(',', $value) : (string)$value;
                     $value = explode(',', $value);
                     $value = implode(';', $value);
                 }
