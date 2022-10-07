@@ -12,7 +12,6 @@ use Magento\Framework\Model\AbstractModel;
 use Psr\Log\LoggerInterface;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
-use TNW\Salesforce\Synchronize\Unit\Load\PreLoader\AfterPreLoadExecutorsInterface;
 use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
 use TNW\Salesforce\Synchronize\Unit\Loader\EntityAbstract;
 use TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface;
@@ -70,24 +69,30 @@ class PreLoadEntities implements CleanableInstanceInterface
                 foreach (array_chunk($missedEntityIds, self::CHUNK_SIZE) as $missedEntityIdsChunk) {
                     $collection = $preLoader->createCollectionInstance();
 
-                    $collection->addFieldToFilter(
-                        $collection->getIdFieldName(),
-                        ['in' => $missedEntityIdsChunk]
-                    );
-                    $missedItems = [];
-                    $missedEntityAdditional = [];
-                    foreach ($collection as $item) {
-                        $itemId = $item->getId();
-                        $missedItems[$itemId] = $item;
-                        $missedEntityAdditional[$itemId] = $entityAdditional[$itemId] ?? [];
+                    $missedItems = $missedEntityAdditional = [];
+                    if ($collection) {
+                        $collection->addFieldToFilter(
+                            $collection->getIdFieldName(),
+                            ['in' => $missedEntityIdsChunk]
+                        );
+                        foreach ($collection as $item) {
+                            $itemId = $item->getId();
+                            $missedItems[$itemId] = $item;
+                            $missedEntityAdditional[$itemId] = $entityAdditional[$itemId] ?? [];
+                        }
+                    } else {
+                        foreach ($missedEntityIdsChunk as $itemId) {
+                            $emptyEntity = $preLoader->createEmptyEntity();
+                            $item = $emptyEntity->setId($itemId);
+                            $missedItems[$itemId] = $item;
+                            $missedEntityAdditional[$itemId] = $entityAdditional[$itemId] ?? [];
+                        }
                     }
                     if ($preLoader instanceof EntityAbstract) {
                         $preLoader->preloadSalesforceIds($collection->getItems());
                     }
-                    if ($preLoader instanceof AfterPreLoadExecutorsInterface) {
-                        foreach ($preLoader->getAfterPreLoadExecutors() as $afterLoadExecutor) {
-                           $missedItems = $afterLoadExecutor->execute($missedItems, $missedEntityAdditional);
-                        }
+                    foreach ($preLoader->getAfterPreLoadExecutors() as $afterLoadExecutor) {
+                        $missedItems = $afterLoadExecutor->execute($missedItems, $missedEntityAdditional);
                     }
                     foreach ($missedItems as $itemId => $missedItem) {
                         $this->cache[$type][$itemId] = $missedItem;

@@ -16,12 +16,17 @@ use TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\AfterLoadExecut
 interface PreLoaderInterface
 {
     /**
-     * @return AbstractDb
+     * @return AbstractDb|null
      */
-    public function createCollectionInstance(): AbstractDb;
+    public function createCollectionInstance(): ?AbstractDb;
 
     /**
      * @return AbstractModel
      */
     public function createEmptyEntity(): AbstractModel;
+
+    /**
+     * @return AfterLoadExecutorInterface[]
+     */
+    public function getAfterPreLoadExecutors(): array;
 }

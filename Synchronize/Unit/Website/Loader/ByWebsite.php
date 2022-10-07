@@ -30,20 +30,27 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
     /** @var WebsiteFactory */
     private $factory;
 
+    /** @var array */
+    private $afterPreLoadLoadExecutors;
+
     /**
      * ByWebsite constructor.
      *
+     * @param WebsiteFactory    $factory
      * @param PreLoadEntities   $preLoadEntities
      * @param CollectionFactory $collectionFactory
+     * @param array             $afterPreLoadLoadExecutors
      */
     public function __construct(
         WebsiteFactory    $factory,
         PreLoadEntities   $preLoadEntities,
-        CollectionFactory $collectionFactory
+        CollectionFactory $collectionFactory,
+        array $afterPreLoadLoadExecutors = []
     ) {
         $this->factory = $factory;
         $this->preLoadEntities = $preLoadEntities;
         $this->collectionFactory = $collectionFactory;
+        $this->afterPreLoadLoadExecutors = $afterPreLoadLoadExecutors;
     }
 
     /**
@@ -65,7 +72,7 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
     /**
      * @inheritDoc
      */
-    public function createCollectionInstance(): AbstractDb
+    public function createCollectionInstance(): ?AbstractDb
     {
         return $this->collectionFactory->create();
     }
@@ -76,5 +83,13 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
     public function createEmptyEntity(): AbstractModel
     {
         return $this->factory->create();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAfterPreLoadExecutors(): array
+    {
+        return $this->afterPreLoadLoadExecutors;
     }
 }

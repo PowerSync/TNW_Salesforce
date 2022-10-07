@@ -12,14 +12,13 @@ use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Model\Mapper;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
-use TNW\Salesforce\Synchronize\Unit\Load\PreLoader\AfterPreLoadExecutorsInterface;
 use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
 use TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface;
 
 /**
  * Load By Customer
  */
-class Customer implements LoadLoaderInterface, PreLoaderInterface, AfterPreLoadExecutorsInterface
+class Customer implements LoadLoaderInterface, PreLoaderInterface
 {
     const LOAD_BY = 'customer';
 
@@ -80,7 +79,7 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface, AfterPreLoadE
     /**
      * @inheritDoc
      */
-    public function createCollectionInstance(): AbstractDb
+    public function createCollectionInstance(): ?AbstractDb
     {
         $collection = $this->collectionFactory->create();
 
