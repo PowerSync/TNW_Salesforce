@@ -256,7 +256,7 @@ jobs:
               then
                 NEW_MODULE_VERSION=$(grep -o '^ *"version": *"[0-9\.]*"' ~/tnw_extension/composer.json | awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
               else
-                NEW_MODULE_VERSION=(`composer show -al $package -f json|jq -r '.versions'|grep -o 2.7.\[0-9\]\*|head -n1`);
+                NEW_MODULE_VERSION=(`composer show -al $package -f json|jq -r '.versions'|grep -o 2.9.\[0-9\]\*|head -n1`);
               fi
               composer require $package=$NEW_MODULE_VERSION
             done
@@ -306,7 +306,7 @@ jobs:
               then
                 NEW_MODULE_VERSION=$(grep -o '^ *"version": *"[0-9\.]*"' ~/project/composer.json | awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
               else
-                NEW_MODULE_VERSION=(`composer show -al $package -f json|jq -r '.versions'|grep -o 2.7.\[0-9\]\*|head -n1`);
+                NEW_MODULE_VERSION=(`composer show -al $package -f json|jq -r '.versions'|grep -o 2.9.\[0-9\]\*|head -n1`);
               fi
 
               PAGE_TITLE='_'
@@ -484,7 +484,7 @@ jobs:
               then
                 NEW_MODULE_VERSION=$(grep -o '^ *"version": *"[0-9\.]*"' ~/tnw_extension/composer.json | awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
               else
-                NEW_MODULE_VERSION=(`composer show -al $package -f json|jq -r '.versions'|grep 2.8.\[0-9\]\*|head -n1`);
+                NEW_MODULE_VERSION=(`composer show -al $package -f json|jq -r '.versions'|grep 2.10.\[0-9\]\*|head -n1`);
               fi
               composer require $package=$NEW_MODULE_VERSION
             done
@@ -528,7 +528,7 @@ jobs:
               then
                 NEW_MODULE_VERSION=$(grep -o '^ *"version": *"[0-9\.]*"' ~/project/composer.json | awk '{print $2}' | sed -e 's/"\(.*\)"/\1/g')
               else
-                NEW_MODULE_VERSION=(`composer show -al $package -f json|jq -r '.versions'|grep 2.8.\[0-9\]\*|head -n1`);
+                NEW_MODULE_VERSION=(`composer show -al $package -f json|jq -r '.versions'|grep 2.10.\[0-9\]\*|head -n1`);
               fi
 
               PAGE_TITLE='_'
