@@ -6,6 +6,8 @@
 namespace TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
 use Magento\Framework\Exception\LocalizedException;
+use TNW\Salesforce\Api\CleanableInstanceInterface;
+use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
 use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg;
 
 class Pool
@@ -15,10 +17,18 @@ class Pool
      */
     private $dividers;
 
+    /**
+     * @param CleanableObjectsList $cleanableObjectsList
+     * @param array                $dividers
+     */
     public function __construct(
+        CleanableObjectsList $cleanableObjectsList,
         array $dividers
     ) {
         $this->dividers = $dividers;
+        foreach ($dividers as $divider) {
+            $cleanableObjectsList->add($divider);
+        }
     }
 
     /**

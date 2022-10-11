@@ -79,24 +79,25 @@ class Queue extends AbstractDb
      * Merge
      *
      * @param \TNW\Salesforce\Model\Queue $queue
-     * @return $this
+     * @return array
      * @throws LocalizedException
      */
-    public function convertToArray(\TNW\Salesforce\Model\Queue $queue)
+    public function convertToArray(\TNW\Salesforce\Model\Queue $queue): array
     {
-//        $this->unserializeFields($queue);
         $this->serializeFields($queue);
-
         $data = $this->prepareDataForSave($queue);
+        $this->unserializeFields($queue);
 
         return $data;
     }
 
     /**
      * @param AbstractModel $object
+     *
      * @return array
+     * @throws LocalizedException
      */
-    public function prepareDataForSave(AbstractModel $object)
+    public function prepareDataForSave(AbstractModel $object): array
     {
         return parent::_prepareDataForSave($object);
     }

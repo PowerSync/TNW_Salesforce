@@ -5,6 +5,8 @@
  */
 namespace TNW\Salesforce\Synchronize\Queue;
 
+use TNW\Salesforce\Model\Queue;
+
 interface CreateInterface
 {
     /**
@@ -21,7 +23,7 @@ interface CreateInterface
      * @param array $additional
      * @param callable $create
      * @param int $websiteId
-     * @return \TNW\Salesforce\Model\Queue[]
+     * @return Queue[]
      */
     public function process(array $entityIds, array $additional, callable $create, $websiteId);
 }

@@ -7,34 +7,52 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Model\ResourceModel\Queue;
 
+use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Data\Collection\Db\FetchStrategyInterface;
 use Magento\Framework\Data\Collection\EntityFactoryInterface;
+use Magento\Framework\DataObject;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use Psr\Log\LoggerInterface;
+use TNW\Salesforce\Api\ChunkSizeInterface;
+use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\FilterBlockedQueueRecords;
+use TNW\Salesforce\Model\ResourceModel\Queue as ResourceQueue;
 
 /**
  * Queue Collection
+ *
+ * @method ResourceQueue getResource()
  */
 class Collection extends AbstractCollection
 {
+    private const UPDATE_CHUNK = 500;
+
+    /**
+     * @var string
+     */
+    protected $_idFieldName = 'queue_id';
+
     /**
      * @var FilterBlockedQueueRecords
      */
     private $filterBlockedQueueRecords;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
-     * @param EntityFactoryInterface $entityFactory
-     * @param LoggerInterface $logger
-     * @param FetchStrategyInterface $fetchStrategy
-     * @param ManagerInterface $eventManager
+     * @param EntityFactoryInterface    $entityFactory
+     * @param LoggerInterface           $logger
+     * @param FetchStrategyInterface    $fetchStrategy
+     * @param ManagerInterface          $eventManager
      * @param FilterBlockedQueueRecords $filterBlockedQueueRecords
-     * @param AdapterInterface|null $connection
-     * @param AbstractDb|null $resource
+     * @param AdapterInterface|null     $connection
+     * @param AbstractDb|null           $resource
      */
     public function __construct(
         EntityFactoryInterface    $entityFactory,
@@ -47,37 +65,118 @@ class Collection extends AbstractCollection
     ) {
         parent::__construct($entityFactory, $logger, $fetchStrategy, $eventManager, $connection, $resource);
         $this->filterBlockedQueueRecords = $filterBlockedQueueRecords;
+        $this->logger = $logger;
     }
 
     /**
-     * @var string
+     * @inheritDoc
      */
-    protected $_idFieldName = 'queue_id';
-
-    /**
-     * @return AbstractCollection|void
-     */
-    protected function _initSelect()
+    public function save()
     {
-        $this->addFilterToMap('queue_id', 'main_table.queue_id');
+        $itemsToInsert = [];
+        $resource = $this->getResource();
+        $connection = $resource->getConnection();
+        $exceptionMessages = [];
+        try {
+            foreach ($this as $item) {
+                if ($item->getId()) {
+                    $itemsToInsert[] = $resource->convertToArray($item);
+                }
+            }
+        } catch (\Throwable $e) {
+            $message = [
+                $e->getMessage(),
+                $e->getTraceAsString()
+            ];
+            $exceptionMessages[] = implode(PHP_EOL, $message);
+        }
 
-        parent::_initSelect();
+        foreach (array_chunk($itemsToInsert, ChunkSizeInterface::CHUNK_SIZE_200) as $itemsToInsertChunk) {
+            try {
+                $connection->beginTransaction();
+                $connection->insertOnDuplicate($this->getMainTable(), $itemsToInsertChunk);
+                $connection->commit();
+            } catch (\Throwable $e) {
+                $connection->rollBack();
+                $message = [
+                    $e->getMessage(),
+                    $e->getTraceAsString()
+                ];
+                $exceptionMessages[] = implode(PHP_EOL, $message);
+            }
+        }
+
+        foreach ($exceptionMessages as $exceptionMessage) {
+            $this->logger->error($exceptionMessage);
+        }
+
+        $this->saveDependence($this);
     }
 
     /**
-     * Resource initialization
+     * Save Dependence
      *
-     * @return void
+     * @param Collection $collection
      */
-    protected function _construct()
+    public function saveDependence(Collection $collection): void
     {
-        $this->_init(\TNW\Salesforce\Model\Queue::class, \TNW\Salesforce\Model\ResourceModel\Queue::class);
+        $itemsToInsert = [];
+        /** @var Queue $object */
+        foreach ($collection as $object) {
+            $dependence = $object->getDependence();
+            foreach ($dependence as $item) {
+                $dependenceId = $item->getId();
+                if (empty($dependenceId)) {
+                    continue;
+                }
+
+                $itemsToInsert[] = [
+                    'queue_id' => $object->getId(),
+                    'parent_id' => $dependenceId
+                ];
+            }
+        }
+
+        if (empty($itemsToInsert)) {
+            return;
+        }
+
+        $connection = $this->getConnection();
+        $tableName = $this->getTable('tnw_salesforce_entity_queue_relation');
+        $exceptionMessages = [];
+        foreach (array_chunk($itemsToInsert, ChunkSizeInterface::CHUNK_SIZE_200) as $itemsToInsertChunk) {
+            try {
+                $connection->beginTransaction();
+                $connection->insertOnDuplicate($tableName, $itemsToInsertChunk);
+                $connection->commit();
+            } catch (\Throwable $e) {
+                $connection->rollBack();
+                $message = [
+                    $e->getMessage(),
+                    $e->getTraceAsString()
+                ];
+                $exceptionMessages[] = implode(PHP_EOL, $message);
+            }
+        }
+
+        foreach ($exceptionMessages as $exceptionMessage) {
+            $this->logger->error($exceptionMessage);
+        }
+    }
+
+    /**
+     * @return \TNW\Salesforce\Model\Queue[]
+     */
+    public function getItemsWithoutLoad()
+    {
+        return $this->_items;
     }
 
     /**
      * Add Filter To Sync Type
      *
      * @param int $syncType
+     *
      * @return Collection
      */
     public function addFilterToSyncType($syncType)
@@ -89,6 +188,7 @@ class Collection extends AbstractCollection
      * Add Filter To Code
      *
      * @param string $code
+     *
      * @return Collection
      */
     public function addFilterToCode($code)
@@ -100,6 +200,7 @@ class Collection extends AbstractCollection
      * Add Filter To Code
      *
      * @param string $code
+     *
      * @return Collection
      */
     public function addFilterToStatus($code)
@@ -111,6 +212,7 @@ class Collection extends AbstractCollection
      * Add Filter To Transaction Uid
      *
      * @param string $uid
+     *
      * @return Collection
      */
     public function addFilterToTransactionUid($uid)
@@ -122,6 +224,7 @@ class Collection extends AbstractCollection
      * Add Filter To Not Transaction Uid
      *
      * @param string $uid
+     *
      * @return Collection
      */
     public function addFilterToNotTransactionUid($uid)
@@ -139,8 +242,9 @@ class Collection extends AbstractCollection
      * Join table to collection select
      *
      * @param string|array $table
-     * @param string $cond
+     * @param string       $cond
      * @param string|array $cols
+     *
      * @return $this
      */
     public function joinLeft($table, $cond, $cols = '*')
@@ -167,6 +271,7 @@ class Collection extends AbstractCollection
      * Add Filter To WebsiteId
      *
      * @param string $code
+     *
      * @return Collection
      */
     public function addFilterToWebsiteId($code)
@@ -178,7 +283,7 @@ class Collection extends AbstractCollection
      * Website Ids
      *
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function websiteIds()
     {
@@ -189,6 +294,7 @@ class Collection extends AbstractCollection
             ->addFieldToSelect('website_id');
 
         $collection->getSelect()->group('website_id');
+
         return array_column($collection->getData(), 'website_id');
     }
 
@@ -200,60 +306,50 @@ class Collection extends AbstractCollection
     public function clear()
     {
         $this->_totalRecords = null;
+
         return parent::clear();
     }
 
     /**
      * Update Lock
      *
-     * @param array $data
+     * @param array  $data
      * @param string $groupCode
-     * @param int $websiteId
+     * @param int    $websiteId
+     *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public function updateLock(array $data, string $groupCode, int $websiteId)
     {
         $this->getSelect()->group('identify');
+        $queueIds = $this->filterBlockedQueueRecords->execute($this->getAllIds(), $groupCode, $websiteId);
 
-        $this->_conn->beginTransaction();
         try {
-//            $this->_select->forUpdate();
-            $queueIds = $this->filterBlockedQueueRecords->execute($this->getAllIds(), $groupCode, $websiteId);
-//            $this->_select->forUpdate(false);
-
-            if (!empty($queueIds)) {
-                $this->_conn->update(
-                    $this->getMainTable(),
-                    $data,
-                    $this->_conn->prepareSqlCondition('queue_id', ['in' => $queueIds])
-                );
-
-                /** @var \TNW\Salesforce\Model\Queue $queue */
-                foreach ($this as $queue) {
-                    $queue->addData($data);
+            if ($queueIds) {
+                $this->_conn->beginTransaction();
+                foreach (array_chunk($queueIds, self::UPDATE_CHUNK) as $queueIdsChunk) {
+                    $this->_conn->update(
+                        $this->getMainTable(),
+                        $data,
+                        $this->_conn->prepareSqlCondition('queue_id', ['in' => $queueIdsChunk])
+                    );
                 }
+                $this->_conn->commit();
             }
-
-            $this->_conn->commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_conn->rollBack();
             throw $e;
         }
 
-        return count($queueIds);
-    }
+        if ($queueIds) {
+            /** @var Queue $queue */
+            foreach ($this as $queue) {
+                $queue->addData($data);
+            }
+        }
 
-    /**
-     * Before Add Loaded Item
-     *
-     * @param \Magento\Framework\DataObject $item
-     * @return \Magento\Framework\DataObject
-     */
-    protected function beforeAddLoadedItem(\Magento\Framework\DataObject $item)
-    {
-        $this->getResource()->unserializeFields($item);
-        return parent::beforeAddLoadedItem($item);
+        return count($queueIds);
     }
 
     /**
@@ -272,5 +368,39 @@ class Collection extends AbstractCollection
         $this->distinct(true);
 
         return $this;
+    }
+
+    /**
+     * @return AbstractCollection|void
+     */
+    protected function _initSelect()
+    {
+        $this->addFilterToMap('queue_id', 'main_table.queue_id');
+
+        parent::_initSelect();
+    }
+
+    /**
+     * Resource initialization
+     *
+     * @return void
+     */
+    protected function _construct()
+    {
+        $this->_init(Queue::class, ResourceQueue::class);
+    }
+
+    /**
+     * Before Add Loaded Item
+     *
+     * @param DataObject $item
+     *
+     * @return DataObject
+     */
+    protected function beforeAddLoadedItem(DataObject $item)
+    {
+        $this->getResource()->unserializeFields($item);
+
+        return parent::beforeAddLoadedItem($item);
     }
 }
