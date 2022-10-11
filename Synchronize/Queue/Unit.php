@@ -9,15 +9,22 @@ namespace TNW\Salesforce\Synchronize\Queue;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
+use TNW\Salesforce\Api\Service\PreloaderEntityIdsInterface;
+use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Model\QueueFactory;
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Synchronize\Queue\Skip\PreloadQueuesDataInterface;
+use TNW\Salesforce\Synchronize\Queue\Unit\CreateQueue\UnsetPendingStatusPool;
 
 /**
  * Sync Unit
  */
-class Unit
+class Unit implements CleanableInstanceInterface
 {
     /**
      * @var string
@@ -45,12 +52,12 @@ class Unit
     private $generators;
 
     /**
-     * @var \TNW\Salesforce\Model\QueueFactory
+     * @var QueueFactory
      */
     private $queueFactory;
 
     /**
-     * @var \Magento\Framework\ObjectManagerInterface
+     * @var ObjectManagerInterface
      */
     private $objectManager;
 
@@ -64,9 +71,7 @@ class Unit
      */
     private $parents;
 
-    /**
-     * @var array
-     */
+    /** @var SkipInterface[]  */
     private $skipRules;
 
     /**
@@ -74,10 +79,8 @@ class Unit
      */
     private $ignoreFindGeneratorException;
 
-    /**
-     * @var Queue[]
-     */
-    private $queues = [];
+    /** @var array  */
+    private $queuesByUnitCodeAndBaseEntityId = [];
 
     /**
      * @var Objects
@@ -99,22 +102,35 @@ class Unit
      */
     private $serializer;
 
+    /** @var PreloaderEntityIdsInterface[] */
+    private $preLoaders;
+
+    /** @var UnsetPendingStatusPool */
+    private $pendingStatusPool;
+
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
      * Queue constructor.
-     * @param string $code
-     * @param string $description
-     * @param string $entityType
-     * @param string $objectType
-     * @param array $generators
-     * @param \TNW\Salesforce\Model\QueueFactory $queueFactory
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param Objects $resourceObjects
-     * @param StoreManagerInterface $storeManager
-     * @param RequestInterface $request
-     * @param array $skipRules
-     * @param array $parents
-     * @param array $children
-     * @param $ignoreFindGeneratorException
+     *
+     * @param string                   $code
+     * @param string                   $description
+     * @param string                   $entityType
+     * @param string                   $objectType
+     * @param array                    $generators
+     * @param QueueFactory             $queueFactory
+     * @param ObjectManagerInterface   $objectManager
+     * @param Objects                  $resourceObjects
+     * @param StoreManagerInterface    $storeManager
+     * @param RequestInterface         $request
+     * @param UnsetPendingStatusPool   $pendingStatusPool
+     * @param LoggerInterface          $logger
+     * @param array                    $skipRules
+     * @param array                    $parents
+     * @param array                    $children
+     * @param array                    $preLoaders
+     * @param bool                     $ignoreFindGeneratorException
      * @param SerializerInterface|null $serializer
      */
     public function __construct(
@@ -123,15 +139,18 @@ class Unit
         $entityType,
         $objectType,
         array $generators,
-        \TNW\Salesforce\Model\QueueFactory $queueFactory,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
+        QueueFactory $queueFactory,
+        ObjectManagerInterface $objectManager,
         Objects $resourceObjects,
         StoreManagerInterface $storeManager,
         RequestInterface $request,
+        UnsetPendingStatusPool $pendingStatusPool,
+        LoggerInterface $logger,
         array $skipRules = [],
         array $parents = [],
         array $children = [],
-        $ignoreFindGeneratorException = false,
+        array $preLoaders = [],
+        bool $ignoreFindGeneratorException = false,
         SerializerInterface $serializer= null
     ) {
         $this->code = $code;
@@ -149,6 +168,9 @@ class Unit
         $this->children = $children;
         $this->ignoreFindGeneratorException = $ignoreFindGeneratorException;
         $this->serializer = $serializer ?? $objectManager->get(SerializerInterface::class);
+        $this->preLoaders = $preLoaders;
+        $this->pendingStatusPool = $pendingStatusPool;
+        $this->logger = $logger;
     }
 
     /**
@@ -202,23 +224,6 @@ class Unit
     }
 
     /**
-     * Skip
-     *
-     * @param Queue $queue
-     * @return bool
-     */
-    public function skipQueue($queue)
-    {
-        foreach ($this->skipRules as $rule) {
-            if ($rule->apply($queue) !== false) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Create
      *
      * @param string $loadBy
@@ -249,7 +254,8 @@ class Unit
             $this->objectType,
             $this->serializer->serialize($additionalToHash)
         )));
-        $queue = $this->queueFactory->create(['data' => [
+
+        return $this->queueFactory->create(['data' => [
             'queue_id' => uniqid('', true),
             'code' => $this->code,
             'description' => $this->description($identifiers),
@@ -265,20 +271,6 @@ class Unit
             'identify' => $uniqueHash,
             Queue::UNIQUE_HASH => $uniqueHash
         ]]);
-
-        if ($this->skipQueue($queue)) {
-            $storeId = (int) $this->request->getParam('store', 0);
-            $store = $this->storeManager->getStore($storeId);
-            $websiteId = $store->getWebsiteId();
-            if (count($this->resourceObjects->loadObjectIds($entityId, $this->entityType, $websiteId))) {
-                $this->resourceObjects
-                    ->unsetPendingStatus($entityId, $this->entityType, $websiteId, $this->objectType);
-            }
-
-            return [];
-        }
-
-        return $queue;
     }
 
     /**
@@ -312,9 +304,16 @@ class Unit
     {
         $generator = $this->findGenerator($loadBy);
         if ($generator instanceof CreateInterface) {
+            $preLoaders = $this->preLoaders[$loadBy] ?? [];
+            $preLoaders && array_map(static function ($preLoader) use ($entityIds) {
+                if ($preLoader instanceof PreloaderEntityIdsInterface) {
+                    $preLoader->execute($entityIds);
+                }
+            }, $preLoaders);
+
             $queues = $generator->process($entityIds, $additional, [$this, 'createQueue'], $websiteId);
 
-            $queues = array_filter($queues);
+            $queues = $this->skipQueues($queues);
 
             if (!empty($queues)) {
                 $queues = $this->correctBaseEntityId($queues, $relatedUnitCode);
@@ -434,28 +433,96 @@ class Unit
     }
 
     /**
-     * @return Queue[]
+     * @param string $unitCode
+     *
+     * @return array
      */
-    public function getQueues(): array
+    public function getQueuesGroupedByBaseEntityIds(string $unitCode): array
     {
-        return $this->queues;
+        return $this->queuesByUnitCodeAndBaseEntityId[$unitCode] ?? [];
     }
 
-    /**
-     * @param Queue[] $queues
-     */
-    public function setQueues(array $queues): void
-    {
-        $this->queues = $queues;
-    }
     /**
      * @param Queue[] $queues
      */
     public function addQueues(array $queues): void
     {
         foreach ($queues as $queue) {
-            $this->queues[$queue->getIdentify()] = $queue;
+            $identify = $queue->getIdentify();
+            $baseEntityIdsByUnitCodes = $queue->getData('_base_entity_id') ?? [];
+            $baseEntityIdsByUnitCodes = is_array($baseEntityIdsByUnitCodes) ? $baseEntityIdsByUnitCodes : [];
+            foreach ($baseEntityIdsByUnitCodes as $unitCode => $baseEntityIds) {
+                $baseEntityIds = is_array($baseEntityIds) ? $baseEntityIds : [];
+                foreach ($baseEntityIds as $baseEntityId) {
+                    $this->queuesByUnitCodeAndBaseEntityId[$unitCode][$baseEntityId][$identify] = $queue;
+                }
+            }
         }
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function clearLocalCache(): void
+    {
+        $this->queuesByUnitCodeAndBaseEntityId = [];
+    }
+
+    /**
+     * @param Queue[] $queues
+     *
+     * @return Queue[]
+     * @throws NoSuchEntityException
+     */
+    private function skipQueues(array $queues): array
+    {
+        $filteredQueues = [];
+        if (!$queues) {
+            return $filteredQueues;
+        }
+        $storeId = (int)$this->request->getParam('store', 0);
+        $store = $this->storeManager->getStore($storeId);
+        $websiteId = (int)$store->getWebsiteId();
+        $filteredQueues = $queues;
+        foreach ($this->skipRules as $skipRule) {
+            if ($skipRule instanceof PreloadQueuesDataInterface) {
+                $skipRule->preload($filteredQueues);
+            }
+
+            foreach ($filteredQueues as $index => $queue) {
+                $skipResult = $skipRule->apply($queue);
+                if ($skipResult !== false) {
+                    $entityId = (int)$queue->getEntityId();
+                    $this->pendingStatusPool->addItem(
+                        $this->objectType,
+                        $this->entityType,
+                        $websiteId,
+                        $entityId
+                    );
+                    unset($filteredQueues[$index]);
+                    $message = [
+                        'Queue is skipped!',
+                        'Skip rule class:',
+                        get_class($skipRule),
+                        'Entity id: ',
+                        $queue->getEntityId(),
+                        'Entity type: ',
+                        $queue->getEntityType(),
+                        'Entity load: ',
+                        $queue->getEntityLoad(),
+                        'Skip rule result: ',
+                        $skipResult === true ? 'true' : (string)$skipResult
+                    ];
+                    $this->logger->debug(
+                        implode(
+                            PHP_EOL,
+                            $message
+                        )
+                    );
+                }
+            }
+        }
+
+        return $filteredQueues;
+    }
 }

@@ -52,8 +52,9 @@ class ProcessingAbstract
     {
         $storeId = (int) $this->request->getParam('store', 0);
         $store = $this->storeManager->getStore($storeId);
-        $websiteId = $store->getWebsiteId();
+        $websiteId = (int)$store->getWebsiteId();
 
+        $entityIdsByType = [];
         foreach ($subject->entities() as $entity) {
             $processing = $subject->analize($entity);
             switch (true) {
@@ -61,14 +62,24 @@ class ProcessingAbstract
                 case !$processing:
                     $entityId = $entity->getId();
                     $entityType = $entity->getData('_queue')->getEntityType();
-
-                    if (count($this->resourceObjects->loadObjectIds($entityId, $entityType, $websiteId))) {
-                        $this->resourceObjects->unsetPendingStatus($entityId, $entityType, $websiteId);
-                    }
+                    $entityIdsByType[$entityType][] = $entityId;
                     break;
                 default:
                     break;
             }
+        }
+
+        foreach ($entityIdsByType as $entityType => $entityIds) {
+            $objectIds = $this->resourceObjects->massLoadObjectIds($entityIds, $entityType, $websiteId);
+            $entityIdsToUpdateStatus = [];
+            foreach ($entityIds as $entityId) {
+                $data = $objectIds[$entityId] ?? [];
+                if (count($data)) {
+                    $entityIdsToUpdateStatus[] = $entityId;
+                }
+            }
+
+            $entityIdsToUpdateStatus && $this->resourceObjects->unsetPendingStatus($entityIdsToUpdateStatus, $entityType, $websiteId);
         }
 
         return [];

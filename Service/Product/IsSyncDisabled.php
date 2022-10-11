@@ -4,25 +4,24 @@
  * See TNW_LICENSE.txt for license details.
  */
 
-namespace TNW\Salesforce\Service\Customer;
+namespace TNW\Salesforce\Service\Product;
 
-use Magento\Customer\Model\Customer;
+use Magento\Catalog\Model\Product;
 use Magento\Eav\Model\Config;
 use Magento\Eav\Model\Config as EavConfig;
-use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
-use TNW\Salesforce\Api\Service\Customer\IsSyncDisabledInterface;
 
 /**
- * Is customer sync disabled service.
+ * Is product sync disabled service.
  */
-class IsSyncDisabled implements IsSyncDisabledInterface, CleanableInstanceInterface
+class IsSyncDisabled implements CleanableInstanceInterface
 {
     private const ATTRIBUTE_CODE = 'sforce_disable_sync';
     private const CHUNK_SIZE = ChunkSizeInterface::CHUNK_SIZE;
 
-    /** @var ResourceConnection */
+    /** @var \Magento\Catalog\Model\ResourceModel\Product */
     private $resourceConnection;
 
     /** @var Config */
@@ -35,17 +34,22 @@ class IsSyncDisabled implements IsSyncDisabledInterface, CleanableInstanceInterf
     private $processed = [];
 
     /**
-     * @param ResourceConnection $resourceConnection
-     * @param EavConfig          $eavConfig
+     * @param \Magento\Catalog\Model\ResourceModel\Product $resourceConnection
+     * @param EavConfig                                    $eavConfig
      */
-    public function __construct(ResourceConnection $resourceConnection, EavConfig $eavConfig)
-    {
+    public function __construct(
+        \Magento\Catalog\Model\ResourceModel\Product $resourceConnection,
+        EavConfig $eavConfig
+    ) {
         $this->resourceConnection = $resourceConnection;
         $this->eavConfig = $eavConfig;
     }
 
     /**
-     * @inheritDoc
+     * @param array $entityIds
+     *
+     * @return array
+     * @throws LocalizedException
      */
     public function execute(array $entityIds): array
     {
@@ -56,17 +60,17 @@ class IsSyncDisabled implements IsSyncDisabledInterface, CleanableInstanceInterf
         $entityIds = array_map('intval', $entityIds);
         $entityIds = array_unique($entityIds);
 
-        $missedCustomerIds = [];
-        foreach ($entityIds as $customerId) {
-            if (!isset($this->processed[$customerId])) {
-                $missedCustomerIds[] = $customerId;
-                $this->cache[$customerId] = false;
-                $this->processed[$customerId] = 1;
+        $missedEntityIds = [];
+        foreach ($entityIds as $entityId) {
+            if (!isset($this->processed[$entityId])) {
+                $missedEntityIds[] = $entityId;
+                $this->cache[$entityId] = false;
+                $this->processed[$entityId] = 1;
             }
         }
 
-        if ($missedCustomerIds) {
-            $attribute = $this->eavConfig->getAttribute(Customer::ENTITY, self::ATTRIBUTE_CODE);
+        if ($missedEntityIds) {
+            $attribute = $this->eavConfig->getAttribute(Product::ENTITY, self::ATTRIBUTE_CODE);
             if (!$attribute || !$attribute->getId()) {
                 return [];
             }
@@ -74,16 +78,18 @@ class IsSyncDisabled implements IsSyncDisabledInterface, CleanableInstanceInterf
             $connection = $this->resourceConnection->getConnection();
             $table = $attribute->getBackendTable();
             $select = $connection->select();
-            $select->from($table, ['entity_id']);
+            $linkField = $this->resourceConnection->getLinkField();
+            $select->from($table, [$linkField]);
             $select->where('attribute_id = ?', $attribute->getId());
             $select->where('value = 1');
+            $select->where('store_id = 0');
 
-            foreach (array_chunk($missedCustomerIds, self::CHUNK_SIZE) as $missedCustomerIdsChunk) {
+            foreach (array_chunk($missedEntityIds, self::CHUNK_SIZE) as $missedEntityIdsChunk) {
                 $batchSelect = clone $select;
-                $batchSelect->where('entity_id IN(?)', $missedCustomerIdsChunk);
+                $batchSelect->where($linkField . ' IN (?)', $missedEntityIdsChunk);
                 $items = $connection->fetchAll($batchSelect);
                 foreach ($items as $item) {
-                    $entityId = (int)($item['entity_id'] ?? 0);
+                    $entityId = (int)($item[$linkField] ?? 0);
                     if ($entityId) {
                         $this->cache[$entityId] = true;
                     }
@@ -92,8 +98,8 @@ class IsSyncDisabled implements IsSyncDisabledInterface, CleanableInstanceInterf
         }
 
         $result = [];
-        foreach ($entityIds as $customerId) {
-            $result[$customerId] = $this->cache[$customerId] ?? false;
+        foreach ($entityIds as $entityId) {
+            $result[$entityId] = $this->cache[$entityId] ?? false;
         }
 
         return $result;
