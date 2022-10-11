@@ -15,12 +15,15 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Message\MessageInterface;
 use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\MessageQueue\PublisherAdapter;
+use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteEmulator;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\PreQueue;
 use TNW\Salesforce\Service\Synchronize\Queue\Add\AddDependenciesForProcessingRows;
+use TNW\Salesforce\Service\Synchronize\Queue\Add\UnsetPendingStatusFromPool;
 use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool;
 
 /**
@@ -90,6 +93,12 @@ class Add
     /** @var AddDependenciesForProcessingRows */
     private $addDependenciesForProcessingRows;
 
+    /** @var UnsetPendingStatusFromPool */
+    private $unsetPendingStatusFromPool;
+
+    /** @var CleanableObjectsList */
+    private $cleanableObjectsList;
+
     /**
      * Add constructor.
      *
@@ -106,6 +115,7 @@ class Add
      * @param Config                                    $salesforceConfig
      * @param PublisherAdapter                          $publisher
      * @param AddDependenciesForProcessingRows          $addDependenciesForProcessingRows
+     * @param CleanableObjectsList                      $cleanableObjectsList
      */
     public function __construct(
         $entityType,
@@ -120,7 +130,9 @@ class Add
         State $state,
         Config $salesforceConfig,
         PublisherAdapter $publisher,
-        AddDependenciesForProcessingRows $addDependenciesForProcessingRows
+        AddDependenciesForProcessingRows $addDependenciesForProcessingRows,
+        UnsetPendingStatusFromPool $unsetPendingStatusFromPool,
+        CleanableObjectsList $cleanableObjectsList
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -135,6 +147,8 @@ class Add
         $this->salesforceConfig = $salesforceConfig;
         $this->publisher = $publisher;
         $this->addDependenciesForProcessingRows = $addDependenciesForProcessingRows;
+        $this->unsetPendingStatusFromPool = $unsetPendingStatusFromPool;
+        $this->cleanableObjectsList = $cleanableObjectsList;
     }
 
     /**
@@ -233,21 +247,22 @@ class Add
 
     /**
      * @param Queue[] $current
-     * @param Queue[] $parents
-     * @param string  $unitCode
+     * @param array $parentQueuesByBaseEntityId
      *
      * @return array
      */
-    public function buildDependency($current, $parents, $unitCode)
+    public function buildDependency($current, $parentQueuesByBaseEntityId)
     {
+        if (!$parentQueuesByBaseEntityId) {
+            return [];
+        }
+
         $dependency = [];
         foreach ($current as $queue) {
-            foreach ($parents as $parent) {
-                if (
-                    $parent->getIdentify() != $queue->getIdentify() &&
-                    $parent->getData('_base_entity_id/' . $unitCode) &&
-                    in_array($queue->getEntityId(), $parent->getData('_base_entity_id/' . $unitCode))
-                ) {
+            $entityId = $queue->getEntityId();
+            $parents = $parentQueuesByBaseEntityId[$entityId] ?? [];
+            foreach ($parents as $identify => $parent) {
+                if ($identify !== $queue->getIdentify()) {
                     $dependency[] = [
                         'parent_id' => $parent->getId(),
                         'queue_id' => $queue->getId()
@@ -255,6 +270,7 @@ class Add
                 }
             }
         }
+
         return $dependency;
     }
 
@@ -285,6 +301,7 @@ class Add
          * save related entities to the Queue
          */
         foreach ($unitsList as $key => $unit) {
+            $this->cleanableObjectsList->add($unit);
             $key = (sprintf(
                 '%s',
                 $unit->code()
@@ -368,7 +385,7 @@ class Add
     }
 
     /**
-     * @param $unit
+     * @param Unit $unit
      * @param $current
      * @param $dependencies
      * @return mixed
@@ -380,7 +397,8 @@ class Add
          * and will be created as parent dependency deeper in recursion generateQueueObjects
          */
         foreach ($unit->parents() as $parent) {
-            $newDependencies = $this->buildDependency($current, $parent->getQueues(), $unit->code());
+            $unitCode = $unit->code();
+            $newDependencies = $this->buildDependency($current, $parent->getQueuesGroupedByBaseEntityIds($unitCode));
             if (!empty($newDependencies)) {
                 array_push($dependencies, ...$newDependencies);
             }
@@ -440,6 +458,8 @@ class Add
             $websiteId,
             $dependencies
         );
+
+        $this->unsetPendingStatusFromPool->execute();
 
         $queueDataToSave = $this->getInsertArray($queues, $syncType, $websiteId);
 
@@ -609,42 +629,44 @@ class Add
     private function updateRelationsWithErrors(array $queueDataToSave): void
     {
         if (!empty($queueDataToSave)) {
-            $orWhere = array_map(function (array $queue) {
-                return sprintf(
-                    '(old_queue.identify = \'%s\' AND old_queue.website_id= \'%s\')',
-                    $queue['identify'],
-                    $queue['website_id']
-                );
-            },
-                $queueDataToSave
-            );
 
-            $connection = $this->resourceQueue->getConnection();
-            $queueTable = $connection->getTableName('tnw_salesforce_entity_queue');
-            $relationTable = $connection->getTableName('tnw_salesforce_entity_queue_relation');
-            $select = $connection->select()
-                ->distinct()
-                ->join(
-                    ['relation' => $relationTable],
-                    'relation.parent_id = queue.queue_id',
-                    [
-                        'composite_status' => new \Zend_Db_Expr('\'new\''),
-                        'sync_attempt' => new \Zend_Db_Expr(0),
-                    ]
-                )
-                ->join(
-                    ['old_queue' => $queueTable],
-                    'relation.queue_id = old_queue.queue_id',
-                    []
-                )
-                ->where(
-                    'queue.composite_status = \'error\''
-                )
-                ->where(
-                    implode(' OR ', $orWhere)
+            foreach (array_chunk($queueDataToSave, ChunkSizeInterface::CHUNK_SIZE_200) as $queueDataToSaveBatch) {
+                $orWhere = array_map(function (array $queue) {
+                    return sprintf(
+                        '(old_queue.identify = \'%s\' AND old_queue.website_id= \'%s\')',
+                        $queue['identify'],
+                        $queue['website_id']
+                    );
+                },
+                    $queueDataToSaveBatch
                 );
-            $query = $connection->updateFromSelect($select, ['queue' => $queueTable]);
-            $connection->query($query);
+                $connection = $this->resourceQueue->getConnection();
+                $queueTable = $connection->getTableName('tnw_salesforce_entity_queue');
+                $relationTable = $connection->getTableName('tnw_salesforce_entity_queue_relation');
+                $select = $connection->select()
+                    ->distinct()
+                    ->join(
+                        ['relation' => $relationTable],
+                        'relation.parent_id = queue.queue_id',
+                        [
+                            'composite_status' => new \Zend_Db_Expr('\'new\''),
+                            'sync_attempt' => new \Zend_Db_Expr(0),
+                        ]
+                    )
+                    ->join(
+                        ['old_queue' => $queueTable],
+                        'relation.queue_id = old_queue.queue_id',
+                        []
+                    )
+                    ->where(
+                        'queue.composite_status = \'error\''
+                    )
+                    ->where(
+                        implode(' OR ', $orWhere)
+                    );
+                $query = $connection->updateFromSelect($select, ['queue' => $queueTable]);
+                $connection->query($query);
+            }
         }
     }
 }

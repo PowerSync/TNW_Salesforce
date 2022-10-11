@@ -13,6 +13,8 @@ use Magento\Framework\Phrase;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use SplObjectStorage;
+use TNW\Salesforce\Api\CleanableInstanceInterface;
+use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
 use TNW\Salesforce\Synchronize\Unit\CurrentUnit;
 
 /**
@@ -59,6 +61,9 @@ class Group
     /** @var CurrentUnit */
     private $currentUnit;
 
+    /** @var CleanableObjectsList */
+    private $cleanableObjectsList;
+
     /**
      * Entity constructor.
      * @param string $groupCode
@@ -73,7 +78,8 @@ class Group
         UnitsFactory $unitsFactory,
         ObjectManagerInterface $objectManager,
         LoggerInterface $systemLogger,
-        CurrentUnit $currentUnit
+        CurrentUnit $currentUnit,
+        CleanableObjectsList $cleanableObjectsList
     ) {
         $this->groupCode = $groupCode;
         $this->units = array_filter($units);
@@ -81,6 +87,7 @@ class Group
         $this->systemLogger = $systemLogger;
         $this->unitsFactory = $unitsFactory;
         $this->currentUnit = $currentUnit;
+        $this->cleanableObjectsList = $cleanableObjectsList;
     }
 
     /**
@@ -122,6 +129,9 @@ class Group
             $this->messageDebug('>>> START >>> %s. Unit name %s', $unit->description(), $unit->name());
 
             $unit->status($unit::PROCESS);
+            if($unit instanceof CleanableInstanceInterface) {
+                $this->cleanableObjectsList->add($unit);
+            }
             $unit->process();
             $unit->status($unit::COMPLETE);
             $this->messageDebug('<<< STOP <<< %s. Unit name %s', $unit->description(), $unit->name());

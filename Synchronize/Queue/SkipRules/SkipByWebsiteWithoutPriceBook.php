@@ -14,7 +14,7 @@ use TNW\Salesforce\Synchronize\Queue\SkipInterface;
 /**
  *  Skip when website don`t have price book
  */
-class SkipByWebsiteWithoutPriceBook implements SkipInterface
+class SkipByWebsiteWithoutPriceBook implements SkipInterface, \TNW\Salesforce\Synchronize\Queue\Skip\PreloadQueuesDataInterface
 {
     /**
      * @var StoreManagerInterface
@@ -53,5 +53,13 @@ class SkipByWebsiteWithoutPriceBook implements SkipInterface
         }
 
         return $needSkip;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function preload(array $queues): void
+    {
+        $this->getWebsiteIdByQueue->preload($queues);
     }
 }

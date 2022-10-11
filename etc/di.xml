@@ -840,4 +840,70 @@
             <argument name="resourceCustomer" xsi:type="object">Magento\Customer\Model\ResourceModel\Customer\Proxy</argument>
         </arguments>
     </type>
+    <type name="TNW\Salesforce\Service\CleanLocalCacheForInstances">
+        <arguments>
+            <argument name="instances" xsi:type="array">
+                <item name="TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds" xsi:type="object">TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds</item>
+                <item name="TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList" xsi:type="object">TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList</item>
+                <item name="CustomerGetIdsFilteredByCustomerGroupConfiguration" xsi:type="object">
+                    CustomerGetIdsFilteredByCustomerGroupConfiguration
+                </item>
+                <item name="OrderGetIdsFilteredByCustomerGroupConfiguration" xsi:type="object">
+                    OrderGetIdsFilteredByCustomerGroupConfiguration
+                </item>
+                <item name="QuoteGetIdsFilteredByCustomerGroupConfiguration" xsi:type="object">
+                    QuoteGetIdsFilteredByCustomerGroupConfiguration
+                </item>
+                <item name="QuoteItemGetIdsFilteredByCustomerGroupConfiguration" xsi:type="object">
+                    QuoteItemGetIdsFilteredByCustomerGroupConfiguration
+                </item>
+                <item name="InvoiceGetIdsFilteredByCustomerGroupConfiguration" xsi:type="object">
+                    InvoiceGetIdsFilteredByCustomerGroupConfiguration
+                </item>
+                <item name="ShipmentGetIdsFilteredByCustomerGroupConfiguration" xsi:type="object">
+                    ShipmentGetIdsFilteredByCustomerGroupConfiguration
+                </item>
+                <item name="TNW\Salesforce\Service\Customer\IsSyncDisabled" xsi:type="object">
+                    TNW\Salesforce\Service\Customer\IsSyncDisabled
+                </item>
+                <item name="TNW\Salesforce\Synchronize\Queue\Order\Item\SkipRules\SkipByCustomer" xsi:type="object">
+                    TNW\Salesforce\Synchronize\Queue\Order\Item\SkipRules\SkipByCustomer
+                </item>
+                <item name="TNW\Salesforce\Synchronize\Queue\Order\SkipRules\SkipByCustomer" xsi:type="object">
+                    TNW\Salesforce\Synchronize\Queue\Order\SkipRules\SkipByCustomer
+                </item>
+                <item name="TNW\Salesforce\Synchronize\Queue\OrderInvoice\SkipRules\SkipByCustomer" xsi:type="object">
+                    TNW\Salesforce\Synchronize\Queue\OrderInvoice\SkipRules\SkipByCustomer
+                </item>
+                <item name="TNW\Salesforce\Synchronize\Queue\OrderShipment\SkipRules\SkipByCustomer" xsi:type="object">
+                    TNW\Salesforce\Synchronize\Queue\OrderShipment\SkipRules\SkipByCustomer
+                </item>
+                <item name="TNW\Salesforce\Service\Customer\GetCustomerIdByQuoteId" xsi:type="object">
+                    TNW\Salesforce\Service\Customer\GetCustomerIdByQuoteId
+                </item>
+                <item name="TNW\Salesforce\Service\GetWebsiteByEntityType" xsi:type="object">
+                    TNW\Salesforce\Service\GetWebsiteByEntityType
+                </item>
+                <item name="TNW\Salesforce\Service\Product\IsSyncDisabled" xsi:type="object">
+                    TNW\Salesforce\Service\Product\IsSyncDisabled
+                </item>
+                <item name="TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds" xsi:type="object">
+                    TNW\Salesforce\Service\CustomerGroupConfiguration\GetCustomerGroupIds
+                </item>
+                <item name="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" xsi:type="object">
+                    TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds">
+        <arguments>
+            <argument name="objectsResource" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="TNW\Salesforce\Synchronize\Queue\Unit">
+        <arguments>
+            <argument name="logger" xsi:type="object">TNW\Logger</argument>
+        </arguments>
+    </type>
 </config>

@@ -7,13 +7,14 @@
 namespace TNW\Salesforce\Service\CustomerGroupConfiguration;
 
 use Magento\Framework\App\ResourceConnection;
+use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Api\Service\GetIdsFilteredByCustomerGroupConfigurationInterface;
 use TNW\Salesforce\Api\Service\GetSelectInterface;
 
 /**
  *  Load ids filtered by customer group from store configuration
  */
-class GetFilteredIds implements GetIdsFilteredByCustomerGroupConfigurationInterface
+class GetFilteredIds implements GetIdsFilteredByCustomerGroupConfigurationInterface, CleanableInstanceInterface
 {
     /** @var int[] */
     private $cache = [];
@@ -175,5 +176,14 @@ class GetFilteredIds implements GetIdsFilteredByCustomerGroupConfigurationInterf
             $this->processedIds[$entityType][$entityId] = 1;
             $this->cache[$entityType][$entityId] = $entityId;
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function clearLocalCache(): void
+    {
+        $this->processedIds = [];
+        $this->cache = [];
     }
 }

@@ -56,10 +56,17 @@ class Add
         $websiteId = $store->getWebsiteId();
         $entityType = reset($subject->resolves)->entityType();
 
+        $objectIds = $this->resourceObjects->massLoadObjectIds($entityIds, (string)$entityType, (int)$websiteId);
+        $entityIdsForUpdateStatus = [];
         foreach ($entityIds as $entityId) {
-            if (count($this->resourceObjects->loadObjectIds($entityId, $entityType, $websiteId))) {
-                $this->resourceObjects->setPendingStatus($entityId, $entityType, $websiteId);
+            $data = $objectIds[$entityId] ?? [];
+            if (count($data)) {
+                $entityIdsForUpdateStatus[] = $entityId;
             }
+        }
+
+        if($entityIdsForUpdateStatus) {
+            $this->resourceObjects->setPendingStatus($entityIdsForUpdateStatus, $entityType, $websiteId);
         }
 
         return [$entityIds];

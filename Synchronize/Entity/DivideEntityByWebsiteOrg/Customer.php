@@ -48,7 +48,7 @@ class Customer extends DivideEntityByWebsiteOrg
     public function loadEntities($ids)
     {
         $collection = $this->collectionFactory->create();
-        $collection->addFieldToFilter($collection->getRowIdFieldName(), $ids);
+        $collection->addFieldToFilter($collection->getRowIdFieldName(), ['in' => $ids]);
 
         return $collection;
     }
