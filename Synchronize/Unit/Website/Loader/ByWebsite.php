@@ -31,7 +31,7 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
     private $factory;
 
     /** @var array */
-    private $afterPreLoadLoadExecutors;
+    private $afterLoadExecutors;
 
     /**
      * ByWebsite constructor.
@@ -39,18 +39,18 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
      * @param WebsiteFactory    $factory
      * @param PreLoadEntities   $preLoadEntities
      * @param CollectionFactory $collectionFactory
-     * @param array             $afterPreLoadLoadExecutors
+     * @param array             $afterLoadExecutors
      */
     public function __construct(
         WebsiteFactory    $factory,
         PreLoadEntities   $preLoadEntities,
         CollectionFactory $collectionFactory,
-        array $afterPreLoadLoadExecutors = []
+        array $afterLoadExecutors = []
     ) {
         $this->factory = $factory;
         $this->preLoadEntities = $preLoadEntities;
         $this->collectionFactory = $collectionFactory;
-        $this->afterPreLoadLoadExecutors = $afterPreLoadLoadExecutors;
+        $this->afterLoadExecutors = $afterLoadExecutors;
     }
 
     /**
@@ -90,6 +90,6 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
      */
     public function getAfterPreLoadExecutors(): array
     {
-        return $this->afterPreLoadLoadExecutors;
+        return $this->afterLoadExecutors;
     }
 }

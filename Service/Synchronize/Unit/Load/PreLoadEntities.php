@@ -71,8 +71,12 @@ class PreLoadEntities implements CleanableInstanceInterface
 
                     $missedItems = $missedEntityAdditional = [];
                     if ($collection) {
+                        $idFieldName = $collection->getIdFieldName();
+                        if (!$idFieldName) {
+                            $idFieldName = $collection->getResource()->getIdFieldName();
+                        }
                         $collection->addFieldToFilter(
-                            $collection->getIdFieldName(),
+                            $idFieldName,
                             ['in' => $missedEntityIdsChunk]
                         );
                         foreach ($collection as $item) {
@@ -89,7 +93,7 @@ class PreLoadEntities implements CleanableInstanceInterface
                         }
                     }
                     if ($preLoader instanceof EntityAbstract) {
-                        $preLoader->preloadSalesforceIds($collection->getItems());
+                        $preLoader->preloadSalesforceIds($missedItems);
                     }
                     foreach ($preLoader->getAfterPreLoadExecutors() as $afterLoadExecutor) {
                         $missedItems = $afterLoadExecutor->execute($missedItems, $missedEntityAdditional);

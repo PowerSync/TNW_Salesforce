@@ -9,12 +9,14 @@ namespace TNW\Salesforce\Synchronize\Unit;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
+use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
 use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetDependenceIdsByEntityType;
 use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load as SubEntitiesLoad;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Synchronize\Group;
 use TNW\Salesforce\Synchronize\Unit\Load\EntityLoader\EntityPreLoaderInterface;
@@ -80,13 +82,19 @@ class Load extends Synchronize\Unit\UnitAbstract
     /** @var GetQueuesByIds */
     private $getQueuesByIds;
 
+    /** @var CleanableObjectsList */
+    private $cleanableObjectsList;
+
+    /** @var SubEntitiesLoad */
+    private $loadSubEntities;
+
     /**
      * Load constructor.
      *
      * @param string                       $name
      * @param string                       $magentoType
-     * @param Queue                        $queues
-     * @param LoadLoaderInterface          $loaders
+     * @param array                        $queues
+     * @param array                        $loaders
      * @param Units                        $units
      * @param Group                        $group
      * @param IdentificationInterface      $identification
@@ -96,25 +104,27 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @param PreLoadEntities              $preLoadEntities
      * @param GetDependenceIdsByEntityType $getDependenceIdsByEntityType
      * @param GetQueuesByIds               $getQueuesByIds
-     * @param EntityLoaderAbstract         $entityLoaders
+     * @param CleanableObjectsList         $cleanableObjectsList
+     * @param array                        $entityLoaders
      * @param array                        $entityTypeMapping
      */
     public function __construct(
         $name,
         $magentoType,
         array $queues,
-        array $loaders,
-        Synchronize\Units $units,
-        Synchronize\Group $group,
+        array                                    $loaders,
+        Synchronize\Units                        $units,
+        Synchronize\Group                        $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        Synchronize\Unit\HashInterface $hash,
-        Objects $objects,
-        SalesforceIdStorage $entityObject = null,
-        PreLoadEntities $preLoadEntities,
-        GetDependenceIdsByEntityType $getDependenceIdsByEntityType,
-        GetQueuesByIds $getQueuesByIds,
-        array $entityLoaders = [],
-        array $entityTypeMapping = []
+        Synchronize\Unit\HashInterface           $hash,
+        Objects                                  $objects,
+        SalesforceIdStorage                      $entityObject = null,
+        PreLoadEntities                          $preLoadEntities,
+        GetDependenceIdsByEntityType             $getDependenceIdsByEntityType,
+        GetQueuesByIds                           $getQueuesByIds,
+        SubEntitiesLoad                          $loadSubEntities,
+        array                                    $entityLoaders = [],
+        array                                    $entityTypeMapping = []
     ) {
         parent::__construct($name, $units, $group);
         $this->magentoType = $magentoType;
@@ -129,6 +139,7 @@ class Load extends Synchronize\Unit\UnitAbstract
         $this->preLoadEntities = $preLoadEntities;
         $this->getDependenceIdsByEntityType = $getDependenceIdsByEntityType;
         $this->getQueuesByIds = $getQueuesByIds;
+        $this->loadSubEntities = $loadSubEntities;
     }
 
     /**
@@ -456,7 +467,7 @@ class Load extends Synchronize\Unit\UnitAbstract
                 $entities = $this->preLoadEntities->execute($loader, $entityIds, $entityLoadAdditional);
                 foreach ($this->entityLoaders as $entityLoader) {
                     if ($entityLoader instanceof EntityPreLoaderInterface) {
-                        $entityLoader->preload($entities);
+                        $this->loadSubEntities->execute($entityLoader, $entities);
                     }
                 }
             }

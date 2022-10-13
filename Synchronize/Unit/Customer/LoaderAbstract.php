@@ -22,18 +22,19 @@ abstract class LoaderAbstract  extends \TNW\Salesforce\Synchronize\Unit\EntityLo
 
     /**
      * Customer constructor.
-     * @param \Magento\Customer\Model\CustomerFactory $customerFactory
-     * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+     *
+     * @param \Magento\Customer\Model\CustomerFactory                    $factory
+     * @param \Magento\Customer\Model\ResourceModel\Customer             $resourceCustomer
      * @param \TNW\SForceEnterprise\Synchronize\Entity\Customer\Generate $customerGenerate
-     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage|null $salesforceIdStorage
+     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage|null      $salesforceIdStorage
      */
     public function __construct(
-        \Magento\Customer\Model\CustomerFactory $customerFactory,
-        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer,
+        \Magento\Customer\Model\CustomerFactory          $factory,
+        \Magento\Customer\Model\ResourceModel\Customer   $resourceCustomer,
         \TNW\Salesforce\Model\Entity\SalesforceIdStorage $salesforceIdStorage = null
     ) {
         parent::__construct($salesforceIdStorage);
-        $this->customerFactory = $customerFactory;
+        $this->customerFactory = $factory;
         $this->resourceCustomer = $resourceCustomer;
     }
 

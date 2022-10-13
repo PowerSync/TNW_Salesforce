@@ -56,6 +56,7 @@
     <type name="TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website">
         <arguments>
             <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Website</argument>
+            <argument name="loader" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website\Loader</argument>
         </arguments>
     </type>
 
@@ -843,8 +844,12 @@
     <type name="TNW\Salesforce\Service\CleanLocalCacheForInstances">
         <arguments>
             <argument name="instances" xsi:type="array">
-                <item name="TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds" xsi:type="object">TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds</item>
-                <item name="TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList" xsi:type="object">TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList</item>
+                <item name="TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds" xsi:type="object">
+                    TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds
+                </item>
+                <item name="TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList" xsi:type="object">
+                    TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList
+                </item>
                 <item name="CustomerGetIdsFilteredByCustomerGroupConfiguration" xsi:type="object">
                     CustomerGetIdsFilteredByCustomerGroupConfiguration
                 </item>
@@ -907,6 +912,15 @@
                 </item>
                 <item name="TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds" xsi:type="object">
                     TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds
+                </item>
+                <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load" xsi:type="object">
+                    TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load
+                </item>
+                <item name="TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website\Loader" xsi:type="object">
+                    TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website\Loader
+                </item>
+                <item name="TNW\Salesforce\Synchronize\Unit\Customer\Preload\Loader" xsi:type="object">
+                    TNW\Salesforce\Synchronize\Unit\Customer\Preload\Loader
                 </item>
 
             </argument>

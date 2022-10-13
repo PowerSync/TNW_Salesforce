@@ -32,7 +32,7 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface
     private $getMappedAttributeCodesByMagentoType;
 
     /** @var array */
-    private $afterPreLoadLoadExecutors;
+    private $afterLoadExecutors;
 
     /** @var CustomerFactory */
     private $factory;
@@ -44,20 +44,20 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface
      * @param CollectionFactory                    $collectionFactory
      * @param PreLoadEntities                      $preLoadEntities
      * @param GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType
-     * @param array                                $afterPreLoadLoadExecutors
+     * @param array                                $afterLoadExecutors
      */
     public function __construct(
         CustomerFactory $factory,
         CollectionFactory $collectionFactory,
         PreLoadEntities $preLoadEntities,
         GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType,
-        array $afterPreLoadLoadExecutors = []
+        array $afterLoadExecutors = []
     ) {
         $this->factory = $factory;
         $this->collectionFactory = $collectionFactory;
         $this->preLoadEntities = $preLoadEntities;
         $this->getMappedAttributeCodesByMagentoType = $getMappedAttributeCodesByMagentoType;
-        $this->afterPreLoadLoadExecutors = $afterPreLoadLoadExecutors;
+        $this->afterLoadExecutors = $afterLoadExecutors;
     }
 
     /**
@@ -95,7 +95,7 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface
      */
     public function getAfterPreLoadExecutors(): array
     {
-        return $this->afterPreLoadLoadExecutors;
+        return $this->afterLoadExecutors;
     }
 
     /**
