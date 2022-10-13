@@ -192,6 +192,10 @@ class Add
             $this->resourcePreQueue->saveEntityIds($ids, $this->entityType, $syncType);
         }
 
+        if (!empty($entityIds)) {
+            $this->publisher->publish(\TNW\Salesforce\Model\Prequeue\Process::MQ_TOPIC_NAME, false);
+        }
+
         if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
 
             /** @var MessageInterface $message */
