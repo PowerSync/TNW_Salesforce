@@ -44,11 +44,10 @@ class Loader implements LoaderInterface
      */
     public function execute(array $entities): array
     {
-        $collection = $this->collectionFactory->create();
-
         $entityIds = [];
         foreach ($entities as $entity) {
-            $entityIds[] = $entity->getCustomerId();
+            $customerId = $entity->getCustomerId();
+            $customerId && $entityIds[] = $customerId;
         }
 
         $entityIds = array_unique($entityIds);
@@ -61,6 +60,7 @@ class Loader implements LoaderInterface
         }
 
         if ($missedEntityIds) {
+            $collection = $this->collectionFactory->create();
             $magentoType = Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER;
             $attributeCodes = $this->getMappedAttributeCodesByMagentoType->execute([$magentoType])[$magentoType] ?? [];
             $attributeCodes && $collection->addAttributeToSelect($attributeCodes, 'left');

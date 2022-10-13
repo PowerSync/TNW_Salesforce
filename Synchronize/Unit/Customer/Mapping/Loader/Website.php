@@ -31,12 +31,16 @@ class Website extends EntityLoaderAbstract implements EntityPreLoaderInterface
     /** @var array */
     private $afterLoadExecutors;
 
+    /** @var array */
+    private $beforeLoadExecutors;
+
     /**
      * Website constructor.
      *
      * @param WebsiteFactory           $factory
      * @param Load                     $loadSubEntities
      * @param LoaderInterface          $loader
+     * @param array                    $beforeLoadExecutors
      * @param array                    $afterLoadExecutors
      * @param SalesforceIdStorage|null $salesforceIdStorage
      */
@@ -44,6 +48,7 @@ class Website extends EntityLoaderAbstract implements EntityPreLoaderInterface
         WebsiteFactory      $factory,
         Load                $loadSubEntities,
         LoaderInterface     $loader,
+        array               $beforeLoadExecutors = [],
         array               $afterLoadExecutors = [],
         SalesforceIdStorage $salesforceIdStorage = null
     ) {
@@ -52,6 +57,7 @@ class Website extends EntityLoaderAbstract implements EntityPreLoaderInterface
         $this->loadSubEntities = $loadSubEntities;
         $this->loader = $loader;
         $this->afterLoadExecutors = $afterLoadExecutors;
+        $this->beforeLoadExecutors = $beforeLoadExecutors;
     }
 
     /**
@@ -86,5 +92,13 @@ class Website extends EntityLoaderAbstract implements EntityPreLoaderInterface
     public function getAfterPreloadExecutors(): array
     {
         return $this->afterLoadExecutors;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getBeforePreloadExecutors(): array
+    {
+        return $this->beforeLoadExecutors;
     }
 }
