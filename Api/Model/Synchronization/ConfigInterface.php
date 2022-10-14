@@ -13,6 +13,11 @@ interface ConfigInterface
     const CLEAN_SYSTEM_LOGS = 8;
 
     /**
+     * Cron queue types
+     */
+    const DIRECT_SYNC_TYPE_REALTIME = 3;
+
+    /**
      * @param $websiteId
      * @return mixed
      */
