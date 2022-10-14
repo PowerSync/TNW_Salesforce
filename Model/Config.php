@@ -20,7 +20,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Api\Model\Synchronization\ConfigInterface;
 use TNW\Salesforce\Model\Config\WebsiteDetector;
-use TNW\SForceEnterprise\Model\Config\Source\Synchronization\Mode;
+use \TNW\Salesforce\Model\Config\Source\Synchronization\Mode;
 
 /**
  * Class Config
@@ -41,11 +41,6 @@ class Config extends DataObject implements ConfigInterface
      * Base batch limit for simple sync
      */
     const SFORCE_BASE_UPDATE_LIMIT = 200;
-
-    /**
-     * Cron queue types
-     */
-    const DIRECT_SYNC_TYPE_REALTIME = 3;
 
     /** @comment Base batch limit for simple sync */
     const REALTIME_MAX_SYNC = 30;

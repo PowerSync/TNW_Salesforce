@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace TNW\Salesforce\Model\Cron\Source;
 
 use TNW\Salesforce\Api\Model\Cron\Source\MagentoSyncTypeInterface;
-use TNW\SForceEnterprise\Model\Synchronization\Config;
+use TNW\Salesforce\Api\Model\Synchronization\ConfigInterface;
 
 /**
  * Magento Sync Type
@@ -23,7 +23,7 @@ class MagentoSyncType implements MagentoSyncTypeInterface
     public function toOptionArray()
     {
         return [
-            Config::DIRECT_SYNC_TYPE_REALTIME => __('Realtime')
+            ConfigInterface::DIRECT_SYNC_TYPE_REALTIME => __('Realtime')
         ];
     }
 

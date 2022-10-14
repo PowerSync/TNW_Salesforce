@@ -22,7 +22,6 @@ use TNW\Salesforce\Model\Logger;
 /**
  * Class CurrencyRatesUpdate
  *
- * @package TNW\SForceEnterprise\Cron
  */
 class ClearSystemLog
 {
