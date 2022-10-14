@@ -8,35 +8,28 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Preload;
 
-use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory;
-use TNW\Salesforce\Model\Mapper;
-use TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType;
+use Magento\Customer\Model\CustomerFactory;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load\LoaderInterface;
+use TNW\SForceEnterprise\Service\Synchronize\Unit\Load\GetCustomersByCustomerIds;
 
 class Loader implements LoaderInterface
 {
-    /** @var CollectionFactory */
-    private $collectionFactory;
+    /** @var CustomerFactory */
+    private $factory;
 
-    /** @var GetMappedAttributeCodesByMagentoType */
-    private $getMappedAttributeCodesByMagentoType;
-
-    /** @var array */
-    private $processed = [];
-
-    /** @var array */
-    private $cache = [];
+    /** @var GetCustomersByCustomerIds */
+    private $getCustomersByCustomerIds;
 
     /**
-     * @param CollectionFactory                    $collectionFactory
-     * @param GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType
+     * @param GetCustomersByCustomerIds $getCustomersByCustomerIds
+     * @param CustomerFactory           $factory
      */
     public function __construct(
-        CollectionFactory                    $collectionFactory,
-        GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType
+        GetCustomersByCustomerIds $getCustomersByCustomerIds,
+        CustomerFactory           $factory
     ) {
-        $this->collectionFactory = $collectionFactory;
-        $this->getMappedAttributeCodesByMagentoType = $getMappedAttributeCodesByMagentoType;
+        $this->factory = $factory;
+        $this->getCustomersByCustomerIds = $getCustomersByCustomerIds;
     }
 
     /**
@@ -50,44 +43,14 @@ class Loader implements LoaderInterface
             $customerId && $entityIds[] = $customerId;
         }
 
-        $entityIds = array_unique($entityIds);
-        $missedEntityIds = [];
-        foreach ($entityIds as $entityId) {
-            if (!isset($this->processed[$entityId])) {
-                $missedEntityIds[] = $entityId;
-                $this->processed[$entityId] = 1;
-            }
-        }
-
-        if ($missedEntityIds) {
-            $collection = $this->collectionFactory->create();
-            $magentoType = Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER;
-            $attributeCodes = $this->getMappedAttributeCodesByMagentoType->execute([$magentoType])[$magentoType] ?? [];
-            $attributeCodes && $collection->addAttributeToSelect($attributeCodes, 'left');
-            $collection->addFieldToFilter(
-                $collection->getIdFieldName(),
-                ['in' => $entityIds]
-            );
-            foreach ($collection as $item) {
-                $this->cache[$item->getId()] = $item;
-            }
-        }
+        $customers = $this->getCustomersByCustomerIds->execute($entityIds);
 
         $result = [];
         foreach ($entities as $key => $requestEntity) {
-            $entity = $this->cache[$requestEntity->getCustomerId()] ?? null;
+            $entity = $customers[$requestEntity->getCustomerId()] ?? $this->factory->create();
             $entity && $result[$key] = $entity;
         }
 
         return $result;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function clearLocalCache(): void
-    {
-        $this->cache = [];
-        $this->processed = [];
     }
 }

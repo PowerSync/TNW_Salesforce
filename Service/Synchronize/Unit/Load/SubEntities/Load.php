@@ -51,15 +51,17 @@ class Load implements CleanableInstanceInterface
 
         if ($missedEntities) {
             foreach (array_chunk($missedEntities, ChunkSizeInterface::CHUNK_SIZE_200, true) as $missedEntitiesChunk) {
-                foreach ($preLoader->getBeforePreloadExecutors() as $beforePreloadExecutor) {
-                    $missedEntitiesChunk = $beforePreloadExecutor->execute($missedEntitiesChunk);
+                $loadedEntities = $missedEntitiesChunk;
+                foreach ($preLoader->getLoaders() as $beforePreloadExecutor) {
+                    $loadedEntities = $beforePreloadExecutor->execute($loadedEntities);
                 }
-
-                $loadedEntities = $preLoader->getLoader()->execute($missedEntitiesChunk);
 
                 $entitiesToCache = [];
                 foreach ($missedEntitiesChunk as $missedEntityId => $missedEntity) {
-                    $entitiesToCache[$missedEntityId] = $loadedEntities[$missedEntityId] ?? $preLoader->createEmptyEntity();
+                    if (!isset($loadedEntities[$missedEntityId])) {
+                        throw new \RuntimeException('Undefined Entity!');
+                    }
+                    $entitiesToCache[$missedEntityId] = $loadedEntities[$missedEntityId] ;
                 }
 
                 foreach ($preLoader->getAfterPreloadExecutors() as $afterPreloadExecutor) {

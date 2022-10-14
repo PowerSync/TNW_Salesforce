@@ -1,10 +1,13 @@
-<?php declare(strict_types=1);
+<?php
 /**
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
 
-namespace TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader;
+declare(strict_types=1);
+
+namespace TNW\Salesforce\Synchronize\Unit\Entity\Customer;
+
 
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load;
@@ -12,21 +15,21 @@ use TNW\Salesforce\Synchronize\Unit\EntityLoaderAbstract;
 use TNW\Salesforce\Synchronize\Unit\Load\EntityLoader\EntityPreLoaderInterface;
 
 /**
- * Mapping Loader Website
+ * Mapping Loader Customer
  */
-class Website extends EntityLoaderAbstract implements EntityPreLoaderInterface
+class EntityLoader extends EntityLoaderAbstract implements EntityPreLoaderInterface
 {
     /** @var Load */
     private $loadSubEntities;
 
     /** @var array */
-    private $loaders;
-
-    /** @var array */
     private $afterLoadExecutors;
 
+    /** @var array */
+    private $loaders;
+
     /**
-     * Website constructor.
+     * Customer constructor.
      *
      * @param Load                     $loadSubEntities
      * @param array                    $loaders
@@ -35,14 +38,14 @@ class Website extends EntityLoaderAbstract implements EntityPreLoaderInterface
      */
     public function __construct(
         Load                $loadSubEntities,
-        array               $loaders = [],
+        array               $loaders,
         array               $afterLoadExecutors = [],
         SalesforceIdStorage $salesforceIdStorage = null
     ) {
         parent::__construct($salesforceIdStorage);
         $this->loadSubEntities = $loadSubEntities;
-        $this->loaders = $loaders;
         $this->afterLoadExecutors = $afterLoadExecutors;
+        $this->loaders = $loaders;
     }
 
     /**

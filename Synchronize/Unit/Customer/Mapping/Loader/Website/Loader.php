@@ -8,27 +8,28 @@ declare(strict_types=1);
 
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website;
 
-use Magento\Store\Model\ResourceModel\Website\CollectionFactory;
+use Magento\Store\Model\WebsiteFactory;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load\LoaderInterface;
+use TNW\SForceEnterprise\Service\Synchronize\Unit\Load\GetWebsitesByWebsiteIds;
 
 class Loader implements LoaderInterface
 {
-    /** @var CollectionFactory */
-    private $collectionFactory;
+    /** @var WebsiteFactory */
+    private $factory;
 
-    /** @var array  */
-    private $processed = [];
-
-    /** @var array  */
-    private $cache = [];
+    /** @var GetWebsitesByWebsiteIds */
+    private $getWebsitesByWebsiteIds;
 
     /**
-     * @param CollectionFactory $collectionFactory
+     * @param WebsiteFactory          $factory
+     * @param GetWebsitesByWebsiteIds $getWebsitesByWebsiteIds
      */
     public function __construct(
-        CollectionFactory $collectionFactory
+        WebsiteFactory $factory,
+        GetWebsitesByWebsiteIds $getWebsitesByWebsiteIds
     ) {
-        $this->collectionFactory = $collectionFactory;
+        $this->factory = $factory;
+        $this->getWebsitesByWebsiteIds = $getWebsitesByWebsiteIds;
     }
 
     /**
@@ -45,40 +46,15 @@ class Loader implements LoaderInterface
             return [];
         }
 
-        $websiteIds = array_unique($websiteIds);
-        $missedWebsiteIds = [];
-        foreach ($websiteIds as $websiteId) {
-            if(!isset($this->processed[$websiteId])) {
-                $missedWebsiteIds[] = $websiteId;
-                $this->processed[$websiteId] = 1;
-            }
-        }
-
-        if ($missedWebsiteIds) {
-            $collection = $this->collectionFactory->create();
-            $idFieldName = $collection->getResource()->getIdFieldName();
-            $collection->addFieldToFilter($idFieldName, ['in' => $missedWebsiteIds]);
-            foreach ($collection as $item) {
-                $this->cache[$item->getId()] = $item;
-            }
-        }
+        $websites = $this->getWebsitesByWebsiteIds->execute($websiteIds);
 
         $result = [];
         foreach ($entities as $key => $entity) {
             $websiteId = $entity->getWebsiteId();
-            $item = $this->cache[$websiteId] ?? null;
+            $item = $websites[$websiteId] ?? $this->factory->create();
             $item && $result[$key] = $item;
         }
 
         return $result;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function clearLocalCache(): void
-    {
-        $this->cache = [];
-        $this->processed = [];
     }
 }

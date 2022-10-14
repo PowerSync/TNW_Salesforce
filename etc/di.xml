@@ -56,7 +56,9 @@
     <type name="TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website">
         <arguments>
             <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Website</argument>
-            <argument name="loader" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website\Loader</argument>
+            <argument name="loaders" xsi:type="array">
+                <item name="Loader" xsi:type="object" sortOrder="10">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website\Loader</item>
+            </argument>
         </arguments>
     </type>
 
@@ -916,12 +918,6 @@
                 <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load" xsi:type="object">
                     TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load
                 </item>
-                <item name="TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website\Loader" xsi:type="object">
-                    TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website\Loader
-                </item>
-                <item name="TNW\Salesforce\Synchronize\Unit\Customer\Preload\Loader" xsi:type="object">
-                    TNW\Salesforce\Synchronize\Unit\Customer\Preload\Loader
-                </item>
 
             </argument>
         </arguments>
@@ -934,6 +930,14 @@
     <type name="TNW\Salesforce\Synchronize\Queue\Unit">
         <arguments>
             <argument name="logger" xsi:type="object">TNW\Logger</argument>
+        </arguments>
+    </type>
+    <type name="TNW\Salesforce\Synchronize\Unit\Entity\Customer\EntityLoader">
+        <arguments>
+            <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
+            <argument name="loaders" xsi:type="array">
+                <item name="Loader" xsi:type="object" sortOrder="10">TNW\Salesforce\Synchronize\Unit\Customer\Preload\Loader</item>
+            </argument>
         </arguments>
     </type>
 </config>

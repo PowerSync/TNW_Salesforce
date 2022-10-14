@@ -6,9 +6,7 @@
 
 namespace TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load;
 
-use TNW\Salesforce\Api\CleanableInstanceInterface;
-
-interface LoaderInterface extends CleanableInstanceInterface
+interface LoaderInterface
 {
     /**
      * @param array $entities

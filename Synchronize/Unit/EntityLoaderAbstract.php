@@ -40,9 +40,8 @@ abstract class EntityLoaderAbstract
      */
     public function get($entity)
     {
-        $entityId = $entity->getId();
-        $subEntity = $this->cache[$entityId] ?? $this->load($entity);
-        if (!empty($subEntity) && null !== $this->salesforceIdStorage && null !== $subEntity->getId()) {
+        $subEntity = $this->load($entity);
+        if ($subEntity && null !== $this->salesforceIdStorage && null !== $subEntity->getId()) {
             $this->salesforceIdStorage->load($subEntity, $entity->getData('config_website'));
         }
 
@@ -61,7 +60,7 @@ abstract class EntityLoaderAbstract
      * Load
      *
      * @param AbstractModel $entity
-     * @return AbstractModel
+     * @return AbstractModel|null
      */
     abstract public function load($entity);
 }

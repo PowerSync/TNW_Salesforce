@@ -6,9 +6,7 @@
 
 namespace TNW\Salesforce\Synchronize\Unit\Load\EntityLoader;
 
-use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load\AfterLoadExecutorInterface;
-use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load\BeforeLoadExecutorInterface;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load\LoaderInterface;
 
 /**
@@ -17,19 +15,9 @@ use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load\LoaderInterfac
 interface EntityPreLoaderInterface
 {
     /**
-     * @return AbstractModel| null
+     * @return LoaderInterface[]
      */
-    public function createEmptyEntity(): ?AbstractModel;
-
-    /**
-     * @return LoaderInterface
-     */
-    public function getLoader(): LoaderInterface;
-
-    /**
-     * @return BeforeLoadExecutorInterface[]
-     */
-    public function getBeforePreloadExecutors(): array;
+    public function getLoaders(): array;
 
     /**
      * @return AfterLoadExecutorInterface[]
