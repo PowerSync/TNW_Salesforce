@@ -219,4 +219,14 @@
             <column name="entity_type" />
         </index>
     </table>
+
+    <table name="tnw_salesforce_cron_work" resource="default" engine="innodb" comment="tnw_salesforce_cron_work">
+        <column xsi:type="varchar" name="type" nullable="true" length="255" comment="Type Cron" />
+        <column xsi:type="boolean" name="enable" nullable="false" default="true" comment="Enable" />
+        <column xsi:type="timestamp" name="updated_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At" />
+        <constraint xsi:type="unique" referenceId="TNW_SALESFORCE_CRON_WORK_TYPE">
+            <column name="type" />
+        </constraint>
+    </table>
+
 </schema>

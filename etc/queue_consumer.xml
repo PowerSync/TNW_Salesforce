@@ -14,4 +14,14 @@
               queue="tnw_salesforce_sync_realtime"
               connection="db"
               handler="TNW\Salesforce\Model\Queue\Synchronize\Message\ProcessQueueMessage::process"/>
+
+    <consumer name="tnwSalesforcePrequeueProcessDb"
+              queue="tnw_salesforce.prequeue.process.db"
+              connection="db"
+              handler="TNW\Salesforce\Api\Model\Prequeue\ProcessInterface::execute" />
+
+    <consumer name="tnwSalesforcePrequeueProcessAmqp"
+              queue="tnw_salesforce.prequeue.process.amqp"
+              connection="amqp"
+              handler="TNW\Salesforce\Api\Model\Prequeue\ProcessInterface::execute" />
 </config>
