@@ -20,11 +20,10 @@ abstract class LoaderAbstract  extends \TNW\Salesforce\Synchronize\Unit\EntityLo
      */
     protected $resourceCustomer;
 
+
     /**
-     * Customer constructor.
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
-     * @param \TNW\SForceEnterprise\Synchronize\Entity\Customer\Generate $customerGenerate
      * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage|null $salesforceIdStorage
      */
     public function __construct(

@@ -11,4 +11,12 @@
     <publisher topic="tnw_salesforce.sync.realtime.db">
         <connection name="db" exchange="tnw_salesforce.sync.db" />
     </publisher>
+
+    <publisher topic="tnw_salesforce.prequeue.process.db">
+        <connection name="db" exchange="tnw_salesforce.prequeue.db" />
+    </publisher>
+    <publisher topic="tnw_salesforce.prequeue.process.amqp">
+        <connection name="amqp" exchange="tnw_salesforce.prequeue.amqp" />
+    </publisher>
+
 </config>

@@ -20,6 +20,7 @@
                 <sync_type_realtime>sync_type_realtime</sync_type_realtime>
                 <page_size_from_magento>500</page_size_from_magento>
                 <max_attempt_count>5</max_attempt_count>
+                <max_items_count_for_queue>200</max_items_count_for_queue>
             </synchronization>
             <debug>
                 <db_log_limit>10000</db_log_limit>
