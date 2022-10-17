@@ -18,13 +18,14 @@ use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Api\WebsiteRepositoryInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use TNW\Salesforce\Api\Model\Synchronization\ConfigInterface;
 use TNW\Salesforce\Model\Config\WebsiteDetector;
-use TNW\SForceEnterprise\Model\Config\Source\Synchronization\Mode;
+use \TNW\Salesforce\Model\Config\Source\Synchronization\Mode;
 
 /**
  * Class Config
  */
-class Config extends DataObject
+class Config extends DataObject implements ConfigInterface
 {
     const SFORCE_BASIC_PREFIX = 'tnw_mage_basic__';
     const SFORCE_ENTERPRISE_PREFIX = 'tnw_mage_enterp__';
@@ -40,11 +41,6 @@ class Config extends DataObject
      * Base batch limit for simple sync
      */
     const SFORCE_BASE_UPDATE_LIMIT = 200;
-
-    /**
-     * Cron queue types
-     */
-    const DIRECT_SYNC_TYPE_REALTIME = 3;
 
     /** @comment Base batch limit for simple sync */
     const REALTIME_MAX_SYNC = 30;
@@ -558,5 +554,54 @@ class Config extends DataObject
     public function getMQMode($websiteId = null)
     {
         return $this->getStoreConfig('tnwsforce_general/synchronization/mq_mode', $websiteId);
+    }
+
+    /**
+     * Get Max items count
+     *
+     * @param int|null $websiteId
+     * @return int
+     */
+    public function getMaxItemsCountForQueue($websiteId = null)
+    {
+        return (int)$this->getStoreConfig('tnwsforce_general/synchronization/max_items_count_for_queue', $websiteId);
+    }
+
+    /**
+     * Set Global Last Cron Run
+     *
+     * @param $value
+     * @param int $type
+     * @throws LocalizedException
+     */
+    public function setGlobalLastCronRun($value, $type = 0, $isCheck = false)
+    {
+
+        switch ($type) {
+
+            case self::CLEAN_SYSTEM_LOGS:
+                $cron_type = 'clean_system_logs';
+                break;
+
+            case self::PRE_QUEUE_CRON:
+                $cron_type = 'pre_queue';
+                break;
+
+            case self::DIRECT_SYNC_TYPE_REALTIME:
+                return;
+
+            default:
+                throw new LocalizedException(__('Invalid type to save cron last run date.'));
+        }
+
+        if ($isCheck) {
+            $cron_type .= '_c';
+        }
+
+        $this->resource->getConnection()->insertOnDuplicate($this->resource->getTableName('tnw_salesforce_cron_work'), [
+            'type' => $cron_type,
+            'updated_at' => date('Y-m-d H:i:s', $value)
+        ], ['updated_at']);
+
     }
 }

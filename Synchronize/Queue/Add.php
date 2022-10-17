@@ -168,18 +168,6 @@ class Add
         }
 
         $this->addToPreQueue($entityIds);
-
-//        $this->addToQueueDirectly($entityIds);
-//
-//        if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
-//
-//            /** @var MessageInterface $message */
-//            $message = $this->messageManager
-//                ->createMessage(MessageInterface::TYPE_SUCCESS)
-//                ->setText('Item(s) were added to the Salesforce sync queue');
-//
-//            $this->messageManager->addUniqueMessages([$message]);
-//        }
     }
 
     /**
@@ -190,6 +178,10 @@ class Add
         foreach (array_chunk($entityIds, self::DIRECT_ADD_TO_QUEUE_COUNT_LIMIT) as $ids) {
             $syncType = $this->syncType(count($entityIds), 0);
             $this->resourcePreQueue->saveEntityIds($ids, $this->entityType, $syncType);
+        }
+
+        if (!empty($entityIds)) {
+            $this->publisher->publish(\TNW\Salesforce\Model\Prequeue\Process::MQ_TOPIC_NAME, false);
         }
 
         if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
@@ -234,7 +226,7 @@ class Add
 
         $this->create($this->resolves, $this->entityType, $entityIds, [], $websiteId, $syncType);
 
-        if ($syncType === Config::DIRECT_SYNC_TYPE_REALTIME) {
+        if ($syncType === \TNW\Salesforce\Api\Model\Synchronization\ConfigInterface::DIRECT_SYNC_TYPE_REALTIME) {
             // Sync realtime type
             $this->publisher->publish(self::TOPIC_NAME, (string)$websiteId);
             return;
@@ -608,7 +600,7 @@ class Add
      */
     public function syncType($count, $websiteId)
     {
-        return Config::DIRECT_SYNC_TYPE_REALTIME;
+        return \TNW\Salesforce\Api\Model\Synchronization\ConfigInterface::DIRECT_SYNC_TYPE_REALTIME;
     }
 
     /**

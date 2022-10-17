@@ -20,12 +20,12 @@ use Magento\Framework\App\Cache\Type\Collection;
 
 class Config extends \TNW\Salesforce\Model\Customer\Config
 {
-    
+
 
     /**
      * Cron queue types
      */
-   
+
     const CLEAN_SYSTEM_LOGS = 8;
 
 
@@ -108,35 +108,6 @@ class Config extends \TNW\Salesforce\Model\Customer\Config
     public function getMagentoTime($websiteId = null)
     {
         return $this->dateTime->scopeTimeStamp($websiteId);
-    }
-
-    /**
-     * Set Global Last Cron Run
-     *
-     * @param string $value
-     * @param int $type
-     * @throws LocalizedException
-     */
-    public function setGlobalLastCronRun($value, $type = 0, $isCheck = false)
-    {
-        switch ($type) {
-
-            case self::CLEAN_SYSTEM_LOGS:
-                $cron_type = 'clean_system_logs';
-                break;
-
-            default:
-                throw new LocalizedException(__('Invalid type to save cron last run date.'));
-        }
-
-        if ($isCheck) {
-            $cron_type .= '_c';
-        }
-
-        $this->resource->getConnection()->insertOnDuplicate($this->resource->getTableName('tnw_salesforce_cron_work'), [
-            'type' => $cron_type,
-            'updated_at' => date('Y-m-d H:i:s', $value)
-        ], ['updated_at']);
     }
 
 }
