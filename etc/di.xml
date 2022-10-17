@@ -18,6 +18,20 @@
         </arguments>
     </type>
 
+    <preference for="TNW\Salesforce\Api\Model\Cron\Source\MagentoSyncTypeInterface" type="TNW\Salesforce\Model\Cron\Source\MagentoSyncType" />
+    <preference for="TNW\Salesforce\Api\Model\Synchronization\ConfigInterface" type="TNW\Salesforce\Model\Synchronization\Config" />
+    <preference for="TNW\Salesforce\Api\Model\Prequeue\ProcessInterface" type="TNW\Salesforce\Model\Prequeue\Process" />
+
+    <type name="TNW\Salesforce\Model\Prequeue\Process">
+        <arguments>
+            <argument name="queueAddPool" xsi:type="array">
+                <item name="website" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Website</item>
+                <item name="customer" xsi:type="object">TNW\Salesforce\Synchronize\Queue\Customer</item>
+            </argument>
+            <argument name="systemLogger" xsi:type="object">TNW\Logger</argument>
+        </arguments>
+    </type>
+
     <preference for="Magento\Framework\Interception\Code\Generator\Interceptor" type="TNW\Salesforce\Code\Generator\Interceptor" />
     <!-- Workaround for Magento bug, see https://github.com/magento/magento2/pull/26475 -->
     <preference for="Magento\Customer\Model\Customer\Attribute\Source\Store" type="TNW\Salesforce\Model\Customer\Attribute\Source\Store" />

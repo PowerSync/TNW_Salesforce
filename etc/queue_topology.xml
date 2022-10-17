@@ -11,4 +11,13 @@
     <exchange name="tnw_salesforce.sync.db" type="topic" connection="db">
         <binding id="tnwSalesforceSyncRealtime" topic="tnw_salesforce.sync.realtime.db" destinationType="queue" destination="tnw_salesforce_sync_realtime"/>
     </exchange>
+
+    <exchange name="tnw_salesforce.prequeue.amqp" type="topic" connection="amqp">
+        <binding id="tnwSalesforcePrequeueProcessAmqp" topic="tnw_salesforce.prequeue.process.amqp" destinationType="queue" destination="tnw_salesforce.prequeue.process.amqp"/>
+    </exchange>
+
+    <exchange name="tnw_salesforce.prequeue.db" type="topic" connection="db">
+        <binding id="tnwSalesforcePrequeueProcessDb" topic="tnw_salesforce.prequeue.process.db" destinationType="queue" destination="tnw_salesforce.prequeue.process.db"/>
+    </exchange>
+
 </config>
