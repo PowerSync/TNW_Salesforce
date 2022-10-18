@@ -936,8 +936,19 @@
         <arguments>
             <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
             <argument name="loaders" xsi:type="array">
-                <item name="Loader" xsi:type="object" sortOrder="10">TNW\Salesforce\Synchronize\Unit\Customer\Preload\Loader</item>
+                <item name="Loader" xsi:type="object" sortOrder="10">CustomersByGetCustomerIdMethodLoader</item>
             </argument>
         </arguments>
     </type>
+
+    <virtualType name="CustomersByGetCustomerIdMethodLoader" type="TNW\Salesforce\Service\Synchronize\Unit\Load\Loaders\CustomersByMethodLoader">
+        <arguments>
+            <argument name="method" xsi:type="const">TNW\Salesforce\Service\Synchronize\Unit\Load\Loaders\CustomersByMethodLoader::GET_CUSTOMER_ID_METHOD</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="CustomersByGetSuperUserIdMethodLoader" type="TNW\Salesforce\Service\Synchronize\Unit\Load\Loaders\CustomersByMethodLoader">
+        <arguments>
+            <argument name="method" xsi:type="const">TNW\Salesforce\Service\Synchronize\Unit\Load\Loaders\CustomersByMethodLoader::GET_SUPER_USER_ID_METHOD</argument>
+        </arguments>
+    </virtualType>
 </config>

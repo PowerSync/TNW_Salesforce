@@ -39,11 +39,10 @@ class Load implements CleanableInstanceInterface
         }
 
         $cacheKey = get_class($preLoader);
-        $entities = array_unique($entities);
 
         $missedEntities = [];
         foreach ($entities as $entityId => $entity) {
-            if (!isset($this->processed[$entityId])) {
+            if (!isset($this->processed[$cacheKey][$entityId])) {
                 $missedEntities[$entityId] = $entity;
                 $this->processed[$cacheKey][$entityId] = 1;
             }
