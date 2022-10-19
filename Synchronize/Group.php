@@ -132,7 +132,10 @@ class Group
             if($unit instanceof CleanableInstanceInterface) {
                 $this->cleanableObjectsList->add($unit);
             }
+            $code = get_class($unit) . ':' . __LINE__;
+            \TNW\Dev\DB\Profiler::startPartial($code);
             $unit->process();
+            \TNW\Dev\DB\Profiler::stopPartial($code);
             $unit->status($unit::COMPLETE);
             $this->messageDebug('<<< STOP <<< %s. Unit name %s', $unit->description(), $unit->name());
 

@@ -57,6 +57,11 @@ class SalesforceIdStorage
      */
     private $config;
 
+    /** @var array */
+    private $records = [];
+
+    private $cacheForUpdateStatus = [];
+
     /**
      * ObjectAbstract constructor.
      *
@@ -198,6 +203,44 @@ class SalesforceIdStorage
     }
 
     /**
+     * Save Value By Attribute
+     *
+     * @param AbstractModel $entity
+     * @param string $value
+     * @param string $attributeName
+     * @param null|bool|int|string|WebsiteInterface $website
+     *
+     * @throws LocalizedException
+     */
+    public function addRecordsToCache($entity, $value, $attributeName, $website = null)
+    {
+        $entity_id = $entity->getId();
+        $magento_type = $this->magentoType;
+        if (null === $entity->getId()) {
+            if (!($queue = $entity->getData('_queue')) || (null === $queue->getEntityId())) {
+                return;
+            }
+            $entity_id = $queue->getEntityId();
+            $magento_type = $queue->getEntityLoad();
+        }
+
+        $this->records[] = [
+            'magento_type' => $magento_type,
+            'entity_id' => $entity_id,
+            'object_id' => $value,
+            'salesforce_type' => $this->objectByAttribute($attributeName),
+            'website_id' => $this->prepareWebsiteId($website)
+        ];
+    }
+
+    public function saveRecordsFromCache()
+    {
+        $records = $this->records;
+        $this->records = [];
+        $this->resourceObjects->saveRecords($records);
+    }
+
+    /**
      * Save Status
      *
      * @param AbstractModel $entity
@@ -219,6 +262,41 @@ class SalesforceIdStorage
                 $status,
                 $this->prepareWebsiteId($website)
             );
+    }
+
+    /**
+     * Save Status
+     *
+     * @param AbstractModel $entity
+     * @param bool $status
+     * @param null|bool|int|string|WebsiteInterface $website
+     *
+     * @throws LocalizedException
+     */
+    public function saveStatusFromCache()
+    {
+        $this->resourceObjects
+            ->saveStatusMass($this->cacheForUpdateStatus);
+        $this->cacheForUpdateStatus = [];
+    }
+
+    /**
+     * Save Status
+     *
+     * @param AbstractModel $entity
+     * @param bool $status
+     * @param null|bool|int|string|WebsiteInterface $website
+     *
+     * @throws LocalizedException
+     */
+    public function addStatusToCacheForMassUpdate($entity, $status, $website = null)
+    {
+        if (null === $entity->getId()) {
+            return;
+        }
+
+        $websiteId = $this->prepareWebsiteId($website);
+        $this->cacheForUpdateStatus[$websiteId][$status][$this->magentoType][] = $entity->getId();
     }
 
     /**
