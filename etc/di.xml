@@ -70,6 +70,9 @@
     <type name="TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website">
         <arguments>
             <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Website</argument>
+            <argument name="loaders" xsi:type="array">
+                <item name="Loader" xsi:type="object" sortOrder="10">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website\Loader</item>
+            </argument>
         </arguments>
     </type>
 
@@ -857,8 +860,12 @@
     <type name="TNW\Salesforce\Service\CleanLocalCacheForInstances">
         <arguments>
             <argument name="instances" xsi:type="array">
-                <item name="TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds" xsi:type="object">TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds</item>
-                <item name="TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList" xsi:type="object">TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList</item>
+                <item name="TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds" xsi:type="object">
+                    TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds
+                </item>
+                <item name="TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList" xsi:type="object">
+                    TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList
+                </item>
                 <item name="CustomerGetIdsFilteredByCustomerGroupConfiguration" xsi:type="object">
                     CustomerGetIdsFilteredByCustomerGroupConfiguration
                 </item>
@@ -907,6 +914,28 @@
                 <item name="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" xsi:type="object">
                     TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField
                 </item>
+                <item name="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" xsi:type="object">
+                    TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField
+                </item>
+                <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities" xsi:type="object">
+                    TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities
+                </item>
+                <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType" xsi:type="object">
+                    TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType
+                </item>
+                <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\GetEntityTypeByCode" xsi:type="object">
+                    TNW\Salesforce\Service\Synchronize\Unit\Load\GetEntityTypeByCode
+                </item>
+                <item name="TNW\Salesforce\Service\Model\ResourceModel\Queue\GetDependenceIdsByEntityType" xsi:type="object">
+                    TNW\Salesforce\Service\Model\ResourceModel\Queue\GetDependenceIdsByEntityType
+                </item>
+                <item name="TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds" xsi:type="object">
+                    TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds
+                </item>
+                <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load" xsi:type="object">
+                    TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load
+                </item>
+
             </argument>
         </arguments>
     </type>
@@ -920,4 +949,23 @@
             <argument name="logger" xsi:type="object">TNW\Logger</argument>
         </arguments>
     </type>
+    <type name="TNW\Salesforce\Synchronize\Unit\Entity\Customer\EntityLoader">
+        <arguments>
+            <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
+            <argument name="loaders" xsi:type="array">
+                <item name="Loader" xsi:type="object" sortOrder="10">CustomersByGetCustomerIdMethodLoader</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="CustomersByGetCustomerIdMethodLoader" type="TNW\Salesforce\Service\Synchronize\Unit\Load\Loaders\CustomersByMethodLoader">
+        <arguments>
+            <argument name="method" xsi:type="const">TNW\Salesforce\Service\Synchronize\Unit\Load\Loaders\CustomersByMethodLoader::GET_CUSTOMER_ID_METHOD</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="CustomersByGetSuperUserIdMethodLoader" type="TNW\Salesforce\Service\Synchronize\Unit\Load\Loaders\CustomersByMethodLoader">
+        <arguments>
+            <argument name="method" xsi:type="const">TNW\Salesforce\Service\Synchronize\Unit\Load\Loaders\CustomersByMethodLoader::GET_SUPER_USER_ID_METHOD</argument>
+        </arguments>
+    </virtualType>
 </config>

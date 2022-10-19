@@ -5,40 +5,63 @@
  */
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader;
 
+use Magento\Customer\Model\CustomerFactory;
+use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory;
+use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Model\AbstractModel;
+use TNW\Salesforce\Model\Mapper;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
+use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
+use TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface;
+
 /**
  * Load By Customer
  */
-class Customer implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
+class Customer implements LoadLoaderInterface, PreLoaderInterface
 {
     const LOAD_BY = 'customer';
 
-    /**
-     * @var \Magento\Customer\Model\CustomerFactory
-     */
-    private $customerFactory;
+    /** @var CollectionFactory */
+    private $collectionFactory;
 
-    /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer
-     */
-    private $resourceCustomer;
+    /** @var PreLoadEntities */
+    private $preLoadEntities;
+
+    /** @var GetMappedAttributeCodesByMagentoType */
+    private $getMappedAttributeCodesByMagentoType;
+
+    /** @var array */
+    private $afterLoadExecutors;
+
+    /** @var CustomerFactory */
+    private $factory;
 
     /**
      * ByCustomer constructor.
-     * @param \Magento\Customer\Model\CustomerFactory $customerFactory
-     * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+     *
+     * @param CustomerFactory                      $factory
+     * @param CollectionFactory                    $collectionFactory
+     * @param PreLoadEntities                      $preLoadEntities
+     * @param GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType
+     * @param array                                $afterLoadExecutors
      */
     public function __construct(
-        \Magento\Customer\Model\CustomerFactory $customerFactory,
-        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+        CustomerFactory $factory,
+        CollectionFactory $collectionFactory,
+        PreLoadEntities $preLoadEntities,
+        GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType,
+        array $afterLoadExecutors = []
     ) {
-        $this->customerFactory = $customerFactory;
-        $this->resourceCustomer = $resourceCustomer;
+        $this->factory = $factory;
+        $this->collectionFactory = $collectionFactory;
+        $this->preLoadEntities = $preLoadEntities;
+        $this->getMappedAttributeCodesByMagentoType = $getMappedAttributeCodesByMagentoType;
+        $this->afterLoadExecutors = $afterLoadExecutors;
     }
 
     /**
-     * Load Type
-     *
-     * @return string
+     * @inheritDoc
      */
     public function loadBy()
     {
@@ -46,17 +69,40 @@ class Customer implements \TNW\Salesforce\Synchronize\Unit\LoadLoaderInterface
     }
 
     /**
-     * Load
-     *
-     * @param int $entityId
-     * @param array $additional
-     * @return \Magento\Customer\Model\Customer
+     * @inheritDoc
      */
     public function load($entityId, array $additional)
     {
-        $customer = $this->customerFactory->create();
-        $this->resourceCustomer->load($customer, $entityId);
+        return $this->preLoadEntities->execute($this, [$entityId], [$entityId => $additional])[$entityId] ?? null;
+    }
 
-        return $customer;
+    /**
+     * @inheritDoc
+     */
+    public function createCollectionInstance(): ?AbstractDb
+    {
+        $collection = $this->collectionFactory->create();
+
+        $magentoType = Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER;
+        $attributeCodes = $this->getMappedAttributeCodesByMagentoType->execute([$magentoType])[$magentoType] ?? [];
+        $attributeCodes && $collection->addAttributeToSelect($attributeCodes, 'left');
+
+        return $collection;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAfterPreLoadExecutors(): array
+    {
+        return $this->afterLoadExecutors;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function createEmptyEntity(): AbstractModel
+    {
+        return $this->factory->create();
     }
 }
