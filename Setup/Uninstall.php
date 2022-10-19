@@ -64,6 +64,7 @@ class Uninstall implements UninstallInterface
             'tnw_salesforce_entity_queue_relation',
             'tnw_salesforce_entity_queue',
             'tnw_salesforce_entity_prequeue',
+            'tnw_salesforce_cron_work',
         ];
         $columnsToDrop = [
             'store_website' => [

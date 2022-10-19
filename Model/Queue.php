@@ -208,7 +208,7 @@ class Queue extends AbstractModel
 
     public function isRealtime()
     {
-        return $this->getSyncType() == Config::DIRECT_SYNC_TYPE_REALTIME;
+        return $this->getSyncType() == \TNW\Salesforce\Api\Model\Synchronization\ConfigInterface::DIRECT_SYNC_TYPE_REALTIME;
     }
 
     /**
