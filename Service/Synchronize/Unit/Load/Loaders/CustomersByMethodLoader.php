@@ -10,7 +10,7 @@ namespace TNW\Salesforce\Service\Synchronize\Unit\Load\Loaders;
 
 use Magento\Customer\Model\CustomerFactory;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load\LoaderInterface;
-use TNW\SForceEnterprise\Service\Synchronize\Unit\Load\GetCustomersByCustomerIds;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomersByCustomerIds;
 
 class CustomersByMethodLoader implements LoaderInterface
 {
