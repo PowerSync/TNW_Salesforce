@@ -10,7 +10,7 @@ namespace TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website;
 
 use Magento\Store\Model\WebsiteFactory;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load\LoaderInterface;
-use TNW\SForceEnterprise\Service\Synchronize\Unit\Load\GetWebsitesByWebsiteIds;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\GetWebsitesByWebsiteIds;
 
 class Loader implements LoaderInterface
 {
