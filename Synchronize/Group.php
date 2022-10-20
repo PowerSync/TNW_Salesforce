@@ -16,6 +16,7 @@ use SplObjectStorage;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
 use TNW\Salesforce\Synchronize\Unit\CurrentUnit;
+use TNW\Salesforce\Synchronize\Unit\UnitAbstract;
 
 /**
  * Group
@@ -64,13 +65,20 @@ class Group
     /** @var CleanableObjectsList */
     private $cleanableObjectsList;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
      * Entity constructor.
-     * @param string $groupCode
-     * @param string[] $units
-     * @param UnitsFactory $unitsFactory
+     *
+     * @param string                 $groupCode
+     * @param string[]               $units
+     * @param UnitsFactory           $unitsFactory
      * @param ObjectManagerInterface $objectManager
-     * @param LoggerInterface $systemLogger
+     * @param LoggerInterface        $systemLogger
+     * @param LoggerInterface        $logger
+     * @param CurrentUnit            $currentUnit
+     * @param CleanableObjectsList   $cleanableObjectsList
      */
     public function __construct(
         $groupCode,
@@ -78,6 +86,7 @@ class Group
         UnitsFactory $unitsFactory,
         ObjectManagerInterface $objectManager,
         LoggerInterface $systemLogger,
+        LoggerInterface $logger,
         CurrentUnit $currentUnit,
         CleanableObjectsList $cleanableObjectsList
     ) {
@@ -88,6 +97,7 @@ class Group
         $this->unitsFactory = $unitsFactory;
         $this->currentUnit = $currentUnit;
         $this->cleanableObjectsList = $cleanableObjectsList;
+        $this->logger = $logger;
     }
 
     /**
@@ -112,7 +122,7 @@ class Group
         $this->messageDebug('======== START SYNC %s ========', $this->code());
 
         $units = $this->createUnits($queues)->sort();
-        /** @var Unit\UnitInterface $unit */
+        /** @var UnitAbstract $unit */
         foreach ($units as $unit) {
             $this->currentUnit->setUnit($unit);
             foreach ($unit->dependents() as $dependent) {
@@ -132,10 +142,7 @@ class Group
             if($unit instanceof CleanableInstanceInterface) {
                 $this->cleanableObjectsList->add($unit);
             }
-            $code = get_class($unit) . ':' . __LINE__;
-            \TNW\Dev\DB\Profiler::startPartial($code);
             $unit->process();
-            \TNW\Dev\DB\Profiler::stopPartial($code);
             $unit->status($unit::COMPLETE);
             $this->messageDebug('<<< STOP <<< %s. Unit name %s', $unit->description(), $unit->name());
 
@@ -233,6 +240,13 @@ class Group
             case 'error':
                 $this->errorMessages[] = $message;
                 $this->systemLogger->error($message);
+                $traceAsString = (new RuntimeException('Stactrace'))->getTraceAsString();
+                $this->logger->error(
+                    implode(
+                        PHP_EOL,
+                        [$message, $traceAsString]
+                    )
+                );
                 break;
 
             case 'success':

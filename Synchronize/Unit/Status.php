@@ -146,7 +146,9 @@ class Status extends Synchronize\Unit\UnitAbstract
             $this->saveStatus($entity);
         }
 
-        $this->salesforceIdStorage->saveStatusFromCache();
+        if (null !== $this->salesforceIdStorage) {
+            $this->salesforceIdStorage->saveStatusFromCache();
+        }
 
         $this->updateQueue();
     }
