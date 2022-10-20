@@ -57,7 +57,7 @@ class Load implements CleanableInstanceInterface
 
                 $entitiesToCache = [];
                 foreach ($missedEntitiesChunk as $missedEntityId => $missedEntity) {
-                    if (!isset($loadedEntities[$missedEntityId])) {
+                    if (!array_key_exists($missedEntityId, $loadedEntities)) {
                         throw new \RuntimeException('Undefined Entity!');
                     }
                     $entitiesToCache[$missedEntityId] = $loadedEntities[$missedEntityId] ;

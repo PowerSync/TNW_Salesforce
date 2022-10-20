@@ -9,7 +9,6 @@ namespace TNW\Salesforce\Synchronize\Unit;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
-use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
@@ -82,9 +81,6 @@ class Load extends Synchronize\Unit\UnitAbstract
     /** @var GetQueuesByIds */
     private $getQueuesByIds;
 
-    /** @var CleanableObjectsList */
-    private $cleanableObjectsList;
-
     /** @var SubEntitiesLoad */
     private $loadSubEntities;
 
@@ -104,7 +100,6 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @param PreLoadEntities              $preLoadEntities
      * @param GetDependenceIdsByEntityType $getDependenceIdsByEntityType
      * @param GetQueuesByIds               $getQueuesByIds
-     * @param CleanableObjectsList         $cleanableObjectsList
      * @param array                        $entityLoaders
      * @param array                        $entityTypeMapping
      */
@@ -158,31 +153,6 @@ class Load extends Synchronize\Unit\UnitAbstract
     public function description()
     {
         return __('Loading Magento %1 ...', $this->magentoType);
-    }
-
-    /**
-     * @return void
-     */
-    public function reset()
-    {
-        parent::reset();
-
-        foreach ($this->entityLoaders as $entityType => $entityLoader) {
-            if (method_exists($entityLoader, 'reset')) {
-                $entityLoader->reset();
-            } else {
-                $this->group()->messageDebug('Need to implement the "reset" method for the class %s', get_class($entityLoader));
-            }
-        }
-
-        foreach ($this->loaders as $loader) {
-            if (method_exists($loader, 'reset')) {
-                $loader->reset();
-            } else {
-                $this->group()->messageDebug('Need to implement the "reset" method for the class %s', get_class($loader));
-            }
-        }
-        gc_collect_cycles();
     }
 
     /**

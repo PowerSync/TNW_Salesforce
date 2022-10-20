@@ -42,10 +42,6 @@ class Loader implements LoaderInterface
             $websiteIds[] = $entity->getWebsiteId();
         }
 
-        if(!$websiteIds) {
-            return [];
-        }
-
         $websites = $this->getWebsitesByWebsiteIds->execute($websiteIds);
 
         $result = [];
