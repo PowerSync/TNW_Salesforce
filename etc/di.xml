@@ -932,6 +932,9 @@
                 <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load" xsi:type="object">
                     TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load
                 </item>
+                <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomersByCustomerIds" xsi:type="object">
+                    TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomersByCustomerIds
+                </item>
 
             </argument>
         </arguments>
