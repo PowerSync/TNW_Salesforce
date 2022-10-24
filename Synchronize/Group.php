@@ -282,7 +282,7 @@ class Group
             $argument = $argument->render();
         }
 
-        if ($argument instanceof \Exception) {
+        if ($argument instanceof \Throwable) {
             $argument = $argument->getMessage();
         }
 
