@@ -33,6 +33,9 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
     /** @var array */
     private $afterLoadExecutors;
 
+    /** @var array */
+    private $groupKeys;
+
     /**
      * ByWebsite constructor.
      *
@@ -40,17 +43,20 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
      * @param PreLoadEntities   $preLoadEntities
      * @param CollectionFactory $collectionFactory
      * @param array             $afterLoadExecutors
+     * @param array             $groupKeys
      */
     public function __construct(
         WebsiteFactory    $factory,
         PreLoadEntities   $preLoadEntities,
         CollectionFactory $collectionFactory,
-        array $afterLoadExecutors = []
+        array $afterLoadExecutors = [],
+        array $groupKeys = []
     ) {
         $this->factory = $factory;
         $this->preLoadEntities = $preLoadEntities;
         $this->collectionFactory = $collectionFactory;
         $this->afterLoadExecutors = $afterLoadExecutors;
+        $this->groupKeys = $groupKeys;
     }
 
     /**
@@ -66,7 +72,7 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
      */
     public function load($entityId, array $additional)
     {
-        return $this->preLoadEntities->execute($this, [$entityId], [$entityId => $additional])[$entityId] ?? null;
+        return $this->preLoadEntities->execute($this, [$entityId], [$entityId => $additional])[$this->getGroupValue($additional)][$entityId] ?? null;
     }
 
     /**
@@ -91,5 +97,21 @@ class ByWebsite implements LoadLoaderInterface, PreLoaderInterface
     public function getAfterPreLoadExecutors(): array
     {
         return $this->afterLoadExecutors;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getGroupValue(array $loadAdditional): string
+    {
+        $groupValue = '';
+        foreach ($this->groupKeys as $groupKey) {
+            $value = $loadAdditional[$groupKey];
+            if($value) {
+                $groupValue .= $value;
+            }
+        }
+
+        return $groupValue ?: self::DEFAULT_CACHE_KEY;
     }
 }

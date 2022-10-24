@@ -107,19 +107,19 @@ class Load extends Synchronize\Unit\UnitAbstract
         $name,
         $magentoType,
         array $queues,
-        array                                    $loaders,
-        Synchronize\Units                        $units,
-        Synchronize\Group                        $group,
+        array $loaders,
+        Synchronize\Units $units,
+        Synchronize\Group $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        Synchronize\Unit\HashInterface           $hash,
-        Objects                                  $objects,
-        SalesforceIdStorage                      $entityObject = null,
-        PreLoadEntities                          $preLoadEntities,
-        GetDependenceIdsByEntityType             $getDependenceIdsByEntityType,
-        GetQueuesByIds                           $getQueuesByIds,
-        SubEntitiesLoad                          $loadSubEntities,
-        array                                    $entityLoaders = [],
-        array                                    $entityTypeMapping = []
+        Synchronize\Unit\HashInterface $hash,
+        Objects $objects,
+        SalesforceIdStorage $entityObject = null,
+        PreLoadEntities $preLoadEntities,
+        GetDependenceIdsByEntityType $getDependenceIdsByEntityType,
+        GetQueuesByIds $getQueuesByIds,
+        SubEntitiesLoad $loadSubEntities,
+        array $entityLoaders = [],
+        array $entityTypeMapping = []
     ) {
         parent::__construct($name, $units, $group);
         $this->magentoType = $magentoType;
@@ -427,17 +427,22 @@ class Load extends Synchronize\Unit\UnitAbstract
         foreach ($queuesByEntityLoad as $entityLoad => $queues) {
             $loader = $this->loaderBy($entityLoad);
             if ($loader instanceof PreLoaderInterface) {
-                $entityIds = [];
-                $entityLoadAdditional = [];
+                $groupedByCacheKey = [];
                 foreach ($queues as $queue) {
+                    $loadAdditional = $queue->getEntityLoadAdditional() ?? [];
+                    $groupValue = $loader->getGroupValue($loadAdditional);
                     $entityId = (int)$queue->getEntityId();
-                    $entityIds[] = $entityId;
-                    $entityLoadAdditional[$entityId] = $queue->getEntityLoadAdditional() ?? [];
+                    $groupedByCacheKey[$groupValue]['entityIds'][] = $entityId;
+                    $groupedByCacheKey[$groupValue]['entityLoadAdditional'][$entityId] = $loadAdditional;
                 }
-                $entities = $this->preLoadEntities->execute($loader, $entityIds, $entityLoadAdditional);
-                foreach ($this->entityLoaders as $entityLoader) {
-                    if ($entityLoader instanceof EntityPreLoaderInterface) {
-                        $this->loadSubEntities->execute($entityLoader, $entities);
+                foreach ($groupedByCacheKey as $data) {
+                    $entityIds = $data['entityIds'] ?? [];
+                    $entityLoadAdditional = $data['entityLoadAdditional'] ?? [];
+                    $entities = $this->preLoadEntities->execute($loader, $entityIds, $entityLoadAdditional);
+                    foreach ($this->entityLoaders as $entityLoader) {
+                        if ($entityLoader instanceof EntityPreLoaderInterface) {
+                            $this->loadSubEntities->execute($entityLoader, $entities);
+                        }
                     }
                 }
             }

@@ -60,9 +60,11 @@ class PreLoadEntities implements CleanableInstanceInterface
             $type = $preLoader->loadBy();
             $missedEntityIds = [];
             foreach ($entityIds as $entityId) {
-                if (!isset($this->processed[$type][$entityId])) {
+                $loadAdditional = $entityAdditional[$entityId] ?? [];
+                $groupValue = $preLoader->getGroupValue($loadAdditional);
+                if (!isset($this->processed[$type][$groupValue][$entityId])) {
                     $missedEntityIds[] = $entityId;
-                    $this->processed[$type][$entityId] = 1;
+                    $this->processed[$type][$groupValue][$entityId] = 1;
                 }
             }
             if ($missedEntityIds) {
@@ -99,14 +101,18 @@ class PreLoadEntities implements CleanableInstanceInterface
                         $missedItems = $afterLoadExecutor->execute($missedItems, $missedEntityAdditional);
                     }
                     foreach ($missedItems as $itemId => $missedItem) {
-                        $this->cache[$type][$itemId] = $missedItem;
+                        $loadAdditional = $entityAdditional[$itemId] ?? [];
+                        $groupValue = $preLoader->getGroupValue($loadAdditional);
+                        $this->cache[$type][$groupValue][$itemId] = $missedItem;
                     }
                 }
             }
             $result = [];
             foreach ($entityIds as $entityId) {
-                $item = $this->cache[$type][$entityId] ?? $preLoader->createEmptyEntity()->setId($entityId);
-                $item && $result[$entityId] = $item;
+                $loadAdditional = $entityAdditional[$entityId] ?? [];
+                $groupValue = $preLoader->getGroupValue($loadAdditional);
+                $item = $this->cache[$type][$groupValue][$entityId] ?? $preLoader->createEmptyEntity()->setId($entityId);
+                $item && $result[$groupValue][$entityId] = $item;
             }
         } catch (\Throwable $e) {
             $result = [];

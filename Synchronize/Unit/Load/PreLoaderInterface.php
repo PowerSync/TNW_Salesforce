@@ -15,6 +15,8 @@ use TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\AfterLoadExecut
  */
 interface PreLoaderInterface
 {
+    public const DEFAULT_CACHE_KEY = 'default';
+
     /**
      * @return AbstractDb|null
      */
@@ -29,4 +31,9 @@ interface PreLoaderInterface
      * @return AfterLoadExecutorInterface[]
      */
     public function getAfterPreLoadExecutors(): array;
+
+    /**
+     * @return string|null
+     */
+    public function getGroupValue(array $loadAdditional): string;
 }

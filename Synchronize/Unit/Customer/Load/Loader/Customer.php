@@ -37,6 +37,9 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface
     /** @var CustomerFactory */
     private $factory;
 
+    /** @var array */
+    private $groupKeys;
+
     /**
      * ByCustomer constructor.
      *
@@ -45,19 +48,22 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface
      * @param PreLoadEntities                      $preLoadEntities
      * @param GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType
      * @param array                                $afterLoadExecutors
+     * @param array                                $groupKeys
      */
     public function __construct(
         CustomerFactory $factory,
         CollectionFactory $collectionFactory,
         PreLoadEntities $preLoadEntities,
         GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType,
-        array $afterLoadExecutors = []
+        array $afterLoadExecutors = [],
+        array $groupKeys = []
     ) {
         $this->factory = $factory;
         $this->collectionFactory = $collectionFactory;
         $this->preLoadEntities = $preLoadEntities;
         $this->getMappedAttributeCodesByMagentoType = $getMappedAttributeCodesByMagentoType;
         $this->afterLoadExecutors = $afterLoadExecutors;
+        $this->groupKeys = $groupKeys;
     }
 
     /**
@@ -73,7 +79,7 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface
      */
     public function load($entityId, array $additional)
     {
-        return $this->preLoadEntities->execute($this, [$entityId], [$entityId => $additional])[$entityId] ?? null;
+        return $this->preLoadEntities->execute($this, [$entityId], [$entityId => $additional])[$this->getGroupValue($additional)][$entityId] ?? null;
     }
 
     /**
@@ -104,5 +110,21 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface
     public function createEmptyEntity(): AbstractModel
     {
         return $this->factory->create();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getGroupValue(array $loadAdditional): string
+    {
+        $groupValue = '';
+        foreach ($this->groupKeys as $groupKey) {
+            $value = $loadAdditional[$groupKey];
+            if($value) {
+                $groupValue .= $value;
+            }
+        }
+
+        return $groupValue ?: self::DEFAULT_CACHE_KEY;
     }
 }
