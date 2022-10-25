@@ -434,11 +434,19 @@ class Load extends Synchronize\Unit\UnitAbstract
                     $entityId = (int)$queue->getEntityId();
                     $groupedByCacheKey[$groupValue]['entityIds'][] = $entityId;
                     $groupedByCacheKey[$groupValue]['entityLoadAdditional'][$entityId] = $loadAdditional;
+                    $groupedByCacheKey[$groupValue]['queues'][$entityId] = $queue;
                 }
                 foreach ($groupedByCacheKey as $data) {
                     $entityIds = $data['entityIds'] ?? [];
                     $entityLoadAdditional = $data['entityLoadAdditional'] ?? [];
+                    $groupedQueues = $data['queues'] ?? [];
                     $entities = $this->preLoadEntities->execute($loader, $entityIds, $entityLoadAdditional) ?? [];
+
+                    foreach ($entities as $entityId => $entity) {
+                        $queue = $groupedQueues[$entityId] ?? null;
+                        $entity->setData('_queue', $queue);
+                    }
+
                     foreach ($this->entityLoaders as $entityLoader) {
                         if ($entityLoader instanceof EntityPreLoaderInterface) {
                             $this->loadSubEntities->execute($entityLoader, $entities);
