@@ -112,7 +112,7 @@ class PreLoadEntities implements CleanableInstanceInterface
                 $loadAdditional = $entityAdditional[$entityId] ?? [];
                 $groupValue = $preLoader->getGroupValue($loadAdditional);
                 $item = $this->cache[$type][$groupValue][$entityId] ?? $preLoader->createEmptyEntity()->setId($entityId);
-                $item && $result[$groupValue][$entityId] = $item;
+                $item && $result[$entityId] = $item;
             }
         } catch (\Throwable $e) {
             $result = [];
