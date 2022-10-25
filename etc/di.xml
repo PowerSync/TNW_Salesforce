@@ -71,7 +71,7 @@
         <arguments>
             <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Website</argument>
             <argument name="loaders" xsi:type="array">
-                <item name="Loader" xsi:type="object" sortOrder="10">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website\Loader</item>
+                <item name="10" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader\Website\Loader</item>
             </argument>
         </arguments>
     </type>
@@ -959,7 +959,7 @@
         <arguments>
             <argument name="salesforceIdStorage" xsi:type="object">TNW\Salesforce\Model\Entity\Object\Customer</argument>
             <argument name="loaders" xsi:type="array">
-                <item name="Loader" xsi:type="object" sortOrder="10">CustomersByGetCustomerIdMethodLoader</item>
+                <item name="10" xsi:type="object">CustomersByGetCustomerIdMethodLoader</item>
             </argument>
         </arguments>
     </type>
