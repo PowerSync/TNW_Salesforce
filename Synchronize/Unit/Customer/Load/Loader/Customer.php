@@ -79,7 +79,7 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface
      */
     public function load($entityId, array $additional)
     {
-        return $this->preLoadEntities->execute($this, [$entityId], [$entityId => $additional])[$this->getGroupValue($additional)][$entityId] ?? null;
+        return $this->preLoadEntities->execute($this, [$entityId], [$entityId => $additional])[$entityId] ?? null;
     }
 
     /**
