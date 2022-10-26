@@ -16,7 +16,6 @@ use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetDependenceIdsByEntityTyp
 use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load as SubEntitiesLoad;
-use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Synchronize\Group;
 use TNW\Salesforce\Synchronize\Unit\Load\EntityLoader\EntityPreLoaderInterface;
 use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
@@ -25,7 +24,7 @@ use TNW\Salesforce\Synchronize\Units;
 /**
  * Load
  */
-class Load extends Synchronize\Unit\UnitAbstract
+class Load extends UnitAbstract
 {
     /**
      * @var string
@@ -96,10 +95,11 @@ class Load extends Synchronize\Unit\UnitAbstract
      * @param IdentificationInterface      $identification
      * @param HashInterface                $hash
      * @param Objects                      $objects
-     * @param SalesforceIdStorage|null     $entityObject
      * @param PreLoadEntities              $preLoadEntities
      * @param GetDependenceIdsByEntityType $getDependenceIdsByEntityType
      * @param GetQueuesByIds               $getQueuesByIds
+     * @param SubEntitiesLoad              $loadSubEntities
+     * @param SalesforceIdStorage|null     $entityObject
      * @param array                        $entityLoaders
      * @param array                        $entityTypeMapping
      */
@@ -108,16 +108,16 @@ class Load extends Synchronize\Unit\UnitAbstract
         $magentoType,
         array $queues,
         array $loaders,
-        Synchronize\Units $units,
-        Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
-        Synchronize\Unit\HashInterface $hash,
+        Units $units,
+        Group $group,
+        IdentificationInterface $identification,
+        HashInterface $hash,
         Objects $objects,
-        SalesforceIdStorage $entityObject = null,
         PreLoadEntities $preLoadEntities,
         GetDependenceIdsByEntityType $getDependenceIdsByEntityType,
         GetQueuesByIds $getQueuesByIds,
         SubEntitiesLoad $loadSubEntities,
+        SalesforceIdStorage $entityObject = null,
         array $entityLoaders = [],
         array $entityTypeMapping = []
     ) {
