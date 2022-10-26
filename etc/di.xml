@@ -914,9 +914,6 @@
                 <item name="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" xsi:type="object">
                     TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField
                 </item>
-                <item name="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" xsi:type="object">
-                    TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField
-                </item>
                 <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities" xsi:type="object">
                     TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities
                 </item>

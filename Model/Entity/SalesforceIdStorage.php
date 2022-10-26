@@ -72,7 +72,7 @@ class SalesforceIdStorage
      * @param Config $config
      */
     public function __construct(
-        $magentoType,
+        string $magentoType,
         array $mappingAttribute,
         Objects $resourceObjects,
         StoreManagerInterface $storeManager,
