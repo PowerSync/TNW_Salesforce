@@ -279,10 +279,15 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
                 return;
             }
 
-            $entityTypes = array_keys($this->queueAddPool);
+            $queueAddByEntityTypes = [];
+            foreach ($this->queueAddPool as $item) {
+                $entityType = $item->getEntityType();
+                $queueAddByEntityTypes[$entityType] = $item;
+            }
+            $entityTypes = array_keys($queueAddByEntityTypes);
             $this->getAvailableSyncTypesByEntityTypes->execute($entityTypes);
 
-            foreach ($this->queueAddPool as $entityType => $queueAdd) {
+            foreach ($queueAddByEntityTypes as $entityType => $queueAdd) {
                 $this->processByPool($entityType, $queueAdd);
             }
 
