@@ -225,8 +225,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
                 }
 
                 $object[$salesforceAttributeName] = $value;
-            } catch (Exception $e) {
-                $this->group()->messageError('The "%s" field mapping error: %s', $salesforceAttributeName, $e->getMessage());
+            } catch (\Throwable $e) {
+                $group = $this->group();
+                $group->messageError('The "%s" field mapping error: %s', $salesforceAttributeName, $e->getMessage());
+                $group->messageThrowable($e);
+
             }
         }
 

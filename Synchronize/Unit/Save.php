@@ -121,7 +121,7 @@ class Save extends Synchronize\Unit\UnitAbstract
 
                     // Save Salesforce Id
                     if ($salesforceId || $this->entityObject->recordExist($entity, $attributeName, $website)) {
-                        $this->entityObject->saveValueByAttribute($entity, $salesforceId, $attributeName, $website);
+                        $this->entityObject->addRecordsToCache($entity, $salesforceId, $attributeName, $website);
                     }
 
                     $this->load()->get('%s/queue', $entity)->setAdditionalByCode($attributeName, $salesforceId);
@@ -135,7 +135,7 @@ class Save extends Synchronize\Unit\UnitAbstract
 
                     // Save Salesforce Id from duplicates
                     foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
-                        $this->entityObject->saveValueByAttribute($duplicate, $salesforceId, $attributeName, $website);
+                        $this->entityObject->addRecordsToCache($duplicate, $salesforceId, $attributeName, $website);
 
                         $this->load()->get('%s/queue', $duplicate)->setAdditionalByCode($attributeName, $salesforceId);
 
@@ -146,12 +146,16 @@ class Save extends Synchronize\Unit\UnitAbstract
                             $salesforceId
                         );
                     }
-                } catch (Exception $e) {
-                    $this->group()->messageError($e->getMessage(), $entity->getId());
+                } catch (\Throwable $e) {
+                    $group = $this->group();
+                    $group->messageError($e->getMessage(), $entity->getId());
+                    $group->messageThrowable($e);
                     $this->cache[$entity]['message'] = $e->getMessage();
                 }
             }
         }
+
+        $this->entityObject->saveRecordsFromCache();
 
         if (empty($message)) {
             $message[] = __('Nothing to save');

@@ -9,6 +9,7 @@ namespace TNW\Salesforce\Synchronize;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Stdlib\DateTime\DateTime;
+use Psr\Log\LoggerInterface;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Logger\Processor\UidProcessor;
@@ -65,6 +66,9 @@ class Queue
     /** @var CleanLocalCacheForInstances */
     private $cleanLocalCacheForInstances;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /**
      * Queue constructor.
      *
@@ -76,6 +80,7 @@ class Queue
      * @param PushMqMessage               $pushMqMessage
      * @param DateTime                    $dateTime
      * @param CleanLocalCacheForInstances $cleanLocalCacheForInstances
+     * @param LoggerInterface             $logger
      * @param bool                        $isCheck
      */
     public function __construct(
@@ -87,6 +92,7 @@ class Queue
         PushMqMessage                       $pushMqMessage,
         DateTime                            $dateTime,
         CleanLocalCacheForInstances         $cleanLocalCacheForInstances,
+        LoggerInterface                     $logger,
                                             $isCheck = false
     ) {
         $this->groups = $groups;
@@ -98,6 +104,7 @@ class Queue
         $this->setIsCheck($isCheck);
         $this->dateTime = $dateTime;
         $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
+        $this->logger = $logger;
     }
 
     /**
@@ -211,7 +218,7 @@ class Queue
                         $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
                         $group->synchronize($groupCollection->getItems());
 
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
 
                         if ($e instanceof SalesforceException) {
                             $status = $e->getQueueStatus();
@@ -230,6 +237,13 @@ class Queue
                             $syncType = $this->getSyncType($groupCollection);
                             $this->pushMqMessage->sendMessage($syncType);
                         }
+
+                        $messages = [
+                            $e->getMessage(),
+                            $e->getTraceAsString()
+                        ];
+
+                        $this->logger->error(implode(PHP_EOL, $messages));
                     }
 
                     $group->messageDebug(

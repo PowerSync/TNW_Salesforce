@@ -5,6 +5,8 @@
  */
 namespace TNW\Salesforce\Synchronize\Unit\Loader;
 
+use Magento\Framework\Exception\LocalizedException;
+
 /**
  * Mapping Entity Loader
  */
@@ -30,14 +32,27 @@ abstract class EntityAbstract implements \TNW\Salesforce\Synchronize\Unit\LoadLo
      *
      * @param \Magento\Framework\Model\AbstractModel $entity
      * @return \Magento\Framework\Model\AbstractModel
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function loadSalesforceId($entity)
     {
-        if (null !== $this->salesforceIdStorage && null !== $entity->getId()) {
+        if (null !== $this->salesforceIdStorage && $entity && null !== $entity->getId()) {
             $this->salesforceIdStorage->load($entity, $entity->getData('config_website'));
         }
 
         return $entity;
+    }
+
+    /**
+     * @param array $entities
+     *
+     * @return void
+     * @throws LocalizedException
+     */
+    public function preloadSalesforceIds(array $entities): void
+    {
+        if (null !== $this->salesforceIdStorage) {
+            $this->salesforceIdStorage->massLoadObjectIds($entities);
+        }
     }
 }
