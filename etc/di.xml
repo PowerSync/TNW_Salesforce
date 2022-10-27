@@ -939,6 +939,9 @@
                     TNW\Salesforce\Service\Synchronize\Unit\Load\GetWebsitesByWebsiteIds
                 </item>
 
+                <item name="TNW\Salesforce\Service\Model\Prequeue\Process\GetAvailableSyncTypesByEntityTypes" xsi:type="object">
+                    TNW\Salesforce\Service\Model\Prequeue\Process\GetAvailableSyncTypesByEntityTypes
+                </item>
             </argument>
         </arguments>
     </type>
