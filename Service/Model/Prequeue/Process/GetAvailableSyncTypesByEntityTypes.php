@@ -84,8 +84,9 @@ class GetAvailableSyncTypesByEntityTypes implements CleanableInstanceInterface
     private function getSelect(): Select
     {
         $connection = $this->resource->getConnection();
-        $select = $connection->select()->from($this->resource->getMainTable(), ['entity_type', 'sync_type']);
-        $select->group('entity_type');
+        $columns = ['entity_type', 'sync_type'];
+        $select = $connection->select()->from($this->resource->getMainTable(), $columns);
+        $select->group($columns);
 
         return $select;
     }
