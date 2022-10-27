@@ -18,6 +18,7 @@ use Psr\Log\LoggerInterface;
 use TNW\Salesforce\Api\MessageQueue\PublisherAdapter;
 use TNW\Salesforce\Model\ResourceModel\PreQueue;
 use TNW\Salesforce\Service\CleanLocalCacheForInstances;
+use TNW\Salesforce\Service\Model\Prequeue\Process\GetAvailableSyncTypesByEntityTypes;
 use TNW\Salesforce\Synchronize\Queue\Add;
 use \TNW\Salesforce\Api\Model\Cron\Source\MagentoSyncTypeInterface;
 use TNW\Salesforce\Api\Model\Synchronization\ConfigInterface;
@@ -59,18 +60,22 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
     /** @var CleanLocalCacheForInstances */
     protected $cleanLocalCacheForInstances;
 
+    /** @var GetAvailableSyncTypesByEntityTypes */
+    protected $getAvailableSyncTypesByEntityTypes;
+
     /**
      * Process constructor.
      *
-     * @param array                       $queueAddPool
-     * @param PreQueue                    $resourcePreQueue
-     * @param State                       $state
-     * @param TimezoneInterface           $timezone
-     * @param ConfigInterface                      $config
-     * @param PublisherAdapter            $publisher
-     * @param LoggerInterface             $systemLogger
-     * @param MagentoSyncTypeInterface             $magentoSyncType
-     * @param CleanLocalCacheForInstances $cleanLocalCacheForInstances
+     * @param array                              $queueAddPool
+     * @param PreQueue                           $resourcePreQueue
+     * @param State                              $state
+     * @param TimezoneInterface                  $timezone
+     * @param ConfigInterface                    $config
+     * @param PublisherAdapter                   $publisher
+     * @param LoggerInterface                    $systemLogger
+     * @param MagentoSyncTypeInterface           $magentoSyncType
+     * @param CleanLocalCacheForInstances        $cleanLocalCacheForInstances
+     * @param GetAvailableSyncTypesByEntityTypes $getAvailableSyncTypesByEntityTypes
      */
     public function __construct(
         array                       $queueAddPool,
@@ -81,7 +86,8 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
         PublisherAdapter            $publisher,
         LoggerInterface             $systemLogger,
         MagentoSyncTypeInterface    $magentoSyncType,
-        CleanLocalCacheForInstances $cleanLocalCacheForInstances
+        CleanLocalCacheForInstances $cleanLocalCacheForInstances,
+        GetAvailableSyncTypesByEntityTypes $getAvailableSyncTypesByEntityTypes
     ) {
         $this->queueAddPool = $queueAddPool;
         $this->resourcePreQueue = $resourcePreQueue;
@@ -92,6 +98,7 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
         $this->systemLogger = $systemLogger;
         $this->magentoSyncType = $magentoSyncType;
         $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
+        $this->getAvailableSyncTypesByEntityTypes = $getAvailableSyncTypesByEntityTypes;
     }
 
     /**
@@ -188,13 +195,19 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
     /**
      * @param $entityType
      * @param $queueAdd
+     *
+     * @throws LocalizedException
      */
     public function processByPool($entityType, $queueAdd)
     {
         $maxAttempts = $this->config->getMaxAdditionalAttemptsCount(true);
+        $availableSyncTypes = $this->getAvailableSyncTypesByEntityTypes->execute([$entityType])[$entityType] ?? [];
 
         $runNextBatch = false;
         foreach ($this->magentoSyncType->toOptionArray() as $syncType => $syncTypeText) {
+            if (!isset($availableSyncTypes[$syncType])) {
+                continue;
+            }
             $entityIds = $this->getIdsBySyncType($entityType, $syncType);
             if (empty($entityIds)) {
                 continue;
@@ -266,7 +279,15 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
                 return;
             }
 
-            foreach ($this->queueAddPool as $entityType => $queueAdd) {
+            $queueAddByEntityTypes = [];
+            foreach ($this->queueAddPool as $item) {
+                $entityType = $item->getEntityType();
+                $queueAddByEntityTypes[$entityType] = $item;
+            }
+            $entityTypes = array_keys($queueAddByEntityTypes);
+            $this->getAvailableSyncTypesByEntityTypes->execute($entityTypes);
+
+            foreach ($queueAddByEntityTypes as $entityType => $queueAdd) {
                 $this->processByPool($entityType, $queueAdd);
             }
 
