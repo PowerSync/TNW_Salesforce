@@ -9,6 +9,8 @@ use TNW\Salesforce\Model\Queue;
 
 interface CreateInterface
 {
+    public const CURRENCY_CODE = 'currency_code';
+
     /**
      * Create By
      *

@@ -254,7 +254,7 @@ class Add
             $entityId = $queue->getEntityId();
             $parents = $parentQueuesByBaseEntityId[$entityId] ?? [];
             foreach ($parents as $identify => $parent) {
-                if ($identify !== $queue->getIdentify()) {
+                if ($identify !== $queue->getIdentify() && $this->checkAdditional($queue, $parent)) {
                     $dependency[] = [
                         'parent_id' => $parent->getId(),
                         'queue_id' => $queue->getId()
@@ -264,6 +264,31 @@ class Add
         }
 
         return $dependency;
+    }
+
+    /**
+     * @param Queue $queue
+     * @param Queue $parentQueue
+     *
+     * @return bool
+     */
+    public function checkAdditional(Queue $queue, Queue $parentQueue): bool
+    {
+        $result = true;
+        if ($queue->getCode() === Unit::PRODUCT_PRICE_BOOK_ENTRY &&
+            $parentQueue->getCode() === Unit::PRODUCT_PRICE_BOOK_ENTRY
+        ) {
+            $entityLoadAdditional = $queue->getEntityLoadAdditional() ?? [];
+            $parentEntityLoadAdditional = $parentQueue->getEntityLoadAdditional() ?? [];
+            if (is_array($entityLoadAdditional) && is_array($parentEntityLoadAdditional)) {
+                $currency = (string)($entityLoadAdditional['currency_code'] ?? '');
+                $parentCurrency = (string)($parentEntityLoadAdditional['currency_code'] ?? '');
+
+                $result = $currency === $parentCurrency;
+            }
+        }
+
+        return $result;
     }
 
     /**

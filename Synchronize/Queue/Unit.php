@@ -26,6 +26,8 @@ use TNW\Salesforce\Synchronize\Queue\Unit\CreateQueue\UnsetPendingStatusPool;
  */
 class Unit implements CleanableInstanceInterface
 {
+    public const PRODUCT_PRICE_BOOK_ENTRY = 'productPricebookEntry';
+
     /**
      * @var string
      */
