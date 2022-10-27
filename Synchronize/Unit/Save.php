@@ -146,8 +146,10 @@ class Save extends Synchronize\Unit\UnitAbstract
                             $salesforceId
                         );
                     }
-                } catch (Exception $e) {
-                    $this->group()->messageError($e->getMessage(), $entity->getId());
+                } catch (\Throwable $e) {
+                    $group = $this->group();
+                    $group->messageError($e->getMessage(), $entity->getId());
+                    $group->messageThrowable($e);
                     $this->cache[$entity]['message'] = $e->getMessage();
                 }
             }
