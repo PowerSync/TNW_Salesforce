@@ -206,6 +206,23 @@ class Group
     }
 
     /**
+     * @param \Throwable $e
+     *
+     * @return void
+     */
+    public function messageThrowable(\Throwable $e): void
+    {
+        $message = implode(
+            PHP_EOL,
+            [$e->getMessage(), $e->getTraceAsString()]
+        );
+        $this->systemLogger->error($message);
+        $this->logger->error(
+            $message
+        );
+    }
+
+    /**
      * Call
      *
      * @param string $name
@@ -240,7 +257,7 @@ class Group
             case 'error':
                 $this->errorMessages[] = $message;
                 $this->systemLogger->error($message);
-                $traceAsString = (new RuntimeException('Stactrace'))->getTraceAsString();
+                $traceAsString = (new RuntimeException('Stacktrace'))->getTraceAsString();
                 $this->logger->error(
                     implode(
                         PHP_EOL,
