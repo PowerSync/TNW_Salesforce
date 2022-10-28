@@ -938,6 +938,9 @@
                 <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\GetWebsitesByWebsiteIds" xsi:type="object">
                     TNW\Salesforce\Service\Synchronize\Unit\Load\GetWebsitesByWebsiteIds
                 </item>
+                <item name="TNW\Salesforce\Service\Synchronize\Queue\Create\GetEntities" xsi:type="object">
+                    TNW\Salesforce\Service\Synchronize\Queue\Create\GetEntities
+                </item>
 
             </argument>
         </arguments>

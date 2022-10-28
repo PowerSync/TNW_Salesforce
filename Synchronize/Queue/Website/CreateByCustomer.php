@@ -6,6 +6,7 @@
 namespace TNW\Salesforce\Synchronize\Queue\Website;
 
 use Magento\Customer\Model\ResourceModel\Customer;
+use TNW\Salesforce\Service\Synchronize\Queue\Create\GetEntities;
 
 /**
  * Create By Customer
@@ -19,14 +20,21 @@ class CreateByCustomer extends CreateByBase
      */
     private $resourceCustomer;
 
+    /** @var GetEntities */
+    private $getEntities;
+
     /**
      * CreateByCustomer constructor.
-     * @param Customer $resourceCustomer
+     *
+     * @param Customer    $resourceCustomer
+     * @param GetEntities $getEntities
      */
     public function __construct(
-        Customer $resourceCustomer
+        Customer $resourceCustomer,
+        GetEntities $getEntities
     ) {
         $this->resourceCustomer = $resourceCustomer;
+        $this->getEntities = $getEntities;
     }
 
     /**
@@ -51,7 +59,8 @@ class CreateByCustomer extends CreateByBase
     public function process(array $entityIds, array $additional, callable $create, $websiteId)
     {
         $queues = [];
-        foreach ($this->entities($entityIds) as $entity) {
+        $entities = $this->getEntities->execute($entityIds, $this, 'base_entity_id');
+        foreach ($entities as $entity) {
             $queues[] = $create(
                 'website',
                 $entity['website_id'],
