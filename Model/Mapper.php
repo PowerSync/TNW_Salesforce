@@ -19,7 +19,7 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     const CUSTOM_ATTRIBUTE_CODE = 'custom';
 
     public const MAGENTO_ENTITY_TYPE_CUSTOMER = 'customer';
-    public const MAGENTO_ENTITY_TYPE_PRODUCT = 'product';
+    public const MAGENTO_ENTITY_TYPE_PRODUCT = 'catalog_product';
 
     /**
      * @return void
