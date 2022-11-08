@@ -28,4 +28,11 @@ interface CreateInterface
      * @return Queue[]
      */
     public function process(array $entityIds, array $additional, callable $create, $websiteId);
+
+    /**
+     * @param array $entityIds
+     *
+     * @return mixed
+     */
+    public function entities(array $entityIds);
 }
