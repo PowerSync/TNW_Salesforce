@@ -113,7 +113,7 @@ class WebsiteEmulator
                 $e->getMessage(),
                 $e->getTraceAsString(),
             ];
-            $this->systemLogger->error(
+            $this->systemLogger->critical(
                 implode(PHP_EOL, $message)
             );
             if ($this->appState->getAreaCode() == Area::AREA_ADMINHTML) {

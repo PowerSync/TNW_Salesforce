@@ -48,9 +48,6 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
      */
     protected $config;
 
-    /** @var LoggerInterface */
-    protected $systemLogger;
-
     /** @var PublisherAdapter */
     protected $publisher;
 
@@ -63,6 +60,9 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
     /** @var GetAvailableSyncTypesByEntityTypes */
     protected $getAvailableSyncTypesByEntityTypes;
 
+    /** @var LoggerInterface */
+    protected $logger;
+
     /**
      * Process constructor.
      *
@@ -72,7 +72,6 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
      * @param TimezoneInterface                  $timezone
      * @param ConfigInterface                    $config
      * @param PublisherAdapter                   $publisher
-     * @param LoggerInterface                    $systemLogger
      * @param MagentoSyncTypeInterface           $magentoSyncType
      * @param CleanLocalCacheForInstances        $cleanLocalCacheForInstances
      * @param GetAvailableSyncTypesByEntityTypes $getAvailableSyncTypesByEntityTypes
@@ -84,7 +83,7 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
         TimezoneInterface           $timezone,
         ConfigInterface                      $config,
         PublisherAdapter            $publisher,
-        LoggerInterface             $systemLogger,
+        LoggerInterface             $logger,
         MagentoSyncTypeInterface    $magentoSyncType,
         CleanLocalCacheForInstances $cleanLocalCacheForInstances,
         GetAvailableSyncTypesByEntityTypes $getAvailableSyncTypesByEntityTypes
@@ -95,10 +94,10 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
         $this->timezone = $timezone;
         $this->config = $config;
         $this->publisher = $publisher;
-        $this->systemLogger = $systemLogger;
         $this->magentoSyncType = $magentoSyncType;
         $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
         $this->getAvailableSyncTypesByEntityTypes = $getAvailableSyncTypesByEntityTypes;
+        $this->logger = $logger;
     }
 
     /**
@@ -220,23 +219,30 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
                 try {
                     $this->addEntitiesToQueue($entityIds, $queueAdd, $syncType, $entityType);
                 } catch (DeadlockException|LockWaitException $e) {
-                    $this->systemLogger->debug(
-                        __('DB Lock found, try add records to the Queue in next session. Code: %1', $e->getCode())
+                    $phrase = __('DB Lock found, try add records to the Queue in next session. Code: %1', $e->getCode());
+                    $message = [
+                        $phrase,
+                        $e->getMessage(),
+                        $e->getTraceAsString()
+                    ];
+                    $this->logger->error(
+                        implode(PHP_EOL, $message)
                     );
                 } catch (\Throwable $e) {
                     $countAttempts++;
                     if ($countAttempts >= $maxAttempts) {
                         $this->deleteProcessedPrequeue($entityIds, $entityType, $syncType);
-
-                        $phrase = __('SalesForce adding entities to the queue caused an error: %1', $e->getMessage());
-                        $message = [
-                            $phrase,
-                            $e->getTraceAsString()
-                        ];
-                        $this->systemLogger->error(
-                            implode(PHP_EOL, $message)
-                        );
                     }
+
+                    $phrase = __('SalesForce adding entities to the queue caused an error: %1', $e->getMessage());
+                    $message = [
+                        $phrase,
+                        $e->getMessage(),
+                        $e->getTraceAsString()
+                    ];
+                    $this->logger->critical(
+                        implode(PHP_EOL, $message)
+                    );
 
             } finally {
                 if (!empty($entityIds) && $this->getQueueTypeCode($syncType)) {
@@ -291,8 +297,9 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
                 $this->processByPool($entityType, $queueAdd);
             }
 
-        } catch (Exception $e) {
-            $this->systemLogger->critical($e->getMessage());
+        } catch (\Throwable $e) {
+            $message = [$e->getMessage(), $e->getTraceAsString()];
+            $this->logger->critical(implode(PHP_EOL, $message));
             throw new Exception(__('SalesForce attempt to process prequeue caused an error: ' . $e->getMessage()));
         } finally {
             $this->cleanLocalCacheForInstances->execute();
