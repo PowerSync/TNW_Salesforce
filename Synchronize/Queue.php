@@ -216,7 +216,11 @@ class Queue
                     try {
                         $groupCollection->each('incSyncAttempt');
                         $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
-                        $group->synchronize($groupCollection->getItems());
+                        $queues = $groupCollection->getItems();
+                        if(!$queues) {
+                            continue;
+                        }
+                        $group->synchronize($queues);
 
                     } catch (\Throwable $e) {
 
