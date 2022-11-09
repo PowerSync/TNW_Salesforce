@@ -57,7 +57,11 @@ class GetMappedAttributeCodesByMagentoType implements CleanableInstanceInterface
         foreach ($magentoTypes as $magentoEntityType) {
             if (!isset($this->cache[$magentoEntityType])) {
                 $missedMagentoTypes[] = $magentoEntityType;
-                $this->cache[$magentoEntityType] = [];
+                $defaultAttributes = [];
+                if($magentoEntityType === Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER) {
+                    $defaultAttributes[] = 'sales_representative';
+                }
+                $this->cache[$magentoEntityType] = $defaultAttributes;
             }
         }
 
