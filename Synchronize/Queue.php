@@ -122,9 +122,7 @@ class Queue
             $tmpCollection->setCurPage(1);
         }
 
-        $item = $tmpCollection->getFirstItem();
-
-        return $item->getSyncType();
+        return $tmpCollection->getFirstItem()->getSyncType();
     }
 
     /**
@@ -134,7 +132,8 @@ class Queue
      * @param            $websiteId
      * @param array      $syncJobs
      *
-     * @throws LocalizedException|\Exception
+     * @throws LocalizedException
+     * @throws \Throwable
      */
     public function synchronize($collection, $websiteId, $syncJobs = [])
     {
@@ -204,20 +203,26 @@ class Queue
 
                 $lastPageNumber = (int)$groupCollection->getLastPageNumber();
                 for ($i = 1; $i <= $lastPageNumber; $i++) {
-                    $groupCollection->clear();
-
-                    $group->messageDebug(
-                        'Start job "%s", phase "%s" for website %s',
-                        $groupCode,
-                        $phase['phaseName'],
-                        $websiteId
-                    );
-
                     try {
+                        $groupCollection->clear();
+
+                        $group->messageDebug(
+                            'Start job "%s", phase "%s" for website %s',
+                            $groupCode,
+                            $phase['phaseName'],
+                            $websiteId
+                        );
+
                         $groupCollection->each('incSyncAttempt');
                         $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
                         $queues = $groupCollection->getItems();
-                        if(!$queues) {
+                        if (!$queues) {
+                            $group->messageDebug(
+                                'Stop job "%s", phase "%s" for website %s',
+                                $groupCode,
+                                $phase['phaseName'],
+                                $websiteId
+                            );
                             continue;
                         }
                         $group->synchronize($queues);
@@ -242,12 +247,8 @@ class Queue
                             $this->pushMqMessage->sendMessage($syncType);
                         }
 
-                        $messages = [
-                            $e->getMessage(),
-                            $e->getTraceAsString()
-                        ];
-
-                        $this->logger->error(implode(PHP_EOL, $messages));
+                        $message = implode(PHP_EOL, [$e->getMessage(), $e->getTraceAsString()]);
+                        $this->logger->critical($message);
                     }
 
                     $group->messageDebug(
@@ -265,14 +266,15 @@ class Queue
             }
             $this->cleanLocalCacheForInstances->execute();
         }
-
-        return;
     }
 
     /**
      * Sort Group
      *
+     * @param null $syncJobs
+     *
      * @return Group[]
+     * @throws LocalizedException
      */
     public function sortGroup($syncJobs = null)
     {

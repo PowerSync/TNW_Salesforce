@@ -220,14 +220,8 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
                     $this->addEntitiesToQueue($entityIds, $queueAdd, $syncType, $entityType);
                 } catch (DeadlockException|LockWaitException $e) {
                     $phrase = __('DB Lock found, try add records to the Queue in next session. Code: %1', $e->getCode());
-                    $message = [
-                        $phrase,
-                        $e->getMessage(),
-                        $e->getTraceAsString()
-                    ];
-                    $this->logger->error(
-                        implode(PHP_EOL, $message)
-                    );
+                    $message = implode(PHP_EOL, [$phrase, $e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->critical($message);
                 } catch (\Throwable $e) {
                     $countAttempts++;
                     if ($countAttempts >= $maxAttempts) {
@@ -235,14 +229,8 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
                     }
 
                     $phrase = __('SalesForce adding entities to the queue caused an error: %1', $e->getMessage());
-                    $message = [
-                        $phrase,
-                        $e->getMessage(),
-                        $e->getTraceAsString()
-                    ];
-                    $this->logger->critical(
-                        implode(PHP_EOL, $message)
-                    );
+                    $message = implode(PHP_EOL, [$phrase, $e->getMessage(), $e->getTraceAsString()]);
+                    $this->logger->critical($message);
 
             } finally {
                 if (!empty($entityIds) && $this->getQueueTypeCode($syncType)) {
@@ -298,8 +286,8 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
             }
 
         } catch (\Throwable $e) {
-            $message = [$e->getMessage(), $e->getTraceAsString()];
-            $this->logger->critical(implode(PHP_EOL, $message));
+            $message = implode(PHP_EOL, [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->critical($message);
             throw new Exception(__('SalesForce attempt to process prequeue caused an error: ' . $e->getMessage()));
         } finally {
             $this->cleanLocalCacheForInstances->execute();

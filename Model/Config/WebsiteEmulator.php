@@ -34,7 +34,7 @@ class WebsiteEmulator
     private $messageManager;
 
     /** @var LoggerInterface */
-    private $systemLogger;
+    private $logger;
 
     /**
      * WebsiteEmulator constructor.
@@ -47,14 +47,14 @@ class WebsiteEmulator
         Emulation $storeEmulator,
         State $appState,
         ManagerInterface $messageManager,
-        LoggerInterface $systemLogger
+        LoggerInterface $logger
 
     ) {
         $this->websiteDetector = $websiteDetector;
         $this->storeEmulator = $storeEmulator;
         $this->appState = $appState;
         $this->messageManager = $messageManager;
-        $this->systemLogger = $systemLogger;
+        $this->logger = $logger;
     }
 
     /**
@@ -109,13 +109,8 @@ class WebsiteEmulator
                     array_merge([$websiteId], $params)
                 );
         } catch (Throwable $e) {
-            $message = [
-                $e->getMessage(),
-                $e->getTraceAsString(),
-            ];
-            $this->systemLogger->critical(
-                implode(PHP_EOL, $message)
-            );
+            $message = implode(PHP_EOL, [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->critical($message);
             if ($this->appState->getAreaCode() == Area::AREA_ADMINHTML) {
                 $this->messageManager->addErrorMessage($e->getMessage());
             }

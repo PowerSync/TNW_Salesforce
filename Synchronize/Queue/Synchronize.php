@@ -67,7 +67,7 @@ class Synchronize
     private $state;
 
     /** @var LoggerInterface */
-    private $systemLogger;
+    private $logger;
 
     /**
      * Queue constructor.
@@ -80,7 +80,7 @@ class Synchronize
      * @param ManagerInterface           $messageManager
      * @param Config                     $salesforceConfig
      * @param State                      $state
-     * @param LoggerInterface            $systemLogger
+     * @param LoggerInterface            $logger
      * @param bool                       $isCheck
      */
     public function __construct(
@@ -92,8 +92,8 @@ class Synchronize
         ManagerInterface $messageManager,
         Config $salesforceConfig,
         State $state,
-        LoggerInterface $systemLogger,
-        $isCheck = false
+        LoggerInterface $logger,
+        bool $isCheck = false
     ) {
         $this->type = $type;
         $this->synchronizeQueue = $synchronizeQueue;
@@ -104,7 +104,7 @@ class Synchronize
         $this->salesforceConfig = $salesforceConfig;
         $this->state = $state;
         $this->setIsCheck($isCheck);
-        $this->systemLogger = $systemLogger;
+        $this->logger = $logger;
     }
 
     /**
@@ -157,6 +157,7 @@ class Synchronize
      * Synchronize To Website
      *
      * @param int $websiteId
+     *
      * @throws Exception
      */
     public function synchronizeToWebsite($websiteId, $syncJobs = [])
@@ -175,13 +176,8 @@ class Synchronize
         try {
             $this->synchronizeQueue->synchronize($collection, $websiteId, $syncJobs);
         } catch (\Throwable $e) {
-            $message = [
-                $e->getMessage(),
-                $e->getTraceAsString(),
-            ];
-            $this->systemLogger->error(
-                implode(PHP_EOL, $message)
-            );
+            $message = implode(PHP_EOL, [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->critical($message);
             if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
                 $this->messageManager->addErrorMessage($e->getMessage());
             }
