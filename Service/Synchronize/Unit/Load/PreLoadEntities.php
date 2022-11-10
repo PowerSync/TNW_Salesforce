@@ -116,14 +116,8 @@ class PreLoadEntities implements CleanableInstanceInterface
             }
         } catch (\Throwable $e) {
             $result = [];
-            $messages = [
-                $e->getMessage(),
-                $e->getTraceAsString()
-            ];
-
-            $this->logger->critical(
-                implode(PHP_EOL, $messages)
-            );
+            $message = implode(PHP_EOL, [$e->getMessage(), $e->getTraceAsString()]);
+            $this->logger->critical($message);
         }
 
 

@@ -18,6 +18,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use Psr\Log\LoggerInterface;
+use Throwable;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\FilterBlockedQueueRecords;
@@ -27,6 +28,7 @@ use TNW\Salesforce\Model\ResourceModel\Queue as ResourceQueue;
  * Queue Collection
  *
  * @method ResourceQueue getResource()
+ * @method Queue[] getItems()
  */
 class Collection extends AbstractCollection
 {
@@ -83,7 +85,7 @@ class Collection extends AbstractCollection
                     $itemsToInsert[] = $resource->convertToArray($item);
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $message = [
                 $e->getMessage(),
                 $e->getTraceAsString()
@@ -96,7 +98,7 @@ class Collection extends AbstractCollection
                 $connection->beginTransaction();
                 $connection->insertOnDuplicate($this->getMainTable(), $itemsToInsertChunk);
                 $connection->commit();
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $connection->rollBack();
                 $message = [
                     $e->getMessage(),
@@ -107,7 +109,7 @@ class Collection extends AbstractCollection
         }
 
         foreach ($exceptionMessages as $exceptionMessage) {
-            $this->logger->error($exceptionMessage);
+            $this->logger->critical($exceptionMessage);
         }
 
         $this->saveDependence($this);
@@ -149,7 +151,7 @@ class Collection extends AbstractCollection
                 $connection->beginTransaction();
                 $connection->insertOnDuplicate($tableName, $itemsToInsertChunk);
                 $connection->commit();
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $connection->rollBack();
                 $message = [
                     $e->getMessage(),
@@ -160,12 +162,12 @@ class Collection extends AbstractCollection
         }
 
         foreach ($exceptionMessages as $exceptionMessage) {
-            $this->logger->error($exceptionMessage);
+            $this->logger->critical($exceptionMessage);
         }
     }
 
     /**
-     * @return \TNW\Salesforce\Model\Queue[]
+     * @return Queue[]
      */
     public function getItemsWithoutLoad()
     {
@@ -318,7 +320,7 @@ class Collection extends AbstractCollection
      * @param int    $websiteId
      *
      * @return int
-     * @throws Exception
+     * @throws Throwable
      */
     public function updateLock(array $data, string $groupCode, int $websiteId)
     {
@@ -337,7 +339,7 @@ class Collection extends AbstractCollection
                 }
                 $this->_conn->commit();
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->_conn->rollBack();
             throw $e;
         }
