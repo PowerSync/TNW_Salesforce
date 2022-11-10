@@ -940,9 +940,11 @@
                 <item name="TNW\Salesforce\Service\Synchronize\Queue\Create\GetEntities" xsi:type="object">
                     TNW\Salesforce\Service\Synchronize\Queue\Create\GetEntities
                 </item>
-
                 <item name="TNW\Salesforce\Service\Model\Prequeue\Process\GetAvailableSyncTypesByEntityTypes" xsi:type="object">
                     TNW\Salesforce\Service\Model\Prequeue\Process\GetAvailableSyncTypesByEntityTypes
+                </item>
+                <item name="TNW\Salesforce\Service\Synchronize\Unit\Mapping\GetAttributeFrontedValueFromCache" xsi:type="object">
+                    TNW\Salesforce\Service\Synchronize\Unit\Mapping\GetAttributeFrontedValueFromCache
                 </item>
             </argument>
         </arguments>

@@ -12,7 +12,12 @@ use TNW\Salesforce\Api\Service\Company\GenerateCompanyNameInterface;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\Config\Source\Customer\ContactAssignee;
 use TNW\Salesforce\Model\Customer\Config;
+use TNW\Salesforce\Model\ResourceModel\Mapper\CollectionFactory;
 use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Synchronize\Group;
+use TNW\Salesforce\Synchronize\Unit\IdentificationInterface;
+use TNW\Salesforce\Synchronize\Unit\Mapping\Context;
+use TNW\Salesforce\Synchronize\Units;
 
 /**
  * Customer Contact Mapping
@@ -30,30 +35,32 @@ class Mapping extends Synchronize\Unit\Mapping
     /**
      * Mapping constructor.
      *
-     * @param string                                       $name
-     * @param string                                       $load
-     * @param string                                       $lookup
-     * @param string                                       $objectType
-     * @param Synchronize\Units                            $units
-     * @param Synchronize\Group                            $group
-     * @param Synchronize\Unit\IdentificationInterface     $identification
-     * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
-     * @param Config                                       $customerConfig
-     * @param GenerateCompanyNameInterface                 $generateCompanyName
-     * @param array                                        $dependents
+     * @param string                       $name
+     * @param string                       $load
+     * @param string                       $lookup
+     * @param string                       $objectType
+     * @param Units                        $units
+     * @param Group                        $group
+     * @param IdentificationInterface      $identification
+     * @param CollectionFactory            $mapperCollectionFactory
+     * @param Config                       $customerConfig
+     * @param GenerateCompanyNameInterface $generateCompanyName
+     * @param Context                      $context
+     * @param array                        $dependents
      */
     public function __construct(
-        $name,
-        $load,
-        $lookup,
-        $objectType,
-        Synchronize\Units $units,
-        Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
+        string                                       $name,
+        string                                       $load,
+        string                                       $lookup,
+        string                                       $objectType,
+        Synchronize\Units                            $units,
+        Synchronize\Group                            $group,
+        Synchronize\Unit\IdentificationInterface     $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
-        Config $customerConfig,
-        GenerateCompanyNameInterface $generateCompanyName,
-        array $dependents = []
+        Config                                       $customerConfig,
+        GenerateCompanyNameInterface                 $generateCompanyName,
+        Context                                      $context,
+        array                                        $dependents = []
     ) {
         parent::__construct(
             $name,
@@ -64,6 +71,7 @@ class Mapping extends Synchronize\Unit\Mapping
             $group,
             $identification,
             $mapperCollectionFactory,
+            $context,
             $dependents
         );
 
