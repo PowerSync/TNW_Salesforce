@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace TNW\Salesforce\Service\Synchronize\Unit\Load;
 
 use Magento\Customer\Model\ResourceModel\Address;
+use Magento\Customer\Model\Address as AddressModel;
 use Magento\Customer\Model\ResourceModel\Address\CollectionFactory;
 use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Api\ChunkSizeInterface;
@@ -43,7 +44,7 @@ class GetCustomerAddressesByAddressIds implements CleanableInstanceInterface
     /**
      * @param array $entityIds
      *
-     * @return array
+     * @return AddressModel[]
      * @throws LocalizedException
      */
     public function execute(array $entityIds): array
