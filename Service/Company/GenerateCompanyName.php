@@ -6,9 +6,8 @@
 
 namespace TNW\Salesforce\Service\Company;
 
-use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Api\Service\Company\GenerateCompanyNameInterface;
-use TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomerAddressesByAddressIds;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomerAddressByType;
 use TNW\Salesforce\Utils\Company;
 
 /**
@@ -16,16 +15,16 @@ use TNW\Salesforce\Utils\Company;
  */
 class GenerateCompanyName implements GenerateCompanyNameInterface
 {
-    /** @var GetCustomerAddressesByAddressIds */
-    private $getCustomerAddressesByAddressIds;
+    /** @var GetCustomerAddressByType */
+    private $getCustomerAddressByType;
 
     /**
-     * @param GetCustomerAddressesByAddressIds $getCustomerAddressesByAddressIds
+     * @param GetCustomerAddressByType $getCustomerAddressByType
      */
     public function __construct(
-        GetCustomerAddressesByAddressIds $getCustomerAddressesByAddressIds
+        GetCustomerAddressByType $getCustomerAddressByType
     ) {
-        $this->getCustomerAddressesByAddressIds = $getCustomerAddressesByAddressIds;
+        $this->getCustomerAddressByType = $getCustomerAddressByType;
     }
 
     /**
@@ -37,13 +36,13 @@ class GenerateCompanyName implements GenerateCompanyNameInterface
         if (!empty($customerCompany)) {
             $company = $customerCompany;
         } else {
-            $billingAddress = $this->getAddressByType($customer, 'default_billing');
+            $billingAddress = $this->getCustomerAddressByType->getDefaultBillingAddress($customer);
             if ($billingAddress) {
                 $company = trim((string)$billingAddress->getCompany());
             }
 
             if (empty($company)) {
-                $shippingAddress = $this->getAddressByType($customer, 'default_shipping');
+                $shippingAddress = $this->getCustomerAddressByType->getDefaultShippingAddress($customer);
                 if ($shippingAddress) {
                     $company = trim((string)$shippingAddress->getCompany());
                 }
@@ -55,23 +54,5 @@ class GenerateCompanyName implements GenerateCompanyNameInterface
         }
 
         return $company;
-    }
-
-    /**
-     * @param        $customer
-     * @param string $type
-     *
-     * @return mixed|null
-     * @throws LocalizedException
-     */
-    private function getAddressByType($customer, string $type)
-    {
-        $address = null;
-        $addressId = $customer->getData($type);
-        if ($addressId) {
-            $address = $this->getCustomerAddressesByAddressIds->execute([$addressId])[$addressId] ?? null;
-        }
-
-        return $address;
     }
 }
