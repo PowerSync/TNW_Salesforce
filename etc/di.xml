@@ -946,6 +946,9 @@
                 <item name="TNW\Salesforce\Service\Synchronize\Unit\Mapping\GetAttributeFrontedValueFromCache" xsi:type="object">
                     TNW\Salesforce\Service\Synchronize\Unit\Mapping\GetAttributeFrontedValueFromCache
                 </item>
+                <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomerAddressesByAddressIds" xsi:type="object">
+                    TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomerAddressesByAddressIds
+                </item>
             </argument>
         </arguments>
     </type>
@@ -978,4 +981,11 @@
             <argument name="method" xsi:type="const">TNW\Salesforce\Service\Synchronize\Unit\Load\Loaders\CustomersByMethodLoader::GET_SUPER_USER_ID_METHOD</argument>
         </arguments>
     </virtualType>
+    <type name="TNW\Salesforce\Synchronize\Unit\Customer\Load\Loader\Customer">
+        <arguments>
+            <argument name="afterLoadExecutors" xsi:type="array">
+                <item name="10" xsi:type="object">TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\PreloadAddresses</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
