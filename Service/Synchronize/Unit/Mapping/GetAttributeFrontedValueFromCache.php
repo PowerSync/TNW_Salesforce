@@ -45,7 +45,7 @@ class GetAttributeFrontedValueFromCache implements CleanableInstanceInterface
             return null;
         }
 
-        $entityType = $entity->getEntityType()->getEntityTypeCode();
+        $entityType = $attribute->getEntityTypeId();
         if (!isset($this->processed[$entityType][$attributeCode][$attributeOptionCode])) {
             $this->processed[$entityType][$attributeCode][$attributeOptionCode] = 1;
 
