@@ -81,7 +81,7 @@ class GetCustomerAddressesByAddressIds implements CleanableInstanceInterface
 
         $result = [];
         foreach ($entityIds as $entityId) {
-            $result[$entityId] = $this->cache[$entityId] ?? [];
+            $result[$entityId] = $this->cache[$entityId] ?? null;
         }
 
         return $result;
