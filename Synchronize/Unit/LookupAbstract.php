@@ -6,6 +6,7 @@
 namespace TNW\Salesforce\Synchronize\Unit;
 
 use InvalidArgumentException;
+use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use OutOfBoundsException;
@@ -60,6 +61,9 @@ abstract class LookupAbstract extends UnitAbstract
      * @var IdentificationInterface
      */
     protected $identification;
+
+    /** @var DataObject */
+    private $emptyDataObject;
 
     /**
      * LookupAbstract constructor.
@@ -376,5 +380,17 @@ abstract class LookupAbstract extends UnitAbstract
     public function skipped($entity)
     {
         return false;
+    }
+
+    /**
+     * @return DataObject
+     */
+    protected function getCacheObject(): DataObject
+    {
+        if($this->emptyDataObject === null) {
+            $this->emptyDataObject = new DataObject();
+        }
+
+        return $this->emptyDataObject;
     }
 }
