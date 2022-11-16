@@ -3,6 +3,7 @@
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup;
 
 use Magento\Customer\Model\Customer;
@@ -24,31 +25,37 @@ class ByContact extends Lookup
     public function processInput()
     {
         $magentoIdField = 'tnw_mage_basic__Magento_ID__c';
-        $magentoWebsiteField = 'tnw_mage_basic__Magento_Website__c';
+        $websiteField = 'tnw_mage_basic__Magento_Website__c';
 
         $this->input->columns[] = 'Id';
         $this->input->columns[] = 'Email';
         $this->input->columns[] = $magentoIdField;
-        $this->input->columns[] = $magentoWebsiteField;
+        $this->input->columns[] = $websiteField;
         $this->input->columns[] = 'Account.Id';
         $this->input->columns[] = 'Account.OwnerId';
         $this->input->columns[] = 'Account.Name';
 
-        foreach ($this->entities() as $entity) {
-            $this->input[$entity]['AND']['CoM']['AND']['EaW']['AND']['Email']['=']
-                = strtolower((string)$entity->getEmail());
+        $cacheObject = $this->getCacheObject();
 
+        foreach ($this->entities() as $entity) {
+            $salesForceWebsiteId = '';
             if ($this->customerConfigShare->isWebsiteScope()) {
-                $this->input[$entity]['AND']['CoM']['AND']['EaW']['AND'][$magentoWebsiteField]['IN']
-                    = ['', $this->load()->entityByType($entity, 'website')->getData('salesforce_id')];
+                $salesForceWebsiteId = (string)$this->load()->entityByType($entity, 'website')->getData('salesforce_id');
             }
+            $salesForceWebsites = [''];
+            $salesForceWebsiteId && $salesForceWebsites[] = $salesForceWebsiteId;
+            foreach ($salesForceWebsites as $website) {
+                $this->input[$cacheObject]['AND']['Global']['AND'][$salesForceWebsiteId]['AND'][$websiteField]['IN'][] = $website;
+            }
+            $email = strtolower((string)$entity->getEmail());
+            $email && $this->input[$cacheObject]['AND']['Global']['AND'][$salesForceWebsiteId]['AND']['Email']['IN'][] = $email;
 
             $magentoId = $entity->getId();
             if (!empty($magentoId)) {
-                $this->input[$entity]['AND']['CoM']['OR'][$magentoIdField]['='] = $magentoId;
+                $this->input[$cacheObject]['AND']['Global']['OR'][$magentoIdField]['IN'][] = $magentoId;
             }
 
-            $this->input[$entity]['AND']['AccountId']['!='] = '';
+            $this->input[$cacheObject]['AND']['AccountId']['!='] = '';
         }
 
         $this->input->from = 'Contact';
@@ -58,6 +65,7 @@ class ByContact extends Lookup
      * Prepare Record
      *
      * @param array $record
+     *
      * @return mixed
      */
     public function prepareRecord(array $record)
