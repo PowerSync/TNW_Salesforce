@@ -11,6 +11,7 @@ namespace TNW\Salesforce\Service\Synchronize\Unit\Load;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\Address;
 use Magento\Framework\Exception\LocalizedException;
+use TNW\SForceEnterprise\SForceBusiness\Synchronize\Entity\Customer\Generate;
 
 class GetCustomerAddressByType
 {
@@ -34,7 +35,7 @@ class GetCustomerAddressByType
      */
     public function getDefaultBillingAddress(Customer $customer): ?Address
     {
-        return $this->execute($customer, 'default_billing');
+        return (bool)$customer->getData('generated') ? $customer->getData(Generate::DEFAULT_GENERATED_BILLING_ADDRESS) : $this->execute($customer, 'default_billing');
     }
 
     /**
@@ -45,7 +46,7 @@ class GetCustomerAddressByType
      */
     public function getDefaultShippingAddress(Customer $customer): ?Address
     {
-        return $this->execute($customer, 'default_shipping');
+        return (bool)$customer->getData('generated') ? $customer->getData(Generate::DEFAULT_GENERATED_SHIPPING_ADDRESS) : $this->execute($customer, 'default_shipping');
     }
 
     /**
