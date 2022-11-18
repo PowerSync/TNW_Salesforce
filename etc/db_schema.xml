@@ -18,6 +18,7 @@
         <column xsi:type="smallint" name="website_id" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Website ID" />
         <column xsi:type="smallint" name="skip_blank_values" unsigned="true" nullable="false" identity="false"
                 default="1" comment="Skip blank values"/>
+        <column xsi:type="varchar" name="format_value" nullable="true" length="255" default="" comment="Value Format" />
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="map_id" />
         </constraint>
