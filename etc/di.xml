@@ -684,6 +684,7 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <item name="tnw_salesforce_clean_system_logs_command" xsi:type="object">TNW\Salesforce\Console\Command\CleanSystemLogsCommand</item>
+                <item name="RefreshSalesforceDataOnGrids" xsi:type="object">TNW\Salesforce\Console\Command\RefreshSalesforceDataOnGrids</item>
             </argument>
         </arguments>
     </type>
@@ -918,6 +919,82 @@
     <type name="TNW\Salesforce\Synchronize\Queue\Unit">
         <arguments>
             <argument name="logger" xsi:type="object">TNW\Logger</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\ContactSelect" type="TNW\Salesforce\Model\ResourceModel\Objects\ObjectIdSelect">
+        <arguments>
+            <argument name="magentoType" xsi:type="string">Customer</argument>
+            <argument name="salesforceType" xsi:type="string">Contact</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\AccountSelect" type="TNW\Salesforce\Model\ResourceModel\Objects\ObjectIdSelect">
+        <arguments>
+            <argument name="magentoType" xsi:type="string">Customer</argument>
+            <argument name="salesforceType" xsi:type="string">Account</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\StatusSelect" type="TNW\Salesforce\Model\ResourceModel\Objects\StatusSelect">
+        <arguments>
+            <argument name="magentoType" xsi:type="string">Customer</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="SalesCustomerGridFlatColumnsModifier" type="TNW\Salesforce\Service\Model\Grid\Executor\ByCollection\CreateCollection\ColumnModifier">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="sf_website_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\WebsiteSelect</item>
+                <item name="sforce_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\ContactSelect</item>
+                <item name="sforce_account_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\AccountSelect</item>
+                <item name="sforce_sync_status" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\StatusSelect</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="CreateCustomerGridFlatGridCollection" type="TNW\Salesforce\Service\Model\Grid\Executor\ByCollection\CreateCollection">
+        <arguments>
+            <argument name="collectionClassName" xsi:type="string">Magento\Customer\Model\ResourceModel\Grid\Collection</argument>
+            <argument name="resource" xsi:type="object">Magento\Customer\Model\ResourceModel\Customer</argument>
+            <argument name="modifiers" xsi:type="array">
+                <item name="SalesCustomerGridFlatColumnsModifier" xsi:type="object">SalesCustomerGridFlatColumnsModifier</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="GetCustomerGridFlatObjectIdSalesforceColumnData" type="TNW\Salesforce\Service\Model\Grid\Executor\GetColumnDataByCollection">
+        <arguments>
+            <argument name="createCollection" xsi:type="object">CreateCustomerGridFlatGridCollection</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="GetCustomerGridFlatSalesforceSyncStatusColumnData" type="TNW\Salesforce\Service\Model\Grid\Executor\GetColumnDataByCollection">
+        <arguments>
+            <argument name="createCollection" xsi:type="object">CreateCustomerGridFlatGridCollection</argument>
+            <argument name="allowNull" xsi:type="boolean">false</argument>
+            <argument name="resultType" xsi:type="const">TNW\Salesforce\Service\Model\Grid\Executor\GetColumnDataByCollection::RESULT_TYPE_INT</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="GetSalesCustomerGridFlatTableColumnsDataItems" type="TNW\Salesforce\Service\Model\Grid\GetColumnsDataItems">
+        <arguments>
+            <argument name="executors" xsi:type="array">
+                <item name="entity_id" xsi:type="object">GetCustomerGridFlatObjectIdSalesforceColumnData</item>
+                <item name="sforce_id" xsi:type="object">GetCustomerGridFlatObjectIdSalesforceColumnData</item>
+                <item name="sforce_account_id" xsi:type="object">GetCustomerGridFlatObjectIdSalesforceColumnData</item>
+                <item name="sforce_sync_status" xsi:type="object">GetCustomerGridFlatSalesforceSyncStatusColumnData</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="UpdateCustomerGridFlatTableByGetColumnData" type="TNW\Salesforce\Service\Model\Grid\UpdateTableByGetColumnData">
+        <arguments>
+            <argument name="getColumnsDataItems" xsi:type="object">GetSalesCustomerGridFlatTableColumnsDataItems</argument>
+            <argument name="tableName" xsi:type="string">customer_grid_flat</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="TNW\Salesforce\Service\Model\Grid\GetGridUpdatersByEntityTypes">
+        <arguments>
+            <argument name="gridUpdaters" xsi:type="array">
+                <item name="customer" xsi:type="array">
+                    <item name="UpdateCustomerGridFlatTableByGetColumnData" xsi:type="object">UpdateCustomerGridFlatTableByGetColumnData</item>
+                </item>
+            </argument>
         </arguments>
     </type>
 </config>
