@@ -29,41 +29,6 @@
         </arguments>
     </type>
 
-    <!-- Customer Select Grid -->
-    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\ContactSelect" type="TNW\Salesforce\Model\ResourceModel\Objects\ObjectIdSelect">
-        <arguments>
-            <argument name="magentoType" xsi:type="string">Customer</argument>
-            <argument name="salesforceType" xsi:type="string">Contact</argument>
-        </arguments>
-    </virtualType>
-
-    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\AccountSelect" type="TNW\Salesforce\Model\ResourceModel\Objects\ObjectIdSelect">
-        <arguments>
-            <argument name="magentoType" xsi:type="string">Customer</argument>
-            <argument name="salesforceType" xsi:type="string">Account</argument>
-        </arguments>
-    </virtualType>
-
-    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\StatusSelect" type="TNW\Salesforce\Model\ResourceModel\Objects\StatusSelect">
-        <arguments>
-            <argument name="magentoType" xsi:type="string">Customer</argument>
-        </arguments>
-    </virtualType>
-
-    <type name="TNW\Salesforce\Plugin\Customer\Model\ResourceModel\Grid\Collection">
-        <arguments>
-            <argument name="select" xsi:type="array">
-                <item name="sf_website_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\WebsiteSelect</item>
-                <item name="sforce_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\ContactSelect</item>
-                <item name="sforce_account_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\AccountSelect</item>
-                <item name="sforce_sync_status" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\StatusSelect</item>
-            </argument>
-        </arguments>
-    </type>
-
-    <type name="Magento\Customer\Model\ResourceModel\Grid\Collection">
-        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Customer\Model\ResourceModel\Grid\Collection" />
-    </type>
     <type name="Magento\Framework\View\Element\Message\MessageConfigurationsPool">
         <arguments>
             <argument name="configurationsMap" xsi:type="array">

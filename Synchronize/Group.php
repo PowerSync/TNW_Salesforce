@@ -15,6 +15,7 @@ use RuntimeException;
 use SplObjectStorage;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
+use TNW\Salesforce\Service\Model\Grid\UpdateGridsByQueues;
 use TNW\Salesforce\Synchronize\Unit\CurrentUnit;
 
 /**
@@ -64,13 +65,20 @@ class Group
     /** @var CleanableObjectsList */
     private $cleanableObjectsList;
 
+    /** @var UpdateGridsByQueues */
+    private $updateGridsByQueues;
+
     /**
      * Entity constructor.
-     * @param string $groupCode
-     * @param string[] $units
-     * @param UnitsFactory $unitsFactory
+     *
+     * @param string                 $groupCode
+     * @param string[]               $units
+     * @param UnitsFactory           $unitsFactory
      * @param ObjectManagerInterface $objectManager
-     * @param LoggerInterface $systemLogger
+     * @param LoggerInterface        $systemLogger
+     * @param CurrentUnit            $currentUnit
+     * @param CleanableObjectsList   $cleanableObjectsList
+     * @param UpdateGridsByQueues    $updateGridsByQueues
      */
     public function __construct(
         $groupCode,
@@ -79,7 +87,8 @@ class Group
         ObjectManagerInterface $objectManager,
         LoggerInterface $systemLogger,
         CurrentUnit $currentUnit,
-        CleanableObjectsList $cleanableObjectsList
+        CleanableObjectsList $cleanableObjectsList,
+        UpdateGridsByQueues $updateGridsByQueues
     ) {
         $this->groupCode = $groupCode;
         $this->units = array_filter($units);
@@ -88,6 +97,7 @@ class Group
         $this->unitsFactory = $unitsFactory;
         $this->currentUnit = $currentUnit;
         $this->cleanableObjectsList = $cleanableObjectsList;
+        $this->updateGridsByQueues = $updateGridsByQueues;
     }
 
     /**
@@ -140,6 +150,9 @@ class Group
         }
         $this->currentUnit->clear();
         $this->messageDebug('======== END SYNC %s ========', $this->code());
+        $this->messageDebug('======== START UPDATE GRIDS %s ========');
+        $this->updateGridsByQueues->execute($queues);
+        $this->messageDebug('======== END UPDATE GRIDS %s ========', $this->code());
 
         return $units;
     }
