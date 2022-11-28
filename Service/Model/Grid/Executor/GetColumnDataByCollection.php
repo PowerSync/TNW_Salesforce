@@ -69,7 +69,7 @@ class GetColumnDataByCollection implements ExecutorInterface, CleanableInstanceI
                 foreach ($collection as $entity) {
                     $entityId = $entity->getId();
                     $this->processed[$entityId] = 1;
-                    $this->cache[$entityId] = $entity;
+                    $entityId && $this->cache[$entityId] = $entity;
 
                 }
                 $this->fullProcessed = true;
@@ -79,7 +79,7 @@ class GetColumnDataByCollection implements ExecutorInterface, CleanableInstanceI
             foreach ($this->cache as $entity) {
                 $entityId = $entity->getId();
                 $value = $entity->getData($columnName);
-                $result[$entityId] = $this->prepareValue($value);
+                $entityId && $result[$entityId] = $this->prepareValue($value);
             }
 
             return $result;
@@ -106,7 +106,7 @@ class GetColumnDataByCollection implements ExecutorInterface, CleanableInstanceI
                 $collection = $this->createCollection->execute($missedEntityIdsChunk);
                 foreach ($collection as $item) {
                     $entityId = $item->getId();
-                    $this->cache[$entityId] = $item;
+                    $entityId && $this->cache[$entityId] = $item;
                 }
             }
         }
@@ -115,7 +115,7 @@ class GetColumnDataByCollection implements ExecutorInterface, CleanableInstanceI
         foreach ($entityIds as $entityId) {
             $entity = $this->cache[$entityId] ?? null;
             $value = $entity ? $entity->getData($columnName) : null;
-            $result[$entityId] = $this->prepareValue($value);
+            $entityId && $result[$entityId] = $this->prepareValue($value);
         }
 
         return $result;
