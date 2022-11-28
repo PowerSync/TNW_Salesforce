@@ -51,7 +51,7 @@ class GetColumnsDataItems
                 $entityIds = array_keys($items);
             }
             foreach ($entityIds as $entityId) {
-                $result[$entityId][$columnName] = $items[$entityId] ?? null;
+                $entityId && $result[$entityId][$columnName] = $items[$entityId] ?? null;
             }
         }
 
