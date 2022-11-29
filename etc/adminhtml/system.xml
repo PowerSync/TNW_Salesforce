@@ -91,6 +91,12 @@
                     <label>Restart Consumers</label>
                     <frontend_model>TNW\Salesforce\Block\System\Config\Form\Field\ButtonField</frontend_model>
                 </field>
+
+                <field id="need_refresh_grids" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="0">
+                    <label>Refresh grids</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Enable refresh Salesforce columns data on magento grids by cron.]]></comment>
+                </field>
             </group>
 
             <group id="debug" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
