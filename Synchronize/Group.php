@@ -15,6 +15,7 @@ use RuntimeException;
 use SplObjectStorage;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
+use TNW\Salesforce\Service\Model\Grid\UpdateGridsByQueues;
 use TNW\Salesforce\Synchronize\Unit\CurrentUnit;
 use TNW\Salesforce\Synchronize\Unit\UnitAbstract;
 
@@ -68,6 +69,9 @@ class Group
     /** @var LoggerInterface */
     private $logger;
 
+    /** @var UpdateGridsByQueues */
+    private $updateGridsByQueues;
+
     /**
      * Entity constructor.
      *
@@ -79,6 +83,7 @@ class Group
      * @param LoggerInterface        $logger
      * @param CurrentUnit            $currentUnit
      * @param CleanableObjectsList   $cleanableObjectsList
+     * @param UpdateGridsByQueues    $updateGridsByQueues
      */
     public function __construct(
         $groupCode,
@@ -88,7 +93,8 @@ class Group
         LoggerInterface $systemLogger,
         LoggerInterface $logger,
         CurrentUnit $currentUnit,
-        CleanableObjectsList $cleanableObjectsList
+        CleanableObjectsList $cleanableObjectsList,
+        UpdateGridsByQueues $updateGridsByQueues
     ) {
         $this->groupCode = $groupCode;
         $this->units = array_filter($units);
@@ -98,6 +104,7 @@ class Group
         $this->currentUnit = $currentUnit;
         $this->cleanableObjectsList = $cleanableObjectsList;
         $this->logger = $logger;
+        $this->updateGridsByQueues = $updateGridsByQueues;
     }
 
     /**
@@ -150,6 +157,9 @@ class Group
         }
         $this->currentUnit->clear();
         $this->messageDebug('======== END SYNC %s ========', $this->code());
+        $this->messageDebug('======== START UPDATE GRIDS %s ========');
+        $this->updateGridsByQueues->execute($queues);
+        $this->messageDebug('======== END UPDATE GRIDS %s ========', $this->code());
 
         return $units;
     }

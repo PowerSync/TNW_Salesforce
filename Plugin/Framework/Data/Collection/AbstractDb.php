@@ -3,15 +3,17 @@
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
+
 namespace TNW\Salesforce\Plugin\Framework\Data\Collection;
 
 use Magento\Framework\Data\Collection\AbstractDb as Collection;
 use TNW\Salesforce\Model\Config;
+use TNW\Salesforce\Model\ResourceModel\Objects\SelectAbstract;
 
 class AbstractDb
 {
     /**
-     * @var array
+     * @var SelectAbstract[]
      */
     private $select;
 
@@ -21,7 +23,7 @@ class AbstractDb
     private $config;
 
     public function __construct(
-        array $select,
+        array  $select,
         Config $config
     ) {
         $this->select = $select;
@@ -30,8 +32,8 @@ class AbstractDb
 
     /**
      * @param Collection $collection
-     * @param bool $printQuery
-     * @param bool $logQuery
+     * @param bool       $printQuery
+     * @param bool       $logQuery
      *
      * @return array
      */
@@ -41,8 +43,9 @@ class AbstractDb
             return [$printQuery, $logQuery];
         }
 
+        $originalSelect = $collection->getSelect();
         foreach ($this->select as $alias => $select) {
-            $collection->getSelect()->columns([$alias => $select->build()]);
+            $originalSelect->columns([$alias => $select->build($originalSelect)]);
         }
 
         return [$printQuery, $logQuery];
