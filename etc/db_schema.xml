@@ -229,5 +229,10 @@
             <column name="type" />
         </constraint>
     </table>
+    <table name="customer_grid_flat">
+        <column xsi:type="varchar" name="sforce_id" nullable="true" length="255" comment="Salesforce Contact Id" />
+        <column xsi:type="varchar" name="sforce_account_id" nullable="true" length="255" comment="Salesforce Account Id" />
+        <column xsi:type="smallint" name="sforce_sync_status" padding="6" unsigned="false" nullable="false" identity="false" comment="Salesforce sync status" />
+    </table>
 
 </schema>
