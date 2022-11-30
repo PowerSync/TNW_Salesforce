@@ -22,16 +22,19 @@ class GetColumnsDataItems
 
     /**
      * @param CleanableObjectsList $cleanableObjectsList
+     * @param CleanableObjectsList $cleanableExecutorsList
      * @param array                $executors
      */
     public function __construct(
         CleanableObjectsList $cleanableObjectsList,
+        CleanableObjectsList $cleanableExecutorsList,
         array                $executors
     ) {
         $this->executors = $executors;
         foreach ($executors as $executor) {
             if ($executor instanceof CleanableInstanceInterface) {
                 $cleanableObjectsList->add($executor);
+                $cleanableExecutorsList->add($executor);
             }
         }
     }

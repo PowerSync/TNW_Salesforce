@@ -22,7 +22,7 @@
         <job name="salesforce_refresh_grids"
              instance="TNW\Salesforce\Cron\RefreshGrids"
              method="execute">
-            <schedule>*/1 * * * *</schedule>
+            <schedule>*/5 * * * *</schedule>
         </job>
 
     </group>
