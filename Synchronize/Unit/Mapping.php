@@ -285,6 +285,8 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
 
         if (null === $value || (is_string($value) && '' === trim((string)$value))) {
             $value = $this->defaultValue($entity, $mapper);
+        } elseif (!empty($mapper->getFormatValue())) {
+            $value = sprintf($mapper->getFormatValue(), $value);
         }
 
         return $value;
