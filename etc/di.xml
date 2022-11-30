@@ -997,4 +997,15 @@
             </argument>
         </arguments>
     </type>
+    <virtualType name="TNW\Salesforce\Service\Model\Grid\GetColumnsDataItems\CleanableObjectsList" type="TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList"/>
+    <type name="TNW\Salesforce\Service\Model\Grid\GetColumnsDataItems">
+        <arguments>
+            <argument name="cleanableExecutorsList" xsi:type="object">TNW\Salesforce\Service\Model\Grid\GetColumnsDataItems\CleanableObjectsList</argument>
+        </arguments>
+    </type>
+    <type name="TNW\Salesforce\Service\Model\Grid\UpdateGridsByQueues">
+        <arguments>
+            <argument name="cleanableExecutorsList" xsi:type="object">TNW\Salesforce\Service\Model\Grid\GetColumnsDataItems\CleanableObjectsList</argument>
+        </arguments>
+    </type>
 </config>
