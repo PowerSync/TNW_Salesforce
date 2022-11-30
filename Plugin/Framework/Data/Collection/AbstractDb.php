@@ -6,6 +6,7 @@
 namespace TNW\Salesforce\Plugin\Framework\Data\Collection;
 
 use Magento\Framework\Data\Collection\AbstractDb as Collection;
+use TNW\Salesforce\Model\Config;
 
 class AbstractDb
 {
@@ -14,10 +15,17 @@ class AbstractDb
      */
     private $select;
 
+    /**
+     * @var Config
+     */
+    private $config;
+
     public function __construct(
-        array $select
+        array $select,
+        Config $config
     ) {
         $this->select = $select;
+        $this->config = $config;
     }
 
     /**
@@ -29,7 +37,7 @@ class AbstractDb
      */
     public function beforeLoad(Collection $collection, $printQuery = false, $logQuery = false)
     {
-        if ($collection->isLoaded()) {
+        if ($collection->isLoaded() || !$this->config->getSalesforceStatus()) {
             return [$printQuery, $logQuery];
         }
 
