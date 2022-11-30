@@ -17,6 +17,7 @@ use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
 use TNW\Salesforce\Service\Model\Grid\UpdateGridsByQueues;
 use TNW\Salesforce\Synchronize\Unit\CurrentUnit;
+use TNW\Salesforce\Synchronize\Unit\UnitAbstract;
 
 /**
  * Group
@@ -65,6 +66,9 @@ class Group
     /** @var CleanableObjectsList */
     private $cleanableObjectsList;
 
+    /** @var LoggerInterface */
+    private $logger;
+
     /** @var UpdateGridsByQueues */
     private $updateGridsByQueues;
 
@@ -76,6 +80,7 @@ class Group
      * @param UnitsFactory           $unitsFactory
      * @param ObjectManagerInterface $objectManager
      * @param LoggerInterface        $systemLogger
+     * @param LoggerInterface        $logger
      * @param CurrentUnit            $currentUnit
      * @param CleanableObjectsList   $cleanableObjectsList
      * @param UpdateGridsByQueues    $updateGridsByQueues
@@ -86,6 +91,7 @@ class Group
         UnitsFactory $unitsFactory,
         ObjectManagerInterface $objectManager,
         LoggerInterface $systemLogger,
+        LoggerInterface $logger,
         CurrentUnit $currentUnit,
         CleanableObjectsList $cleanableObjectsList,
         UpdateGridsByQueues $updateGridsByQueues
@@ -98,6 +104,7 @@ class Group
         $this->currentUnit = $currentUnit;
         $this->cleanableObjectsList = $cleanableObjectsList;
         $this->updateGridsByQueues = $updateGridsByQueues;
+        $this->logger = $logger;
     }
 
     /**
@@ -122,7 +129,7 @@ class Group
         $this->messageDebug('======== START SYNC %s ========', $this->code());
 
         $units = $this->createUnits($queues)->sort();
-        /** @var Unit\UnitInterface $unit */
+        /** @var UnitAbstract $unit */
         foreach ($units as $unit) {
             $this->currentUnit->setUnit($unit);
             foreach ($unit->dependents() as $dependent) {
@@ -209,6 +216,23 @@ class Group
     }
 
     /**
+     * @param \Throwable $e
+     *
+     * @return void
+     */
+    public function messageThrowable(\Throwable $e): void
+    {
+        $message = implode(
+            PHP_EOL,
+            [$e->getMessage(), $e->getTraceAsString()]
+        );
+        $this->systemLogger->error($message);
+        $this->logger->error(
+            $message
+        );
+    }
+
+    /**
      * Call
      *
      * @param string $name
@@ -243,6 +267,13 @@ class Group
             case 'error':
                 $this->errorMessages[] = $message;
                 $this->systemLogger->error($message);
+                $traceAsString = (new RuntimeException('Stacktrace'))->getTraceAsString();
+                $this->logger->error(
+                    implode(
+                        PHP_EOL,
+                        [$message, $traceAsString]
+                    )
+                );
                 break;
 
             case 'success':
@@ -278,7 +309,7 @@ class Group
             $argument = $argument->render();
         }
 
-        if ($argument instanceof \Exception) {
+        if ($argument instanceof \Throwable) {
             $argument = $argument->getMessage();
         }
 

@@ -150,6 +150,10 @@ class Status extends Synchronize\Unit\UnitAbstract
             $this->saveStatus($entity);
         }
 
+        if (null !== $this->salesforceIdStorage) {
+            $this->salesforceIdStorage->saveStatusFromCache();
+        }
+
         $this->updateQueue();
     }
 
@@ -162,11 +166,11 @@ class Status extends Synchronize\Unit\UnitAbstract
         if (null !== $this->salesforceIdStorage) {
             switch ($this->cache[$entity]['status']) {
                 case Queue::STATUS_COMPLETE:
-                    $this->salesforceIdStorage->saveStatus($entity, 1, $entity->getData('config_website'));
+                    $this->salesforceIdStorage->addStatusToCacheForMassUpdate($entity, 1, $entity->getData('config_website'));
                     break;
 
                 case Queue::STATUS_ERROR:
-                    $this->salesforceIdStorage->saveStatus($entity, 0, $entity->getData('config_website'));
+                    $this->salesforceIdStorage->addStatusToCacheForMassUpdate($entity, 0, $entity->getData('config_website'));
                     break;
             }
         }

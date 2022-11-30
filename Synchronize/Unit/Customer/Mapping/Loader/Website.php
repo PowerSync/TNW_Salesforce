@@ -3,40 +3,71 @@
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader;
+
+use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities\Load;
+use TNW\Salesforce\Synchronize\Unit\EntityLoaderAbstract;
+use TNW\Salesforce\Synchronize\Unit\Load\EntityLoader\EntityPreLoaderInterface;
 
 /**
  * Mapping Loader Website
  */
-class Website extends \TNW\Salesforce\Synchronize\Unit\EntityLoaderAbstract
+class Website extends EntityLoaderAbstract implements EntityPreLoaderInterface
 {
-    /**
-     * @var \Magento\Store\Model\StoreManager
-     */
-    private $storeManager;
+    /** @var Load */
+    private $loadSubEntities;
+
+    /** @var array */
+    private $loaders;
+
+    /** @var array */
+    private $afterLoadExecutors;
 
     /**
      * Website constructor.
-     * @param \Magento\Store\Model\StoreManager $storeManager
-     * @param \TNW\Salesforce\Model\Entity\SalesforceIdStorage|null $salesforceIdStorage
+     *
+     * @param Load                     $loadSubEntities
+     * @param array                    $loaders
+     * @param array                    $afterLoadExecutors
+     * @param SalesforceIdStorage|null $salesforceIdStorage
      */
     public function __construct(
-        \Magento\Store\Model\StoreManager $storeManager,
-        \TNW\Salesforce\Model\Entity\SalesforceIdStorage $salesforceIdStorage = null
+        Load                $loadSubEntities,
+        array               $loaders = [],
+        array               $afterLoadExecutors = [],
+        SalesforceIdStorage $salesforceIdStorage = null
     ) {
         parent::__construct($salesforceIdStorage);
-        $this->storeManager = $storeManager;
+        $this->loadSubEntities = $loadSubEntities;
+        $this->loaders = $loaders;
+        $this->afterLoadExecutors = $afterLoadExecutors;
     }
 
     /**
-     * Load
-     *
-     * @param \Magento\Customer\Model\Customer $entity
-     * @return \Magento\Framework\Model\AbstractModel
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @inheritDoc
      */
     public function load($entity)
     {
-        return $this->storeManager->getWebsite($entity->getWebsiteId());
+        $entityId = spl_object_id($entity);
+
+        return $this->loadSubEntities->execute($this, [$entity])[$entityId] ?? null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getLoaders(): array
+    {
+        return $this->loaders;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAfterPreloadExecutors(): array
+    {
+        return $this->afterLoadExecutors;
     }
 }

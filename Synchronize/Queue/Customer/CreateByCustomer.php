@@ -5,26 +5,38 @@
  */
 namespace TNW\Salesforce\Synchronize\Queue\Customer;
 
+use Magento\Customer\Model\ResourceModel\Customer;
+use TNW\Salesforce\Model\Queue;
+use TNW\Salesforce\Service\Synchronize\Queue\Create\GetEntities;
+use TNW\Salesforce\Synchronize\Queue\CreateInterface;
+
 /**
  * Create By Customer
  */
-class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterface
+class CreateByCustomer implements CreateInterface
 {
     const CREATE_BY = 'customer';
 
     /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer
+     * @var Customer
      */
     private $resourceCustomer;
 
+    /** @var GetEntities */
+    private $getEntities;
+
     /**
      * CreateByCustomer constructor.
-     * @param \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+     *
+     * @param Customer    $resourceCustomer
+     * @param GetEntities $getEntities
      */
     public function __construct(
-        \Magento\Customer\Model\ResourceModel\Customer $resourceCustomer
+        Customer    $resourceCustomer,
+        GetEntities $getEntities
     ) {
         $this->resourceCustomer = $resourceCustomer;
+        $this->getEntities = $getEntities;
     }
 
     /**
@@ -44,12 +56,13 @@ class CreateByCustomer implements \TNW\Salesforce\Synchronize\Queue\CreateInterf
      * @param array $additional
      * @param callable $create
      * @param int $websiteId
-     * @return \TNW\Salesforce\Model\Queue[]
+     * @return Queue[]
      */
     public function process(array $entityIds, array $additional, callable $create, $websiteId)
     {
         $queues = [];
-        foreach ($this->entities($entityIds) as $entity) {
+        $entities = $this->getEntities->execute($entityIds, $this, 'entity_id');
+        foreach ($entities as $entity) {
             $queues[] = $create(
                 'customer',
                 $entity['entity_id'],

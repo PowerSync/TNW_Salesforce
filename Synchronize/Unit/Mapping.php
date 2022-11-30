@@ -23,6 +23,7 @@ use TNW\Salesforce\Model\Mapper;
 use TNW\Salesforce\Model\ResourceModel\Mapper\CollectionFactory;
 use TNW\Salesforce\Synchronize;
 use TNW\Salesforce\Synchronize\Group;
+use TNW\Salesforce\Synchronize\Unit\Mapping\Context;
 use TNW\Salesforce\Synchronize\Units;
 
 /**
@@ -74,8 +75,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
     /** @var array */
     private $values = [];
 
-    /** @var array  */
+    /** @var array */
     private $valuesProcessed = [];
+
+    /** @var Mapping\Context */
+    private $context;
 
     /**
      * Mapping constructor.
@@ -88,18 +92,20 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
      * @param Group                   $group
      * @param IdentificationInterface $identification
      * @param CollectionFactory       $mapperCollectionFactory
+     * @param Context                 $context
      * @param array                   $dependents
      */
     public function __construct(
-        $name,
-        $load,
-        $lookup,
-        $objectType,
-        Synchronize\Units $units,
-        Synchronize\Group $group,
+        string                                   $name,
+        string                                   $load,
+        string                                   $lookup,
+        string                                   $objectType,
+        Synchronize\Units                        $units,
+        Synchronize\Group                        $group,
         Synchronize\Unit\IdentificationInterface $identification,
-        CollectionFactory $mapperCollectionFactory,
-        array $dependents = []
+        CollectionFactory                        $mapperCollectionFactory,
+        Context                                  $context,
+        array                                    $dependents = []
     ) {
         parent::__construct($name, $units, $group, array_merge($dependents, [$load, $lookup]));
         $this->load = $load;
@@ -107,6 +113,7 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
         $this->identification = $identification;
         $this->mapperCollectionFactory = $mapperCollectionFactory;
         $this->lookup = $lookup;
+        $this->context = $context;
     }
 
     /**
@@ -225,8 +232,11 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
                 }
 
                 $object[$salesforceAttributeName] = $value;
-            } catch (Exception $e) {
-                $this->group()->messageError('The "%s" field mapping error: %s', $salesforceAttributeName, $e->getMessage());
+            } catch (\Throwable $e) {
+                $group = $this->group();
+                $group->messageError('The "%s" field mapping error: %s', $salesforceAttributeName, $e->getMessage());
+                $group->messageThrowable($e);
+
             }
         }
 
@@ -379,33 +389,17 @@ class Mapping extends Synchronize\Unit\UnitAbstract implements CleanableInstance
     public function prepareValue($entity, $attributeCode)
     {
         $attributeCode = (string)$attributeCode;
+        $resource = $entity->getResource();
         if (
-            $entity->getResource() instanceof AbstractEntity &&
-            $entity->getResource()->getAttribute($attributeCode) &&
-            $entity->getResource()->getAttribute($attributeCode)->getFrontend()->getConfigField('input') != 'boolean'
+            $resource instanceof AbstractEntity &&
+            $resource->getAttribute($attributeCode) &&
+            $resource->getAttribute($attributeCode)->getFrontend()->getConfigField('input') != 'boolean'
         ) {
-            /** @var Attribute $attribute */
-            $attribute = $entity->getResource()->getAttribute($attributeCode);
-            $value = $attribute->getFrontend()->getValue($entity);
+            $attribute = $resource->getAttribute($attributeCode);
 
-            if ($value && in_array($attribute->getBackendType(), self::DATE_BACKEND_TYPES, true)) {
-                $value = $entity->getData($attributeCode);
-                if ($attribute->getFrontendInput() === self::ATTRIBUTE_TYPE_DATE) {
-                    $dateTime = new DateTime($value);
-                    $value = $dateTime->format('Y-m-d');
-                    $dateTime = new DateTime($value);
-                    $dateTime->add(new DateInterval('PT12H'));
-                    $value = $dateTime->format('Y-m-d H:i:s');
-                }
-            }
+            $value = $this->context->getAttributeFrontedValueFromCache()->execute($entity, $attribute);
 
             if (!empty($value)) {
-                if ($attribute->getFrontendInput() === 'multiselect') {
-                    $value = is_array($value) ? implode(',', $value) : (string)$value;
-                    $value = explode(',', $value);
-                    $value = implode(';', $value);
-                }
-
                 return (string)$value;
             }
         }

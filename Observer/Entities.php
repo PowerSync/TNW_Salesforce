@@ -22,6 +22,10 @@ class Entities
      */
     public function addEntity($entity)
     {
+        if ($entity === null) {
+            return;
+        }
+
         if ($entity instanceof \Magento\Framework\Model\AbstractModel) {
             $entity = $entity->getId();
         }

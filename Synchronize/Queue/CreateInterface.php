@@ -9,6 +9,8 @@ use TNW\Salesforce\Model\Queue;
 
 interface CreateInterface
 {
+    public const CURRENCY_CODE = 'currency_code';
+
     /**
      * Create By
      *
@@ -26,4 +28,11 @@ interface CreateInterface
      * @return Queue[]
      */
     public function process(array $entityIds, array $additional, callable $create, $websiteId);
+
+    /**
+     * @param array $entityIds
+     *
+     * @return mixed
+     */
+    public function entities(array $entityIds);
 }

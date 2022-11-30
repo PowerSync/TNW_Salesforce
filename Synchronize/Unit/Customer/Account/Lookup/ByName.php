@@ -92,7 +92,8 @@ class ByName extends Synchronize\Unit\LookupAbstract
         $this->input->columns['name'] = 'Name';
 
         foreach ($this->entities() as $entity) {
-            $this->input[$entity]['AND']['Name']['IN'][] = $this->valueCompany($entity);
+            $company = $this->valueCompany($entity);
+            $company && $this->input[$this->getCacheObject()]['OR']['Name']['IN'][] = $company;
         }
 
         $this->input->from = 'Account';

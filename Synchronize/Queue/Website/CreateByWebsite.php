@@ -8,6 +8,7 @@ namespace TNW\Salesforce\Synchronize\Queue\Website;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\ResourceModel\Order;
 use Magento\Store\Model\ResourceModel\Website;
+use TNW\Salesforce\Service\Synchronize\Queue\Create\GetEntities;
 
 /**
  * Create By Website
@@ -21,14 +22,21 @@ class CreateByWebsite extends CreateByBase
      */
     private $resourceWebsite;
 
+    /** @var GetEntities */
+    private $getEntities;
+
     /**
      * CreateByWebsite constructor.
-     * @param Website $resourceWebsite
+     *
+     * @param Website     $resourceWebsite
+     * @param GetEntities $getEntities
      */
     public function __construct(
-        Website $resourceWebsite
+        Website $resourceWebsite,
+        GetEntities $getEntities
     ) {
         $this->resourceWebsite = $resourceWebsite;
+        $this->getEntities = $getEntities;
     }
 
     /**
@@ -54,7 +62,8 @@ class CreateByWebsite extends CreateByBase
     public function process(array $entityIds, array $additional, callable $create, $websiteId)
     {
         $queues = [];
-        foreach ($this->entities($entityIds) as $entity) {
+        $entities = $this->getEntities->execute($entityIds, $this, 'base_entity_id');
+        foreach ($entities as $entity) {
             $queues[] = $create(
                 'website',
                 $entity['website_id'],
