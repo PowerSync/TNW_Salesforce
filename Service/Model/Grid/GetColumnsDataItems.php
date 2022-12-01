@@ -20,15 +20,20 @@ class GetColumnsDataItems
     /** @var ExecutorInterface[] */
     private $executors;
 
+    /** @var string */
+    private $entityIdColumnName;
+
     /**
      * @param CleanableObjectsList $cleanableObjectsList
      * @param CleanableObjectsList $cleanableExecutorsList
      * @param array                $executors
+     * @param string               $entityIdColumnName
      */
     public function __construct(
         CleanableObjectsList $cleanableObjectsList,
         CleanableObjectsList $cleanableExecutorsList,
-        array                $executors
+        array                $executors,
+        string               $entityIdColumnName = 'entity_id'
     ) {
         $this->executors = $executors;
         foreach ($executors as $executor) {
@@ -37,6 +42,7 @@ class GetColumnsDataItems
                 $cleanableExecutorsList->add($executor);
             }
         }
+        $this->entityIdColumnName = $entityIdColumnName;
     }
 
 
@@ -48,14 +54,23 @@ class GetColumnsDataItems
     public function execute(array $entityIds = null): array
     {
         $result = [];
+        $nullableEntityIds = [];
         foreach ($this->executors as $columnName => $executor) {
             $items = $executor->execute($columnName, $entityIds);
             if ($entityIds === null) {
                 $entityIds = array_keys($items);
             }
             foreach ($entityIds as $entityId) {
-                $entityId && $result[$entityId][$columnName] = $items[$entityId] ?? null;
+                $value = $items[$entityId] ?? null;
+                if ($columnName === $this->entityIdColumnName && $value === null) {
+                    $nullableEntityIds[] = $entityId;
+                }
+                $entityId && $result[$entityId][$columnName] = $value;
             }
+        }
+
+        foreach ($nullableEntityIds as $nullableEntityId) {
+            unset($result[$nullableEntityId]);
         }
 
         return $result;
