@@ -3,18 +3,26 @@
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account;
 
 use Magento\Customer\Model\Address;
 use Magento\Customer\Model\Customer;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Model\AbstractModel;
 use RuntimeException;
 use TNW\Salesforce\Api\Service\Company\GenerateCompanyNameInterface;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\Customer\Config;
 use TNW\Salesforce\Model\Mapper;
+use TNW\Salesforce\Model\ResourceModel\Mapper\CollectionFactory;
 use TNW\Salesforce\Service\Synchronize\Unit\Customer\Account\Mapping\GetDefaultOwnerId;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomerAddressByType;
 use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Synchronize\Group;
+use TNW\Salesforce\Synchronize\Unit\IdentificationInterface;
+use TNW\Salesforce\Synchronize\Unit\Mapping\Context;
+use TNW\Salesforce\Synchronize\Units;
 use TNW\Salesforce\Utils\Company;
 
 /**
@@ -28,35 +36,42 @@ class Mapping extends Synchronize\Unit\Mapping
     /** @var GetDefaultOwnerId */
     private $getDefaultOwnerId;
 
+    /** @var GetCustomerAddressByType */
+    private $getCustomerAddressByType;
+
     /**
      * Mapping constructor.
      *
-     * @param string                                       $name
-     * @param string                                       $load
-     * @param string                                       $lookup
-     * @param string                                       $objectType
-     * @param Synchronize\Units                            $units
-     * @param Synchronize\Group                            $group
-     * @param Synchronize\Unit\IdentificationInterface     $identification
-     * @param Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory
-     * @param Config                                       $customerConfig
-     * @param GenerateCompanyNameInterface                 $generateCompanyName
-     * @param GetDefaultOwnerId                            $getDefaultOwnerId
-     * @param array                                        $dependents
+     * @param string                       $name
+     * @param string                       $load
+     * @param string                       $lookup
+     * @param string                       $objectType
+     * @param Units                        $units
+     * @param Group                        $group
+     * @param IdentificationInterface      $identification
+     * @param CollectionFactory            $mapperCollectionFactory
+     * @param Config                       $customerConfig
+     * @param GenerateCompanyNameInterface $generateCompanyName
+     * @param GetDefaultOwnerId            $getDefaultOwnerId
+     * @param Context                      $context
+     * @param GetCustomerAddressByType     $getCustomerAddressByType
+     * @param array                        $dependents
      */
     public function __construct(
-        $name,
-        $load,
-        $lookup,
-        $objectType,
-        Synchronize\Units $units,
-        Synchronize\Group $group,
-        Synchronize\Unit\IdentificationInterface $identification,
+        string                                       $name,
+        string                                       $load,
+        string                                       $lookup,
+        string                                       $objectType,
+        Synchronize\Units                            $units,
+        Synchronize\Group                            $group,
+        Synchronize\Unit\IdentificationInterface     $identification,
         Model\ResourceModel\Mapper\CollectionFactory $mapperCollectionFactory,
-        Config $customerConfig,
-        GenerateCompanyNameInterface $generateCompanyName,
-        GetDefaultOwnerId $getDefaultOwnerId,
-        array $dependents = []
+        Config                                       $customerConfig,
+        GenerateCompanyNameInterface                 $generateCompanyName,
+        GetDefaultOwnerId                            $getDefaultOwnerId,
+        Context                                      $context,
+        GetCustomerAddressByType                     $getCustomerAddressByType,
+        array                                        $dependents = []
     ) {
         parent::__construct(
             $name,
@@ -67,18 +82,21 @@ class Mapping extends Synchronize\Unit\Mapping
             $group,
             $identification,
             $mapperCollectionFactory,
+            $context,
             $dependents
         );
 
         $this->generateCompanyName = $generateCompanyName;
         $this->getDefaultOwnerId = $getDefaultOwnerId;
+        $this->getCustomerAddressByType = $getCustomerAddressByType;
     }
 
     /**
      * Object By Entity Type
      *
      * @param Customer $entity
-     * @param string $magentoEntityType
+     * @param string   $magentoEntityType
+     *
      * @return mixed
      */
     public function objectByEntityType($entity, $magentoEntityType)
@@ -88,10 +106,10 @@ class Mapping extends Synchronize\Unit\Mapping
                 return $entity;
 
             case 'customer_address/shipping':
-                return $entity->getDefaultShippingAddress();
+                return $this->getCustomerAddressByType->getDefaultShippingAddress($entity);
 
             case 'customer_address/billing':
-                return $entity->getDefaultBillingAddress();
+                return $this->getCustomerAddressByType->getDefaultBillingAddress($entity);
 
             default:
                 return parent::objectByEntityType($entity, $magentoEntityType);
@@ -102,7 +120,8 @@ class Mapping extends Synchronize\Unit\Mapping
      * Prepare Value
      *
      * @param AbstractModel $entity
-     * @param string $attributeCode
+     * @param string        $attributeCode
+     *
      * @return mixed
      * @throws RuntimeException
      */
@@ -124,7 +143,8 @@ class Mapping extends Synchronize\Unit\Mapping
      * Default Value
      *
      * @param Customer $entity
-     * @param Mapper $mapper
+     * @param Mapper   $mapper
+     *
      * @return mixed
      */
     protected function defaultValue($entity, $mapper)
@@ -146,6 +166,7 @@ class Mapping extends Synchronize\Unit\Mapping
      * Company By Customer
      *
      * @param Customer $entity
+     *
      * @return string
      */
     public static function companyByCustomer($entity)
@@ -162,13 +183,15 @@ class Mapping extends Synchronize\Unit\Mapping
      * Get Company By Customer
      *
      * @param Customer $entity
+     *
      * @return string
      */
     public static function getCompanyByCustomer($entity)
     {
         $companyName = '';
-
-        $address = $entity->getDefaultBillingAddress();
+        /** @var GetCustomerAddressByType $service */
+        $service = ObjectManager::getInstance()->get(GetCustomerAddressByType::class);
+        $address = $service->getDefaultBillingAddress($entity);
         if ($address instanceof Address) {
             $companyName = $address->getData('company');
         }

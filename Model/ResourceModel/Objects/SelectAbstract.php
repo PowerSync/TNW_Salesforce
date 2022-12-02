@@ -6,6 +6,8 @@
 
 namespace TNW\Salesforce\Model\ResourceModel\Objects;
 
+use Magento\Framework\DB\Select;
+
 abstract class SelectAbstract
 {
     /**
@@ -57,7 +59,7 @@ abstract class SelectAbstract
     }
 
     /**
-     * @return \Magento\Framework\DB\Select
+     * @return Select
      */
     public function select()
     {
@@ -65,7 +67,7 @@ abstract class SelectAbstract
     }
 
     /**
-     * @return \Magento\Framework\DB\Select|string
+     * @return Select|string
      */
-    abstract public function build();
+    abstract public function build(Select $originalSelect);
 }

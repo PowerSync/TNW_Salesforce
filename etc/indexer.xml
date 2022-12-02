@@ -12,5 +12,6 @@
             <field name="sforce_id" xsi:type="filterable" dataType="varchar" handler="TNW\Salesforce\Indexer\Handler\Attribute"/>
             <field name="sforce_account_id" xsi:type="filterable" dataType="varchar" handler="TNW\Salesforce\Indexer\Handler\Attribute"/>
         </fieldset>
+        <saveHandler class="TNW\Salesforce\Model\Framework\Indexer\SaveHandler\Grid"/>
     </indexer>
 </config>

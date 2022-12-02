@@ -5,16 +5,19 @@
  */
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Mapping\Loader;
 
+use Magento\Framework\Model\AbstractModel;
+use TNW\Salesforce\Synchronize\Unit\EntityLoaderAbstract;
+
 /**
  * Mapping Loader Customer
  */
-class Customer extends \TNW\Salesforce\Synchronize\Unit\EntityLoaderAbstract
+class Customer extends EntityLoaderAbstract
 {
     /**
      * Load
      *
      * @param \Magento\Customer\Model\Customer $entity
-     * @return \Magento\Framework\Model\AbstractModel
+     * @return AbstractModel
      */
     public function load($entity)
     {

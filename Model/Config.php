@@ -36,6 +36,7 @@ class Config extends DataObject implements ConfigInterface
     const MAPPING_WHEN_INSERT_ONLY = 'InsertOnly';
 
     const SYNC_MAX_ATTEMPT_COUNT_XML = 'tnwsforce_general/synchronization/max_attempt_count';
+    public const SYNCHRONIZATION_NEED_REFRESH_GRIDS = 'tnwsforce_general/synchronization/need_refresh_grids';
 
     /**
      * Base batch limit for simple sync
@@ -160,6 +161,16 @@ class Config extends DataObject implements ConfigInterface
     public function getSalesforceStatus($websiteId = null)
     {
         return (bool)$this->getStoreConfig('tnwsforce_general/salesforce/active', $websiteId);
+    }
+
+    /**
+     * Get is need refresh grids
+     *
+     * @return bool
+     */
+    public function needRefreshGrids(): bool
+    {
+        return (bool)$this->getStoreConfig(self::SYNCHRONIZATION_NEED_REFRESH_GRIDS);
     }
 
 

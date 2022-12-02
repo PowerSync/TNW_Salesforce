@@ -12,6 +12,8 @@ use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Synchronize;
+use TNW\Salesforce\Synchronize\Group;
+use TNW\Salesforce\Synchronize\Units;
 
 /**
  * Unit Status
@@ -38,13 +40,15 @@ class Status extends Synchronize\Unit\UnitAbstract
 
     /**
      * Status constructor.
-     * @param string $name
-     * @param string $load
-     * @param string $upsertOutput
-     * @param Synchronize\Units $units
-     * @param Synchronize\Group $group
-     * @param SalesforceIdStorage $salesforceIdStorage
-     * @param array $dependents
+     *
+     * @param string                   $name
+     * @param string                   $load
+     * @param string                   $upsertOutput
+     * @param Units                    $units
+     * @param Group                    $group
+     * @param Config                   $config
+     * @param SalesforceIdStorage|null $salesforceIdStorage
+     * @param array                    $dependents
      */
     public function __construct(
         $name,
@@ -146,6 +150,10 @@ class Status extends Synchronize\Unit\UnitAbstract
             $this->saveStatus($entity);
         }
 
+        if (null !== $this->salesforceIdStorage) {
+            $this->salesforceIdStorage->saveStatusFromCache();
+        }
+
         $this->updateQueue();
     }
 
@@ -158,11 +166,11 @@ class Status extends Synchronize\Unit\UnitAbstract
         if (null !== $this->salesforceIdStorage) {
             switch ($this->cache[$entity]['status']) {
                 case Queue::STATUS_COMPLETE:
-                    $this->salesforceIdStorage->saveStatus($entity, 1, $entity->getData('config_website'));
+                    $this->salesforceIdStorage->addStatusToCacheForMassUpdate($entity, 1, $entity->getData('config_website'));
                     break;
 
                 case Queue::STATUS_ERROR:
-                    $this->salesforceIdStorage->saveStatus($entity, 0, $entity->getData('config_website'));
+                    $this->salesforceIdStorage->addStatusToCacheForMassUpdate($entity, 0, $entity->getData('config_website'));
                     break;
             }
         }

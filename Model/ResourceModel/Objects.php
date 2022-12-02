@@ -303,6 +303,7 @@ class Objects extends AbstractDb
      * @param array $records
      *
      * @throws LocalizedException
+     * @throws \Throwable
      */
     public function saveRecords(array $records)
     {
@@ -323,8 +324,18 @@ class Objects extends AbstractDb
             ]));
         }, $records);
         $this->eventManager->dispatch('tnw_salesforce_objects_save_before', [self::RECORDS_KEY => $records]);
-        $this->getConnection()
-            ->insertOnDuplicate($this->getMainTable(), $records);
+        $connection = $this->getConnection();
+        try {
+            $connection->beginTransaction();
+            foreach (array_chunk($records, self::CHUNK_SIZE) as $recordsChunk) {
+                $connection
+                    ->insertOnDuplicate($this->getMainTable(), $recordsChunk);
+            }
+            $connection->commit();
+        } catch (\Throwable $e) {
+            $connection->rollBack();
+            throw $e;
+        }
         $this->eventManager->dispatch('tnw_salesforce_objects_save_after', [self::RECORDS_KEY => $records]);
     }
 
@@ -344,6 +355,59 @@ class Objects extends AbstractDb
                 ['status' => (int)$status],
                 "entity_id = $entityId AND magento_type = '$magentoType' AND website_id = {$websiteId}"
             );
+    }
+
+    /**
+     * @param array $records
+     *
+     * @throws LocalizedException
+     * @throws \Throwable
+     */
+    public function saveStatusMass(array $records): void
+    {
+        $parts = [];
+        foreach ($records as $websiteId => $groupedByStatus) {
+            foreach ($groupedByStatus as $status => $groupedByMagentoType) {
+                foreach ($groupedByMagentoType as $magentoType => $entityIds) {
+                    if ($entityIds) {
+                        $entityIds = array_unique($entityIds);
+                        $parts[] = [
+                            'website_id' => $websiteId,
+                            'status' => $status,
+                            'magento_type' => $magentoType,
+                            'entity_id' => $entityIds
+                        ];
+                    }
+                }
+            }
+        }
+        $connection = $this->getConnection();
+        foreach ($parts as $part) {
+            $websiteId = $part['website_id'];
+            $status = $part['status'];
+            $magentoType = $part['magento_type'];
+            $entityIds = $part['entity_id'] ?? [];
+            foreach (array_chunk($entityIds, self::CHUNK_SIZE) as $entityIdsChunk) {
+                $entityIdsChunk = implode(',', $entityIdsChunk);
+                try {
+                    $connection->beginTransaction();
+                    $connection->update(
+                        $this->getMainTable(),
+                        ['status' => (int)$status],
+                        sprintf(
+                            "entity_id IN (%s) AND magento_type = '%s' AND website_id = %d",
+                            $entityIdsChunk,
+                            $magentoType,
+                            (int)$websiteId
+                        )
+                    );
+                    $connection->commit();
+                } catch (\Throwable $e) {
+                    $connection->rollBack();
+                    throw $e;
+                }
+            }
+        }
     }
 
     /**

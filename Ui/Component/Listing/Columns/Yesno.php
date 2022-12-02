@@ -8,6 +8,7 @@ namespace TNW\Salesforce\Ui\Component\Listing\Columns;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
+use TNW\Salesforce\Model\Config;
 
 /**
  * Class SyncStatus
@@ -16,17 +17,25 @@ use Magento\Ui\Component\Listing\Columns\Column;
 class Yesno extends Column
 {
     /**
+     * @var Config
+     */
+    protected $config;
+
+    /**
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
+     * @param Config $config
      * @param array $components
      * @param array $data
      */
     public function __construct(
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
+        Config $config,
         array $components = [],
         array $data = []
     ) {
+        $data = $config->getSalesforceStatus() ? $data : [];
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 
