@@ -48,7 +48,7 @@ class ObjectIdSelect extends SelectAbstract
     /**
      * @inheritdoc
      */
-    public function build()
+    public function build(\Magento\Framework\DB\Select $originalSelect)
     {
         return $this->select()
             ->from(['object' => $this->getTable('tnw_salesforce_objects')], ['object_id'])

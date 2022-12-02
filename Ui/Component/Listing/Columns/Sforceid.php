@@ -17,11 +17,17 @@ class Sforceid extends Column
     protected $client;
 
     /**
+     * @var \TNW\Salesforce\Model\Config
+     */
+    protected $config;
+
+    /**
      * Constructor
      *
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
      * @param \TNW\Salesforce\Client\Salesforce $client
+     * @param \TNW\Salesforce\Model\Config $config
      * @param array $components
      * @param array $data
      */
@@ -29,9 +35,11 @@ class Sforceid extends Column
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
         \TNW\Salesforce\Client\Salesforce $client,
+        \TNW\Salesforce\Model\Config $config,
         array $components = [],
         array $data = []
     ) {
+        $data = $config->getSalesforceStatus() ? $data : [];
         parent::__construct($context, $uiComponentFactory, $components, $data);
 
         $this->client = $client;

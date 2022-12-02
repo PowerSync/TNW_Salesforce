@@ -7,7 +7,7 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceBlock name="customer_form">
-            <block class="TNW\Salesforce\Block\Adminhtml\Customer\Edit\Tabs" name="tnw_salesforce_custom_edit_tab_view">
+            <block class="TNW\Salesforce\Block\Adminhtml\Customer\Edit\Tabs" name="tnw_salesforce_custom_edit_tab_view" ifconfig="tnwsforce_general/salesforce/active">
                 <arguments>
                     <argument name="sort_order" xsi:type="number">31</argument>
                 </arguments>

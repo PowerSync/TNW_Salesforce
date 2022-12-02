@@ -7,6 +7,7 @@
 namespace TNW\Salesforce\Service\Company;
 
 use TNW\Salesforce\Api\Service\Company\GenerateCompanyNameInterface;
+use TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomerAddressByType;
 use TNW\Salesforce\Utils\Company;
 
 /**
@@ -14,30 +15,42 @@ use TNW\Salesforce\Utils\Company;
  */
 class GenerateCompanyName implements GenerateCompanyNameInterface
 {
+    /** @var GetCustomerAddressByType */
+    private $getCustomerAddressByType;
+
+    /**
+     * @param GetCustomerAddressByType $getCustomerAddressByType
+     */
+    public function __construct(
+        GetCustomerAddressByType $getCustomerAddressByType
+    ) {
+        $this->getCustomerAddressByType = $getCustomerAddressByType;
+    }
+
     /**
      * @inheritDoc
      */
     public function execute($customer): string
     {
         $customerCompany = trim((string)$customer->getCompany());
-        $billingAddress = $customer->getDefaultBillingAddress();
-        $shippingAddress = $customer->getDefaultShippingAddress();
-        switch (true) {
-            case (!empty($customerCompany)):
-                $company = $customerCompany;
-                break;
-
-            case ($billingAddress && !empty(trim((string)$billingAddress->getCompany()))):
+        if (!empty($customerCompany)) {
+            $company = $customerCompany;
+        } else {
+            $billingAddress = $this->getCustomerAddressByType->getDefaultBillingAddress($customer);
+            if ($billingAddress) {
                 $company = trim((string)$billingAddress->getCompany());
-                break;
+            }
 
-            case ($shippingAddress && !empty(trim((string)$shippingAddress->getCompany()))):
-                $company = trim((string)$shippingAddress->getCompany());
-                break;
+            if (empty($company)) {
+                $shippingAddress = $this->getCustomerAddressByType->getDefaultShippingAddress($customer);
+                if ($shippingAddress) {
+                    $company = trim((string)$shippingAddress->getCompany());
+                }
+            }
 
-            default:
+            if (empty($company)) {
                 $company = Company::generateCompanyByCustomer($customer);
-                break;
+            }
         }
 
         return $company;

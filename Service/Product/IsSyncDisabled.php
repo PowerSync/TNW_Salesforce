@@ -12,6 +12,7 @@ use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 
 /**
  * Is product sync disabled service.
@@ -20,9 +21,6 @@ class IsSyncDisabled implements CleanableInstanceInterface
 {
     private const ATTRIBUTE_CODE = 'sforce_disable_sync';
     private const CHUNK_SIZE = ChunkSizeInterface::CHUNK_SIZE;
-
-    /** @var \Magento\Catalog\Model\ResourceModel\Product */
-    private $resourceConnection;
 
     /** @var Config */
     private $eavConfig;
@@ -33,16 +31,19 @@ class IsSyncDisabled implements CleanableInstanceInterface
     /** @var array  */
     private $processed = [];
 
+    /** @var CollectionFactory */
+    private $collectionFactory;
+
     /**
-     * @param \Magento\Catalog\Model\ResourceModel\Product $resourceConnection
-     * @param EavConfig                                    $eavConfig
+     * @param EavConfig         $eavConfig
+     * @param CollectionFactory $collectionFactory
      */
     public function __construct(
-        \Magento\Catalog\Model\ResourceModel\Product $resourceConnection,
-        EavConfig $eavConfig
+        EavConfig $eavConfig,
+        CollectionFactory $collectionFactory
     ) {
-        $this->resourceConnection = $resourceConnection;
         $this->eavConfig = $eavConfig;
+        $this->collectionFactory = $collectionFactory;
     }
 
     /**
@@ -72,27 +73,22 @@ class IsSyncDisabled implements CleanableInstanceInterface
         if ($missedEntityIds) {
             $attribute = $this->eavConfig->getAttribute(Product::ENTITY, self::ATTRIBUTE_CODE);
             if (!$attribute || !$attribute->getId()) {
-                return [];
+                $result = [];
+                foreach ($entityIds as $entityId) {
+                    $result[$entityId] = $this->cache[$entityId] ?? false;
+                }
+
+                return $result;
             }
 
-            $connection = $this->resourceConnection->getConnection();
-            $table = $attribute->getBackendTable();
-            $select = $connection->select();
-            $linkField = $this->resourceConnection->getLinkField();
-            $select->from($table, [$linkField]);
-            $select->where('attribute_id = ?', $attribute->getId());
-            $select->where('value = 1');
-            $select->where('store_id = 0');
-
             foreach (array_chunk($missedEntityIds, self::CHUNK_SIZE) as $missedEntityIdsChunk) {
-                $batchSelect = clone $select;
-                $batchSelect->where($linkField . ' IN (?)', $missedEntityIdsChunk);
-                $items = $connection->fetchAll($batchSelect);
-                foreach ($items as $item) {
-                    $entityId = (int)($item[$linkField] ?? 0);
-                    if ($entityId) {
-                        $this->cache[$entityId] = true;
-                    }
+                $collection = $this->collectionFactory->create();
+                $collection->addAttributeToSelect([self::ATTRIBUTE_CODE], 'left');
+                $collection->addIdFilter($entityIds);
+
+                foreach ($collection as $item) {
+                    $entityId = $item->getId();
+                    $entityId && $this->cache[$entityId] = (bool)$item->getData(self::ATTRIBUTE_CODE);
                 }
             }
         }
