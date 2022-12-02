@@ -29,7 +29,7 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         $this->input->columns[] = 'OwnerId';
 
         foreach ($this->entities() as $entity) {
-            $this->input[$entity]['OR'][$codeField]['IN'][] = $entity->getCode();
+            $this->input[$this->getCacheObject()]['OR'][$codeField]['IN'][] = $entity->getCode();
         }
 
         $this->input->from = 'tnw_mage_basic__Magento_Website__c';

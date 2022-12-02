@@ -23,16 +23,16 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     /**
      * Lookup constructor.
      *
-     * @param string $name
-     * @param string $load
-     * @param Synchronize\Units $units
-     * @param Synchronize\Group $group
-     * @param Synchronize\Unit\IdentificationInterface $identification
-     * @param Synchronize\Transport\Calls\Query\InputFactory $inputFactory
+     * @param string                                          $name
+     * @param string                                          $load
+     * @param Synchronize\Units                               $units
+     * @param Synchronize\Group                               $group
+     * @param Synchronize\Unit\IdentificationInterface        $identification
+     * @param Synchronize\Transport\Calls\Query\InputFactory  $inputFactory
      * @param Synchronize\Transport\Calls\Query\OutputFactory $outputFactory
-     * @param Synchronize\Transport\Calls\QueryInterface $process
-     * @param \Magento\Customer\Model\Config\Share $customerConfigShare
-     * @param array $dependents
+     * @param Synchronize\Transport\Calls\QueryInterface      $process
+     * @param \Magento\Customer\Model\Config\Share            $customerConfigShare
+     * @param array                                           $dependents
      */
     public function __construct(
         $name,
@@ -81,20 +81,33 @@ class Lookup extends Synchronize\Unit\LookupAbstract
         $this->input->columns[] = $magentoIdField;
         $this->input->columns[] = $magentoWebsiteField;
 
+        $cacheObject = $this->getCacheObject();
         foreach ($this->entities() as $entity) {
-            $this->input[$entity]['AND']['EaW']['AND']['Email']['='] = strtolower((string)$entity->getEmail());
+            $email = strtolower((string)$entity->getEmail());
+
+            $salesForceWebsiteId = '';
             if ($this->customerConfigShare->isWebsiteScope()) {
-                $this->input[$entity]['AND']['EaW']['AND'][$magentoWebsiteField]['IN']
-                    = ['', $this->load()->entityByType($entity, 'website')->getData('salesforce_id')];
+
+                $website = $this->load()->entityByType($entity, 'website');
+                if ($website) {
+                    $salesForceWebsiteId = $website->getData('salesforce_id');
+                }
+
+                $this->input[$cacheObject]['AND'][$salesForceWebsiteId]['AND'][$magentoWebsiteField]['IN'][] = '';
+                if ($salesForceWebsiteId) {
+                    $this->input[$cacheObject]['AND'][$salesForceWebsiteId]['AND'][$magentoWebsiteField]['IN'][] = $salesForceWebsiteId;
+                }
             }
+            $email && $this->input[$cacheObject]['AND'][$salesForceWebsiteId]['AND']['Email']['IN'][] = $email;
 
             $magentoId = $entity->getId();
             if (!empty($magentoId)) {
-                $this->input[$entity]['OR'][$magentoIdField]['='] = $magentoId;
+                $this->input[$cacheObject]['OR'][$magentoIdField]['IN'][] = $magentoId;
             }
         }
 
         $this->input->from = 'Contact';
+
         return true;
     }
 
@@ -130,8 +143,9 @@ class Lookup extends Synchronize\Unit\LookupAbstract
     /**
      * Search Priority Order
      *
-     * @param array $searchIndex
+     * @param array                            $searchIndex
      * @param \Magento\Customer\Model\Customer $entity
+     *
      * @return array
      */
     public function searchPriorityOrder(array $searchIndex, $entity)
