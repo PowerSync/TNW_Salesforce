@@ -6,10 +6,12 @@
 
 namespace TNW\Salesforce\Synchronize\Queue\Website;
 
+use TNW\Salesforce\Synchronize\Queue\CreateInterface;
+
 /**
  * Create By Customer
  */
-abstract class CreateByBase implements \TNW\Salesforce\Synchronize\Queue\CreateInterface
+abstract class CreateByBase implements CreateInterface
 {
     const CREATE_BY = 'base';
 

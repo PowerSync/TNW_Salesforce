@@ -17,14 +17,19 @@ use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\MessageQueue\PublisherAdapter;
+use TNW\Salesforce\Api\Model\Synchronization\ConfigInterface;
 use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Config\WebsiteEmulator;
+use TNW\Salesforce\Model\Prequeue\Process;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\PreQueue;
+use TNW\Salesforce\Service\Model\Grid\UpdateGridsByQueues;
+use TNW\Salesforce\Service\Model\Grid\UpdateTableByGetColumnData;
 use TNW\Salesforce\Service\Synchronize\Queue\Add\AddDependenciesForProcessingRows;
 use TNW\Salesforce\Service\Synchronize\Queue\Add\UnsetPendingStatusFromPool;
 use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool;
+use Zend_Db_Expr;
 
 /**
  * Class Entity
@@ -99,6 +104,9 @@ class Add
     /** @var CleanableObjectsList */
     private $cleanableObjectsList;
 
+    /** @var UpdateGridsByQueues */
+    private $updateGridsByQueues;
+
     /**
      * Add constructor.
      *
@@ -115,7 +123,9 @@ class Add
      * @param Config                                    $salesforceConfig
      * @param PublisherAdapter                          $publisher
      * @param AddDependenciesForProcessingRows          $addDependenciesForProcessingRows
+     * @param UnsetPendingStatusFromPool                $unsetPendingStatusFromPool
      * @param CleanableObjectsList                      $cleanableObjectsList
+     * @param UpdateGridsByQueues                       $updateGridsByQueues
      */
     public function __construct(
         $entityType,
@@ -132,7 +142,8 @@ class Add
         PublisherAdapter $publisher,
         AddDependenciesForProcessingRows $addDependenciesForProcessingRows,
         UnsetPendingStatusFromPool $unsetPendingStatusFromPool,
-        CleanableObjectsList $cleanableObjectsList
+        CleanableObjectsList $cleanableObjectsList,
+        UpdateGridsByQueues $updateGridsByQueues
     ) {
         $this->resolves = $resolves;
         $this->entityType = $entityType;
@@ -149,6 +160,7 @@ class Add
         $this->addDependenciesForProcessingRows = $addDependenciesForProcessingRows;
         $this->unsetPendingStatusFromPool = $unsetPendingStatusFromPool;
         $this->cleanableObjectsList = $cleanableObjectsList;
+        $this->updateGridsByQueues = $updateGridsByQueues;
     }
 
     /**
@@ -181,7 +193,7 @@ class Add
         }
 
         if (!empty($entityIds)) {
-            $this->publisher->publish(\TNW\Salesforce\Model\Prequeue\Process::MQ_TOPIC_NAME, false);
+            $this->publisher->publish(Process::MQ_TOPIC_NAME, false);
         }
 
         if ($this->state->getAreaCode() == Area::AREA_ADMINHTML) {
@@ -226,7 +238,7 @@ class Add
 
         $this->create($this->resolves, $this->entityType, $entityIds, [], $websiteId, $syncType);
 
-        if ($syncType === \TNW\Salesforce\Api\Model\Synchronization\ConfigInterface::DIRECT_SYNC_TYPE_REALTIME) {
+        if ($syncType === ConfigInterface::DIRECT_SYNC_TYPE_REALTIME) {
             // Sync realtime type
             $this->publisher->publish(self::TOPIC_NAME, (string)$websiteId);
             return;
@@ -254,7 +266,7 @@ class Add
             $entityId = $queue->getEntityId();
             $parents = $parentQueuesByBaseEntityId[$entityId] ?? [];
             foreach ($parents as $identify => $parent) {
-                if ($identify !== $queue->getIdentify()) {
+                if ($identify !== $queue->getIdentify() && $this->checkAdditional($queue, $parent)) {
                     $dependency[] = [
                         'parent_id' => $parent->getId(),
                         'queue_id' => $queue->getId()
@@ -267,13 +279,38 @@ class Add
     }
 
     /**
+     * @param Queue $queue
+     * @param Queue $parentQueue
+     *
+     * @return bool
+     */
+    public function checkAdditional(Queue $queue, Queue $parentQueue): bool
+    {
+        $result = true;
+        if ($queue->getCode() === Unit::PRODUCT_PRICE_BOOK_ENTRY &&
+            $parentQueue->getCode() === Unit::PRODUCT_PRICE_BOOK_ENTRY
+        ) {
+            $entityLoadAdditional = $queue->getEntityLoadAdditional() ?? [];
+            $parentEntityLoadAdditional = $parentQueue->getEntityLoadAdditional() ?? [];
+            if (is_array($entityLoadAdditional) && is_array($parentEntityLoadAdditional)) {
+                $currency = (string)($entityLoadAdditional['currency_code'] ?? '');
+                $parentCurrency = (string)($parentEntityLoadAdditional['currency_code'] ?? '');
+
+                $result = $currency === $parentCurrency;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * @param $unitsList Unit[]
      * @param $loadBy
      * @param $entityIds
      * @param $loadAdditional
      * @param $websiteId
      * @param $dependencies
-     * @return array
+     * @return Queue[]
      * @throws LocalizedException
      */
     public function generateQueueObjects(
@@ -459,6 +496,8 @@ class Add
 
         $this->saveData($queueDataToSave, $dependencies);
 
+        $this->updateGridsByQueues->execute($queues);
+
 //        $this->closeGraph();
     }
 
@@ -600,7 +639,7 @@ class Add
      */
     public function syncType($count, $websiteId)
     {
-        return \TNW\Salesforce\Api\Model\Synchronization\ConfigInterface::DIRECT_SYNC_TYPE_REALTIME;
+        return ConfigInterface::DIRECT_SYNC_TYPE_REALTIME;
     }
 
     /**
@@ -641,8 +680,8 @@ class Add
                         ['relation' => $relationTable],
                         'relation.parent_id = queue.queue_id',
                         [
-                            'composite_status' => new \Zend_Db_Expr('\'new\''),
-                            'sync_attempt' => new \Zend_Db_Expr(0),
+                            'composite_status' => new Zend_Db_Expr('\'new\''),
+                            'sync_attempt' => new Zend_Db_Expr(0),
                         ]
                     )
                     ->join(

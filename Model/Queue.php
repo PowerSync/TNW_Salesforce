@@ -415,21 +415,6 @@ class Queue extends AbstractModel
     }
 
     /**
-     * Dependence By Entity Type
-     *
-     * @param string $entityType
-     * @return Queue[]
-     * @throws LocalizedException
-     */
-    public function childByEntityType($entityType)
-    {
-        return array_map(
-            [$this, 'loadById'],
-            $this->_getResource()->childIdsByEntityType($this->getId(), $entityType)
-        );
-    }
-
-    /**
      * Load By Id
      *
      * @param int $queueId

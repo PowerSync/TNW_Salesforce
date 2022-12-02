@@ -15,7 +15,9 @@ use RuntimeException;
 use SplObjectStorage;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\CleanLocalCache\CleanableObjectsList;
+use TNW\Salesforce\Service\Model\Grid\UpdateGridsByQueues;
 use TNW\Salesforce\Synchronize\Unit\CurrentUnit;
+use TNW\Salesforce\Synchronize\Unit\UnitAbstract;
 
 /**
  * Group
@@ -64,13 +66,24 @@ class Group
     /** @var CleanableObjectsList */
     private $cleanableObjectsList;
 
+    /** @var LoggerInterface */
+    private $logger;
+
+    /** @var UpdateGridsByQueues */
+    private $updateGridsByQueues;
+
     /**
      * Entity constructor.
-     * @param string $groupCode
-     * @param string[] $units
-     * @param UnitsFactory $unitsFactory
+     *
+     * @param string                 $groupCode
+     * @param string[]               $units
+     * @param UnitsFactory           $unitsFactory
      * @param ObjectManagerInterface $objectManager
-     * @param LoggerInterface $systemLogger
+     * @param LoggerInterface        $systemLogger
+     * @param LoggerInterface        $logger
+     * @param CurrentUnit            $currentUnit
+     * @param CleanableObjectsList   $cleanableObjectsList
+     * @param UpdateGridsByQueues    $updateGridsByQueues
      */
     public function __construct(
         $groupCode,
@@ -78,8 +91,10 @@ class Group
         UnitsFactory $unitsFactory,
         ObjectManagerInterface $objectManager,
         LoggerInterface $systemLogger,
+        LoggerInterface $logger,
         CurrentUnit $currentUnit,
-        CleanableObjectsList $cleanableObjectsList
+        CleanableObjectsList $cleanableObjectsList,
+        UpdateGridsByQueues $updateGridsByQueues
     ) {
         $this->groupCode = $groupCode;
         $this->units = array_filter($units);
@@ -88,6 +103,8 @@ class Group
         $this->unitsFactory = $unitsFactory;
         $this->currentUnit = $currentUnit;
         $this->cleanableObjectsList = $cleanableObjectsList;
+        $this->updateGridsByQueues = $updateGridsByQueues;
+        $this->logger = $logger;
     }
 
     /**
@@ -112,7 +129,7 @@ class Group
         $this->messageDebug('======== START SYNC %s ========', $this->code());
 
         $units = $this->createUnits($queues)->sort();
-        /** @var Unit\UnitInterface $unit */
+        /** @var UnitAbstract $unit */
         foreach ($units as $unit) {
             $this->currentUnit->setUnit($unit);
             foreach ($unit->dependents() as $dependent) {
@@ -140,6 +157,9 @@ class Group
         }
         $this->currentUnit->clear();
         $this->messageDebug('======== END SYNC %s ========', $this->code());
+        $this->messageDebug('======== START UPDATE GRIDS %s ========');
+        $this->updateGridsByQueues->execute($queues);
+        $this->messageDebug('======== END UPDATE GRIDS %s ========', $this->code());
 
         return $units;
     }
@@ -196,6 +216,23 @@ class Group
     }
 
     /**
+     * @param \Throwable $e
+     *
+     * @return void
+     */
+    public function messageThrowable(\Throwable $e): void
+    {
+        $message = implode(
+            PHP_EOL,
+            [$e->getMessage(), $e->getTraceAsString()]
+        );
+        $this->systemLogger->error($message);
+        $this->logger->error(
+            $message
+        );
+    }
+
+    /**
      * Call
      *
      * @param string $name
@@ -230,6 +267,13 @@ class Group
             case 'error':
                 $this->errorMessages[] = $message;
                 $this->systemLogger->error($message);
+                $traceAsString = (new RuntimeException('Stacktrace'))->getTraceAsString();
+                $this->logger->error(
+                    implode(
+                        PHP_EOL,
+                        [$message, $traceAsString]
+                    )
+                );
                 break;
 
             case 'success':
@@ -265,7 +309,7 @@ class Group
             $argument = $argument->render();
         }
 
-        if ($argument instanceof \Exception) {
+        if ($argument instanceof \Throwable) {
             $argument = $argument->getMessage();
         }
 
