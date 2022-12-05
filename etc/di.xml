@@ -950,6 +950,9 @@
                 <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomerAddressesByAddressIds" xsi:type="object">
                     TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomerAddressesByAddressIds
                 </item>
+                <item name="TNW\Salesforce\Model\ResourceModel\Queue\GetDependenceQueueIdsGroupedByCode" xsi:type="object">
+                    TNW\Salesforce\Model\ResourceModel\Queue\GetDependenceQueueIdsGroupedByCode
+                </item>
             </argument>
         </arguments>
     </type>
