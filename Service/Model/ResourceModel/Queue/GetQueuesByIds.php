@@ -83,6 +83,20 @@ class GetQueuesByIds implements CleanableInstanceInterface
     }
 
     /**
+     * @param Queue $queue
+     *
+     * @return void
+     */
+    public function fillCache(Queue $queue)
+    {
+        $queueId = $queue->getId();
+        if($queueId) {
+            $this->cache[$queueId] = $queue;
+            $this->processed[$queueId] = 1;
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function clearLocalCache(): void
