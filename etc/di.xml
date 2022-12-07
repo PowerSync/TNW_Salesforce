@@ -953,6 +953,9 @@
                 <item name="TNW\Salesforce\Model\ResourceModel\Queue\GetDependenceQueueIdsGroupedByCode" xsi:type="object">
                     TNW\Salesforce\Model\ResourceModel\Queue\GetDependenceQueueIdsGroupedByCode
                 </item>
+                <item name="TNW\Salesforce\Service\Model\Mapper\IsEnabledMapping" xsi:type="object">
+                    TNW\Salesforce\Service\Model\Mapper\IsEnabledMapping
+                </item>
             </argument>
         </arguments>
     </type>

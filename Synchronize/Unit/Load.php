@@ -452,11 +452,19 @@ class Load extends UnitAbstract
                     foreach ($entities as $entityId => $entity) {
                         $queue = $groupedQueues[$entityId] ?? null;
                         $entity->setData('_queue', $queue);
+                        $data = $entity->getData('preloadInfo') ?? [];
+                        $data['loader'] = $loader;
+                        $entity->setData('preloadInfo', $data);
                     }
 
                     foreach ($this->entityLoaders as $entityLoader) {
                         if ($entityLoader instanceof EntityPreLoaderInterface) {
                             $this->loadSubEntities->execute($entityLoader, $entities);
+                            foreach ($entities as $entity) {
+                                $data = $entity->getData('preloadInfo') ?? [];
+                                $data['subEntityLoaders'][] = $entityLoader;
+                                $entity->setData('preloadInfo', $data);
+                            }
                         }
                     }
                 }
