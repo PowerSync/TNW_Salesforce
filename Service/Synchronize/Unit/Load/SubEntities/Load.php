@@ -10,6 +10,7 @@ namespace TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities;
 
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
+use TNW\Salesforce\Synchronize\Unit\EntityLoaderAbstract;
 use TNW\Salesforce\Synchronize\Unit\Load\EntityLoader\EntityPreLoaderInterface;
 
 class Load implements CleanableInstanceInterface
@@ -65,6 +66,10 @@ class Load implements CleanableInstanceInterface
 
                 foreach ($preLoader->getAfterPreloadExecutors() as $afterPreloadExecutor) {
                     $entitiesToCache = $afterPreloadExecutor->execute($entitiesToCache, $missedEntitiesChunk);
+                }
+
+                if ($preLoader instanceof EntityLoaderAbstract) {
+                    $preLoader->preloadSalesforceIds($entitiesToCache);
                 }
 
                 foreach ($entitiesToCache as $entityId => $entity) {
