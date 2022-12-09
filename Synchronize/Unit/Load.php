@@ -458,9 +458,11 @@ class Load extends UnitAbstract
                         if ($entityLoader instanceof EntityPreLoaderInterface) {
                             $this->loadSubEntities->execute($entityLoader, $entities);
                             foreach ($entities as $entity) {
-                                $data = $entity->getData('preloadInfo') ?? [];
-                                $data['subEntityLoaders'][] = $entityLoader;
-                                $entity->setData('preloadInfo', $data);
+                                if ($entity) {
+                                    $data = $entity->getData('preloadInfo') ?? [];
+                                    $data['subEntityLoaders'][] = $entityLoader;
+                                    $entity->setData('preloadInfo', $data);
+                                }
                             }
                         }
                     }
