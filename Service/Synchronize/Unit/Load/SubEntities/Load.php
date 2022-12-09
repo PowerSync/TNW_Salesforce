@@ -52,7 +52,9 @@ class Load implements CleanableInstanceInterface
         if ($missedEntities) {
             foreach (array_chunk($missedEntities, ChunkSizeInterface::CHUNK_SIZE_200, true) as $missedEntitiesChunk) {
                 $loadedEntities = $missedEntitiesChunk;
-                foreach ($preLoader->getLoaders() as $beforePreloadExecutor) {
+                $loaders = $preLoader->getLoaders();
+                ksort($loaders);
+                foreach ($loaders as $beforePreloadExecutor) {
                     $loadedEntities = $beforePreloadExecutor->execute($loadedEntities);
                 }
 
@@ -64,7 +66,9 @@ class Load implements CleanableInstanceInterface
                     $entitiesToCache[$missedEntityId] = $loadedEntities[$missedEntityId] ;
                 }
 
-                foreach ($preLoader->getAfterPreloadExecutors() as $afterPreloadExecutor) {
+                $afterPreloadExecutors = $preLoader->getAfterPreloadExecutors();
+                ksort($afterPreloadExecutors);
+                foreach ($afterPreloadExecutors as $afterPreloadExecutor) {
                     $entitiesToCache = $afterPreloadExecutor->execute($entitiesToCache, $missedEntitiesChunk);
                 }
 
@@ -73,6 +77,9 @@ class Load implements CleanableInstanceInterface
                 }
 
                 foreach ($entitiesToCache as $entityId => $entity) {
+                    $data = $entity->getData('preloadInfo') ?? [];
+                    $data['preLoader']['object'] = $preLoader;
+                    $entity->setData('preloadInfo', $data);
                     $this->cache[$cacheKey][$entityId] = $entity;
                 }
             }
