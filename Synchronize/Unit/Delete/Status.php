@@ -82,6 +82,11 @@ class Status extends Synchronize\Unit\UnitAbstract
         foreach ($this->entities() as $entity) {
             $this->load()->get('%s/queue', $entity)
                 ->addData(iterator_to_array($this->cache[$entity]));
+
+            foreach ((array)$this->load()->get('duplicates/%s', $entity) as $duplicate) {
+                $this->load()->get('%s/queue', $duplicate)
+                    ->addData(iterator_to_array($this->cache[$entity]));
+            }
         }
     }
 
