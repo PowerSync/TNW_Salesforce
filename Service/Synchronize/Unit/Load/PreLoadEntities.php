@@ -97,10 +97,16 @@ class PreLoadEntities implements CleanableInstanceInterface
                     if ($preLoader instanceof EntityAbstract) {
                         $preLoader->preloadSalesforceIds($missedItems);
                     }
-                    foreach ($preLoader->getAfterPreLoadExecutors() as $afterLoadExecutor) {
+                    $afterPreLoadExecutors = $preLoader->getAfterPreLoadExecutors();
+                    ksort($afterPreLoadExecutors);
+                    foreach ($afterPreLoadExecutors as $afterLoadExecutor) {
                         $missedItems = $afterLoadExecutor->execute($missedItems, $missedEntityAdditional);
                     }
                     foreach ($missedItems as $itemId => $missedItem) {
+                        $data = $missedItem->getData('preloadInfo') ?? [];
+                        $data['loader'] = $preLoader;
+                        $missedItem->setData('preloadInfo', $data);
+
                         $loadAdditional = $entityAdditional[$itemId] ?? [];
                         $groupValue = $preLoader->getGroupValue($loadAdditional);
                         $this->cache[$type][$groupValue][$itemId] = $missedItem;
