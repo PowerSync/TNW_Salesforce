@@ -77,9 +77,11 @@ class Load implements CleanableInstanceInterface
                 }
 
                 foreach ($entitiesToCache as $entityId => $entity) {
-                    $data = $entity->getData('preloadInfo') ?? [];
-                    $data['preLoader']['object'] = $preLoader;
-                    $entity->setData('preloadInfo', $data);
+                    if ($entity) {
+                        $data = $entity->getData('preloadInfo') ?? [];
+                        $data['preLoader']['object'] = $preLoader;
+                        $entity->setData('preloadInfo', $data);
+                    }
                     $this->cache[$cacheKey][$entityId] = $entity;
                 }
             }

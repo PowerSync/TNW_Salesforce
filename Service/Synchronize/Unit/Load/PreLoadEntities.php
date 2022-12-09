@@ -103,9 +103,11 @@ class PreLoadEntities implements CleanableInstanceInterface
                         $missedItems = $afterLoadExecutor->execute($missedItems, $missedEntityAdditional);
                     }
                     foreach ($missedItems as $itemId => $missedItem) {
-                        $data = $missedItem->getData('preloadInfo') ?? [];
-                        $data['loader'] = $preLoader;
-                        $missedItem->setData('preloadInfo', $data);
+                        if ($missedItem) {
+                            $data = $missedItem->getData('preloadInfo') ?? [];
+                            $data['loader'] = $preLoader;
+                            $missedItem->setData('preloadInfo', $data);
+                        }
 
                         $loadAdditional = $entityAdditional[$itemId] ?? [];
                         $groupValue = $preLoader->getGroupValue($loadAdditional);
