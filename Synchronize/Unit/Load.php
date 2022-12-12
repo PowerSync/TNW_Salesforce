@@ -172,7 +172,7 @@ class Load extends UnitAbstract
                 $i++;
                 $this->group()->messageDebug('>>> Load Entity progress: %s of %s', $i, count($this->queues));
                 $this->group()->messageDebug('>>> Load Entity %s', $this->description());
-                $entity = $this->loadEntity($queue);
+                $entity = $this->loadEntity($queue, $index);
                 $this->group()->messageDebug('<<< Loaded Entity %s', $this->description());
                 if (empty($entity)) {
                     $message[] = __('QueueId item %1 is not available anymore', $queue->getId());
@@ -325,17 +325,23 @@ class Load extends UnitAbstract
      * Load Entity
      *
      * @param Queue $queue
+     * @param array $index
      *
      * @return AbstractModel
      * @throws LocalizedException
      */
-    public function loadEntity($queue)
+    public function loadEntity($queue, $index)
     {
         $entity = $this->loaderBy($queue->getEntityLoad())
             ->load($queue->getEntityId(), $queue->getEntityLoadAdditional());
 
         if (!empty($entity)) {
             $entity->setData('config_website', $queue->getWebsiteId());
+        }
+
+        $hash = $this->hash->calculateEntity($entity);
+        if (isset($index[$hash])) {
+            $entity = clone $entity;
         }
 
         return $entity;
