@@ -37,18 +37,25 @@ class GetMappedAttributeCodesByMagentoType implements CleanableInstanceInterface
     /** @var Config */
     private $eavConfig;
 
+    /** @var array */
+    private $defaultAttributes;
+
     /**
      * @param ResourceConnection  $resource
      * @param GetEntityTypeByCode $getEntityTypeByCode
+     * @param Config              $eavConfig
+     * @param array               $defaultAttributes
      */
     public function __construct(
         ResourceConnection  $resource,
         GetEntityTypeByCode $getEntityTypeByCode,
-        Config              $eavConfig
+        Config              $eavConfig,
+        array               $defaultAttributes = []
     ) {
         $this->resource = $resource;
         $this->getEntityTypeByCode = $getEntityTypeByCode;
         $this->eavConfig = $eavConfig;
+        $this->defaultAttributes = $defaultAttributes;
     }
 
     public function execute(array $magentoTypes): array
@@ -63,12 +70,8 @@ class GetMappedAttributeCodesByMagentoType implements CleanableInstanceInterface
         $missedMagentoTypes = [];
         foreach ($magentoTypes as $magentoEntityType) {
             if (!isset($this->cache[$magentoEntityType])) {
+                $this->cache[$magentoEntityType] = array_values($this->defaultAttributes[$magentoEntityType] ?? []);
                 $missedMagentoTypes[] = $magentoEntityType;
-                $defaultAttributes = [];
-                if ($magentoEntityType === Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER) {
-                    $defaultAttributes[] = 'sales_representative';
-                }
-                $this->cache[$magentoEntityType] = $defaultAttributes;
             }
         }
 
@@ -108,6 +111,7 @@ class GetMappedAttributeCodesByMagentoType implements CleanableInstanceInterface
                         $this->cache[$magentoEntityType][] = $magentoAttributeName;
                         $magentoEntityTypes[] = $magentoEntityType;
                     }
+                    $magentoEntityTypes = array_unique($magentoEntityTypes);
 
                     foreach ($magentoEntityTypes as $magentoEntityType) {
                         $attributeCodes = $this->cache[$magentoEntityType] ?? [];
