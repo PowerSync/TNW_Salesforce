@@ -10,8 +10,10 @@ namespace TNW\Salesforce\Service\Synchronize\Unit\Load;
 
 use Magento\Catalog\Model\Product;
 use Magento\Customer\Model\Customer;
+use Magento\Eav\Model\Config;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
+use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Model\Mapper;
@@ -32,16 +34,21 @@ class GetMappedAttributeCodesByMagentoType implements CleanableInstanceInterface
     /** @var GetEntityTypeByCode */
     private $getEntityTypeByCode;
 
+    /** @var Config */
+    private $eavConfig;
+
     /**
      * @param ResourceConnection  $resource
      * @param GetEntityTypeByCode $getEntityTypeByCode
      */
     public function __construct(
         ResourceConnection  $resource,
-        GetEntityTypeByCode $getEntityTypeByCode
+        GetEntityTypeByCode $getEntityTypeByCode,
+        Config              $eavConfig
     ) {
         $this->resource = $resource;
         $this->getEntityTypeByCode = $getEntityTypeByCode;
+        $this->eavConfig = $eavConfig;
     }
 
     public function execute(array $magentoTypes): array
@@ -114,7 +121,10 @@ class GetMappedAttributeCodesByMagentoType implements CleanableInstanceInterface
 
         $result = [];
         foreach ($magentoTypes as $magentoEntityType) {
-            $result[$magentoEntityType] = $this->cache[$magentoEntityType] ?? [];
+            $attributeCodes = $this->cache[$magentoEntityType] ?? [];
+            $entityTypeCode = (string)(self::ENTITY_TYPE_MAP[$magentoEntityType] ?? '');
+            $attributeCodes = $this->filterNotExistsAttributeCodes($attributeCodes, $entityTypeCode);
+            $result[$magentoEntityType] = $attributeCodes;
         }
 
         return $result;
@@ -146,5 +156,32 @@ class GetMappedAttributeCodesByMagentoType implements CleanableInstanceInterface
         );
 
         return $select;
+    }
+
+    /**
+     * @param array  $attributeCodes
+     * @param string $entityTypeCode
+     *
+     * @return array
+     * @throws LocalizedException
+     */
+    private function filterNotExistsAttributeCodes(array $attributeCodes, string $entityTypeCode): array
+    {
+        if (!$attributeCodes) {
+            return [];
+        }
+
+        $filteredAttributes = [];
+        $entityType = $this->getEntityTypeByCode->execute([$entityTypeCode])[$entityTypeCode] ?? null;
+        if ($entityType && $entityType->getId()) {
+            foreach ($attributeCodes as $attributeCode) {
+                $attribute = $this->eavConfig->getAttribute($entityType, $attributeCode);
+                if ($attribute && $attribute->getId()) {
+                    $filteredAttributes[] = $attributeCode;
+                }
+            }
+        }
+
+        return $filteredAttributes;
     }
 }
