@@ -75,7 +75,7 @@ class Load implements CleanableInstanceInterface
 
         $result = [];
         foreach ($entities as $entityId => $entity) {
-            $result[$entityId] = $this->cache[$cacheKey][$entityId];
+            $result[$entityId] = $this->cache[$cacheKey][$entityId] ?? null;
         }
 
         return $result;
