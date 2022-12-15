@@ -86,6 +86,12 @@ class PreLoadEntities implements CleanableInstanceInterface
                             $missedItems[$itemId] = $item;
                             $missedEntityAdditional[$itemId] = $entityAdditional[$itemId] ?? [];
                         }
+                        foreach ($missedEntityIdsChunk as $missedEntityId) {
+                            if (!isset($missedItems[$missedEntityId])) {
+                                $missedItems[$missedEntityId] = $preLoader->createEmptyEntity();
+                                $missedEntityAdditional[$missedEntityId] = $entityAdditional[$missedEntityId] ?? [];
+                            }
+                        }
                     } else {
                         foreach ($missedEntityIdsChunk as $itemId) {
                             $emptyEntity = $preLoader->createEmptyEntity();
