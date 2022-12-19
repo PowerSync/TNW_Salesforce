@@ -26,16 +26,9 @@ class PreloadAttributes implements AfterLoadExecutorInterface
      */
     public function execute(array $entities, array $entityAdditionalByEntityId = []): array
     {
-        $ids = [];
-
-        foreach ($entities as $entity) {
-            $ids[] = $entity->getId();
-        }
-
-        $ids = array_filter($ids);
 
         if (!empty($ids)) {
-            $this->loaderAttributes->execute($ids);
+            $entities = $this->loaderAttributes->execute($entities);
         }
 
         return $entities;

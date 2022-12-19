@@ -19,7 +19,7 @@ class LoaderAttributes
 {
     const MAX_TABLES_JOIN = 50;
 
-    /** @var string  */
+    /** @var string */
     private $magentoType;
 
     private $collectionFactory;
@@ -41,29 +41,45 @@ class LoaderAttributes
         $this->getMappedAttributeCodesByMagentoType = $getMappedAttributeCodesByMagentoType;
     }
 
+    public function getEntityIds($entities)
+    {
+        $ids = [];
+
+        foreach ($entities as $entity) {
+            $ids[] = $entity->getId();
+        }
+
+        $ids = array_filter($ids);
+
+        return $ids;
+    }
+
     /**
      * @param Collection $collection
      * @return AbstractDb|null
      * @throws LocalizedException
      */
-    public function execute($entityIds): ?AbstractDb
+    public function execute($entities): ?array
     {
+        $entityIds = $this->getEntityIds($entities);
+
         /** @var \Magento\Eav\Model\Entity\Collection\AbstractCollection $collection */
         $collection = $this->collectionFactory->create();
         $collection->addFieldToFilter('entity_id', $entityIds);
 
-        $attributeCodesGrouppedByType = $this->getMappedAttributeCodesByMagentoType->execute([$this->magentoType])[$this->magentoType] ?? [];
+        $attributeCodesArray = $this->getMappedAttributeCodesByMagentoType->execute([$this->magentoType])[$this->magentoType] ?? [];
 
-        foreach ($attributeCodesGrouppedByType as $attributeCodesArray) {
-            foreach (array_chunk($attributeCodesArray, self::MAX_TABLES_JOIN) as $attributeCodes) {
-                $attributeCollection = clone $collection;
-                $attributeCollection->clear();
-                $attributeCodes && $attributeCollection->addAttributeToSelect($attributeCodes, 'left');
-                foreach ($attributeCollection as $customerWithAttributes) {
-                    $collection->getItemById($customerWithAttributes->getId())->addData($customerWithAttributes->getData());
+        foreach (array_chunk($attributeCodesArray, self::MAX_TABLES_JOIN) as $attributeCodes) {
+            $attributeCollection = clone $collection;
+            $attributeCollection->clear();
+            $attributeCodes && $attributeCollection->addAttributeToSelect($attributeCodes, 'left');
+            foreach ($attributeCollection as $customerWithAttributes) {
+                if (!empty($entities[$customerWithAttributes->getId()])) {
+                    $entities[$customerWithAttributes->getId()]->addData($customerWithAttributes->getData());
                 }
             }
         }
-        return $collection;
+
+        return $entities;
     }
 }
