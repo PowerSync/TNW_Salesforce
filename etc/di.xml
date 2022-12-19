@@ -16,7 +16,7 @@
     <virtualType name="TNW\Salesforce\Synchronize\Unit\Load\LoaderAttributes\Customer" type="TNW\Salesforce\Synchronize\Unit\Load\LoaderAttributes">
         <arguments>
             <argument name="magentoType" xsi:type="const">TNW\Salesforce\Model\Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER</argument>
-            <argument name="collectionFactory" xsi:type="object">Magento\Customer\Model\ResourceModel\Customer\CollectionFactory</argument>
+            <argument name="collectionFactoryName" xsi:type="string">Magento\Customer\Model\ResourceModel\Customer\CollectionFactory</argument>
         </arguments>
     </virtualType>
 

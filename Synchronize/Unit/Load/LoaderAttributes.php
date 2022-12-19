@@ -10,6 +10,7 @@ namespace TNW\Salesforce\Synchronize\Unit\Load;
 use \Magento\Eav\Model\Entity\Collection\VersionControl\AbstractCollection as Collection;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\ObjectManagerInterface;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType;
 
 /**
@@ -28,16 +29,19 @@ class LoaderAttributes
     private $getMappedAttributeCodesByMagentoType;
 
     /**
-     * @param string $magentoType
+     * @param $magentoType
+     * @param $collectionFactory
      * @param GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType
      */
     public function __construct(
-        $magentoType,
-        $collectionFactory,
+        string $magentoType,
+        string $collectionFactoryName,
+        ObjectManagerInterface                   $objectManager,
         GetMappedAttributeCodesByMagentoType $getMappedAttributeCodesByMagentoType
     ) {
         $this->magentoType = $magentoType;
-        $this->collectionFactory = $collectionFactory;
+        $this->objectManager = $objectManager;
+        $this->collectionFactory = $this->objectManager->create($collectionFactoryName);
         $this->getMappedAttributeCodesByMagentoType = $getMappedAttributeCodesByMagentoType;
     }
 
@@ -63,9 +67,13 @@ class LoaderAttributes
     {
         $entityIds = $this->getEntityIds($entities);
 
+        if (empty($entityIds)) {
+            return $entities;
+        }
+
         /** @var \Magento\Eav\Model\Entity\Collection\AbstractCollection $collection */
         $collection = $this->collectionFactory->create();
-        $collection->addFieldToFilter('entity_id', $entityIds);
+        $collection->addFieldToFilter($collection->getResource()->getEntityIdField(), $entityIds);
 
         $attributeCodesArray = $this->getMappedAttributeCodesByMagentoType->execute([$this->magentoType])[$this->magentoType] ?? [];
 
