@@ -16,7 +16,7 @@ class PreloadAttributes implements AfterLoadExecutorInterface
     private $loaderAttributes;
 
     public function __construct(
-        LoaderAttributes $loaderAttributes,
+        LoaderAttributes $loaderAttributes
     ) {
         $this->loaderAttributes = $loaderAttributes;
     }
