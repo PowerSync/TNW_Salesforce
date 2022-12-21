@@ -10,9 +10,10 @@ use Magento\Customer\Model\Customer;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 use Magento\Framework\Setup\Patch\PatchVersionInterface;
 
-class AddTestAttributes implements DataPatchInterface, PatchVersionInterface
+class AddTestAttributes implements DataPatchInterface, PatchRevertableInterface
 {
     /**
      * ModuleDataSetupInterface
@@ -109,12 +110,8 @@ class AddTestAttributes implements DataPatchInterface, PatchVersionInterface
         }
     }
 
-    /**
-     *
-     * @return string
-     */
-    public static function getVersion()
+    public function revert()
     {
-        return '0.0.1';
+        // TODO: Implement revert() method.
     }
 }
