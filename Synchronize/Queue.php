@@ -202,53 +202,31 @@ class Queue
                 $groupCollection->setPageSize($this->salesforceConfig->getPageSizeFromMagento(null, $syncType));
 
                 $lastPageNumber = (int)$groupCollection->getLastPageNumber();
+
+                $group->messageDebug(
+                    'Start job "%s", phase "%s" for website %s',
+                    $groupCode,
+                    $phase['phaseName'],
+                    $websiteId
+                );
+
                 for ($i = 1; $i <= $lastPageNumber; $i++) {
                     try {
                         $groupCollection->clear();
 
-                        $group->messageDebug(
-                            'Start job "%s", phase "%s" for website %s',
-                            $groupCode,
-                            $phase['phaseName'],
-                            $websiteId
-                        );
+                        $group->messageDebug('Batch #%s of %s', $i, $lastPageNumber);
 
                         $groupCollection->each('incSyncAttempt');
                         $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
                         $queues = $groupCollection->getItems();
                         if (!$queues) {
-                            $group->messageDebug(
-                                'Stop job "%s", phase "%s" for website %s',
-                                $groupCode,
-                                $phase['phaseName'],
-                                $websiteId
-                            );
                             continue;
                         }
+
                         $group->synchronize($queues);
 
                     } catch (\Throwable $e) {
-
-                        if ($e instanceof SalesforceException) {
-                            $status = $e->getQueueStatus();
-                        } else {
-                            $status = $phase['errorStatus'];
-                        }
-
-                        $groupCollection->each('addData', [[
-                            'status' => $status,
-                            'message' => $e->getMessage()
-                        ]]);
-
-                        $group->messageError($e);
-
-                        if (!empty($groupCollection->getFirstItem())) {
-                            $syncType = $this->getSyncType($groupCollection);
-                            $this->pushMqMessage->sendMessage($syncType);
-                        }
-
-                        $message = implode(PHP_EOL, [$e->getMessage(), $e->getTraceAsString()]);
-                        $this->logger->critical($message);
+                        $this->processError($e, $groupCollection, $group, $phase);
                     }
 
                     $group->messageDebug(
@@ -263,9 +241,39 @@ class Queue
 
                     gc_collect_cycles();
                 }
+
+                if (!empty($syncType)) {
+                    $this->pushMqMessage->sendMessage($syncType);
+                }
             }
             $this->cleanLocalCacheForInstances->execute();
         }
+    }
+
+    /**
+     * @param $e
+     * @param $groupCollection
+     * @param $group
+     * @param $phase
+     * @return void
+     */
+    public function processError($e, $groupCollection, $group, $phase)
+    {
+        if ($e instanceof SalesforceException) {
+            $status = $e->getQueueStatus();
+        } else {
+            $status = $phase['errorStatus'];
+        }
+
+        $groupCollection->each('addData', [[
+            'status' => $status,
+            'message' => $e->getMessage()
+        ]]);
+
+        $group->messageError($e);
+
+        $message = implode(PHP_EOL, [$e->getMessage(), $e->getTraceAsString()]);
+        $this->logger->critical($message);
     }
 
     /**
