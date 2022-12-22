@@ -9,7 +9,6 @@ use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Model\AbstractModel;
-use TNW\Salesforce\Model\Mapper;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
 use TNW\Salesforce\Synchronize\Unit\Load\PreLoaderInterface;
@@ -88,10 +87,6 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface
     public function createCollectionInstance(): ?AbstractDb
     {
         $collection = $this->collectionFactory->create();
-
-        $magentoType = Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER;
-        $attributeCodes = $this->getMappedAttributeCodesByMagentoType->execute([$magentoType])[$magentoType] ?? [];
-        $attributeCodes && $collection->addAttributeToSelect($attributeCodes, 'left');
 
         return $collection;
     }

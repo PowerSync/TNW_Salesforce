@@ -12,6 +12,8 @@ use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
+use TNW\Salesforce\Api\Model\Synchronization\ConfigInterface;
+use TNW\Salesforce\Model\ResourceModel\Queue\GetDependenceByCode;
 
 /**
  * Class Queue
@@ -71,25 +73,31 @@ class Queue extends AbstractModel
 
     protected $salesforceConfig = [];
 
+    /** @var ResourceModel\Queue\GetDependenceByCode */
+    private $getDependenceByCode;
+
     /**
      * @param Context               $context
      * @param Registry              $registry
      * @param Config                $salesforceConfig
+     * @param GetDependenceByCode   $getDependenceByCode
      * @param AbstractResource|null $resource
      * @param AbstractDb|null       $resourceCollection
      * @param array                 $data
      */
     public function __construct(
-        Context $context,
-        Registry $registry,
-        Config $salesforceConfig,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
-        array $data = []
+        Context             $context,
+        Registry            $registry,
+        Config              $salesforceConfig,
+        GetDependenceByCode $getDependenceByCode,
+        AbstractResource    $resource = null,
+        AbstractDb          $resourceCollection = null,
+        array               $data = []
     ) {
 
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
         $this->salesforceConfig = $salesforceConfig;
+        $this->getDependenceByCode = $getDependenceByCode;
     }
 
     /**
@@ -208,7 +216,7 @@ class Queue extends AbstractModel
 
     public function isRealtime()
     {
-        return $this->getSyncType() == \TNW\Salesforce\Api\Model\Synchronization\ConfigInterface::DIRECT_SYNC_TYPE_REALTIME;
+        return $this->getSyncType() == ConfigInterface::DIRECT_SYNC_TYPE_REALTIME;
     }
 
     /**
@@ -394,24 +402,12 @@ class Queue extends AbstractModel
      * @return Queue
      * @throws LocalizedException
      */
-    public function dependenceByCode($code)
+    public function dependenceByCode(string $code): Queue
     {
-        return $this->loadById($this->_getResource()->dependenceIdByCode($this->getId(), $code));
-    }
 
-    /**
-     * Dependence By Entity Type
-     *
-     * @param string $entityType
-     * @return Queue[]
-     * @throws LocalizedException
-     */
-    public function dependenciesByEntityType($entityType)
-    {
-        return array_map(
-            [$this, 'loadById'],
-            $this->_getResource()->dependenceIdsByEntityType($this->getId(), $entityType)
-        );
+        $entityId = $this->getId();
+
+        return $this->getDependenceByCode->execute([$entityId], $code)[$entityId];
     }
 
     /**

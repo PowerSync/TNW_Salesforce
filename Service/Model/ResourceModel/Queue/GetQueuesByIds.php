@@ -10,6 +10,7 @@ namespace TNW\Salesforce\Service\Model\ResourceModel\Queue;
 
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
+use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Queue\CollectionFactory;
 
 class GetQueuesByIds implements CleanableInstanceInterface
@@ -36,7 +37,7 @@ class GetQueuesByIds implements CleanableInstanceInterface
     /**
      * @param array $entityIds
      *
-     * @return array
+     * @return Queue[]
      */
     public function execute(array $entityIds): array
     {
@@ -79,6 +80,20 @@ class GetQueuesByIds implements CleanableInstanceInterface
         }
 
         return $result;
+    }
+
+    /**
+     * @param Queue $queue
+     *
+     * @return void
+     */
+    public function fillCache(Queue $queue)
+    {
+        $queueId = $queue->getId();
+        if($queueId) {
+            $this->cache[$queueId] = $queue;
+            $this->processed[$queueId] = 1;
+        }
     }
 
     /**

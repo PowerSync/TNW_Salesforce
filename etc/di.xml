@@ -12,6 +12,20 @@
             <argument name="context" xsi:type="object">Magento\Framework\Module\Setup\Context</argument>
         </arguments>
     </virtualType>
+
+    <virtualType name="TNW\Salesforce\Synchronize\Unit\Load\LoaderAttributes\Customer" type="TNW\Salesforce\Synchronize\Unit\Load\LoaderAttributes">
+        <arguments>
+            <argument name="magentoType" xsi:type="const">TNW\Salesforce\Model\Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER</argument>
+            <argument name="collectionFactoryName" xsi:type="string">Magento\Customer\Model\ResourceModel\Customer\CollectionFactory</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\PreloadAttributes\Customer" type="TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\PreloadAttributes">
+        <arguments>
+            <argument name="loaderAttributes" xsi:type="object">TNW\Salesforce\Synchronize\Unit\Load\LoaderAttributes\Customer</argument>
+        </arguments>
+    </virtualType>
+
     <type name="Magento\Eav\Setup\EavSetup">
         <arguments>
             <argument name="setup" xsi:type="object">TNW\Salesforce\Setup\Module\DataSetup</argument>
@@ -950,6 +964,12 @@
                 <item name="TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomerAddressesByAddressIds" xsi:type="object">
                     TNW\Salesforce\Service\Synchronize\Unit\Load\GetCustomerAddressesByAddressIds
                 </item>
+                <item name="TNW\Salesforce\Model\ResourceModel\Queue\GetDependenceQueueIdsGroupedByCode" xsi:type="object">
+                    TNW\Salesforce\Model\ResourceModel\Queue\GetDependenceQueueIdsGroupedByCode
+                </item>
+                <item name="TNW\Salesforce\Service\Model\Mapper\IsEnabledMapping" xsi:type="object">
+                    TNW\Salesforce\Service\Model\Mapper\IsEnabledMapping
+                </item>
             </argument>
         </arguments>
     </type>
@@ -986,6 +1006,7 @@
         <arguments>
             <argument name="afterLoadExecutors" xsi:type="array">
                 <item name="10" xsi:type="object">TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\PreloadAddresses</item>
+                <item name="20" xsi:type="object">TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\PreloadAttributes\Customer</item>
             </argument>
         </arguments>
     </type>
