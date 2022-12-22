@@ -129,7 +129,7 @@ class Collection extends AbstractCollection
         $uniqueIdSelectByWebsite = (clone $baseSelect)
             ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
             ->order('website_id','ASC');
-           
+
         return $uniqueIdSelectByWebsite;
     }
 
@@ -139,7 +139,14 @@ class Collection extends AbstractCollection
     public function addItem(\Magento\Framework\DataObject $item)
     {
         if (null === $this->_getItemId($item)) {
-            $item->setData($this->getResource()->getIdFieldName(), sprintf('system_%d', count($this->_items)));
+            $item->setData($this->getResource()->getIdFieldName(), sprintf('system_%s_%s', $item->getMagentoAttributeName(), $item->getSalesforceAttributeName()));
+        }
+
+        /**
+         * skip if item added already
+         */
+        if ($this->getItemById($item->getId())) {
+            return $this;
         }
 
         return parent::addItem($item);
