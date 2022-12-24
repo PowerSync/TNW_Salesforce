@@ -242,9 +242,7 @@ class Queue
                     gc_collect_cycles();
                 }
 
-                if (!empty($syncType)) {
-                    $this->pushMqMessage->sendMessage($syncType);
-                }
+                $this->pushMqMessage->sendMessage($syncType);
             }
             $this->cleanLocalCacheForInstances->execute();
         }

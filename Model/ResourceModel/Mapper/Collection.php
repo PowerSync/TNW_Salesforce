@@ -139,14 +139,7 @@ class Collection extends AbstractCollection
     public function addItem(\Magento\Framework\DataObject $item)
     {
         if (null === $this->_getItemId($item)) {
-            $item->setData($this->getResource()->getIdFieldName(), sprintf('system_%s_%s', $item->getMagentoAttributeName(), $item->getSalesforceAttributeName()));
-        }
-
-        /**
-         * skip if item added already
-         */
-        if ($this->getItemById($item->getId())) {
-            return $this;
+            $item->setData($this->getResource()->getIdFieldName(), sprintf('system_%d', count($this->_items)));
         }
 
         return parent::addItem($item);
