@@ -1006,7 +1006,7 @@
         <arguments>
             <argument name="afterLoadExecutors" xsi:type="array">
                 <item name="10" xsi:type="object">TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\PreloadAddresses</item>
-                <item name="20" xsi:type="object">TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\PreloadAttributes\Customer</item>
+                <item name="PreloadAttributesCustomer" xsi:type="object">TNW\Salesforce\Service\Synchronize\Unit\Load\PreloadEntities\PreloadAttributes\Customer</item>
             </argument>
         </arguments>
     </type>
