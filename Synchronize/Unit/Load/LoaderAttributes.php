@@ -82,8 +82,11 @@ class LoaderAttributes
             $attributeCollection->clear();
             $attributeCodes && $attributeCollection->addAttributeToSelect($attributeCodes, 'left');
             foreach ($attributeCollection as $customerWithAttributes) {
-                if (!empty($entities[$customerWithAttributes->getId()])) {
-                    $entities[$customerWithAttributes->getId()]->addData($customerWithAttributes->getData());
+                foreach($entities as $key => $entity) {
+                    if ($customerWithAttributes->getId() == $entity->getId()) {
+                        $entities[$key]->addData($customerWithAttributes->getData());
+                        break;
+                    }
                 }
             }
         }
