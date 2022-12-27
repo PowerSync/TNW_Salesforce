@@ -122,14 +122,18 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
                     break;
 
                 case strcasecmp((string)$e->faultcode, 'sf:REQUEST_LIMIT_EXCEEDED') === 0:
-                    $format = 'Salesforce Total Requests Limit exceeded.
-                 For more information click %s';
+                    $format = 'Salesforce Total Requests Limit exceeded. For more information click %s';
                     $link = sprintf(
                         '<a href="%s">here</a>',
                         self::LINK
                     );
                     $message = sprintf($format, $link);
-                    $this->messageManager->addErrorMessage($message);
+                    $this->messageManager->addComplexErrorMessage('allowHtmlTagsMessage',
+                        [
+                            'message' => $message,
+                            'allowed_tags' => ['a']
+                        ],
+                        'backend');
                     break;
 
                 default:
