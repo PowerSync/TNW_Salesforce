@@ -129,7 +129,7 @@ class Collection extends AbstractCollection
         $uniqueIdSelectByWebsite = (clone $baseSelect)
             ->where('website_id IN(0, ?)', $this->uniquenessWebsite)
             ->order('website_id','ASC');
-           
+
         return $uniqueIdSelectByWebsite;
     }
 
