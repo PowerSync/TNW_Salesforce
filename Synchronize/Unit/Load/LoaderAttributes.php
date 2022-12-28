@@ -45,6 +45,10 @@ class LoaderAttributes
         $this->getMappedAttributeCodesByMagentoType = $getMappedAttributeCodesByMagentoType;
     }
 
+    /**
+     * @param $entities
+     * @return array
+     */
     public function getEntityIds($entities)
     {
         $ids = [];
