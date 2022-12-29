@@ -23,6 +23,7 @@ use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\FilterBlockedQueueRecords;
 use TNW\Salesforce\Model\ResourceModel\Queue as ResourceQueue;
+use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds;
 
 /**
  * Queue Collection
@@ -47,12 +48,16 @@ class Collection extends AbstractCollection
     /** @var LoggerInterface */
     private $logger;
 
+    /** @var GetQueuesByIds */
+    private $getQueuesByIds;
+
     /**
      * @param EntityFactoryInterface    $entityFactory
      * @param LoggerInterface           $logger
      * @param FetchStrategyInterface    $fetchStrategy
      * @param ManagerInterface          $eventManager
      * @param FilterBlockedQueueRecords $filterBlockedQueueRecords
+     * @param GetQueuesByIds            $getQueuesByIds
      * @param AdapterInterface|null     $connection
      * @param AbstractDb|null           $resource
      */
@@ -62,12 +67,14 @@ class Collection extends AbstractCollection
         FetchStrategyInterface    $fetchStrategy,
         ManagerInterface          $eventManager,
         FilterBlockedQueueRecords $filterBlockedQueueRecords,
+        GetQueuesByIds            $getQueuesByIds,
         AdapterInterface          $connection = null,
         AbstractDb                $resource = null
     ) {
         parent::__construct($entityFactory, $logger, $fetchStrategy, $eventManager, $connection, $resource);
         $this->filterBlockedQueueRecords = $filterBlockedQueueRecords;
         $this->logger = $logger;
+        $this->getQueuesByIds = $getQueuesByIds;
     }
 
     /**
@@ -310,6 +317,20 @@ class Collection extends AbstractCollection
         $this->_totalRecords = null;
 
         return parent::clear();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function _afterLoad()
+    {
+        $collection = parent::_afterLoad();
+
+        foreach ($collection as $item) {
+            $this->getQueuesByIds->fillCache($item);
+        }
+
+        return $collection;
     }
 
     /**

@@ -10,6 +10,7 @@ namespace TNW\Salesforce\Service\Synchronize\Unit\Load\SubEntities;
 
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
+use TNW\Salesforce\Synchronize\Unit\EntityLoaderAbstract;
 use TNW\Salesforce\Synchronize\Unit\Load\EntityLoader\EntityPreLoaderInterface;
 
 class Load implements CleanableInstanceInterface
@@ -51,7 +52,9 @@ class Load implements CleanableInstanceInterface
         if ($missedEntities) {
             foreach (array_chunk($missedEntities, ChunkSizeInterface::CHUNK_SIZE_200, true) as $missedEntitiesChunk) {
                 $loadedEntities = $missedEntitiesChunk;
-                foreach ($preLoader->getLoaders() as $beforePreloadExecutor) {
+                $loaders = $preLoader->getLoaders();
+                ksort($loaders);
+                foreach ($loaders as $beforePreloadExecutor) {
                     $loadedEntities = $beforePreloadExecutor->execute($loadedEntities);
                 }
 
@@ -63,11 +66,22 @@ class Load implements CleanableInstanceInterface
                     $entitiesToCache[$missedEntityId] = $loadedEntities[$missedEntityId] ;
                 }
 
-                foreach ($preLoader->getAfterPreloadExecutors() as $afterPreloadExecutor) {
+                $afterPreloadExecutors = $preLoader->getAfterPreloadExecutors();
+                ksort($afterPreloadExecutors);
+                foreach ($afterPreloadExecutors as $afterPreloadExecutor) {
                     $entitiesToCache = $afterPreloadExecutor->execute($entitiesToCache, $missedEntitiesChunk);
                 }
 
+                if ($preLoader instanceof EntityLoaderAbstract) {
+                    $preLoader->preloadSalesforceIds($entitiesToCache);
+                }
+
                 foreach ($entitiesToCache as $entityId => $entity) {
+                    if ($entity) {
+                        $data = $entity->getData('preloadInfo') ?? [];
+                        $data['preLoader']['object'] = $preLoader;
+                        $entity->setData('preloadInfo', $data);
+                    }
                     $this->cache[$cacheKey][$entityId] = $entity;
                 }
             }

@@ -57,6 +57,19 @@ abstract class EntityLoaderAbstract
     }
 
     /**
+     * @param array $entities
+     *
+     * @return void
+     * @throws LocalizedException
+     */
+    public function preloadSalesforceIds(array $entities): void
+    {
+        if (null !== $this->salesforceIdStorage) {
+            $this->salesforceIdStorage->massLoadObjectIds($entities);
+        }
+    }
+
+    /**
      * Load
      *
      * @param AbstractModel $entity
