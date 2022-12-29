@@ -28,6 +28,7 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
 {
     private const TNW_SECTION_PREFIX = 'tnwsforce_';
     private const TNW_GENERAL_SECTION = 'tnwsforce_general';
+    private const LINK = 'https://technweb.atlassian.net/wiki/spaces/IWS/pages/50561027/REQUEST+LIMIT+EXCEEDED+TotalRequests+Limit+exceeded';
 
     /** @var UrlInterface */
     private $urlBuilder;
@@ -118,6 +119,21 @@ class ControllerActionPredispatchAdminhtmlSystemConfigEdit implements ObserverIn
 
                 case strcasecmp((string)$e->faultcode, 'WSDL') === 0:
                     $this->messageManager->addErrorMessage(__('The WSDL file is no available or corrupted. Upload new wsdl file.'));
+                    break;
+
+                case strcasecmp((string)$e->faultcode, 'sf:REQUEST_LIMIT_EXCEEDED') === 0:
+                    $format = 'Salesforce Total Requests Limit exceeded. For more information click %s';
+                    $link = sprintf(
+                        '<a href="%s">here</a>',
+                        self::LINK
+                    );
+                    $message = sprintf($format, $link);
+                    $this->messageManager->addComplexErrorMessage('allowHtmlTagsMessage',
+                        [
+                            'message' => $message,
+                            'allowed_tags' => ['a']
+                        ],
+                        'backend');
                     break;
 
                 default:
