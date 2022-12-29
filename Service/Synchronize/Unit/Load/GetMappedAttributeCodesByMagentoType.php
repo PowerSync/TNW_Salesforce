@@ -153,6 +153,8 @@ class GetMappedAttributeCodesByMagentoType implements CleanableInstanceInterface
             ['main_table' => $resource->getTableName('tnw_salesforce_mapper')],
             ['magento_attribute_name', 'magento_entity_type']
         );
+        $select->where('main_table.magento_to_sf_when IS NOT NULL');
+
         $select->join(
             ['eav' => $resource->getTableName('eav_attribute')],
             'main_table.magento_attribute_name = eav.attribute_code',

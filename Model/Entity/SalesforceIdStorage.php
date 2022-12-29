@@ -412,7 +412,8 @@ class SalesforceIdStorage
 
         $entityIds = [];
         foreach ($entities as $entity) {
-            $entityIds[] = $entity->getId();
+            $entityId = $entity->getId();
+            $entityId !== null && $entityIds[] = $entityId;
         }
 
         return $this->resourceObjects->massLoadObjectIds(
