@@ -12,6 +12,7 @@ use Magento\Framework\Model\AbstractModel;
 use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Model\ResourceModel\Queue\GetDependenceQueueIdsGroupedByCode;
 use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetDependenceIdsByEntityType;
 use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
@@ -83,6 +84,9 @@ class Load extends UnitAbstract
     /** @var SubEntitiesLoad */
     private $loadSubEntities;
 
+    /** @var GetDependenceQueueIdsGroupedByCode */
+    private $getDependenceQueueIdsGroupedByCode;
+
     /**
      * Load constructor.
      *
@@ -117,6 +121,7 @@ class Load extends UnitAbstract
         GetDependenceIdsByEntityType $getDependenceIdsByEntityType,
         GetQueuesByIds $getQueuesByIds,
         SubEntitiesLoad $loadSubEntities,
+        GetDependenceQueueIdsGroupedByCode $getDependenceQueueIdsGroupedByCode,
         SalesforceIdStorage $entityObject = null,
         array $entityLoaders = [],
         array $entityTypeMapping = []
@@ -135,6 +140,7 @@ class Load extends UnitAbstract
         $this->getDependenceIdsByEntityType = $getDependenceIdsByEntityType;
         $this->getQueuesByIds = $getQueuesByIds;
         $this->loadSubEntities = $loadSubEntities;
+        $this->getDependenceQueueIdsGroupedByCode = $getDependenceQueueIdsGroupedByCode;
     }
 
     /**
@@ -163,6 +169,7 @@ class Load extends UnitAbstract
         $this->reset();
         $index = [];
         $i = 0;
+        $this->preloadDependenceQueuesGroupedByCode();
         $this->preloadEntities();
         $this->preloadObjectIds();
         $this->preloadDependedQueues();
@@ -458,6 +465,13 @@ class Load extends UnitAbstract
                     foreach ($this->entityLoaders as $entityLoader) {
                         if ($entityLoader instanceof EntityPreLoaderInterface) {
                             $this->loadSubEntities->execute($entityLoader, $entities);
+                            foreach ($entities as $entity) {
+                                if ($entity) {
+                                    $data = $entity->getData('preloadInfo') ?? [];
+                                    $data['subEntityLoaders'][] = $entityLoader;
+                                    $entity->setData('preloadInfo', $data);
+                                }
+                            }
                         }
                     }
                 }
@@ -505,5 +519,18 @@ class Load extends UnitAbstract
         $dependedQueueIds = $this->getDependenceIdsByEntityType->execute([$queueId], (string)$entityType)[$queueId] ?? [];
 
         return $this->getQueuesByIds->execute($dependedQueueIds);
+    }
+
+    /**
+     * @return void
+     * @throws LocalizedException
+     */
+    private function preloadDependenceQueuesGroupedByCode(): void
+    {
+        $queueIds = [];
+        foreach ($this->queues as $queue) {
+            $queueIds[] = $queue->getId();
+        }
+        $this->getDependenceQueueIdsGroupedByCode->execute($queueIds);
     }
 }
