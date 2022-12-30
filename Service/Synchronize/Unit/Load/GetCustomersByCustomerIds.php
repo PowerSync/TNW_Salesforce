@@ -73,11 +73,8 @@ class GetCustomersByCustomerIds implements CleanableInstanceInterface
         }
 
         if ($missedEntityIds) {
-            $magentoType = Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER;
-            $attributeCodes = $this->getMappedAttributeCodesByMagentoType->execute([$magentoType])[$magentoType] ?? [];
             foreach (array_chunk($missedEntityIds, ChunkSizeInterface::CHUNK_SIZE) as $missedEntityIdsChunk) {
                 $collection = $this->collectionFactory->create();
-                $attributeCodes && $collection->addAttributeToSelect($attributeCodes, 'left');
                 $collection->addFieldToFilter(
                     $this->resource->getIdFieldName(),
                     ['in' => $entityIds]
