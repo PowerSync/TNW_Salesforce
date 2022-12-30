@@ -29,6 +29,10 @@ class Client extends \Tnw\SoapClient\Client
 
     const ERR_INVALID_SESSION = 'sf:INVALID_SESSION_ID';
 
+    const ERR_REQUEST_LIMIT_EXCEEDED = 'sf:REQUEST_LIMIT_EXCEEDED';
+
+    const LINK = 'https://technweb.atlassian.net/wiki/spaces/IWS/pages/50561027/REQUEST+LIMIT+EXCEEDED+TotalRequests+Limit+exceeded';
+
     const TIMEOUT_RESERVE = 180;
 
     /** @var Collection */
@@ -256,6 +260,16 @@ class Client extends \Tnw\SoapClient\Client
         try {
             return parent::call($method, $params);
         } catch (\SoapFault $e) {
+            if ($e->faultcode == self::ERR_REQUEST_LIMIT_EXCEEDED) {
+                $format = 'Sorry but we can\'t load Salesforce data because of Total Request Limits exceeded.
+                 For more information click %s';
+                $link = sprintf(
+                    '<a href="%s">here</a>',
+                    self::LINK
+                );
+                $message = sprintf($format, $link);
+                throw new Exception($message);
+            }
             if ($e->faultcode == self::ERR_INVALID_SESSION) {
                 $this->resetSession();
                 return parent::call($method, $params);
