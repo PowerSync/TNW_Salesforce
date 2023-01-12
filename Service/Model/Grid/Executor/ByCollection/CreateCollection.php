@@ -13,8 +13,9 @@ use Magento\Framework\Data\Collection;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use TNW\Salesforce\Api\Model\Grid\GetColumnsDataItems\Executor\ByCollection\CreateCollection\ModifierInterface;
+use TNW\Salesforce\Api\Service\Model\Grid\Executor\ByCollection\CreateCollectionInterface;
 
-class CreateCollection
+class CreateCollection implements CreateCollectionInterface
 {
     /** @var string */
     private $collectionClassName;
