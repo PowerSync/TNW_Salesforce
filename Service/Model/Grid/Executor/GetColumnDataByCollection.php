@@ -12,7 +12,7 @@ use Magento\Framework\Exception\LocalizedException;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 use TNW\Salesforce\Api\Model\Grid\GetColumnsDataItems\ExecutorInterface;
-use TNW\Salesforce\Service\Model\Grid\Executor\ByCollection\CreateCollection;
+use TNW\Salesforce\Api\Service\Model\Grid\Executor\ByCollection\CreateCollectionInterface;
 
 class GetColumnDataByCollection implements ExecutorInterface, CleanableInstanceInterface
 {
@@ -20,7 +20,7 @@ class GetColumnDataByCollection implements ExecutorInterface, CleanableInstanceI
     public const RESULT_TYPE_STRING = 2;
     public const RESULT_TYPE_BOOLEAN = 3;
 
-    /** @var CreateCollection */
+    /** @var CreateCollectionInterface */
     private $createCollection;
 
     /** @var array */
@@ -39,12 +39,12 @@ class GetColumnDataByCollection implements ExecutorInterface, CleanableInstanceI
     private $allowNull;
 
     /**
-     * @param CreateCollection $createCollection
+     * @param CreateCollectionInterface $createCollection
      * @param string|null      $resultType
      * @param bool             $allowNull
      */
     public function __construct(
-        CreateCollection $createCollection,
+        CreateCollectionInterface $createCollection,
         string           $resultType = null,
         bool             $allowNull = true
     ) {
