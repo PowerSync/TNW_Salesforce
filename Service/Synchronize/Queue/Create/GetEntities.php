@@ -14,16 +14,31 @@ use TNW\Salesforce\Synchronize\Queue\CreateInterface;
 
 class GetEntities implements CleanableInstanceInterface
 {
+    public const TYPE_ENTITY_ID_FIELD = 1;
+
+    public const TYPE_METHOD = 2;
+
+    public const TYPE_KEY = 3;
+
     /** @var array */
     private $processed = [];
 
     /** @var array */
     private $cache = [];
 
+    /**
+     * @param array           $entityIds
+     * @param CreateInterface $loader
+     * @param string          $entityIdFieldOrMethod
+     * @param int             $getEntityIdType
+     *
+     * @return array
+     */
     public function execute(
         array $entityIds,
         CreateInterface $loader,
-        string $entityIdField
+        string $entityIdFieldOrMethod,
+        int $getEntityIdType = self::TYPE_ENTITY_ID_FIELD
     ): array
     {
         if (!$entityIds) {
@@ -46,8 +61,19 @@ class GetEntities implements CleanableInstanceInterface
         if ($missedEntityIds) {
             foreach (array_chunk($missedEntityIds, ChunkSizeInterface::CHUNK_SIZE) as $missedEntityIdsChunk) {
                 $items = $loader->entities($missedEntityIdsChunk);
-                foreach ($items as $item) {
-                    $entityId = $item[$entityIdField] ?? null;
+                foreach ($items as $key => $item) {
+                    switch ($getEntityIdType) {
+                        case self::TYPE_ENTITY_ID_FIELD:
+                        default:
+                            $entityId = $item[$entityIdFieldOrMethod] ?? null;
+                            break;
+                        case self::TYPE_METHOD:
+                            $entityId = $item->$entityIdFieldOrMethod();
+                            break;
+                        case self::TYPE_KEY:
+                            $entityId = $key;
+                            break;
+                    }
                     $entityId !== null && $this->cache[$type][$entityId][] = $item;
                 }
             }
