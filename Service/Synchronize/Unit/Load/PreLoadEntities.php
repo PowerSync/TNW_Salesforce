@@ -57,7 +57,7 @@ class PreLoadEntities implements CleanableInstanceInterface
         try {
             $entityIds = array_map('intval', $entityIds);
             $entityIds = array_unique($entityIds);
-            $type = spl_object_id($preLoader);
+            $type = spl_object_hash($preLoader);
             $missedEntityIds = [];
             foreach ($entityIds as $entityId) {
                 $loadAdditional = $entityAdditional[$entityId] ?? [];
