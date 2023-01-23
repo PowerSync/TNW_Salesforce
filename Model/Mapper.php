@@ -22,6 +22,13 @@ class Mapper extends \Magento\Framework\Model\AbstractModel implements IdentityI
     public const MAGENTO_ENTITY_TYPE_PRODUCT = 'catalog_product';
 
     /**
+     * Prefix of model events names
+     *
+     * @var string
+     */
+    protected $_eventPrefix = 'tnw_salesforce_mapper';
+
+    /**
      * @return void
      */
     protected function _construct()
