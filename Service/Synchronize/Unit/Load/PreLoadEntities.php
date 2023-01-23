@@ -48,7 +48,7 @@ class PreLoadEntities implements CleanableInstanceInterface
      *
      * @return AbstractModel[]
      */
-    public function execute(LoadLoaderInterface $preLoader, array $entityIds, array $entityAdditional = []): array
+    public function execute(LoadLoaderInterface $preLoader, array $entityIds, array $entityAdditional = [], string $idFieldName = null): array
     {
         if (!$entityIds || !($preLoader instanceof PreLoaderInterface)) {
             return [];
@@ -73,16 +73,18 @@ class PreLoadEntities implements CleanableInstanceInterface
 
                     $missedItems = $missedEntityAdditional = [];
                     if ($collection) {
-                        $idFieldName = $collection->getIdFieldName();
-                        if (!$idFieldName) {
-                            $idFieldName = $collection->getResource()->getIdFieldName();
+                        if ($idFieldName === null) {
+                            $idFieldName = $collection->getIdFieldName();
+                            if (!$idFieldName) {
+                                $idFieldName = $collection->getResource()->getIdFieldName();
+                            }
                         }
                         $collection->addFieldToFilter(
                             $idFieldName,
                             ['in' => $missedEntityIdsChunk]
                         );
                         foreach ($collection as $item) {
-                            $itemId = $item->getId();
+                            $itemId = $item->getData($idFieldName);
                             $missedItems[$itemId] = $item;
                             $missedEntityAdditional[$itemId] = $entityAdditional[$itemId] ?? [];
                         }
