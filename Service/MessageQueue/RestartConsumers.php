@@ -45,6 +45,7 @@ class RestartConsumers
     {
         try {
             $this->pillPut->put();
+            $this->logger->info('Restart consumers!');
         } catch (Throwable $e) {
             $this->logger->critical($e->getMessage());
             throw $e;
