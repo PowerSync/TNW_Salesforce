@@ -218,33 +218,53 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
             do {
                 try {
                     $this->addEntitiesToQueue($entityIds, $queueAdd, $syncType, $entityType);
+                    $countAttempts = 0;
                 } catch (DeadlockException|LockWaitException $e) {
+                    sleep(1); // If deadlock happens - DB is busy, wait for 1 second
+                    $countAttempts++;
                     $phrase = __('DB Lock found, try add records to the Queue in next session. Code: %1', $e->getCode());
                     $message = implode(PHP_EOL, [$phrase, $e->getMessage(), $e->getTraceAsString()]);
                     $this->logger->critical($message);
                 } catch (\Throwable $e) {
                     $countAttempts++;
-                    if ($countAttempts >= $maxAttempts) {
-                        $this->deleteProcessedPrequeue($entityIds, $entityType, $syncType);
-                    }
-
                     $phrase = __('SalesForce adding entities to the queue caused an error: %1', $e->getMessage());
                     $message = implode(PHP_EOL, [$phrase, $e->getMessage(), $e->getTraceAsString()]);
                     $this->logger->critical($message);
 
-            } finally {
-                if (!empty($entityIds) && $this->getQueueTypeCode($syncType)) {
-                    $topic = self::MQ_TOPIC_NAME;
-                    $this->publisher->publish($topic, $this->getQueueTypeCode($syncType));
+                } finally {
+                    if ($this->getQueueTypeCode($syncType)) {
+                        if ($countAttempts == 0 || $countAttempts >= $maxAttempts) {
+                            $this->deleteProcessedPrequeue($entityIds, $entityType, $syncType);
+                        }
+
+                        $this->publishMessage($syncType);
+                    }
                 }
-            }
             } while ($countAttempts != 0 && $countAttempts < $maxAttempts);
         }
 
         if ($runNextBatch) {
             $this->publisher->publish(Process::MQ_TOPIC_NAME, false);
         }
+    }
 
+    /**
+     * @param $syncType
+     * @return void
+     */
+    public function publishMessage($syncType)
+    {
+        $topic = $this->getTopic($syncType);
+        $this->publisher->publish($topic, $this->getQueueTypeCode($syncType));
+    }
+
+    /**
+     * @param $syncType
+     * @return string
+     */
+    public function getTopic($syncType)
+    {
+        return self::MQ_TOPIC_NAME;
     }
 
     /**
@@ -255,7 +275,6 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
     public function getQueueTypeCode($syncType)
     {
         $type = null;
-
         return $type;
     }
 
