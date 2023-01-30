@@ -318,6 +318,12 @@ class Input extends Synchronize\Unit\UnitAbstract
                 $object[$fieldName] = trim((string)$object[$fieldName]);
                 if ($object[$fieldName] === '') {
                     $object[$fieldName] = null;
+                    
+                    if ($fieldName === 'OwnerId' && !$object[$fieldName]) {
+                        $this->group()->messageDebug('"%s" field is empty. Removing it from request.', $fieldName);
+                        unset($object[$fieldName]);
+                    }
+                    
                     continue;
                 }
 
