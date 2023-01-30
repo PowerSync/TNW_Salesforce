@@ -13,6 +13,7 @@ use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds;
 
 class SalesforceIdStorage
 {
@@ -31,6 +32,11 @@ class SalesforceIdStorage
     const MAGENTO_TYPE_ORDER_SHIPMENT_NOTE = 'Order Shipment Note';
     const MAGENTO_TYPE_ORDER_SHIPMENT_ITEM = 'Order Shipment Item';
     const MAGENTO_TYPE_ORDER_SHIPMENT_TRACK = 'Order Shipment Track';
+
+    /**
+     * @var MassLoadObjectIds
+     */
+    protected $massLoadObjectIds;
 
     /**
      * @var string
@@ -63,26 +69,27 @@ class SalesforceIdStorage
     private $cacheForUpdateStatus = [];
 
     /**
-     * ObjectAbstract constructor.
-     *
      * @param string $magentoType
      * @param array $mappingAttribute
      * @param Objects $resourceObjects
      * @param StoreManagerInterface $storeManager
      * @param Config $config
+     * @param MassLoadObjectIds $massLoadObjectIds
      */
     public function __construct(
         string $magentoType,
         array $mappingAttribute,
         Objects $resourceObjects,
         StoreManagerInterface $storeManager,
-        Config $config
+        Config $config,
+        MassLoadObjectIds $massLoadObjectIds
     ) {
         $this->resourceObjects = $resourceObjects;
         $this->magentoType = $magentoType;
         $this->mappingAttribute = $mappingAttribute;
         $this->storeManager = $storeManager;
         $this->config = $config;
+        $this->massLoadObjectIds = $massLoadObjectIds;
     }
 
     /**
@@ -390,7 +397,7 @@ class SalesforceIdStorage
             throw new Exception('magentoType was not defined!');
         }
 
-        return $this->resourceObjects->loadObjectIds(
+        return $this->massLoadObjectIds->loadObjectIds(
             $entity->getId(),
             $this->magentoType,
             $this->prepareWebsiteId($website)
@@ -416,7 +423,7 @@ class SalesforceIdStorage
             $entityId !== null && $entityIds[] = $entityId;
         }
 
-        return $this->resourceObjects->massLoadObjectIds(
+        return $this->massLoadObjectIds->massLoadObjectIds(
             $entityIds,
             $this->magentoType,
             $this->prepareWebsiteId($website)

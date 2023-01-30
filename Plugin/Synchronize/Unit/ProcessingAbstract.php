@@ -9,10 +9,16 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds;
 use TNW\Salesforce\Synchronize\Unit\ProcessingAbstract as Subject;
 
 class ProcessingAbstract
 {
+    /**
+     * @var MassLoadObjectIds
+     */
+    protected $massLoadObjectIds;
+
     /**
      * @var Objects
      */
@@ -32,15 +38,18 @@ class ProcessingAbstract
      * @param Objects $resourceObjects
      * @param StoreManagerInterface $storeManager
      * @param RequestInterface $request
+     * @param MassLoadObjectIds $massLoadObjectIds
      */
     public function __construct(
         Objects $resourceObjects,
         StoreManagerInterface $storeManager,
-        RequestInterface $request
+        RequestInterface $request,
+        MassLoadObjectIds $massLoadObjectIds
     ) {
         $this->resourceObjects = $resourceObjects;
         $this->storeManager = $storeManager;
         $this->request = $request;
+        $this->massLoadObjectIds = $massLoadObjectIds;
     }
 
     /**
@@ -70,7 +79,7 @@ class ProcessingAbstract
         }
 
         foreach ($entityIdsByType as $entityType => $entityIds) {
-            $objectIds = $this->resourceObjects->massLoadObjectIds($entityIds, $entityType, $websiteId);
+            $objectIds = $this->massLoadObjectIds->massLoadObjectIds($entityIds, $entityType, $websiteId);
             $entityIdsToUpdateStatus = [];
             foreach ($entityIds as $entityId) {
                 $data = $objectIds[$entityId] ?? [];

@@ -18,8 +18,6 @@ use TNW\Salesforce\Service\MessageQueue\RestartConsumers;
  */
 class Mapper extends AbstractDb
 {
-    /** @var RestartConsumers */
-    private $restartConsumers;
 
     /**
      * @param Context          $context
@@ -92,18 +90,6 @@ class Mapper extends AbstractDb
                 __('Salesforce Attribute')
             )
         ]];
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function _afterSave(AbstractModel $object)
-    {
-        parent::_afterSave($object);
-
-        $this->restartConsumers->execute();
 
         return $this;
     }
