@@ -11,7 +11,6 @@ use Magento\Framework\App\ResourceConnection;
 
 class FilterBlockedQueueRecords
 {
-    private const PAGE_SIZE = 100;
 
     /**
      * @var ResourceConnection
@@ -76,18 +75,12 @@ class FilterBlockedQueueRecords
                 )
                 ->where('parent.status IN (?)', array_merge($this->processStatuses, $this->errorStatuses, $this->newStatuses))
                 ->where('parent.website_id = ?', $websiteId)
-                ->where('child.code = ?', $groupCode);
+                ->where('child.code = ?', $groupCode)
+                ->where('child.queue_id IN (?)', $queueIds);
 
-            //  Not 0
-            $pageNumber = 1;
-            while (true) {
-                $dependentFilter->limitPage($pageNumber, self::PAGE_SIZE);
-                $blockedIds = $connection->fetchCol($dependentFilter);
-                if (empty($blockedIds)) {
-                    break;
-                }
+            $blockedIds = $connection->fetchCol($dependentFilter);
+            if (!empty($blockedIds)) {
                 $queueIds = array_diff($queueIds, $blockedIds);
-                $pageNumber++;
             }
         }
 
