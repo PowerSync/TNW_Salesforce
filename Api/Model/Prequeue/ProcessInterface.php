@@ -13,4 +13,10 @@ interface ProcessInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute();
+
+    /**
+     * @param $syncType
+     * @return void
+     */
+    public function publishMessage($syncType);
 }
