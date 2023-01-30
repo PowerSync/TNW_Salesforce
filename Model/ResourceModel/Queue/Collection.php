@@ -345,12 +345,16 @@ class Collection extends AbstractCollection
     public function updateLock(array $data, string $groupCode, int $websiteId)
     {
         $this->getSelect()->group('identify');
-        $queueIds = $this->filterBlockedQueueRecords->execute($this->getAllIds(), $groupCode, $websiteId);
+        $allIds = $this->getAllIds();
 
+        $queueIds = [];
         try {
-            if ($queueIds) {
+            if ($allIds) {
                 $this->_conn->beginTransaction();
-                foreach (array_chunk($queueIds, self::UPDATE_CHUNK) as $queueIdsChunk) {
+                foreach (array_chunk($allIds, self::UPDATE_CHUNK) as $queueIdsChunk) {
+                    $queueIdsChunk = $this->filterBlockedQueueRecords->execute($queueIdsChunk, $groupCode, $websiteId);
+
+                    $queueIds = array_merge($queueIds, $queueIdsChunk);
                     $this->_conn->update(
                         $this->getMainTable(),
                         $data,
@@ -362,13 +366,6 @@ class Collection extends AbstractCollection
         } catch (Throwable $e) {
             $this->_conn->rollBack();
             throw $e;
-        }
-
-        if ($queueIds) {
-            /** @var Queue $queue */
-            foreach ($this as $queue) {
-                $queue->addData($data);
-            }
         }
 
         return count($queueIds);
