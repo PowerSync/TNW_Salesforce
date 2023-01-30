@@ -12,9 +12,15 @@ use Magento\Ui\Component\Layout\Tabs\TabInterface;
 use Magento\Backend\Block\Widget\Form\Generic;
 use TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SForceId;
 use TNW\Salesforce\Block\Adminhtml\Customer\Edit\Renderer\SyncStatus;
+use TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds;
 
 class Tabs extends Generic implements TabInterface
 {
+    /**
+     * @var MassLoadObjectIds
+     */
+    protected $massLoadObjectIds;
+
     /**
      * @var \Magento\Framework\Registry
      */
@@ -36,11 +42,13 @@ class Tabs extends Generic implements TabInterface
         \Magento\Framework\Data\FormFactory $formFactory,
         CustomerRepositoryInterface $customerRepository,
         \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects,
+        MassLoadObjectIds $massLoadObjectIds,
         array $data = []
     ) {
         $this->coreRegistry = $registry;
         $this->customerRepository = $customerRepository;
         $this->resourceObjects = $resourceObjects;
+        $this->massLoadObjectIds = $massLoadObjectIds;
 
         parent::__construct($context, $registry, $formFactory, $data);
     }
@@ -169,7 +177,7 @@ class Tabs extends Generic implements TabInterface
             'value' => $status,
         ]);
 
-        $salesforceIds = $this->resourceObjects->loadObjectIds(
+        $salesforceIds = $this->massLoadObjectIds->loadObjectIds(
             $this->getCustomerId(),
             \TNW\Salesforce\Model\Entity\SalesforceIdStorage::MAGENTO_TYPE_CUSTOMER,
             $this->websiteId()
