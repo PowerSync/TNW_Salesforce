@@ -222,9 +222,9 @@ class Queue
                         if (!$queues) {
                             continue;
                         }
-
-                        $group->synchronize($queues);
-
+                        $groupInstance = clone $group;
+                        $groupInstance->synchronize($queues);
+                        unset($groupInstance);
                     } catch (\Throwable $e) {
                         $this->processError($e, $groupCollection, $group, $phase);
                     }
@@ -238,13 +238,11 @@ class Queue
 
                     // Save change status
                     $groupCollection->save();
-
-                    gc_collect_cycles();
+                    $this->cleanLocalCacheForInstances->execute();
                 }
 
                 $this->pushMqMessage->sendMessage($syncType);
             }
-            $this->cleanLocalCacheForInstances->execute();
         }
     }
 

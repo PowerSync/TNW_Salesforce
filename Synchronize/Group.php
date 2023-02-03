@@ -155,13 +155,20 @@ class Group
 
 
         }
-        $this->currentUnit->clear();
+        unset($units);
+        $this->clear();
         $this->messageDebug('======== END SYNC %s ========', $this->code());
         $this->messageDebug('======== START UPDATE GRIDS %s ========');
         $this->updateGridsByQueues->execute($queues);
         $this->messageDebug('======== END UPDATE GRIDS %s ========', $this->code());
+    }
 
-        return $units;
+    /**
+     * @return void
+     */
+    public function clear()
+    {
+        $this->currentUnit->clear();
     }
 
     /**
