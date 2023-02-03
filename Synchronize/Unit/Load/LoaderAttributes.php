@@ -11,6 +11,7 @@ use \Magento\Eav\Model\Entity\Collection\VersionControl\AbstractCollection as Co
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Catalog\Model\Product;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType;
 
 /**
@@ -54,6 +55,10 @@ class LoaderAttributes
         $ids = [];
 
         foreach ($entities as $entity) {
+            if (!$entity instanceof Product) {
+                continue;
+            }
+
             $ids[] = $entity->getId();
         }
 
@@ -86,9 +91,13 @@ class LoaderAttributes
             $attributeCollection->clear();
             $attributeCodes && $attributeCollection->addAttributeToSelect($attributeCodes, 'left');
             foreach ($attributeCollection as $customerWithAttributes) {
-                foreach($entities as $key => $entity) {
+                foreach($entities as $entity) {
                     if ($customerWithAttributes->getId() == $entity->getId()) {
-                        $entities[$key]->addData($customerWithAttributes->getData());
+                        foreach ($customerWithAttributes->getData() as $attribute => $value) {
+                            if (!in_array($attribute, array_keys($entity->getData()))) {
+                                $entity->setData($attribute, $value);
+                            }
+                        }
                         break;
                     }
                 }
