@@ -52,11 +52,9 @@ class FilterBlockedQueueRecords
 
     /**
      * @param array $queueIds
-     * @param string $groupCode
-     * @param int $websiteId
      * @return array
      */
-    public function execute(array $queueIds, string $groupCode, int $websiteId): array
+    public function execute(array $queueIds): array
     {
         if (!empty($queueIds)) {
             $connection = $this->resourceConnection->getConnection();
@@ -74,8 +72,6 @@ class FilterBlockedQueueRecords
                     []
                 )
                 ->where('parent.status IN (?)', array_merge($this->processStatuses, $this->errorStatuses, $this->newStatuses))
-                ->where('parent.website_id = ?', $websiteId)
-                ->where('child.code = ?', $groupCode)
                 ->where('child.queue_id IN (?)', $queueIds);
 
             $blockedIds = $connection->fetchCol($dependentFilter);
