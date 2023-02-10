@@ -33,7 +33,7 @@ use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds;
  */
 class Collection extends AbstractCollection
 {
-    private const UPDATE_CHUNK = 500;
+    const UPDATE_CHUNK = 500;
 
     /**
      * @var string
@@ -334,45 +334,6 @@ class Collection extends AbstractCollection
     }
 
     /**
-     * Update Lock
-     *
-     * @param array  $data
-     * @param string $groupCode
-     * @param int    $websiteId
-     *
-     * @return int
-     * @throws Throwable
-     */
-    public function updateLock(array $data, string $groupCode, int $websiteId)
-    {
-        $this->getSelect()->group('identify');
-        $allIds = $this->getAllIds();
-
-        $queueIds = [];
-        try {
-            if ($allIds) {
-                $this->_conn->beginTransaction();
-                foreach (array_chunk($allIds, self::UPDATE_CHUNK) as $queueIdsChunk) {
-                    $queueIdsChunk = $this->filterBlockedQueueRecords->execute($queueIdsChunk, $groupCode, $websiteId);
-
-                    $queueIds = array_merge($queueIds, $queueIdsChunk);
-                    $this->_conn->update(
-                        $this->getMainTable(),
-                        $data,
-                        $this->_conn->prepareSqlCondition('queue_id', ['in' => $queueIdsChunk])
-                    );
-                }
-                $this->_conn->commit();
-            }
-        } catch (Throwable $e) {
-            $this->_conn->rollBack();
-            throw $e;
-        }
-
-        return count($queueIds);
-    }
-
-    /**
      * @return $this
      */
     public function denyDependentItems()
@@ -422,5 +383,13 @@ class Collection extends AbstractCollection
         $this->getResource()->unserializeFields($item);
 
         return parent::beforeAddLoadedItem($item);
+    }
+
+    /**
+     * @return array
+     */
+    public function getBindParams()
+    {
+        return $this->_bindParams;
     }
 }
