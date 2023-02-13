@@ -10,6 +10,7 @@ use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Psr\Log\LoggerInterface;
+use Throwable;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\Logger\Processor\UidProcessor;
@@ -18,13 +19,14 @@ use TNW\Salesforce\Service\CleanLocalCacheForInstances;
 use TNW\Salesforce\Synchronize\Exception as SalesforceException;
 use TNW\Salesforce\Synchronize\Queue\PushMqMessage;
 use Zend_Db_Expr;
-use \TNW\Salesforce\Service\Synchronize\Queue\Collection\UpdateLock;
+use TNW\Salesforce\Service\Synchronize\Queue\Collection\UpdateLock;
 
 /**
  * Queue
  */
 class Queue
 {
+    const MAX_SYNC_ITERATIONS = 1000;
     /**
      * @var Group[]
      */
@@ -97,7 +99,8 @@ class Queue
         LoggerInterface                     $logger,
         UpdateLock                          $updateLock,
                                             $isCheck = false
-    ) {
+    )
+    {
         $this->groups = $groups;
         $this->phases = array_filter($phases);
         $this->salesforceConfig = $salesforceConfig;
@@ -134,10 +137,10 @@ class Queue
      *
      * @param Collection $collection
      * @param            $websiteId
-     * @param array      $syncJobs
+     * @param array $syncJobs
      *
      * @throws LocalizedException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function synchronize($collection, $websiteId, $syncJobs = [])
     {
@@ -192,58 +195,57 @@ class Queue
                 }
                 $syncType = $this->getSyncType($lockCollection);
 
-                // Mark work
-                $countUpdate = $this->updateLock->execute($lockCollection, $lockData, $this->salesforceConfig->getPageSizeFromMagento(null, $syncType));
+                $iterations = 0;
+                while ($queueIds = $this->updateLock->execute($lockCollection, $lockData, $this->salesforceConfig->getPageSizeFromMagento(null, $syncType))) {
 
-                if (0 === $countUpdate) {
-                    continue;
-                }
+                    $iterations++;
+                    $groupCollection = clone $collection;
+                    $groupCollection->addFilterToIds($queueIds);
 
-                $groupCollection = clone $collection;
-                $groupCollection->addFilterToStatus($phase['processStatus']);
-                $groupCollection->addFilterToCode($groupCode);
+                    $group->messageDebug(
+                        'Start job "%s", phase "%s" for website %s',
+                        $groupCode,
+                        $phase['phaseName'],
+                        $websiteId
+                    );
 
-                $groupCollection->setPageSize($this->salesforceConfig->getPageSizeFromMagento(null, $syncType));
+                    try {
+                        if ($groupCollection->getSize() == 0) {
+                            continue;
+                        }
 
-                $group->messageDebug(
-                    'Start job "%s", phase "%s" for website %s',
-                    $groupCode,
-                    $phase['phaseName'],
-                    $websiteId
-                );
+                        $groupCollection->clear();
 
-                try {
-                    if ($groupCollection->getSize() == 0) {
-                        continue;
+                        $groupCollection->each('incSyncAttempt');
+                        $groupCollection->each('setData', ['_is_last_page', true]);
+                        $queues = $groupCollection->getItems();
+                        if (!$queues) {
+                            continue;
+                        }
+                        $groupInstance = clone $group;
+                        $groupInstance->synchronize($queues);
+                        unset($groupInstance);
+                    } catch (Throwable $e) {
+                        $this->processError($e, $groupCollection, $group, $phase);
                     }
 
-                    $groupCollection->clear();
-
-                    $groupCollection->each('incSyncAttempt');
-                    $groupCollection->each('setData', ['_is_last_page', true]);
-                    $queues = $groupCollection->getItems();
-                    if (!$queues) {
-                        continue;
-                    }
-                    $groupInstance = clone $group;
-                    $groupInstance->synchronize($queues);
-                    unset($groupInstance);
-                } catch (\Throwable $e) {
-                    $this->processError($e, $groupCollection, $group, $phase);
-                }
-
-                $group->messageDebug(
-                    'Stop job "%s", phase "%s" for website %s',
-                    $groupCode,
-                    $phase['phaseName'],
-                    $websiteId
-                );
+                    $group->messageDebug(
+                        'Stop job "%s", phase "%s" for website %s',
+                        $groupCode,
+                        $phase['phaseName'],
+                        $websiteId
+                    );
 
                     // Save change status
                     $groupCollection->save();
                     $this->cleanLocalCacheForInstances->execute();
 
-                $this->pushMqMessage->sendMessage($syncType);
+                    $this->pushMqMessage->sendMessage($syncType);
+                    if ($iterations > self:: MAX_SYNC_ITERATIONS) {
+                        // to avoid infinity loop
+                        break;
+                    }
+                }
             }
         }
     }
