@@ -205,6 +205,17 @@ class Collection extends AbstractCollection
     }
 
     /**
+     * Add Filter To queue_id
+     *
+     * @param array $ids
+     *
+     * @return Collection
+     */
+    public function addFilterToIds($ids)
+    {
+        return $this->addFieldToFilter('main_table.queue_id', ['in' => $ids]);
+    }
+    /**
      * Add Filter To Code
      *
      * @param string $code

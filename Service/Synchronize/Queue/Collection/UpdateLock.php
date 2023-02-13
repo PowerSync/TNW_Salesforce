@@ -11,6 +11,7 @@ namespace TNW\Salesforce\Service\Synchronize\Queue\Collection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Throwable;
+use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Model\Config;
 use TNW\Salesforce\Model\ResourceModel\FilterBlockedQueueRecords;
 use TNW\Salesforce\Model\ResourceModel\Queue\Collection;
@@ -33,46 +34,43 @@ class UpdateLock
      * @param \TNW\Salesforce\Model\ResourceModel\Queue $resource
      * @param array $lockData
      * @param $limit
-     * @return int|null
+     * @return array
      * @throws LocalizedException
      * @throws Throwable
      */
     public function updateLock(
-        array      $ids,
+        array      $queueIds,
         \TNW\Salesforce\Model\ResourceModel\Queue $resource,
         array      $lockData,
         $limit
     ) {
-        $queueIds = [];
         try {
             $conection = $resource->getConnection();
-            if ($ids) {
-
-                $conection->beginTransaction();
-                $queueIds = $this->filterBlockedQueueRecords->execute($ids);
-
+            if ($queueIds) {
                 $queueIds = array_slice($queueIds, 0, $limit);
 
-                $conection->update(
-                    $resource->getMainTable(),
-                    $lockData,
-                    $conection->prepareSqlCondition('queue_id', ['in' => $queueIds])
-                );
-                $conection->commit();
+                foreach (array_chunk($queueIds, ChunkSizeInterface::CHUNK_SIZE_200) as $ids) {
+
+                    $conection->update(
+                        $resource->getMainTable(),
+                        $lockData,
+                        $conection->prepareSqlCondition('queue_id', ['in' => $ids])
+                    );
+                }
             }
         } catch (Throwable $e) {
             $conection->rollBack();
             throw $e;
         }
 
-        return count($queueIds);
+        return $queueIds;
     }
 
     /**
      * @param Collection $collection
      * @param array $lockData
      * @param int $maxCount
-     * @return int|null
+     * @return array
      * @throws LocalizedException
      * @throws Throwable
      */
@@ -80,18 +78,20 @@ class UpdateLock
         Collection $collection,
         array      $lockData,
         int        $maxCount = Config::SFORCE_BASE_UPDATE_LIMIT
-    ): int {
+    ): array {
         $idsCollection = clone $collection;
         $idsCollection->getSelect()->group('identify');
         $idsCollection = $this->resetCollection($idsCollection);
         $counter = 0;
 
+        $queueIds = [];
         while (($ids = $this->getIdsBatch($idsCollection, $maxCount)) && $counter < $maxCount) {
-            $limit = ($maxCount - $counter);
-            $counter += $this->updateLock($ids, $idsCollection->getResource(), $lockData, $limit);
+            $counter += count($ids);
+            $queueIds += $ids;
         }
+        $queueIds = $this->updateLock($queueIds, $idsCollection->getResource(), $lockData, $maxCount);
 
-        return $counter;
+        return $queueIds;
     }
 
     /**
@@ -118,6 +118,7 @@ class UpdateLock
         }
 
         $ids = $idsCollection->getColumnValues($idsCollection->getResource()->getIdFieldName());
+        $ids = $this->filterBlockedQueueRecords->execute($ids);
 
         return $ids;
     }

@@ -72,7 +72,9 @@ class FilterBlockedQueueRecords
                     []
                 )
                 ->where('parent.status IN (?)', array_merge($this->processStatuses, $this->errorStatuses, $this->newStatuses))
-                ->where('child.queue_id IN (?)', $queueIds);
+                ->where('child.queue_id IN (?)', $queueIds)
+                ->group('relation.queue_id')
+            ;
 
             $blockedIds = $connection->fetchCol($dependentFilter);
             if (!empty($blockedIds)) {
