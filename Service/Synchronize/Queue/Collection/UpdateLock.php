@@ -131,6 +131,7 @@ class UpdateLock
     {
         $idsCollection->clear();
         $idsSelect = $idsCollection->getSelect();
+        $idsCollection->getSelect()->group('identify');
         $idsSelect->reset(Select::COLUMNS);
         $idsSelect->columns($idsCollection->getIdFieldName());
 
