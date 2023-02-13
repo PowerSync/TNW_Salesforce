@@ -30,15 +30,18 @@ class UpdateLock
 
     /**
      * @param array $ids
-     * @param Collection $idsCollection
+     * @param \TNW\Salesforce\Model\ResourceModel\Queue $resource
      * @param array $lockData
+     * @param $limit
      * @return int|null
+     * @throws LocalizedException
      * @throws Throwable
      */
     public function updateLock(
         array      $ids,
         \TNW\Salesforce\Model\ResourceModel\Queue $resource,
-        array      $lockData
+        array      $lockData,
+        $limit
     ) {
         $queueIds = [];
         try {
@@ -47,6 +50,8 @@ class UpdateLock
 
                 $conection->beginTransaction();
                 $queueIds = $this->filterBlockedQueueRecords->execute($ids);
+
+                $queueIds = array_slice($queueIds, 0, $limit);
 
                 $conection->update(
                     $resource->getMainTable(),
@@ -82,7 +87,8 @@ class UpdateLock
         $counter = 0;
 
         while (($ids = $this->getIdsBatch($idsCollection, $maxCount)) && $counter < $maxCount) {
-            $counter += $this->updateLock($ids, $idsCollection->getResource(), $lockData);
+            $limit = ($maxCount - $counter);
+            $counter += $this->updateLock($ids, $idsCollection->getResource(), $lockData, $limit);
         }
 
         return $counter;
