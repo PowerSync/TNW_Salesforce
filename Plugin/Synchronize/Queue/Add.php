@@ -9,10 +9,16 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds;
 use TNW\Salesforce\Synchronize\Queue\Add as Subject;
 
 class Add
 {
+    /**
+     * @var MassLoadObjectIds
+     */
+    protected $massLoadObjectIds;
+
     /**
      * @var Objects
      */
@@ -36,11 +42,13 @@ class Add
     public function __construct(
         Objects $resourceObjects,
         StoreManagerInterface $storeManager,
-        RequestInterface $request
+        RequestInterface $request,
+        MassLoadObjectIds $massLoadObjectIds
     ) {
         $this->resourceObjects = $resourceObjects;
         $this->storeManager = $storeManager;
         $this->request = $request;
+        $this->massLoadObjectIds = $massLoadObjectIds;
     }
 
     /**
@@ -56,7 +64,7 @@ class Add
         $websiteId = $store->getWebsiteId();
         $entityType = reset($subject->resolves)->entityType();
 
-        $objectIds = $this->resourceObjects->massLoadObjectIds($entityIds, (string)$entityType, (int)$websiteId);
+        $objectIds = $this->massLoadObjectIds->massLoadObjectIds($entityIds, (string)$entityType, (int)$websiteId);
         $entityIdsForUpdateStatus = [];
         foreach ($entityIds as $entityId) {
             $data = $objectIds[$entityId] ?? [];
