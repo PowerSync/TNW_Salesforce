@@ -25,6 +25,7 @@ use TNW\Salesforce\Synchronize\Queue\PushMqMessage;
 class Queue
 {
     const MAX_SYNC_ITERATIONS = 1000;
+    const MAX_SYNC_ENTITIES_PER_RUN = 1000;
     /**
      * @var Group[]
      */
@@ -170,6 +171,7 @@ class Queue
                 $iterations = 0;
                 $pageSize = $this->salesforceConfig->getPageSizeFromMagento(null, $syncType);
 
+                xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY + XHPROF_FLAGS_NO_BUILTINS);
                 $queueIds = $this->getQueueIds($lockCollection);
 
                 foreach (array_chunk($queueIds, $pageSize) as $chunkedQueueIds) {
@@ -209,6 +211,21 @@ class Queue
                         break;
                     }
                 }
+//                if (count($queueIds) > self::MAX_SYNC_ENTITIES_PER_RUN) {
+//                    // restart consumer to reset cached Magento objects if we sync big batch
+//                    exit(0);
+//                }
+                $xhprof_data = xhprof_disable();
+
+                if (!empty($queueIds)) {
+                    // save raw data for this profiler run using default
+                    // implementation of iXHProfRuns.
+                    $xhprof_runs = new \XHProfRuns_Default();
+
+                    // save the run under a namespace "xhprof_foo"
+                    $run_id = $xhprof_runs->save_run($xhprof_data, "m245ee");
+                }
+
             }
         }
     }
@@ -247,6 +264,8 @@ class Queue
         if (!$queues) {
             return;
         }
+        echo sprintf("BATCH SIZE: %s \n", count($queues));
+
         $group->synchronize($queues);
     }
 
