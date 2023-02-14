@@ -482,7 +482,7 @@ class Unit implements CleanableInstanceInterface
         if (!$queues) {
             return $filteredQueues;
         }
-        $storeId = (int)$this->request->getParam('store', 0);
+        $storeId = $this->request->getParam('store', null);
         $store = $this->storeManager->getStore($storeId);
         $websiteId = (int)$store->getWebsiteId();
         $filteredQueues = $queues;
