@@ -8,18 +8,16 @@ namespace TNW\Salesforce\Synchronize;
 
 use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Stdlib\DateTime\DateTime;
 use Psr\Log\LoggerInterface;
 use Throwable;
+use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\Config;
-use TNW\Salesforce\Model\Logger\Processor\UidProcessor;
 use TNW\Salesforce\Model\ResourceModel\Queue\Collection;
 use TNW\Salesforce\Service\CleanLocalCacheForInstances;
+use TNW\Salesforce\Service\Synchronize\Queue\Collection\UpdateLock;
 use TNW\Salesforce\Synchronize\Exception as SalesforceException;
 use TNW\Salesforce\Synchronize\Queue\PushMqMessage;
-use Zend_Db_Expr;
-use TNW\Salesforce\Service\Synchronize\Queue\Collection\UpdateLock;
 
 /**
  * Queue
@@ -47,11 +45,6 @@ class Queue
      */
     protected $resourceQueue;
 
-    /**
-     * @var Model\Logger\Processor\UidProcessor
-     */
-    protected $uidProcessor;
-
     /** @var [] */
     protected $sortGroups;
 
@@ -62,9 +55,6 @@ class Queue
      * @var boolean
      */
     protected $isCheck = false;
-
-    /** @var DateTime */
-    protected $dateTime;
 
     /** @var CleanLocalCacheForInstances */
     protected $cleanLocalCacheForInstances;
@@ -79,9 +69,7 @@ class Queue
      * @param array $phases
      * @param Config $salesforceConfig
      * @param Model\ResourceModel\Queue $resourceQueue
-     * @param UidProcessor $uidProcessor
      * @param PushMqMessage $pushMqMessage
-     * @param DateTime $dateTime
      * @param CleanLocalCacheForInstances $cleanLocalCacheForInstances
      * @param LoggerInterface $logger
      * @param UpdateLock $updateLock
@@ -92,23 +80,18 @@ class Queue
         array                               $phases,
         Model\Config                        $salesforceConfig,
         Model\ResourceModel\Queue           $resourceQueue,
-        Model\Logger\Processor\UidProcessor $uidProcessor,
         PushMqMessage                       $pushMqMessage,
-        DateTime                            $dateTime,
         CleanLocalCacheForInstances         $cleanLocalCacheForInstances,
         LoggerInterface                     $logger,
         UpdateLock                          $updateLock,
-                                            $isCheck = false
-    )
-    {
+        $isCheck = false
+    ) {
         $this->groups = $groups;
         $this->phases = array_filter($phases);
         $this->salesforceConfig = $salesforceConfig;
         $this->resourceQueue = $resourceQueue;
-        $this->uidProcessor = $uidProcessor;
         $this->pushMqMessage = $pushMqMessage;
         $this->setIsCheck($isCheck);
-        $this->dateTime = $dateTime;
         $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
         $this->logger = $logger;
         $this->updateLock = $updateLock;
@@ -171,8 +154,6 @@ class Queue
             if (!$allowedStatuses) {
                 continue;
             }
-            // refresh uid
-            $this->uidProcessor->refresh();
 
             foreach ($this->phases as $phase) {
                 $startStatus = $phase['startStatus'] ?? '';
@@ -184,23 +165,19 @@ class Queue
                 $lockCollection->addFilterToCode($groupCode);
                 $lockCollection->addFilterToStatus($startStatus);
 
-                $lockData = [
-                    'status' => $phase['processStatus'],
-                    'transaction_uid' => $this->uidProcessor->uid(),
-                    'identify' => new Zend_Db_Expr('queue_id')
-                ];
-
-                if ($startStatus === Model\Queue::STATUS_NEW) {
-                    $lockData['sync_at'] = $this->dateTime->gmtDate('c');
-                }
                 $syncType = $this->getSyncType($lockCollection);
 
                 $iterations = 0;
-                while ($queueIds = $this->updateLock->execute($lockCollection, $lockData, $this->salesforceConfig->getPageSizeFromMagento(null, $syncType))) {
+                $pageSize = $this->salesforceConfig->getPageSizeFromMagento(null, $syncType);
+
+                $queueIds = $this->getQueueIds($lockCollection);
+
+                foreach (array_chunk($queueIds, $pageSize) as $chunkedQueueIds) {
+                    $this->updateLock->updateLock($chunkedQueueIds, $phase, $lockCollection->getResource());
 
                     $iterations++;
                     $groupCollection = clone $collection;
-                    $groupCollection->addFilterToIds($queueIds);
+                    $groupCollection->addFilterToIds($chunkedQueueIds);
 
                     $group->messageDebug(
                         'Start job "%s", phase "%s" for website %s',
@@ -210,21 +187,7 @@ class Queue
                     );
 
                     try {
-                        if ($groupCollection->getSize() == 0) {
-                            continue;
-                        }
-
-                        $groupCollection->clear();
-
-                        $groupCollection->each('incSyncAttempt');
-                        $groupCollection->each('setData', ['_is_last_page', true]);
-                        $queues = $groupCollection->getItems();
-                        if (!$queues) {
-                            continue;
-                        }
-                        $groupInstance = clone $group;
-                        $groupInstance->synchronize($queues);
-                        unset($groupInstance);
+                        $this->syncBatch($group, $groupCollection);
                     } catch (Throwable $e) {
                         $this->processError($e, $groupCollection, $group, $phase);
                     }
@@ -241,13 +204,50 @@ class Queue
                     $this->cleanLocalCacheForInstances->execute();
 
                     $this->pushMqMessage->sendMessage($syncType);
-                    if ($iterations > self:: MAX_SYNC_ITERATIONS) {
+                    if ($iterations > self::MAX_SYNC_ITERATIONS) {
                         // to avoid infinity loop
                         break;
                     }
                 }
             }
         }
+    }
+
+    public function getQueueIds($lockCollection)
+    {
+        $queueIds = [];
+        $lockCollection->setPageSize(ChunkSizeInterface::CHUNK_SIZE_200);
+        $lastPageNumber = (int)$lockCollection->getLastPageNumber();
+
+        for ($i = 1; $i <= $lastPageNumber; $i++) {
+            $lockCollection->clear();
+            $ids = $this->updateLock->getIdsBatch($lockCollection, $i);
+            $queueIds = array_merge($queueIds, $ids);
+        }
+
+        return $queueIds;
+    }
+
+    /**
+     * @param $group
+     * @param $groupCollection
+     * @return false|void
+     */
+    public function syncBatch($group, $groupCollection)
+    {
+        if ($groupCollection->getSize() == 0) {
+            return false;
+        }
+
+        $groupCollection->clear();
+
+        $groupCollection->each('incSyncAttempt');
+        $groupCollection->each('setData', ['_is_last_page', true]);
+        $queues = $groupCollection->getItems();
+        if (!$queues) {
+            return;
+        }
+        $group->synchronize($queues);
     }
 
     /**
@@ -309,7 +309,6 @@ class Queue
         };
 
         if (empty($this->sortGroups)) {
-
             $sortGroups = [];
 //        $i=0;
 
