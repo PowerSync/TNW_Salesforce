@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace TNW\Salesforce\Service\Synchronize\Queue\Add;
 
 use TNW\Salesforce\Model\ResourceModel\Objects;
+use TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds;
 use TNW\Salesforce\Synchronize\Queue\Unit\CreateQueue\UnsetPendingStatusPool;
 
 /**
@@ -16,6 +17,11 @@ use TNW\Salesforce\Synchronize\Queue\Unit\CreateQueue\UnsetPendingStatusPool;
  */
 class UnsetPendingStatusFromPool
 {
+    /**
+     * @var MassLoadObjectIds
+     */
+    protected $massLoadObjectIds;
+
     /** @var UnsetPendingStatusPool */
     private $pendingStatusPool;
 
@@ -24,14 +30,17 @@ class UnsetPendingStatusFromPool
 
     /**
      * @param UnsetPendingStatusPool $pendingStatusPool
-     * @param Objects                $objects
+     * @param Objects $objects
+     * @param MassLoadObjectIds $massLoadObjectIds
      */
     public function __construct(
         UnsetPendingStatusPool $pendingStatusPool,
-        Objects                $objects
+        Objects                $objects,
+        MassLoadObjectIds $massLoadObjectIds
     ) {
         $this->pendingStatusPool = $pendingStatusPool;
         $this->objects = $objects;
+        $this->massLoadObjectIds = $massLoadObjectIds;
     }
 
     /**
@@ -44,7 +53,7 @@ class UnsetPendingStatusFromPool
             foreach ($entityTypes as $entityType => $websiteIds) {
                 foreach ($websiteIds as $websiteId => $entityIds) {
                     $entityIds = array_values($entityIds);
-                    $objectIds = $this->objects->massLoadObjectIds($entityIds, (string)$entityType, (int)$websiteId);
+                    $objectIds = $this->massLoadObjectIds->massLoadObjectIds($entityIds, (string)$entityType, (int)$websiteId);
                     $entityIdsForUpdateStatus = [];
                     foreach ($entityIds as $entityId) {
                         if (count($objectIds[$entityId])) {
