@@ -35,11 +35,11 @@ class Load implements CleanableInstanceInterface
 
         $entities = [];
         foreach ($requestEntities as $requestEntity) {
-            $entityId = spl_object_id($requestEntity);
+            $entityId = spl_object_hash($requestEntity);
             $entities[$entityId] = $requestEntity;
         }
 
-        $cacheKey = spl_object_id($preLoader);
+        $cacheKey = spl_object_hash($preLoader);
 
         $missedEntities = [];
         foreach ($entities as $entityId => $entity) {

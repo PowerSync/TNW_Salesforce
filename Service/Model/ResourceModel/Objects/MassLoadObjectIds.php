@@ -126,4 +126,29 @@ class MassLoadObjectIds implements CleanableInstanceInterface
         $this->cache = [];
         $this->processed = [];
     }
+
+
+    /**
+     * @param int    $entityId
+     * @param string $magentoType
+     * @param int    $websiteId
+     *
+     * @return array
+     */
+    public function loadObjectIds($entityId, $magentoType, $websiteId)
+    {
+        return $this->execute([$entityId], (string)$magentoType, (int)$websiteId)[$entityId] ?? [];
+    }
+
+    /**
+     * @param array  $entityIds
+     * @param string $magentoType
+     * @param int    $websiteId
+     *
+     * @return array
+     */
+    public function massLoadObjectIds(array $entityIds, string $magentoType, int $websiteId): array
+    {
+        return $this->execute($entityIds, $magentoType, $websiteId);
+    }
 }

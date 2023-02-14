@@ -53,7 +53,7 @@ class EntityLoader extends EntityLoaderAbstract implements EntityPreLoaderInterf
      */
     public function load($entity)
     {
-        $entityId = spl_object_id($entity);
+        $entityId = spl_object_hash($entity);
 
         return $this->loadSubEntities->execute($this, [$entity])[$entityId] ?? null;
     }
