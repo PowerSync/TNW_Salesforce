@@ -245,7 +245,8 @@ class Unit implements CleanableInstanceInterface
         $baseEntityId,
         array $identifiers,
         array $additionalLoad = [],
-        array $additionalToHash = []
+        array $additionalToHash = [],
+        int $priority = 0
     ) {
         $uniqueHash = hash('sha256', (sprintf(
             '%s/%s/%s/%s/%s/%s',
@@ -271,6 +272,7 @@ class Unit implements CleanableInstanceInterface
             'sync_attempt' => 0,
             '_base_entity_id' => [$baseEntityId],
             'identify' => $uniqueHash,
+            'priority' => $priority,
             Queue::UNIQUE_HASH => $uniqueHash
         ]]);
     }
@@ -482,7 +484,7 @@ class Unit implements CleanableInstanceInterface
         if (!$queues) {
             return $filteredQueues;
         }
-        $storeId = $this->request->getParam('store', null);
+        $storeId = (int)$this->request->getParam('store', 0);
         $store = $this->storeManager->getStore($storeId);
         $websiteId = (int)$store->getWebsiteId();
         $filteredQueues = $queues;

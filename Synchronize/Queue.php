@@ -171,8 +171,11 @@ class Queue
                 $iterations = 0;
                 $pageSize = $this->salesforceConfig->getPageSizeFromMagento(null, $syncType);
 
-                xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY + XHPROF_FLAGS_NO_BUILTINS);
                 $queueIds = $this->getQueueIds($lockCollection);
+
+                if (count($queueIds) == 0) {
+                    continue;
+                }
 
                 foreach (array_chunk($queueIds, $pageSize) as $chunkedQueueIds) {
                     $this->updateLock->updateLock($chunkedQueueIds, $phase, $lockCollection->getResource());
@@ -211,25 +214,28 @@ class Queue
                         break;
                     }
                 }
-//                if (count($queueIds) > self::MAX_SYNC_ENTITIES_PER_RUN) {
-//                    // restart consumer to reset cached Magento objects if we sync big batch
-//                    exit(0);
-//                }
-                $xhprof_data = xhprof_disable();
 
-                if (!empty($queueIds)) {
-                    // save raw data for this profiler run using default
-                    // implementation of iXHProfRuns.
-                    $xhprof_runs = new \XHProfRuns_Default();
-
-                    // save the run under a namespace "xhprof_foo"
-                    $run_id = $xhprof_runs->save_run($xhprof_data, "m245ee");
-                }
-
+                $this->checkConsumerMemoryUsage();
             }
         }
     }
 
+    /**
+     * @return void
+     */
+    public function checkConsumerMemoryUsage()
+    {
+        $memory = memory_get_usage(true);
+        if ($memory > $this->salesforceConfig->getMemoryLimitByte()) {
+            exit(0);
+        }
+    }
+
+    /**
+     * @param $lockCollection
+     * @return array
+     * @throws LocalizedException
+     */
     public function getQueueIds($lockCollection)
     {
         $queueIds = [];
@@ -264,7 +270,6 @@ class Queue
         if (!$queues) {
             return;
         }
-        echo sprintf("BATCH SIZE: %s \n", count($queues));
 
         $group->synchronize($queues);
     }
