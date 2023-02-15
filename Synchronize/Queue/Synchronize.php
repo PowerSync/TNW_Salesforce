@@ -170,6 +170,7 @@ class Synchronize
             ['lt' => $this->salesforceConfig->getMaxAdditionalAttemptsCount($this->getSynchronizeQueue()->isCheck())]
         );
 
+        $collection->addOrder('priority');
         $collection->addOrder('sync_at', Collection::SORT_ORDER_ASC);
         $collection->addOrder('sync_attempt', Collection::SORT_ORDER_ASC);
 

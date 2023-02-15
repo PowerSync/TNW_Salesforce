@@ -60,7 +60,9 @@ class FilterBlockedQueueRecords
             $connection = $this->resourceConnection->getConnection();
             $dependentFilter = $connection->select()
                 ->from(
-                    ['parent' => $this->resourceConnection->getTableName('tnw_salesforce_entity_queue')], [])
+                    ['parent' => $this->resourceConnection->getTableName('tnw_salesforce_entity_queue')],
+                    []
+                )
                 ->joinInner(
                     ['relation' => $this->resourceConnection->getTableName('tnw_salesforce_entity_queue_relation')],
                     'relation.parent_id = parent.queue_id',
@@ -73,8 +75,7 @@ class FilterBlockedQueueRecords
                 )
                 ->where('parent.status IN (?)', array_merge($this->processStatuses, $this->errorStatuses, $this->newStatuses))
                 ->where('child.queue_id IN (?)', $queueIds)
-                ->group('relation.queue_id')
-            ;
+                ->group('relation.queue_id');
 
             $blockedIds = $connection->fetchCol($dependentFilter);
             if (!empty($blockedIds)) {
