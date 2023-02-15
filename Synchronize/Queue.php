@@ -213,9 +213,8 @@ class Queue
                         // to avoid infinity loop
                         break;
                     }
+                    $this->checkConsumerMemoryUsage();
                 }
-
-                $this->checkConsumerMemoryUsage();
             }
         }
     }
