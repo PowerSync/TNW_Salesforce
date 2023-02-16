@@ -247,7 +247,7 @@ class Queue
             $queueIds = array_merge($queueIds, $ids);
         }
 
-        return $queueIds;
+        return array_unique($queueIds);
     }
 
     /**
