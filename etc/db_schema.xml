@@ -172,6 +172,9 @@
         <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_STATUS" indexType="btree">
             <column name="status" />
         </index>
+        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_PRIORITY" indexType="btree">
+            <column name="priority" />
+        </index>
         <index referenceId="TNW_SALESFORCE_ENTITY_ENTITY_ID" indexType="btree">
             <column name="entity_id" />
         </index>
