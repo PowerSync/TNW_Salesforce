@@ -9,9 +9,15 @@ namespace TNW\Salesforce\Block\Adminhtml\Base\Edit\Renderer;
 use Magento\Framework\Data\Form\Element\CollectionFactory;
 use Magento\Framework\Data\Form\Element\Factory;
 use Magento\Framework\Escaper;
+use TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds;
 
 abstract class SForceId extends \Magento\Framework\Data\Form\Element\Link
 {
+    /**
+     * @var MassLoadObjectIds
+     */
+    protected $massLoadObjectIds;
+
     /** @var \TNW\Salesforce\Client\Salesforce  */
     private $client;
 
@@ -22,7 +28,6 @@ abstract class SForceId extends \Magento\Framework\Data\Form\Element\Link
     protected $registry;
 
     /**
-     * SForceId constructor.
      * @param Factory $factoryElement
      * @param CollectionFactory $factoryCollection
      * @param Escaper $escaper
@@ -30,6 +35,7 @@ abstract class SForceId extends \Magento\Framework\Data\Form\Element\Link
      * @param \TNW\Salesforce\Client\Salesforce $client
      * @param \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects
      * @param \Magento\Framework\Registry $registry
+     * @param MassLoadObjectIds $massLoadObjectIds
      */
     public function __construct(
         Factory $factoryElement,
@@ -38,12 +44,14 @@ abstract class SForceId extends \Magento\Framework\Data\Form\Element\Link
         array $data,
         \TNW\Salesforce\Client\Salesforce $client,
         \TNW\Salesforce\Model\ResourceModel\Objects $resourceObjects,
-        \Magento\Framework\Registry $registry
+        \Magento\Framework\Registry $registry,
+        MassLoadObjectIds $massLoadObjectIds
     ) {
         parent::__construct($factoryElement, $factoryCollection, $escaper, $data);
         $this->client = $client;
         $this->resourceObjects = $resourceObjects;
         $this->registry = $registry;
+        $this->massLoadObjectIds = $massLoadObjectIds;
     }
 
     /**
@@ -104,7 +112,7 @@ abstract class SForceId extends \Magento\Framework\Data\Form\Element\Link
         $url = $this->client->getSalesForceUrl($websiteId);
 
         $magentoId = $this->getEntityId();
-        $salesforceIds = $this->resourceObjects->loadObjectIds($magentoId, $this->getMagentoObjectType(), $websiteId);
+        $salesforceIds = $this->massLoadObjectIds->loadObjectIds($magentoId, $this->getMagentoObjectType(), $websiteId);
 
         $salesforceObject = $this->getSalesforceObjectByAttribute();
 

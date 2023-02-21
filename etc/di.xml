@@ -522,7 +522,7 @@
     </virtualType>
     <type name="TNW\Salesforce\Observer\WebsiteSaveCommitAfter">
         <arguments>
-            <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Customer</argument>
+            <argument name="entities" xsi:type="object">TNW\Salesforce\Observer\Entities\Website</argument>
         </arguments>
     </type>
 

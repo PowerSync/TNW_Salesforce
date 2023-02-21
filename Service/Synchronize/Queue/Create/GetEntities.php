@@ -47,7 +47,7 @@ class GetEntities implements CleanableInstanceInterface
 
         $entityIds = array_unique($entityIds);
 
-        $type = spl_object_id($loader);
+        $type = spl_object_hash($loader);
 
         $missedEntityIds = [];
         foreach ($entityIds as $entityId) {

@@ -14,7 +14,6 @@ use \Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\Model\ResourceModel\Db\Context;
 use Psr\Log\LoggerInterface;
 use TNW\Salesforce\Model\Config;
-use TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds;
 
 class Objects extends AbstractDb
 {
@@ -66,26 +65,19 @@ class Objects extends AbstractDb
      */
     private $config;
 
-    /** @var MassLoadObjectIds */
-    private $massLoadObjectIds;
-
     /** @var LoggerInterface */
     private $logger;
 
     /**
-     * Objects constructor.
-     *
-     * @param Context           $context
-     * @param Config            $config
-     * @param MassLoadObjectIds $massLoadObjectIds
-     * @param LoggerInterface   $logger
-     * @param null              $connectionName
-     * @param ?Manager          $eventManager
+     * @param Context $context
+     * @param Config $config
+     * @param LoggerInterface $logger
+     * @param null $connectionName
+     * @param Manager|null $eventManager
      */
     public function __construct(
         Context           $context,
         Config            $config,
-        MassLoadObjectIds $massLoadObjectIds,
         LoggerInterface   $logger,
                           $connectionName = null,
         Manager           $eventManager = null
@@ -93,7 +85,6 @@ class Objects extends AbstractDb
         parent::__construct($context, $connectionName);
         $this->eventManager = $eventManager ?? ObjectManager::getInstance()->get(Manager::class);
         $this->config = $config;
-        $this->massLoadObjectIds = $massLoadObjectIds;
         $this->logger = $logger;
     }
 
@@ -214,30 +205,6 @@ class Objects extends AbstractDb
             'entity_website_id' => $websiteId,
             'base_website_id' => $this->baseWebsiteId($websiteId),
         ]);
-    }
-
-    /**
-     * @param int    $entityId
-     * @param string $magentoType
-     * @param int    $websiteId
-     *
-     * @return array
-     */
-    public function loadObjectIds($entityId, $magentoType, $websiteId)
-    {
-        return $this->massLoadObjectIds->execute([$entityId], (string)$magentoType, (int)$websiteId)[$entityId] ?? [];
-    }
-
-    /**
-     * @param array  $entityIds
-     * @param string $magentoType
-     * @param int    $websiteId
-     *
-     * @return array
-     */
-    public function massLoadObjectIds(array $entityIds, string $magentoType, int $websiteId): array
-    {
-        return $this->massLoadObjectIds->execute($entityIds, $magentoType, $websiteId);
     }
 
     /**
