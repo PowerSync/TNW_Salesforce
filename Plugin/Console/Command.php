@@ -6,8 +6,6 @@
 namespace TNW\Salesforce\Plugin\Console;
 
 use Symfony\Component\Console\Command\Command as Subject;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use TNW\Salesforce\Service\Sync\Entities as SyncEntitiesService;
 
 class Command
@@ -28,15 +26,17 @@ class Command
 
     /**
      * @param Subject $subject
-     * @param int $result
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int
+     * @param array $args
+     * @return array
      */
-    public function afterRun(Subject $subject, int $result, InputInterface $input, OutputInterface $output): int
+    public function beforeRun(Subject $subject, ...$args)
     {
-        $this->syncEntitiesService->execute();
+        $commandName = $subject->getName();
 
-        return $result;
+        if ($commandName !== 'cron:run') {
+            $this->syncEntitiesService->execute();
+        }
+
+        return $args;
     }
 }
