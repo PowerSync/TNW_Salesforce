@@ -9,6 +9,7 @@ namespace TNW\Salesforce\Synchronize;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
+use TNW\Salesforce\Service\MessageQueue\CheckMemoryLimit;
 use Throwable;
 use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Model;
@@ -63,6 +64,9 @@ class Queue
     /** @var LoggerInterface */
     protected $logger;
 
+    /** @var CheckMemoryLimit  */
+    protected $checkMemoryLimitService;
+
     protected $updateLock;
 
     /**
@@ -74,7 +78,8 @@ class Queue
      * @param CleanLocalCacheForInstances $cleanLocalCacheForInstances
      * @param LoggerInterface $logger
      * @param UpdateLock $updateLock
-     * @param $isCheck
+     * @param CheckMemoryLimit $checkMemoryLimitService
+     * @param bool $isCheck
      */
     public function __construct(
         array                               $groups,
@@ -85,6 +90,7 @@ class Queue
         CleanLocalCacheForInstances         $cleanLocalCacheForInstances,
         LoggerInterface                     $logger,
         UpdateLock                          $updateLock,
+        CheckMemoryLimit $checkMemoryLimitService,
         $isCheck = false
     ) {
         $this->groups = $groups;
@@ -95,6 +101,7 @@ class Queue
         $this->setIsCheck($isCheck);
         $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
         $this->logger = $logger;
+        $this->checkMemoryLimitService = $checkMemoryLimitService;
         $this->updateLock = $updateLock;
     }
 
@@ -171,7 +178,7 @@ class Queue
                 $iterations = 0;
                 $pageSize = $this->salesforceConfig->getPageSizeFromMagento(null, $syncType);
 
-                $queueIds = $this->getQueueIds($lockCollection);
+                $queueIds = $this->getQueueIds($lockCollection, $pageSize);
 
                 if (count($queueIds) == 0) {
                     continue;
@@ -213,7 +220,7 @@ class Queue
                         // to avoid infinity loop
                         break;
                     }
-                    $this->checkConsumerMemoryUsage();
+                    $this->afterSyncAction();
                 }
             }
         }
@@ -222,28 +229,27 @@ class Queue
     /**
      * @return void
      */
-    public function checkConsumerMemoryUsage()
+    public function afterSyncAction()
     {
-        $memory = memory_get_usage(true);
-        if ($memory > $this->salesforceConfig->getMemoryLimitByte()) {
-            exit(0);
-        }
+        $this->checkMemoryLimitService->execute();
     }
 
     /**
      * @param $lockCollection
+     * @param $pageSize
      * @return array
      * @throws LocalizedException
      */
-    public function getQueueIds($lockCollection)
+    public function getQueueIds($lockCollection, $count)
     {
         $queueIds = [];
         $lockCollection->setPageSize(ChunkSizeInterface::CHUNK_SIZE_200);
         $lastPageNumber = (int)$lockCollection->getLastPageNumber();
 
-        for ($i = 1; $i <= $lastPageNumber; $i++) {
+        for ($i = 1; ($i <= $lastPageNumber && $count > 0); $i++) {
             $lockCollection->clear();
-            $ids = $this->updateLock->getIdsBatch($lockCollection, $i);
+            $ids = $this->updateLock->getIdsBatch($lockCollection, $i, $count);
+            $count -= count($ids);
             $queueIds = array_merge($queueIds, $ids);
         }
 
