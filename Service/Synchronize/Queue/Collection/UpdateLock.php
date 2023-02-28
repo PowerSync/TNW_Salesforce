@@ -100,15 +100,19 @@ class UpdateLock
     /**
      * @param Collection $idsCollection
      * @param int $page
-     * @param int $limit
+     * @param int $count
      * @return array
      * @throws LocalizedException
      */
-    public function getIdsBatch(Collection $idsCollection, int $page = 1, int $limit = ChunkSizeInterface::CHUNK_SIZE_200): array
+    public function getIdsBatch(Collection $idsCollection, int $page, int $count): array
     {
+        if ($count <= 0) {
+            return [];
+        }
+
         $this->resetCollection($idsCollection);
         if (!$idsCollection->getPageSize()) {
-            $idsCollection->setPageSize($limit);
+            $idsCollection->setPageSize(ChunkSizeInterface::CHUNK_SIZE_200);
         }
 
         $idsCollection->setCurPage($page);
@@ -118,6 +122,7 @@ class UpdateLock
         }
 
         $ids = $idsCollection->getColumnValues($idsCollection->getResource()->getIdFieldName());
+        $ids = array_slice($ids, 0, $count);
         $ids = $this->filterBlockedQueueRecords->execute($ids);
 
         return $ids;
