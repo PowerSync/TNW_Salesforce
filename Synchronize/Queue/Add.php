@@ -354,8 +354,8 @@ class Add
             foreach ([$current] as $relation) {
                 foreach ($relation as $relationItem) {
                     if (empty($queuesUnique[$key][$relationItem->getId()])) {
-                        $currentEntityIds[$relationItem->getEntityLoad()][] = $relationItem->getEntityId();
-                        $currentByEntityLoad[$relationItem->getEntityLoad()][] = $relationItem;
+                        $currentEntityIds[$relationItem->getEntityLoad()][$relationItem->getEntityId()] = $relationItem->getEntityId();
+                        $currentByEntityLoad[$relationItem->getEntityLoad()][$relationItem->getEntityId()] = $relationItem;
                         $queuesUnique[$key][$relationItem->getId()] = $relationItem;
                     }
                 }
