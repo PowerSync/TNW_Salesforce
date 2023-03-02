@@ -243,6 +243,8 @@ jobs:
             cd /var/www/html/magento/
             composer config -g http-basic.dist.powersync.biz $TECHWEB_REPO_LOGIN $TECHNWEB_REPO_PASSWORD
             composer config --global repositories.powersync composer https://dist.powersync.biz
+            composer config repositories.powersync '{"type": "composer", "url": "https://dist.powersync.biz", "canonical": false}'
+            composer config repositories.0 '{"type": "composer", "url": "https://repo.magento.com/", "canonical": false}'
 
       - run:
           name: Checkout related modules
@@ -294,6 +296,7 @@ jobs:
             echo '{}'>~/.composer/composer.json
             composer config -g http-basic.dist.powersync.biz $TECHWEB_REPO_LOGIN $TECHNWEB_REPO_PASSWORD
             composer config --global repositories.powersync composer https://dist.powersync.biz
+
       - run:
           name: Push changes to wiki
           command: |
@@ -471,6 +474,9 @@ jobs:
             cd /var/www/html/magento/
             composer config -g http-basic.dist.powersync.biz $TECHWEB_REPO_LOGIN $TECHNWEB_REPO_PASSWORD
             composer config --global repositories.powersync composer https://dist.powersync.biz
+            composer config repositories.powersync '{"type": "composer", "url": "https://dist.powersync.biz", "canonical": false}'
+            composer config repositories.0 '{"type": "composer", "url": "https://repo.magento.com/", "canonical": false}'
+
 
       - run:
           name: Checkout related modules
@@ -516,6 +522,7 @@ jobs:
             echo '{}'>~/.composer/composer.json
             composer config -g http-basic.dist.powersync.biz $TECHWEB_REPO_LOGIN $TECHNWEB_REPO_PASSWORD
             composer config --global repositories.powersync composer https://dist.powersync.biz
+
       - run:
           name: Push changes to wiki
           command: |

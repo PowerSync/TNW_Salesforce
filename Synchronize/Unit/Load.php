@@ -13,6 +13,7 @@ use TNW\Salesforce\Model\Entity\SalesforceIdStorage;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\Objects;
 use TNW\Salesforce\Model\ResourceModel\Queue\GetDependenceQueueIdsGroupedByCode;
+use TNW\Salesforce\Service\Model\ResourceModel\Objects\MassLoadObjectIds;
 use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetDependenceIdsByEntityType;
 use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\PreLoadEntities;
@@ -27,6 +28,11 @@ use TNW\Salesforce\Synchronize\Units;
  */
 class Load extends UnitAbstract
 {
+    /**
+     * @var MassLoadObjectIds
+     */
+    protected $massLoadObjectIds;
+
     /**
      * @var string
      */
@@ -92,20 +98,22 @@ class Load extends UnitAbstract
      *
      * @param string                       $name
      * @param string                       $magentoType
-     * @param array                        $queues
-     * @param array                        $loaders
-     * @param Units                        $units
-     * @param Group                        $group
-     * @param IdentificationInterface      $identification
-     * @param HashInterface                $hash
-     * @param Objects                      $objects
-     * @param PreLoadEntities              $preLoadEntities
+     * @param array $queues
+     * @param array $loaders
+     * @param Units $units
+     * @param Group $group
+     * @param IdentificationInterface $identification
+     * @param HashInterface $hash
+     * @param Objects $objects
+     * @param PreLoadEntities $preLoadEntities
      * @param GetDependenceIdsByEntityType $getDependenceIdsByEntityType
-     * @param GetQueuesByIds               $getQueuesByIds
-     * @param SubEntitiesLoad              $loadSubEntities
-     * @param SalesforceIdStorage|null     $entityObject
-     * @param array                        $entityLoaders
-     * @param array                        $entityTypeMapping
+     * @param GetQueuesByIds $getQueuesByIds
+     * @param SubEntitiesLoad $loadSubEntities
+     * @param GetDependenceQueueIdsGroupedByCode $getDependenceQueueIdsGroupedByCode
+     * @param SalesforceIdStorage|null $entityObject
+     * @param MassLoadObjectIds $massLoadObjectIds
+     * @param array $entityLoaders
+     * @param array $entityTypeMapping
      */
     public function __construct(
         $name,
@@ -123,6 +131,7 @@ class Load extends UnitAbstract
         SubEntitiesLoad $loadSubEntities,
         GetDependenceQueueIdsGroupedByCode $getDependenceQueueIdsGroupedByCode,
         SalesforceIdStorage $entityObject = null,
+        MassLoadObjectIds $massLoadObjectIds,
         array $entityLoaders = [],
         array $entityTypeMapping = []
     ) {
@@ -141,6 +150,7 @@ class Load extends UnitAbstract
         $this->getQueuesByIds = $getQueuesByIds;
         $this->loadSubEntities = $loadSubEntities;
         $this->getDependenceQueueIdsGroupedByCode = $getDependenceQueueIdsGroupedByCode;
+        $this->massLoadObjectIds = $massLoadObjectIds;
     }
 
     /**
@@ -206,7 +216,7 @@ class Load extends UnitAbstract
 
                     if (!empty($subEntity)) {
                         if (!empty($entityLoader->getSalesforceIdStorage()) && !$subEntity->getData($subEntity->getIdFieldName())) {
-                            $salesforceIds = $this->objects->loadObjectIds(
+                            $salesforceIds = $this->massLoadObjectIds->loadObjectIds(
                                 $queue->getEntityId(),
                                 $queue->getEntityLoad(),
                                 $queue->getWebsiteId()
@@ -417,7 +427,7 @@ class Load extends UnitAbstract
                 foreach ($groupedByMagentoTypes as $magentoType => $entityIds) {
                     $entityIds = array_values($entityIds);
 
-                    $this->objects->massLoadObjectIds(
+                    $this->massLoadObjectIds->massLoadObjectIds(
                         $entityIds,
                         (string)$magentoType,
                         (int)$websiteId
