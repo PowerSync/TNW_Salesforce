@@ -87,6 +87,7 @@ class Customer implements LoadLoaderInterface, PreLoaderInterface
     public function createCollectionInstance(): ?AbstractDb
     {
         $collection = $this->collectionFactory->create();
+        $collection->addAttributeToSelect('sales_representative');
 
         return $collection;
     }
