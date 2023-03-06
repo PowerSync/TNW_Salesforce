@@ -75,6 +75,7 @@ class GetCustomersByCustomerIds implements CleanableInstanceInterface
         if ($missedEntityIds) {
             foreach (array_chunk($missedEntityIds, ChunkSizeInterface::CHUNK_SIZE) as $missedEntityIdsChunk) {
                 $collection = $this->collectionFactory->create();
+                $collection->addAttributeToSelect('sales_representative');
                 $collection->addFieldToFilter(
                     $this->resource->getIdFieldName(),
                     ['in' => $entityIds]
