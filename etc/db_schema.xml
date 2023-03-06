@@ -123,7 +123,7 @@
         <column xsi:type="varchar" name="object_type" nullable="false" length="255" comment="Object Type" />
         <column xsi:type="int" name="sync_type" padding="10" unsigned="true" nullable="false" identity="false" default="0" comment="Sync Type" />
         <column xsi:type="int" name="sync_attempt" padding="10" unsigned="true" nullable="false" identity="false" default="0" comment="Sync Attempt" />
-        <column xsi:type="datetime" name="sync_at" on_update="false" nullable="true" comment="When synced" />
+        <column xsi:type="timestamp" name="sync_at" on_update="false" nullable="true" comment="When synced" />
         <column xsi:type="varchar" name="status" nullable="false" length="30" default="new" comment="Status" />
         <column xsi:type="text" name="message" nullable="true" comment="Message" />
         <column xsi:type="varchar" name="status_code" nullable="true" comment="Status code"/>
