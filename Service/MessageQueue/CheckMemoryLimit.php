@@ -38,7 +38,9 @@ class CheckMemoryLimit
     {
         $memory = memory_get_usage(true);
         if ($memory > $this->salesforceConfig->getMemoryLimitByte()) {
-            exit(0);
+            // Emergency exit from the specific consumer
+            // phpcs:ignore
+            exit(0); // @codingStandardsIgnoreLine
         }
     }
 }
