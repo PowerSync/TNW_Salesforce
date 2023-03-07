@@ -8,103 +8,101 @@ namespace TNW\Salesforce\Synchronize;
 
 use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Stdlib\DateTime\DateTime;
 use Psr\Log\LoggerInterface;
+use TNW\Salesforce\Service\MessageQueue\CheckMemoryLimit;
+use Throwable;
+use TNW\Salesforce\Api\ChunkSizeInterface;
 use TNW\Salesforce\Model;
 use TNW\Salesforce\Model\Config;
-use TNW\Salesforce\Model\Logger\Processor\UidProcessor;
 use TNW\Salesforce\Model\ResourceModel\Queue\Collection;
 use TNW\Salesforce\Service\CleanLocalCacheForInstances;
+use TNW\Salesforce\Service\Synchronize\Queue\Collection\UpdateLock;
 use TNW\Salesforce\Synchronize\Exception as SalesforceException;
 use TNW\Salesforce\Synchronize\Queue\PushMqMessage;
-use Zend_Db_Expr;
 
 /**
  * Queue
  */
 class Queue
 {
+    const MAX_SYNC_ITERATIONS = 1000;
+    const MAX_SYNC_ENTITIES_PER_RUN = 1000;
     /**
      * @var Group[]
      */
-    private $groups;
+    protected $groups;
 
     /**
      * @var string[]
      */
-    private $phases;
+    protected $phases;
 
     /**
      * @var Model\Config
      */
-    private $salesforceConfig;
+    protected $salesforceConfig;
 
     /**
      * @var Model\ResourceModel\Queue
      */
-    private $resourceQueue;
-
-    /**
-     * @var Model\Logger\Processor\UidProcessor
-     */
-    private $uidProcessor;
+    protected $resourceQueue;
 
     /** @var [] */
-    private $sortGroups;
+    protected $sortGroups;
 
     /** @var Queue\PushMqMessage */
-    private $pushMqMessage;
+    protected $pushMqMessage;
 
     /**
      * @var boolean
      */
-    private $isCheck = false;
-
-    /** @var DateTime */
-    private $dateTime;
+    protected $isCheck = false;
 
     /** @var CleanLocalCacheForInstances */
-    private $cleanLocalCacheForInstances;
+    protected $cleanLocalCacheForInstances;
 
     /** @var LoggerInterface */
-    private $logger;
+    protected $logger;
+
+    /** @var CheckMemoryLimit  */
+    protected $checkMemoryLimitService;
+
+    protected $updateLock;
 
     /**
-     * Queue constructor.
-     *
-     * @param array                       $groups
-     * @param array                       $phases
-     * @param Config                      $salesforceConfig
-     * @param Model\ResourceModel\Queue   $resourceQueue
-     * @param UidProcessor                $uidProcessor
-     * @param PushMqMessage               $pushMqMessage
-     * @param DateTime                    $dateTime
+     * @param array $groups
+     * @param array $phases
+     * @param Config $salesforceConfig
+     * @param Model\ResourceModel\Queue $resourceQueue
+     * @param PushMqMessage $pushMqMessage
      * @param CleanLocalCacheForInstances $cleanLocalCacheForInstances
-     * @param LoggerInterface             $logger
-     * @param bool                        $isCheck
+     * @param LoggerInterface $logger
+     * @param UpdateLock $updateLock
+     * @param CheckMemoryLimit $checkMemoryLimitService
+     * @param bool $isCheck
      */
     public function __construct(
         array                               $groups,
         array                               $phases,
         Model\Config                        $salesforceConfig,
         Model\ResourceModel\Queue           $resourceQueue,
-        Model\Logger\Processor\UidProcessor $uidProcessor,
         PushMqMessage                       $pushMqMessage,
-        DateTime                            $dateTime,
         CleanLocalCacheForInstances         $cleanLocalCacheForInstances,
         LoggerInterface                     $logger,
-                                            $isCheck = false
+        UpdateLock                          $updateLock,
+        CheckMemoryLimit $checkMemoryLimitService,
+        $isCheck = false
     ) {
         $this->groups = $groups;
         $this->phases = array_filter($phases);
         $this->salesforceConfig = $salesforceConfig;
         $this->resourceQueue = $resourceQueue;
-        $this->uidProcessor = $uidProcessor;
         $this->pushMqMessage = $pushMqMessage;
         $this->setIsCheck($isCheck);
-        $this->dateTime = $dateTime;
         $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
         $this->logger = $logger;
+        $this->checkMemoryLimitService = $checkMemoryLimitService;
+        $this->updateLock = $updateLock;
     }
 
     /**
@@ -130,10 +128,10 @@ class Queue
      *
      * @param Collection $collection
      * @param            $websiteId
-     * @param array      $syncJobs
+     * @param array $syncJobs
      *
      * @throws LocalizedException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function synchronize($collection, $websiteId, $syncJobs = [])
     {
@@ -151,8 +149,7 @@ class Queue
         if ($collection->getSize() === 0) {
             return;
         }
-
-        // Collection Clear
+        // Collection Clear to reset getSize() update
         $collection->clear();
 
         ksort($this->phases);
@@ -165,8 +162,6 @@ class Queue
             if (!$allowedStatuses) {
                 continue;
             }
-            // refresh uid
-            $this->uidProcessor->refresh();
 
             foreach ($this->phases as $phase) {
                 $startStatus = $phase['startStatus'] ?? '';
@@ -177,55 +172,35 @@ class Queue
                 $lockCollection = clone $collection;
                 $lockCollection->addFilterToCode($groupCode);
                 $lockCollection->addFilterToStatus($startStatus);
-                $lockCollection->addFilterToNotTransactionUid($this->uidProcessor->uid());
-                $lockData = [
-                    'status' => $phase['processStatus'],
-                    'transaction_uid' => $this->uidProcessor->uid(),
-                    'identify' => new Zend_Db_Expr('queue_id')
-                ];
 
-                if ($startStatus === Model\Queue::STATUS_NEW) {
-                    $lockData['sync_at'] = $this->dateTime->gmtDate('c');
-                }
+                $syncType = $this->getSyncType($lockCollection);
 
-                // Mark work
-                $countUpdate = $lockCollection->updateLock($lockData, $groupCode, (int)$websiteId);
+                $iterations = 0;
+                $pageSize = $this->salesforceConfig->getPageSizeFromMagento(null, $syncType);
 
-                if (0 === $countUpdate) {
+                $queueIds = $this->getQueueIds($lockCollection, $pageSize);
+
+                if (count($queueIds) == 0) {
                     continue;
                 }
 
-                $groupCollection = clone $collection;
-                $groupCollection->addFilterToStatus($phase['processStatus']);
-                $groupCollection->addFilterToTransactionUid($this->uidProcessor->uid());
-                $syncType = $this->getSyncType($groupCollection);
-                $groupCollection->setPageSize($this->salesforceConfig->getPageSizeFromMagento(null, $syncType));
+                foreach (array_chunk($queueIds, $pageSize) as $chunkedQueueIds) {
+                    $this->updateLock->updateLock($chunkedQueueIds, $phase, $lockCollection->getResource());
 
-                $lastPageNumber = (int)$groupCollection->getLastPageNumber();
+                    $iterations++;
+                    $groupCollection = clone $collection;
+                    $groupCollection->addFilterToIds($chunkedQueueIds);
 
-                $group->messageDebug(
-                    'Start job "%s", phase "%s" for website %s',
-                    $groupCode,
-                    $phase['phaseName'],
-                    $websiteId
-                );
+                    $group->messageDebug(
+                        'Start job "%s", phase "%s" for website %s',
+                        $groupCode,
+                        $phase['phaseName'],
+                        $websiteId
+                    );
 
-                for ($i = 1; $i <= $lastPageNumber; $i++) {
                     try {
-                        $groupCollection->clear();
-
-                        $group->messageDebug('Batch #%s of %s', $i, $lastPageNumber);
-
-                        $groupCollection->each('incSyncAttempt');
-                        $groupCollection->each('setData', ['_is_last_page', $lastPageNumber === $i]);
-                        $queues = $groupCollection->getItems();
-                        if (!$queues) {
-                            continue;
-                        }
-                        $groupInstance = clone $group;
-                        $groupInstance->synchronize($queues);
-                        unset($groupInstance);
-                    } catch (\Throwable $e) {
+                        $this->syncBatch($group, $groupCollection);
+                    } catch (Throwable $e) {
                         $this->processError($e, $groupCollection, $group, $phase);
                     }
 
@@ -239,11 +214,69 @@ class Queue
                     // Save change status
                     $groupCollection->save();
                     $this->cleanLocalCacheForInstances->execute();
-                }
 
-                $this->pushMqMessage->sendMessage($syncType);
+                    $this->pushMqMessage->sendMessage($syncType);
+                    if ($iterations > self::MAX_SYNC_ITERATIONS) {
+                        // to avoid infinity loop
+                        break;
+                    }
+                    $this->afterSyncAction();
+                }
             }
         }
+    }
+
+    /**
+     * @return void
+     */
+    public function afterSyncAction()
+    {
+        $this->checkMemoryLimitService->execute();
+    }
+
+    /**
+     * @param $lockCollection
+     * @param $pageSize
+     * @return array
+     * @throws LocalizedException
+     */
+    public function getQueueIds($lockCollection, $count)
+    {
+        $queueIds = [];
+        $lockCollection->setPageSize(ChunkSizeInterface::CHUNK_SIZE_200);
+        $lastPageNumber = (int)$lockCollection->getLastPageNumber();
+
+        for ($i = 1; ($i <= $lastPageNumber && $count > 0); $i++) {
+            $lockCollection->clear();
+            $ids = $this->updateLock->getIdsBatch($lockCollection, $i, $count);
+            $count -= count($ids);
+            $queueIds = array_merge($queueIds, $ids);
+        }
+
+        return array_unique($queueIds);
+    }
+
+    /**
+     * @param $group
+     * @param $groupCollection
+     * @return false|void
+     */
+    public function syncBatch($group, $groupCollection)
+    {
+        if ($groupCollection->getSize() == 0) {
+            return false;
+        }
+
+        $groupCollection->clear();
+
+        $groupCollection->each('incSyncAttempt');
+        $groupCollection->each('setData', ['_is_last_page', true]);
+        $queues = $groupCollection->getItems();
+        if (!$queues) {
+            return;
+        }
+
+        $group->synchronize($queues);
     }
 
     /**
@@ -305,7 +338,6 @@ class Queue
         };
 
         if (empty($this->sortGroups)) {
-
             $sortGroups = [];
 //        $i=0;
 

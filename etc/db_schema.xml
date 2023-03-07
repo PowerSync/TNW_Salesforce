@@ -123,7 +123,7 @@
         <column xsi:type="varchar" name="object_type" nullable="false" length="255" comment="Object Type" />
         <column xsi:type="int" name="sync_type" padding="10" unsigned="true" nullable="false" identity="false" default="0" comment="Sync Type" />
         <column xsi:type="int" name="sync_attempt" padding="10" unsigned="true" nullable="false" identity="false" default="0" comment="Sync Attempt" />
-        <column xsi:type="datetime" name="sync_at" on_update="false" nullable="true" comment="When synced" />
+        <column xsi:type="timestamp" name="sync_at" on_update="false" nullable="true" comment="When synced" />
         <column xsi:type="varchar" name="status" nullable="false" length="30" default="new" comment="Status" />
         <column xsi:type="text" name="message" nullable="true" comment="Message" />
         <column xsi:type="varchar" name="status_code" nullable="true" comment="Status code"/>
@@ -137,6 +137,7 @@
         <column xsi:type="varchar" name="identify" nullable="true" length="64" comment="Identifier allow detect entity added to the queue with specific params" />
         <column xsi:type="varchar" name="composite_status" nullable="false" length="255" default="new" comment="Composite status, taking into account the status of relatives" />
         <column xsi:type="varchar" name="unique_hash" nullable="true" length="64" comment="Unique hash for record based on unique data for object." />
+        <column xsi:type="int" name="priority" unsigned="true" nullable="false" identity="false" default="0" comment="Sort order field for optimization" />
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="queue_id" />
         </constraint>
@@ -170,6 +171,9 @@
         </index>
         <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_STATUS" indexType="btree">
             <column name="status" />
+        </index>
+        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_PRIORITY" indexType="btree">
+            <column name="priority" />
         </index>
         <index referenceId="TNW_SALESFORCE_ENTITY_ENTITY_ID" indexType="btree">
             <column name="entity_id" />
