@@ -52,17 +52,17 @@ class FilterBlockedQueueRecords
 
     /**
      * @param array $queueIds
-     * @param string $groupCode
-     * @param int $websiteId
      * @return array
      */
-    public function execute(array $queueIds, string $groupCode, int $websiteId): array
+    public function execute(array $queueIds): array
     {
         if (!empty($queueIds)) {
             $connection = $this->resourceConnection->getConnection();
             $dependentFilter = $connection->select()
                 ->from(
-                    ['parent' => $this->resourceConnection->getTableName('tnw_salesforce_entity_queue')], [])
+                    ['parent' => $this->resourceConnection->getTableName('tnw_salesforce_entity_queue')],
+                    []
+                )
                 ->joinInner(
                     ['relation' => $this->resourceConnection->getTableName('tnw_salesforce_entity_queue_relation')],
                     'relation.parent_id = parent.queue_id',
@@ -74,9 +74,8 @@ class FilterBlockedQueueRecords
                     []
                 )
                 ->where('parent.status IN (?)', array_merge($this->processStatuses, $this->errorStatuses, $this->newStatuses))
-                ->where('parent.website_id = ?', $websiteId)
-                ->where('child.code = ?', $groupCode)
-                ->where('child.queue_id IN (?)', $queueIds);
+                ->where('child.queue_id IN (?)', $queueIds)
+                ->group('relation.queue_id');
 
             $blockedIds = $connection->fetchCol($dependentFilter);
             if (!empty($blockedIds)) {

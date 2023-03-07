@@ -15,6 +15,7 @@ use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Psr\Log\LoggerInterface;
+use TNW\Salesforce\Service\MessageQueue\CheckMemoryLimit;
 use TNW\Salesforce\Api\MessageQueue\PublisherAdapter;
 use TNW\Salesforce\Model\ResourceModel\PreQueue;
 use TNW\Salesforce\Service\CleanLocalCacheForInstances;
@@ -60,20 +61,24 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
     /** @var GetAvailableSyncTypesByEntityTypes */
     protected $getAvailableSyncTypesByEntityTypes;
 
+    /** @var CheckMemoryLimit  */
+    protected $checkMemoryLimitService;
     /** @var LoggerInterface */
     protected $logger;
 
     /**
      * Process constructor.
      *
-     * @param array                              $queueAddPool
-     * @param PreQueue                           $resourcePreQueue
-     * @param State                              $state
-     * @param TimezoneInterface                  $timezone
-     * @param ConfigInterface                    $config
-     * @param PublisherAdapter                   $publisher
-     * @param MagentoSyncTypeInterface           $magentoSyncType
-     * @param CleanLocalCacheForInstances        $cleanLocalCacheForInstances
+     * @param array $queueAddPool
+     * @param PreQueue $resourcePreQueue
+     * @param State $state
+     * @param TimezoneInterface $timezone
+     * @param ConfigInterface $config
+     * @param PublisherAdapter $publisher
+     * @param LoggerInterface $logger
+     * @param MagentoSyncTypeInterface $magentoSyncType
+     * @param CleanLocalCacheForInstances $cleanLocalCacheForInstances
+     * @param CheckMemoryLimit $checkMemoryLimitService
      * @param GetAvailableSyncTypesByEntityTypes $getAvailableSyncTypesByEntityTypes
      */
     public function __construct(
@@ -86,6 +91,7 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
         LoggerInterface             $logger,
         MagentoSyncTypeInterface    $magentoSyncType,
         CleanLocalCacheForInstances $cleanLocalCacheForInstances,
+        CheckMemoryLimit $checkMemoryLimitService,
         GetAvailableSyncTypesByEntityTypes $getAvailableSyncTypesByEntityTypes
     ) {
         $this->queueAddPool = $queueAddPool;
@@ -97,6 +103,7 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
         $this->magentoSyncType = $magentoSyncType;
         $this->cleanLocalCacheForInstances = $cleanLocalCacheForInstances;
         $this->getAvailableSyncTypesByEntityTypes = $getAvailableSyncTypesByEntityTypes;
+        $this->checkMemoryLimitService = $checkMemoryLimitService;
         $this->logger = $logger;
     }
 
@@ -241,11 +248,20 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
                     }
                 }
             } while ($countAttempts != 0 && $countAttempts < $maxAttempts);
+            $this->afterAddToQueueAction();
         }
 
         if ($runNextBatch) {
             $this->publisher->publish(Process::MQ_TOPIC_NAME, false);
         }
+    }
+
+    /**
+     * @return void
+     */
+    public function afterAddToQueueAction()
+    {
+        $this->checkMemoryLimitService->execute();
     }
 
     /**
