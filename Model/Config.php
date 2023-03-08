@@ -36,6 +36,7 @@ class Config extends DataObject implements ConfigInterface
     const MAPPING_WHEN_INSERT_ONLY = 'InsertOnly';
 
     const SYNC_MAX_ATTEMPT_COUNT_XML = 'tnwsforce_general/synchronization/max_attempt_count';
+    const SYNC_MEMORY_LIMIT_XML = 'tnwsforce_general/synchronization/memory_limit';
     public const SYNCHRONIZATION_NEED_REFRESH_GRIDS = 'tnwsforce_general/synchronization/need_refresh_grids';
 
     /**
@@ -542,6 +543,27 @@ class Config extends DataObject implements ConfigInterface
         if (!$value) {
             $value = 5;
         }
+
+        return $value;
+    }
+
+    /**
+     * Get cron maximum attempt count to sync
+     * @return int
+     */
+    public function getMemoryLimitByte()
+    {
+        $value = $this->getMemoryLimit() * 1024 * 1024;
+
+        return $value;
+    }
+    /**
+     * Get cron maximum attempt count to sync
+     * @return int
+     */
+    public function getMemoryLimit()
+    {
+        $value = (int)$this->getStoreConfig(self::SYNC_MEMORY_LIMIT_XML);
 
         return $value;
     }
