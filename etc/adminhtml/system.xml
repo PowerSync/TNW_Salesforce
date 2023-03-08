@@ -97,6 +97,15 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Enable refresh Salesforce columns data on magento grids by cron.]]></comment>
                 </field>
+
+                <field id="memory_limit" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Memory limit for consumer, Mb</label>
+                    <comment>If sync consumer exceeds this limit at the end of sync process - we restart it. The default value: 500</comment>
+                    <depends>
+                        <field id="tnwsforce_general/synchronization/developer_mode">1</field>
+                    </depends>
+                </field>
+
             </group>
 
             <group id="debug" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
