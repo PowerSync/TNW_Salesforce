@@ -248,12 +248,11 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
                     }
                 }
             } while ($countAttempts != 0 && $countAttempts < $maxAttempts);
+
+            $this->publisher->publish(Process::MQ_TOPIC_NAME, false);
             $this->afterAddToQueueAction();
         }
 
-        if ($runNextBatch) {
-            $this->publisher->publish(Process::MQ_TOPIC_NAME, false);
-        }
     }
 
     /**
