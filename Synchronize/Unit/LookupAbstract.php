@@ -385,7 +385,7 @@ abstract class LookupAbstract extends UnitAbstract
     /**
      * @return DataObject
      */
-    protected function getCacheObject(): DataObject
+    public function getCacheObject(): DataObject
     {
         if($this->emptyDataObject === null) {
             $this->emptyDataObject = new DataObject();
