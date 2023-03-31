@@ -12,7 +12,9 @@ use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Catalog\Model\Product;
+use Magento\Customer\Model\Customer;
 use TNW\Salesforce\Service\Synchronize\Unit\Load\GetMappedAttributeCodesByMagentoType;
+use TNW\Salesforce\Model\Mapper;
 
 /**
  * Load By Customer
@@ -55,7 +57,11 @@ class LoaderAttributes
         $ids = [];
 
         foreach ($entities as $entity) {
-            if (!$entity instanceof Product) {
+            if ($this->magentoType == Mapper::MAGENTO_ENTITY_TYPE_PRODUCT && !$entity instanceof Product) {
+                continue;
+            }
+
+            if ($this->magentoType == Mapper::MAGENTO_ENTITY_TYPE_CUSTOMER && !$entity instanceof Customer) {
                 continue;
             }
 
