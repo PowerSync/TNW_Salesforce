@@ -83,7 +83,7 @@ class Recurring implements InstallSchemaInterface
      * @param string $onUpdate
      * @param bool $purge trying remove invalid data
      * @param null $schemaName
-     * @return Zend_Db_Statement_Interface
+     * @return \Zend_Db_Statement_Interface
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     private function addForeignKey(
