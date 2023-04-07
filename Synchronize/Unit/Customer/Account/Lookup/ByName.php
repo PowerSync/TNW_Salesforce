@@ -3,18 +3,19 @@
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
+
 namespace TNW\Salesforce\Synchronize\Unit\Customer\Account\Lookup;
 
+use TNW\Salesforce\Model;
 use TNW\Salesforce\Service\Synchronize\Unit\Customer\Account\Lookup\ByName\GetMapperName;
 use TNW\Salesforce\Synchronize;
-use TNW\Salesforce\Model;
 use TNW\Salesforce\Synchronize\Group;
 use TNW\Salesforce\Synchronize\Transport\Calls\Query\InputFactory;
 use TNW\Salesforce\Synchronize\Transport\Calls\Query\OutputFactory;
 use TNW\Salesforce\Synchronize\Transport\Calls\QueryInterface;
 use TNW\Salesforce\Synchronize\Unit\IdentificationInterface;
 use TNW\Salesforce\Synchronize\Units;
-
+use TNW\Salesforce\Utils\Company;
 /**
  * Account Lookup By Name
  *
@@ -66,19 +67,6 @@ class ByName extends Synchronize\Unit\LookupAbstract
     }
 
     /**
-     * @param $websiteId
-     *
-     * @return Model\Mapper|null
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Zend_Db_Select_Exception
-     * @throws \Zend_Db_Statement_Exception
-     */
-    public function mapperName($websiteId)
-    {
-        return $this->getMapperName->execute((int)$websiteId);
-    }
-
-    /**
      * Process Input
      *
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -93,7 +81,7 @@ class ByName extends Synchronize\Unit\LookupAbstract
 
         foreach ($this->entities() as $entity) {
             $company = $this->valueCompany($entity);
-            $company && $this->input[$this->getCacheObject()]['OR']['Name']['IN'][] = $company;
+            !empty($company) && $this->input[$this->getCacheObject()]['OR']['Name']['IN'][] = $company;
         }
 
         $this->input->from = 'Account';
@@ -111,9 +99,26 @@ class ByName extends Synchronize\Unit\LookupAbstract
     private function valueCompany($entity)
     {
         $mapperName = $this->mapperName($this->load()->get('websiteIds/%s', $entity));
-        return $mapperName instanceof Model\Mapper && null !== $mapperName->getId()
+        $companyName = $mapperName instanceof Model\Mapper && null !== $mapperName->getId()
             ? $this->unit('mapping')->value($entity, $mapperName)
             : Synchronize\Unit\Customer\Account\Mapping::companyByCustomer($entity);
+
+        // avoid lookup for Account create as "FirstName Lastname",
+        // in this case we should create a new Account to avoid merge individual Customers with the same names
+        return $companyName != Company::generateCompanyByCustomer($entity) ? $companyName : '';
+    }
+
+    /**
+     * @param $websiteId
+     *
+     * @return Model\Mapper|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Db_Select_Exception
+     * @throws \Zend_Db_Statement_Exception
+     */
+    public function mapperName($websiteId)
+    {
+        return $this->getMapperName->execute((int)$websiteId);
     }
 
     /**
