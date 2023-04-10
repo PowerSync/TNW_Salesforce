@@ -7,6 +7,7 @@ namespace TNW\Salesforce\Synchronize\Queue\Website;
 
 use Magento\Customer\Model\ResourceModel\Customer;
 use TNW\Salesforce\Service\Synchronize\Queue\Create\GetEntities;
+use TNW\Salesforce\Service\Synchronize\Queue\Website\FilterExisting;
 
 /**
  * Create By Customer
@@ -23,18 +24,24 @@ class CreateByCustomer extends CreateByBase
     /** @var GetEntities */
     private $getEntities;
 
+    /** @var FilterExisting  */
+    private $filterExisting;
+
     /**
      * CreateByCustomer constructor.
      *
-     * @param Customer    $resourceCustomer
-     * @param GetEntities $getEntities
+     * @param Customer       $resourceCustomer
+     * @param GetEntities    $getEntities
+     * @param FilterExisting $filterExisting
      */
     public function __construct(
         Customer $resourceCustomer,
-        GetEntities $getEntities
+        GetEntities $getEntities,
+        FilterExisting $filterExisting
     ) {
         $this->resourceCustomer = $resourceCustomer;
         $this->getEntities = $getEntities;
+        $this->filterExisting = $filterExisting;
     }
 
     /**
@@ -60,6 +67,8 @@ class CreateByCustomer extends CreateByBase
     {
         $queues = [];
         $entities = $this->getEntities->execute($entityIds, $this, 'base_entity_id');
+        $entities = $this->filterExisting->execute($entities, $websiteId);
+        
         foreach ($entities as $entity) {
             $queues[] = $create(
                 'website',
