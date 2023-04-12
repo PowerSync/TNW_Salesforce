@@ -45,6 +45,9 @@ class CleanSystemLogsCommand extends Command
      */
     private $syncConfig;
 
+    /** @var \Magento\Framework\Filesystem\Driver\File  */
+    protected $file;
+
     /**
      * CleanSystemLogsCommand constructor.
      */
