@@ -289,13 +289,17 @@ class Input extends Synchronize\Unit\UnitAbstract
                     }
 
                     if ($object[$fieldName] instanceof DateTime) {
-                        if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
-                            /** @var DateTime $value */
-                            $object[$fieldName]
-                                ->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
+                        if (strcasecmp($fieldProperty->getType(), 'datetime') === 0) {
+                            // case: if Magento field contains DATE i.e. without hours, but the SF field is DateTime
+                            if ($object[$fieldName]->format('H:i:s') == '00:00:00') {
+                                $object[$fieldName] = new DateTime(
+                                    $object[$fieldName]->format('Y-m-d'),
+                                    timezone_open($this->localeDate->getConfigTimezone())
+                                );
+                            }
                         }
 
-                        if ($object[$fieldName]->getTimestamp() <= 0) {
+                        if ($object[$fieldName] instanceof DateTime && $object[$fieldName]->getTimestamp() <= 0) {
                             $this->group()->messageDebug('Date field "%s" is empty', $fieldName);
                             unset($object[$fieldName]);
                         }
@@ -318,12 +322,12 @@ class Input extends Synchronize\Unit\UnitAbstract
                 $object[$fieldName] = trim((string)$object[$fieldName]);
                 if ($object[$fieldName] === '') {
                     $object[$fieldName] = null;
-                    
+
                     if ($fieldName === 'OwnerId' && !$object[$fieldName]) {
                         $this->group()->messageDebug('"%s" field is empty. Removing it from request.', $fieldName);
                         unset($object[$fieldName]);
                     }
-                    
+
                     continue;
                 }
 
