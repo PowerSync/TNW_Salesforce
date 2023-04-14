@@ -18,6 +18,7 @@ use TNW\Salesforce\Service\MessageQueue\RestartConsumers;
  */
 class Mapper extends AbstractDb
 {
+    private RestartConsumers $restartConsumers;
 
     /**
      * @param Context          $context
