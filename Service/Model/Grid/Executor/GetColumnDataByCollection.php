@@ -104,7 +104,7 @@ class GetColumnDataByCollection implements ExecutorInterface, CleanableInstanceI
         if ($missedEntityIds) {
             foreach (array_chunk($missedEntityIds, ChunkSizeInterface::CHUNK_SIZE) as $missedEntityIdsChunk) {
                 $collection = $this->createCollection->execute($missedEntityIdsChunk);
-                foreach ($collection as $item) {
+                while ($item = $collection->fetchItem()) {
                     $entityId = $item->getId();
                     $entityId && $this->cache[$entityId] = $item;
                 }
