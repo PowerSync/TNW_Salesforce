@@ -134,7 +134,7 @@ class Testconnection extends Action
         try {
             $result = $this->salesforceClient->checkConnection($wsdl, $username, $password, $token);
         } catch (Exception $e) {
-            if (strcasecmp((string)$e->faultcode, 'sf:REQUEST_LIMIT_EXCEEDED') === 0) {
+            if (property_exists($e,'faultcode') && strcasecmp((string)$e->faultcode, 'sf:REQUEST_LIMIT_EXCEEDED') === 0) {
                 $result = __('Salesforce Total Requests Limit exceeded. Please try in 24h.');
             } else {
                 $result = $e->getMessage();
