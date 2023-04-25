@@ -69,21 +69,14 @@ class GetAttributeFrontedValueFromCache implements CleanableInstanceInterface
                 )
               ) {
                 $attributeOptionValue = $entity->getData($attributeCode);
-                if ($attribute->getFrontendInput() === self::ATTRIBUTE_TYPE_DATE) {
-                    $dateTime = new DateTime($attributeOptionValue);
-                    $attributeOptionValue = $dateTime->format('Y-m-d H:i:s');
-                } else {
-                    $dateTime = new DateTime($attributeOptionValue);
-                    $dateTime->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
-                    $attributeOptionValue = $dateTime->format('Y-m-d H:i:s');
-                }
+                $dateTime = new DateTime($attributeOptionValue);
+                $attributeOptionValue = $dateTime->format('Y-m-d H:i:s');
 
             } elseif ($attribute->getBackendType() === \Magento\Eav\Model\Entity\Attribute\AbstractAttribute::TYPE_STATIC && $attribute->getFrontendInput() === self::ATTRIBUTE_TYPE_DATE) {
                 // workaround for attributes like created_at, updated_at (example: Product)
                 $attributeOptionValue = $entity->getData($attributeCode);
                 $dateTime = new DateTime($attributeOptionValue);
-                $dateTime->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
-                $attributeOptionValue = $dateTime->format('Y-m-d');
+                $attributeOptionValue = $dateTime->format('Y-m-d H:i:s');
             } else {
                 $attributeOptionValue = $attribute->getFrontend()->getValue($entity);
                 if (!empty($attributeOptionValue) && $attribute->getFrontendInput() === 'multiselect') {
