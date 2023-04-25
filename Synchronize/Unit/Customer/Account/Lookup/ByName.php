@@ -26,6 +26,8 @@ class ByName extends Synchronize\Unit\LookupAbstract
     /** @var GetMapperName */
     private $getMapperName;
 
+    const NAME_PRIORITY = 10;
+
     /**
      * ByName constructor.
      *
@@ -81,7 +83,8 @@ class ByName extends Synchronize\Unit\LookupAbstract
 
         foreach ($this->entities() as $entity) {
             $company = $this->valueCompany($entity);
-            !empty($company) && $this->input[$this->getCacheObject()]['OR']['Name']['IN'][] = $company;
+            !empty($company) && $this->input[$this->getCacheObject()]['AND']['']['OR']['Name']['IN'][] = $company;
+            !empty($entity->getData('sforce_account_id')) && $this->input[$this->getCacheObject()]['AND']['']['OR']['Id']['IN'][] = $entity->getData('sforce_account_id');
         }
 
         $this->input->from = 'Account';
@@ -133,6 +136,10 @@ class ByName extends Synchronize\Unit\LookupAbstract
             if (!empty($record['Name'])) {
                 $searchIndex['name'][$key] = strtolower((string)$record['Name']);
             }
+
+            if (!empty($record['Id'])) {
+                $searchIndex['salesforceId'][$key] = $record['Id'];
+            }
         }
 
         return $searchIndex;
@@ -151,8 +158,17 @@ class ByName extends Synchronize\Unit\LookupAbstract
     public function searchPriorityOrder(array $searchIndex, $entity)
     {
         $recordsIds = [];
+
+        if (!empty($searchIndex['salesforceId'])) {
+
+            $recordsIds[5] = array_keys(
+                $searchIndex['salesforceId'],
+                $entity->getData('sforce_account_id')
+            );
+        }
+
         if (!empty($searchIndex['name'])) {
-            $recordsIds[10] = array_keys($searchIndex['name'], strtolower((string)$this->valueCompany($entity)));
+            $recordsIds[self::NAME_PRIORITY] = array_keys($searchIndex['name'], strtolower((string)$this->valueCompany($entity)));
         }
 
         return $recordsIds;
