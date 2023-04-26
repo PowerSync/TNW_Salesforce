@@ -12,6 +12,7 @@ use DateInterval;
 use DateTime;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use TNW\Salesforce\Api\CleanableInstanceInterface;
 
 class GetAttributeFrontedValueFromCache implements CleanableInstanceInterface
@@ -28,6 +29,18 @@ class GetAttributeFrontedValueFromCache implements CleanableInstanceInterface
 
     /** @var array */
     private $processed = [];
+
+    protected $localeDate;
+
+    /**
+     * @param TimezoneInterface $localeDate
+     */
+    public function __construct(
+        TimezoneInterface $localeDate
+    ) {
+        $this->localeDate = $localeDate;
+    }
+
 
     /**
      * @param AbstractModel     $entity
@@ -54,15 +67,16 @@ class GetAttributeFrontedValueFromCache implements CleanableInstanceInterface
                     self::DATE_BACKEND_TYPES,
                     true
                 )
-            ) {
+              ) {
                 $attributeOptionValue = $entity->getData($attributeCode);
-                if ($attribute->getFrontendInput() === self::ATTRIBUTE_TYPE_DATE) {
-                    $dateTime = new DateTime($attributeOptionValue);
-                    $attributeOptionValue = $dateTime->format('Y-m-d');
-                    $dateTime = new DateTime($attributeOptionValue);
-                    $dateTime->add(new DateInterval('PT12H'));
-                    $attributeOptionValue = $dateTime->format('Y-m-d H:i:s');
-                }
+                $dateTime = new DateTime($attributeOptionValue);
+                $attributeOptionValue = $dateTime->format('Y-m-d H:i:s');
+
+            } elseif ($attribute->getBackendType() === \Magento\Eav\Model\Entity\Attribute\AbstractAttribute::TYPE_STATIC && $attribute->getFrontendInput() === self::ATTRIBUTE_TYPE_DATE) {
+                // workaround for attributes like created_at, updated_at (example: Product)
+                $attributeOptionValue = $entity->getData($attributeCode);
+                $dateTime = new DateTime($attributeOptionValue);
+                $attributeOptionValue = $dateTime->format('Y-m-d H:i:s');
             } else {
                 $attributeOptionValue = $attribute->getFrontend()->getValue($entity);
                 if (!empty($attributeOptionValue) && $attribute->getFrontendInput() === 'multiselect') {

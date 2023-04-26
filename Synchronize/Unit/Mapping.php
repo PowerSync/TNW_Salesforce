@@ -12,6 +12,7 @@ use Exception;
 use InvalidArgumentException;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Eav\Model\Entity\AbstractEntity;
+use Magento\Eav\Model\Entity\Attribute\Frontend\Datetime as FrontendDatetime;
 use Magento\Framework\Data\Collection;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
