@@ -244,6 +244,7 @@ abstract class LookupAbstract extends UnitAbstract
                 continue;
             }
 
+            $this->cache[$entity]['recordsPriority'] = $recordsPriority;
             $this->cache[$entity]['records'] = $this->mergeLookupResult($recordsPriority);
 
             $record = $this->filterByPriority($recordsPriority, $entity);
