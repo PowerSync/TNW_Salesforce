@@ -285,17 +285,26 @@ class Input extends Synchronize\Unit\UnitAbstract
             if (in_array($fieldProperty->getType(), ['datetime', 'date'])) {
                 try {
                     if (!$object[$fieldName] instanceof DateTime) {
-                        $object[$fieldName] = date_create((string)($object[$fieldName] ?? ''));
+                        $dateTime = date_create((string)($object[$fieldName] ?? ''));
+                        if (strcasecmp($fieldProperty->getType(), 'datetime') === 0 && $dateTime->format('H:i:s') == '00:00:00') {
+                            $dateTime = new \DateTime($object[$fieldName], timezone_open($this->localeDate->getConfigTimezone()));
+                        }
+                        $object[$fieldName] = $dateTime;
                     }
 
                     if ($object[$fieldName] instanceof DateTime) {
-                        if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
-                            /** @var DateTime $value */
-                            $object[$fieldName]
-                                ->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
+                        if (strcasecmp($fieldProperty->getType(), 'datetime') === 0) {
+
+                            $object[$fieldName]->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
+                        } elseif(strcasecmp($fieldProperty->getType(), 'date') === 0) {
+                            // case: if Magento field contains DATE i.e. without hours, but the SF field is DateTime
+                            if ($object[$fieldName]->format('H:i:s') != '00:00:00') {
+                                $object[$fieldName]->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
+                            }
+                            $object[$fieldName]->setTime(0, 0, 0);
                         }
 
-                        if ($object[$fieldName]->getTimestamp() <= 0) {
+                        if ($object[$fieldName] instanceof DateTime && $object[$fieldName]->getTimestamp() <= 0) {
                             $this->group()->messageDebug('Date field "%s" is empty', $fieldName);
                             unset($object[$fieldName]);
                         }
@@ -318,12 +327,12 @@ class Input extends Synchronize\Unit\UnitAbstract
                 $object[$fieldName] = trim((string)$object[$fieldName]);
                 if ($object[$fieldName] === '') {
                     $object[$fieldName] = null;
-                    
+
                     if ($fieldName === 'OwnerId' && !$object[$fieldName]) {
                         $this->group()->messageDebug('"%s" field is empty. Removing it from request.', $fieldName);
                         unset($object[$fieldName]);
                     }
-                    
+
                     continue;
                 }
 
@@ -371,14 +380,11 @@ class Input extends Synchronize\Unit\UnitAbstract
                 continue;
             }
 
-            if ($compareValue instanceof \DateTime && !empty($lookupObject[$compareField]) && $lookupObject[$compareField] instanceof \DateTime) {
-                $fieldProperty = $this->findFieldProperty($compareField);
-                if (strcasecmp($fieldProperty->getType(), 'date') === 0) {
-                    $compareValue
-                        ->setTimezone($lookupObject[$compareField]->getTimezone())
-                        ->setTime(0, 0);
-                }
-            }
+//            $fieldProperty = $this->findFieldProperty($compareField);
+//            if ($compareValue instanceof \DateTime && strcasecmp($fieldProperty->getType(), 'date') === 0) {
+//                $compareValue->setTimezone(timezone_open($this->localeDate->getConfigTimezone()));
+//                $compareValue->setTime(0, 0, 0);
+//            }
 
             if ($this->isFieldValueChanged($entity, $compareField, $compareValue)) {
                 $this->group()->messageDebug('Entity %1 has changed field: %2 = %3', $this->identification->printEntity($entity), $compareField, $compareValue);
