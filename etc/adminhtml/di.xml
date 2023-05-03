@@ -46,4 +46,9 @@
                 type="TNW\Salesforce\Plugin\BlockMenu\SplitSubmenuToColumns"
                 sortOrder="110"/>
     </type>
+    <type name="Magento\Config\Model\Config">
+        <plugin name="tnw_salesforce_run_publish_prequeue_after_salesforce_enable"
+                type="TNW\Salesforce\Plugin\Config\Model\Config"
+                sortOrder="1"/>
+    </type>
 </config>
