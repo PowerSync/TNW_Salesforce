@@ -104,14 +104,14 @@ class Save extends Synchronize\Unit\UnitAbstract
             foreach ($entities as $entity) {
                 try {
                     switch (true) {
-                        case !(empty($this->entityObject->valueByAttribute($entity, $attributeName))):
-                            $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
-                            break;
                         case (!empty($this->unit('mapping')) && !empty($this->unit('mapping')->get('%s/' . $key, $entity))):
                             $salesforceId = $this->unit('mapping')->get('%s/' . $key, $entity);
                             break;
                         case (!empty($this->unit('lookup')) && !empty($this->unit('lookup')->get('%s/record/' . $key, $entity))):
                             $salesforceId = $this->unit('lookup')->get('%s/record/' . $key, $entity);
+                            break;
+                        case !(empty($this->entityObject->valueByAttribute($entity, $attributeName))):
+                            $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
                             break;
                         default:
                             $salesforceId = null;
