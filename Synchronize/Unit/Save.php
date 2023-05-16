@@ -214,7 +214,10 @@ class Save extends Synchronize\Unit\UnitAbstract
             $result = $result || $this->entityObject->valueByAttribute($entity, $attribute);
         }
 
-        return $this->fieldModifier()->get('%s/success', $entity) && $result;
+        $status = $this->fieldModifier()->get('%s/success', $entity)
+            || $this->fieldModifier()->get('%s/waiting', $entity);
+        
+        return $status && $result;
     }
 
     /**
