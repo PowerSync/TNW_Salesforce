@@ -256,6 +256,17 @@ class Output extends Synchronize\Unit\UnitAbstract implements Synchronize\Unit\F
      */
     public function prepare($entity)
     {
+        if ($this->cache[$entity]['waiting'] === true) {
+            $attributeNames = $this->additionalSalesforceId();
+
+            foreach ($attributeNames as $key => $attributeName) {
+                if ((!empty($this->unit('mapping'))
+                    && !empty($this->unit('mapping')->get('%s/' . $key, $entity)))) {
+                    $entity->setData($attributeName, $this->unit('mapping')->get('%s/' . $key, $entity));
+                }
+            }
+        }
+
         if (empty($this->cache[$entity]['success']) || empty($this->cache->get('%s/salesforce', $entity))) {
             return;
         }
