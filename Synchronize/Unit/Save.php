@@ -204,6 +204,9 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function filter($entity)
     {
+        $status = $this->fieldModifier()->get('%s/success', $entity)
+            || $this->fieldModifier()->get('%s/waiting', $entity);
+        
         $attributeName = $this->fieldModifier()->fieldSalesforceId();
         if (!is_array($attributeName)) {
             $attributeName = ['Id' => $attributeName];
@@ -213,9 +216,12 @@ class Save extends Synchronize\Unit\UnitAbstract
         foreach ($attributeName as $attribute) {
             $result = $result || $this->entityObject->valueByAttribute($entity, $attribute);
         }
-
-        $status = $this->fieldModifier()->get('%s/success', $entity)
-            || $this->fieldModifier()->get('%s/waiting', $entity);
+        
+        if ($additionalSalesforceAttributes = $this->fieldModifier()->additionalSalesforceId()) {
+            foreach ($additionalSalesforceAttributes as $additionalSalesforceAttribute) {
+                $result = $result || $this->entityObject->valueByAttribute($entity, $additionalSalesforceAttribute);
+            }
+        }
         
         return $status && $result;
     }
