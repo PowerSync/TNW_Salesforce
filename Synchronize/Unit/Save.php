@@ -104,14 +104,14 @@ class Save extends Synchronize\Unit\UnitAbstract
             foreach ($entities as $entity) {
                 try {
                     switch (true) {
-                        case !(empty($this->entityObject->valueByAttribute($entity, $attributeName))):
-                            $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
-                            break;
                         case (!empty($this->unit('mapping')) && !empty($this->unit('mapping')->get('%s/' . $key, $entity))):
                             $salesforceId = $this->unit('mapping')->get('%s/' . $key, $entity);
                             break;
                         case (!empty($this->unit('lookup')) && !empty($this->unit('lookup')->get('%s/record/' . $key, $entity))):
                             $salesforceId = $this->unit('lookup')->get('%s/record/' . $key, $entity);
+                            break;
+                        case !(empty($this->entityObject->valueByAttribute($entity, $attributeName))):
+                            $salesforceId = $this->entityObject->valueByAttribute($entity, $attributeName);
                             break;
                         default:
                             $salesforceId = null;
@@ -204,6 +204,9 @@ class Save extends Synchronize\Unit\UnitAbstract
      */
     public function filter($entity)
     {
+        $status = $this->fieldModifier()->get('%s/success', $entity)
+            || $this->fieldModifier()->get('%s/waiting', $entity);
+        
         $attributeName = $this->fieldModifier()->fieldSalesforceId();
         if (!is_array($attributeName)) {
             $attributeName = ['Id' => $attributeName];
@@ -213,8 +216,14 @@ class Save extends Synchronize\Unit\UnitAbstract
         foreach ($attributeName as $attribute) {
             $result = $result || $this->entityObject->valueByAttribute($entity, $attribute);
         }
-
-        return $this->fieldModifier()->get('%s/success', $entity) && $result;
+        
+        if ($additionalSalesforceAttributes = $this->fieldModifier()->additionalSalesforceId()) {
+            foreach ($additionalSalesforceAttributes as $additionalSalesforceAttribute) {
+                $result = $result || $this->entityObject->valueByAttribute($entity, $additionalSalesforceAttribute);
+            }
+        }
+        
+        return $status && $result;
     }
 
     /**
