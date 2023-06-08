@@ -4,13 +4,13 @@
     "require": {
         "magento/framework": ">102",
         "tnw/soap-client": "~1",
-        "tnw/marketing": "~2.9.0"
+        "tnw/marketing": "~2.9.2"
     },
     "license": [
         "gpl-3.0"
     ],
     "type": "magento2-module",
-    "version": "2.9.32",
+    "version": "2.9.33",
     "autoload": {
         "files": [
             "registration.php"
