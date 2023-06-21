@@ -41,6 +41,15 @@ class ClearSystemLog
      */
     protected $salesforceConfig;
 
+    /** @var File  */
+    protected $file;
+
+    /** @var Filesystem\DirectoryList  */
+    protected $dir;
+
+    /** @var TimezoneInterface  */
+    protected $timezone;
+
     /**
      * UpdateCurrencyRates constructor.
      *

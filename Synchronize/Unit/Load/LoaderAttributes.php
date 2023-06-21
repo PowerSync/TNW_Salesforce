@@ -30,6 +30,7 @@ class LoaderAttributes
 
     /** @var GetMappedAttributeCodesByMagentoType */
     private $getMappedAttributeCodesByMagentoType;
+    private ObjectManagerInterface $objectManager;
 
     /**
      * @param $magentoType
