@@ -243,7 +243,7 @@ class Queue
     public function getQueueIds($lockCollection, $count)
     {
         $queueIds = [];
-        $lockCollection->setPageSize(ChunkSizeInterface::CHUNK_SIZE_200);
+        $lockCollection->setPageSize($count);
         $lastPageNumber = (int)$lockCollection->getLastPageNumber();
 
         for ($i = 1; ($i <= $lastPageNumber && $count > 0); $i++) {
