@@ -6,7 +6,7 @@
 
 namespace TNW\Salesforce\Model\ResourceModel\Objects;
 
-class StatusSelect extends SelectAbstract
+class ObjectIdJoin extends SelectAbstract
 {
     /**
      * @var string
@@ -16,39 +16,49 @@ class StatusSelect extends SelectAbstract
     /**
      * @var string
      */
+    private $salesforceType;
+
+    /**
+     * @var string
+     */
     private $entityIdField;
 
     /**
-     * ObjectIdSelectBuilder constructor.
+     * ObjectIdJoinBuilder constructor.
      *
      * @param \Magento\Framework\App\ResourceConnection $resource
      * @param string $magentoType
+     * @param string $salesforceType
      * @param string $entityIdField
      * @param string|null $connectionName
      */
     public function __construct(
         \Magento\Framework\App\ResourceConnection $resource,
         $magentoType,
+        $salesforceType,
         $entityIdField = 'main_table.entity_id',
         $connectionName = null
     ) {
         parent::__construct($resource, $connectionName);
         $this->magentoType = $magentoType;
+        $this->salesforceType = $salesforceType;
         $this->entityIdField = $entityIdField;
     }
 
     /**
      * @inheritdoc
      */
-    public function build(\Magento\Framework\DB\Select $originalSelect)
+    public function build(\Magento\Framework\DB\Select $originalSelect, string $alias)
     {
-        return $this->select()
-            ->from(['object' => $this->getTable('tnw_salesforce_objects')], ['status'])
-            ->where("object.entity_id = {$this->entityIdField}")
-            ->where('object.magento_type = ?', $this->magentoType)
-            ->where('object.store_id = 0')
-            ->where('object.website_id IN(sf_website_id, 0)')
-            ->order('object.website_id DESC')
-            ->limit(1);
+        return $originalSelect
+            ->joinLeft(
+                ["object_{$alias}" => $this->getTable('tnw_salesforce_objects')],
+                "object_{$alias}.entity_id = {$this->entityIdField}"
+                . " AND object_{$alias}.magento_type = '{$this->magentoType}'"
+                . " AND object_{$alias}.salesforce_type = '{$this->salesforceType}'"
+                . " AND object_{$alias}.store_id = 0"
+                . " AND object_{$alias}.website_id IN ('sf_website_id', 0)",
+                [$alias => 'object_id']
+            );
     }
 }
