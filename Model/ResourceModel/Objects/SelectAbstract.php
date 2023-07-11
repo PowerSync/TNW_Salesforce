@@ -59,15 +59,7 @@ abstract class SelectAbstract
     }
 
     /**
-     * @return Select
-     */
-    public function select()
-    {
-        return $this->getConnection()->select();
-    }
-
-    /**
      * @return Select|string
      */
-    abstract public function build(Select $originalSelect);
+    abstract public function build(Select $originalSelect, string $alias);
 }

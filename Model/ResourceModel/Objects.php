@@ -1,8 +1,9 @@
-<?php declare(strict_types=1);
+<?php
 /**
  * Copyright © 2022 TechNWeb, Inc. All rights reserved.
  * See TNW_LICENSE.txt for license details.
  */
+declare(strict_types=1);
 
 namespace TNW\Salesforce\Model\ResourceModel;
 
@@ -133,12 +134,10 @@ class Objects extends AbstractDb
             ->order(new \Zend_Db_Expr('FIELD(website_id, :base_website_id, :entity_website_id)'));
 
         $this->selectStatus = $this->getConnection()->select()
-            ->from($this->getMainTable(), ['status'])
+            ->from($this->getMainTable(), ['status' => new \Zend_Db_Expr('MAX(status)')])
             ->where('magento_type = :magento_type')
             ->where('entity_id = :entity_id')
-            ->where('website_id IN(:entity_website_id, :base_website_id)')
-            ->order(new \Zend_Db_Expr('FIELD(website_id, :entity_website_id, :base_website_id)'))
-            ->limit(1);
+            ->where('website_id IN(:entity_website_id, :base_website_id)');
 
         $this->selectPriceBookId = $this->getConnection()->select()
             ->from($this->getMainTable(), ['GROUP_CONCAT(DISTINCT(object_id) SEPARATOR "\n")'])

@@ -1014,31 +1014,25 @@
         </arguments>
     </type>
 
-    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\ContactSelect" type="TNW\Salesforce\Model\ResourceModel\Objects\ObjectIdSelect">
+    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\ContactJoin" type="TNW\Salesforce\Model\ResourceModel\Objects\ObjectIdJoin">
         <arguments>
             <argument name="magentoType" xsi:type="string">Customer</argument>
             <argument name="salesforceType" xsi:type="string">Contact</argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\AccountSelect" type="TNW\Salesforce\Model\ResourceModel\Objects\ObjectIdSelect">
+    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\AccountJoin" type="TNW\Salesforce\Model\ResourceModel\Objects\ObjectIdJoin">
         <arguments>
             <argument name="magentoType" xsi:type="string">Customer</argument>
             <argument name="salesforceType" xsi:type="string">Account</argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="TNW\Salesforce\Model\ResourceModel\Objects\Customer\StatusSelect" type="TNW\Salesforce\Model\ResourceModel\Objects\StatusSelect">
-        <arguments>
-            <argument name="magentoType" xsi:type="string">Customer</argument>
         </arguments>
     </virtualType>
     <virtualType name="SalesCustomerGridFlatColumnsModifier" type="TNW\Salesforce\Service\Model\Grid\Executor\ByCollection\CreateCollection\ColumnModifier">
         <arguments>
             <argument name="builders" xsi:type="array">
                 <item name="sf_website_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\WebsiteSelect</item>
-                <item name="sforce_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\ContactSelect</item>
-                <item name="sforce_account_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\AccountSelect</item>
-                <item name="sforce_sync_status" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\StatusSelect</item>
+                <item name="sforce_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\ContactJoin</item>
+                <item name="sforce_account_id" xsi:type="object">TNW\Salesforce\Model\ResourceModel\Objects\Customer\AccountJoin</item>
             </argument>
         </arguments>
     </virtualType>
@@ -1049,6 +1043,7 @@
             <argument name="modifiers" xsi:type="array">
                 <item name="SalesCustomerGridFlatColumnsModifier" xsi:type="object">SalesCustomerGridFlatColumnsModifier</item>
             </argument>
+            <argument name="addStatus" xsi:type="boolean">true</argument>
         </arguments>
     </virtualType>
     <virtualType name="GetCustomerGridFlatObjectIdSalesforceColumnData" type="TNW\Salesforce\Service\Model\Grid\Executor\GetColumnDataByCollection">
