@@ -77,8 +77,14 @@ class CreateCollection implements CreateCollectionInterface
             }
         }
 
+        if ($tableAlias !== 'e') {
+            $condition = $tableAlias . '.' . $this->resource->getIdFieldName();
+        } else {
+            $condition = $this->resource->getIdFieldName();
+        }
+
         $entityIds !== null && $collection->addFieldToFilter(
-            $tableAlias . '.' . $this->resource->getIdFieldName(),
+            $condition,
             ['in' => $entityIds]
         );
 
