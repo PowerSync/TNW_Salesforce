@@ -68,8 +68,17 @@ class CreateCollection implements CreateCollectionInterface
             $modifier->execute($collection);
         }
 
+        $tableAlias = 'main_table';
+        $selectPartFrom = $collection->getSelect()->getPart(Select::FROM);
+
+        foreach ($selectPartFrom as $alias => $data) {
+            if (isset($data['joinType']) && $data['joinType'] == 'from') {
+                $tableAlias = $alias;
+            }
+        }
+
         $entityIds !== null && $collection->addFieldToFilter(
-            $this->resource->getIdFieldName(),
+            $tableAlias . '.' . $this->resource->getIdFieldName(),
             ['in' => $entityIds]
         );
 
