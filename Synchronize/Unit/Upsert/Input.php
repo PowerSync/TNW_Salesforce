@@ -404,9 +404,9 @@ class Input extends Synchronize\Unit\UnitAbstract
         $this->cache[$entity]['updated'] = true;
         $this->cache[$entity]['salesforce'] = $lookupObject['Id'];
         $this->cache[$entity]['message']
-            = __('Synchronization of the %1 was skipped, data is Salesforce matches the data in Magento.', $this->identification->printEntity($entity));
+            = __('Synchronization of the %1 was skipped, data in Salesforce is matched the data in Magento.', $this->identification->printEntity($entity));
 
-        $this->group()->messageDebug('Synchronization of the %1 was skipped, data is Salesforce matches the data in Magento.', $this->identification->printEntity($entity));
+        $this->group()->messageDebug('Synchronization of the %1 was skipped, data in Salesforce is matched the data in Magento.', $this->identification->printEntity($entity));
 
         return false;
     }
