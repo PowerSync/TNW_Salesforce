@@ -34,6 +34,7 @@ class FilterExisting
     {
         $groupByType = [];
         $result = [];
+        $return = [];
 
         foreach ($entities as $entity) {
             $createBy = 'CustomerGroup';
@@ -58,7 +59,7 @@ class FilterExisting
             if ($entityId) {
                 $groupByType[$createBy][] = $entityId;
                 $key = $this->getHash($createBy, $entityId);
-                $result[$key] = $entity;
+                $result[$key][] = $entity;
             }
         }
 
@@ -78,7 +79,13 @@ class FilterExisting
             }
         }
 
-        return $result;
+        foreach ($result as $key => $entities) {
+            foreach ($entities as $entity) {
+                $return[] = $entity;
+            }
+        }
+
+        return $return;
     }
 
     /**
