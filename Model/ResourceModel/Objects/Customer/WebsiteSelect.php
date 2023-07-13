@@ -13,8 +13,8 @@ class WebsiteSelect extends SelectAbstract
     /**
      * @inheritdoc
      */
-    public function build(\Magento\Framework\DB\Select $originalSelect)
+    public function build(\Magento\Framework\DB\Select $originalSelect, string $alias)
     {
-        return 'main_table.website_id';
+        return $originalSelect->columns([$alias => 'main_table.website_id']);
     }
 }
