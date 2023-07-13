@@ -30,7 +30,7 @@ class ColumnModifier implements ModifierInterface
     {
         $originalSelect = $collection->getSelect();
         foreach ($this->builders as $alias => $select) {
-            $originalSelect->columns([$alias => $select->build($originalSelect)]);
+            $select->build($originalSelect, $alias);
         }
     }
 }
