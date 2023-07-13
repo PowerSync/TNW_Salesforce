@@ -10,10 +10,12 @@ namespace TNW\Salesforce\Service\Model\Grid\Executor\ByCollection;
 
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Data\Collection;
+use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use TNW\Salesforce\Api\Model\Grid\GetColumnsDataItems\Executor\ByCollection\CreateCollection\ModifierInterface;
 use TNW\Salesforce\Api\Service\Model\Grid\Executor\ByCollection\CreateCollectionInterface;
+use TNW\Salesforce\Service\Model\Grid\UpdateGridCollectionWithStatus;
 
 class CreateCollection implements CreateCollectionInterface
 {
@@ -26,20 +28,31 @@ class CreateCollection implements CreateCollectionInterface
     /** @var AbstractResource */
     private $resource;
 
+    /** @var UpdateGridCollectionWithStatus */
+    private $updateGridCollectionWithStatus;
+
+    /** @var bool */
+    private $addStatus;
+
     /**
-     * @param AbstractResource $resource
-     * @param array              $modifiers
-     * @param string             $collectionClassName
+     * @param AbstractResource               $resource
+     * @param array                          $modifiers
+     * @param string                         $collectionClassName
+     * @param UpdateGridCollectionWithStatus $updateGridCollectionWithStatus
+     * @param bool                           $addStatus
      */
     public function __construct(
-        AbstractResource $resource,
-        array              $modifiers,
-        string             $collectionClassName
+        AbstractResource               $resource,
+        array                          $modifiers,
+        string                         $collectionClassName,
+        UpdateGridCollectionWithStatus $updateGridCollectionWithStatus,
+        bool                           $addStatus
     ) {
-
         $this->resource = $resource;
         $this->modifiers = $modifiers;
         $this->collectionClassName = $collectionClassName;
+        $this->updateGridCollectionWithStatus = $updateGridCollectionWithStatus;
+        $this->addStatus = $addStatus;
     }
 
     /**
@@ -55,10 +68,29 @@ class CreateCollection implements CreateCollectionInterface
             $modifier->execute($collection);
         }
 
+        $tableAlias = 'main_table';
+        $selectPartFrom = $collection->getSelect()->getPart(Select::FROM);
+
+        foreach ($selectPartFrom as $alias => $data) {
+            if (isset($data['joinType']) && $data['joinType'] == 'from') {
+                $tableAlias = $alias;
+            }
+        }
+
+        if ($tableAlias !== 'e') {
+            $condition = $tableAlias . '.' . $this->resource->getIdFieldName();
+        } else {
+            $condition = $this->resource->getIdFieldName();
+        }
+
         $entityIds !== null && $collection->addFieldToFilter(
-            $this->resource->getIdFieldName(),
+            $condition,
             ['in' => $entityIds]
         );
+
+        if ($this->addStatus) {
+            $this->updateGridCollectionWithStatus->execute($collection);
+        }
 
         return $collection;
     }
