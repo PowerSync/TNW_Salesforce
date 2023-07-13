@@ -45,7 +45,7 @@ class AbstractDb
 
         $originalSelect = $collection->getSelect();
         foreach ($this->select as $alias => $select) {
-            $originalSelect->columns([$alias => $select->build($originalSelect)]);
+            $select->build($originalSelect, $alias);
         }
 
         return [$printQuery, $logQuery];
