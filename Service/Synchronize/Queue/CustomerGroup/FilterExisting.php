@@ -40,15 +40,15 @@ class FilterExisting
             $createBy = 'CustomerGroup';
 
             switch (true) {
-                case !empty($entity['group_id']):
+                case isset($entity['group_id']) :
                     $entityId = $entity['group_id'];
 
                     break;
-                case !empty($entity['customer_group_id']):
+                case isset($entity['customer_group_id']):
                     $entityId = $entity['customer_group_id'];
 
                     break;
-                case !empty($entity['entity_id']):
+                case isset($entity['entity_id']):
                     $entityId = $entity['entity_id'];
 
                     break;
@@ -56,7 +56,7 @@ class FilterExisting
                     $entityId = null;
             }
 
-            if ($entityId) {
+            if ($entityId !== null) {
                 $groupByType[$createBy][] = $entityId;
                 $key = $this->getHash($createBy, $entityId);
                 $result[$key][] = $entity;
