@@ -126,7 +126,7 @@
         <column xsi:type="timestamp" name="sync_at" on_update="false" nullable="true" comment="When synced" />
         <column xsi:type="varchar" name="status" nullable="false" length="30" default="new" comment="Status" />
         <column xsi:type="text" name="message" nullable="true" comment="Message" />
-        <column xsi:type="varchar" name="status_code" nullable="true" comment="Status code"/>
+        <column xsi:type="varchar" name="status_code" length="255" nullable="true" comment="Status code"/>
         <column xsi:type="varchar" name="code" nullable="false" length="255" comment="Code" />
         <column xsi:type="varchar" name="description" nullable="false" length="255" comment="Description" />
         <column xsi:type="smallint" name="website_id" padding="5" unsigned="true" nullable="false" identity="false" comment="Website Id" />
@@ -169,7 +169,16 @@
             <column name="entity_id" />
             <column name="website_id" />
         </index>
-        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_STATUS" indexType="btree">
+        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_COMPOSITE_STATUS" indexType="btree">
+            <column name="status" />
+            <column name="status_code" />
+        </index>
+        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_STATUS_CODE" indexType="btree">
+            <column name="status_code" />
+        </index>
+        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_SYNC_AT_QUEUE_ID_STATUS" indexType="btree">
+            <column name="sync_at" />
+            <column name="queue_id" />
             <column name="status" />
         </index>
         <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_PRIORITY" indexType="btree">
@@ -204,6 +213,10 @@
             <column name="queue_id" />
             <column name="parent_id" />
         </constraint>
+        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_RELATION_PARENT_ID_QUEUE_ID" indexType="btree">
+            <column name="parent_id" />
+            <column name="queue_id" />
+        </index>
     </table>
     <table name="tnw_salesforce_entity_prequeue" resource="default" engine="innodb" comment="tnw_salesforce_entity_prequeue">
         <column xsi:type="int" name="prequeue_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Queue Id" />
