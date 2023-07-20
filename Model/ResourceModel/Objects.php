@@ -131,7 +131,7 @@ class Objects extends AbstractDb
             ->where('salesforce_type = :salesforce_type')
             ->where('object_id = :object_id')
             ->where('website_id IN (:entity_website_id, :base_website_id)')
-            ->order(new \Zend_Db_Expr('FIELD(website_id, :base_website_id, :entity_website_id)'));
+            ->order('website_id');
 
         $this->selectStatus = $this->getConnection()->select()
             ->from($this->getMainTable(), ['status' => new \Zend_Db_Expr('MAX(status)')])
