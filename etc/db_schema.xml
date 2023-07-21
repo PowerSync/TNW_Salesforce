@@ -112,6 +112,16 @@
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id" />
         </constraint>
+        <index referenceId="TNW_SALESFORCE_OBJECTS_MAGENTO_TYPE_SALESFORCE_TYPE_OBJECT_ID" indexType="btree">
+            <column name="magento_type" />
+            <column name="salesforce_type" />
+            <column name="object_id" />
+            <column name="entity_id" />
+            <column name="website_id" />
+        </index>
+        <index referenceId="TNW_SALESFORCE_OBJECTS_WEBSITE_ID" indexType="btree">
+            <column name="website_id" />
+        </index>
     </table>
 
     <table name="tnw_salesforce_entity_queue" resource="default" engine="innodb" comment="tnw_salesforce_entity_queue">
