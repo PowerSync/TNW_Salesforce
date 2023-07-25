@@ -21,7 +21,7 @@
                 <page_size_from_magento>500</page_size_from_magento>
                 <max_attempt_count>5</max_attempt_count>
                 <max_items_count_for_queue>200</max_items_count_for_queue>
-                <need_refresh_grids>1</need_refresh_grids>
+                <need_refresh_grids>0</need_refresh_grids>
                 <memory_limit>500</memory_limit>
             </synchronization>
             <debug>
