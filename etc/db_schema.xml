@@ -135,7 +135,7 @@
         <column xsi:type="int" name="sync_attempt" padding="10" unsigned="true" nullable="false" identity="false" default="0" comment="Sync Attempt" />
         <column xsi:type="timestamp" name="sync_at" on_update="false" nullable="true" comment="When synced" />
         <column xsi:type="varchar" name="status" nullable="false" length="30" default="new" comment="Status" />
-        <column xsi:type="text" name="message" nullable="true" comment="Message" />
+        <column xsi:type="varchar" length="255" name="message" nullable="true" comment="Message" />
         <column xsi:type="varchar" name="status_code" length="255" nullable="true" comment="Status code"/>
         <column xsi:type="varchar" name="code" nullable="false" length="255" comment="Code" />
         <column xsi:type="varchar" name="description" nullable="false" length="255" comment="Description" />
@@ -163,6 +163,23 @@
             <column name="sync_type" />
             <column name="website_id" />
         </constraint>
+        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_SYNC_ATTEMPT_SYNC_TYPE_WEBSITE_ID" indexType="btree">
+            <column name="sync_attempt" />
+            <column name="sync_type" />
+            <column name="website_id" />
+        </index>
+        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_SYNC_ATTEMPT_SYNC_TYPE_WEBSITE_ID_STATUS" indexType="btree">
+            <column name="sync_attempt" />
+            <column name="sync_type" />
+            <column name="website_id" />
+            <column name="status" />
+        </index>
+        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_STATUS_MESSAGE_STATUS_CODE_COMPOSITE_STATUS" indexType="btree">
+            <column name="status" />
+            <column name="message" />
+            <column name="status_code" />
+            <column name="composite_status" />
+        </index>
         <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_CODE_ENTITY_ID_ENTITY_LOAD" indexType="btree">
             <column name="code" />
             <column name="entity_id" />
