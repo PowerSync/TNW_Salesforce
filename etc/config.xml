@@ -23,6 +23,7 @@
                 <max_items_count_for_queue>200</max_items_count_for_queue>
                 <need_refresh_grids>0</need_refresh_grids>
                 <memory_limit>500</memory_limit>
+                <use_pre_check_queue>0</use_pre_check_queue>
             </synchronization>
             <debug>
                 <db_log_limit>10000</db_log_limit>

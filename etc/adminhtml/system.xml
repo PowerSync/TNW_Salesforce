@@ -106,6 +106,21 @@
                     </depends>
                 </field>
 
+                <field id="use_pre_check_queue" translate="label" type="select" sortOrder="400" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Use pre-check </label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="tnwsforce_general/synchronization/developer_mode">1</field>
+                    </depends>
+                    <comment>
+                        <![CDATA[
+                        Run extra SQL query to detect items needs to be synced <br />
+                        Could be useful if Queue is small (up to 1000 records) <br />
+                        Disable it when you sync historical data as extra SQL query takes additional time and resources.
+                        ]]>
+                    </comment>
+                </field>
+
             </group>
 
             <group id="debug" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
