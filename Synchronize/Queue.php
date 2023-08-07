@@ -154,18 +154,23 @@ class Queue
 
         ksort($this->phases);
 
-        $codesAndStatuses = $this->fillCodesAndStatuses($collection);
+        if ($this->salesforceConfig->usePreCheckQueue()) {
+            $codesAndStatuses = $this->fillCodesAndStatuses($collection);
+        } else {
+            $codesAndStatuses = [];
+        }
 
         foreach ($this->sortGroup($syncJobs) as $groupKey => $group) {
+            $group->messageDebug('Use pre-check:' . (int)$this->salesforceConfig->usePreCheckQueue());
             $groupCode = $group->code();
             $allowedStatuses = $codesAndStatuses[$groupCode] ?? [];
-            if (!$allowedStatuses) {
+            if ($this->salesforceConfig->usePreCheckQueue() && !$allowedStatuses) {
                 continue;
             }
 
             foreach ($this->phases as $phase) {
                 $startStatus = $phase['startStatus'] ?? '';
-                if (!in_array($startStatus, $allowedStatuses, true)) {
+                if ($this->salesforceConfig->usePreCheckQueue() && !in_array($startStatus, $allowedStatuses, true)) {
                     continue;
                 }
 
