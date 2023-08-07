@@ -37,6 +37,7 @@ class Config extends DataObject implements ConfigInterface
 
     const SYNC_MAX_ATTEMPT_COUNT_XML = 'tnwsforce_general/synchronization/max_attempt_count';
     const SYNC_MEMORY_LIMIT_XML = 'tnwsforce_general/synchronization/memory_limit';
+    const SYNC_USE_PRE_CHECK_QUEUE_XML = 'tnwsforce_general/synchronization/use_pre_check_queue';
     public const SYNCHRONIZATION_NEED_REFRESH_GRIDS = 'tnwsforce_general/synchronization/need_refresh_grids';
 
     /**
@@ -564,6 +565,17 @@ class Config extends DataObject implements ConfigInterface
     public function getMemoryLimit()
     {
         $value = (int)$this->getStoreConfig(self::SYNC_MEMORY_LIMIT_XML);
+
+        return $value;
+    }
+
+    /**
+     * Get cron maximum attempt count to sync
+     * @return int
+     */
+    public function usePreCheckQueue()
+    {
+        $value = (bool)$this->getStoreConfig(self::SYNC_USE_PRE_CHECK_QUEUE_XML);
 
         return $value;
     }
