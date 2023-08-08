@@ -82,7 +82,7 @@ class FilterBlockedQueueRecords
                 ->where('child.queue_id IN (?)', $queueIds)
                 ->group('relation.queue_id');
 
-            $this->logger->debug('Candidates Filter  SQL: ' . $dependentFilter);
+            $this->logger->info('Candidates Filter  SQL: ' . $dependentFilter);
 
             $blockedIds = $connection->fetchCol($dependentFilter);
             if (!empty($blockedIds)) {
