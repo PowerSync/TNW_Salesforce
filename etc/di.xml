@@ -61,6 +61,7 @@
 
     <type name="TNW\Salesforce\Model\ResourceModel\FilterBlockedQueueRecords">
         <arguments>
+            <argument name="systemLogger" xsi:type="object">TNW\Logger</argument>
             <argument name="processStatuses" xsi:type="const">TNW\Salesforce\Model\Queue::PROCESS_STATUSES</argument>
             <argument name="errorStatuses" xsi:type="const">TNW\Salesforce\Model\Queue::ERROR_STATUSES</argument>
             <argument name="newStatuses" xsi:type="array">
@@ -545,6 +546,11 @@
         </arguments>
     </type>
     <type name="TNW\Salesforce\Synchronize\Group">
+        <arguments>
+            <argument name="systemLogger" xsi:type="object">TNW\Logger</argument>
+        </arguments>
+    </type>
+    <type name="TNW\Salesforce\Synchronize\Queue">
         <arguments>
             <argument name="systemLogger" xsi:type="object">TNW\Logger</argument>
         </arguments>
