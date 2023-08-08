@@ -147,7 +147,7 @@ class Queue
 
         // Check not empty
         if ($collection->getSize() === 0) {
-            $this->logger->debug('SQL result is empty: ' . $collection->getSelectCountSql());
+            $this->logger->info('SQL result is empty: ' . $collection->getSelectCountSql());
             return;
         }
         // Collection Clear to reset getSize() update
@@ -164,7 +164,7 @@ class Queue
         foreach ($this->sortGroup($syncJobs) as $groupKey => $group) {
             $group->messageDebug('Use pre-check:' . (int)$this->salesforceConfig->usePreCheckQueue());
             $groupCode = $group->code();
-            $this->logger->debug('>>> Start Group: ' . $groupCode);
+            $this->logger->info('>>> Start Group: ' . $groupCode);
             $allowedStatuses = $codesAndStatuses[$groupCode] ?? [];
             if ($this->salesforceConfig->usePreCheckQueue() && !$allowedStatuses) {
                 continue;
@@ -172,7 +172,7 @@ class Queue
 
             foreach ($this->phases as $phase) {
                 $startStatus = $phase['startStatus'] ?? '';
-                $this->logger->debug('StartStatus : ' . $startStatus);
+                $this->logger->info('StartStatus : ' . $startStatus);
 
                 if ($this->salesforceConfig->usePreCheckQueue() && !in_array($startStatus, $allowedStatuses, true)) {
                     continue;
@@ -189,9 +189,9 @@ class Queue
 
                 $queueIds = $this->getQueueIds($lockCollection, $pageSize);
 
-                $this->logger->debug('Candidates SQL: ' . $lockCollection->getSelectSql(true));
+                $this->logger->info('Candidates SQL: ' . $lockCollection->getSelectSql(true));
                 if (count($queueIds) == 0) {
-                    $this->logger->debug('Candidates list is empty, nothing sync');
+                    $this->logger->info('Candidates list is empty, nothing sync');
                     continue;
                 }
 
@@ -234,7 +234,7 @@ class Queue
                     $this->afterSyncAction();
                 }
             }
-            $this->logger->debug('>>> END Group: ' . $groupCode);
+            $this->logger->info('>>> END Group: ' . $groupCode);
         }
     }
 
@@ -276,9 +276,9 @@ class Queue
      */
     public function syncBatch($group, $groupCollection)
     {
-        $this->logger->debug('Candidates sync batch SQL: ' . $groupCollection->getSelectSql());
+        $this->logger->info('Candidates sync batch SQL: ' . $groupCollection->getSelectSql());
         if ($groupCollection->getSize() == 0) {
-            $this->logger->debug('Candidates sync batch is empty, nothing to sync');
+            $this->logger->info('Candidates sync batch is empty, nothing to sync');
             return false;
         }
 
