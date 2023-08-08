@@ -46,7 +46,7 @@ class CheckMemoryLimit
     /**
      * @return PublisherAdapter
      */
-    public function getPublisher(): PublisherAdapter
+    public function getPublisher()
     {
         return $this->publisher;
     }
@@ -54,7 +54,7 @@ class CheckMemoryLimit
     /**
      * @return StoreManagerInterface
      */
-    public function getStoreManager(): StoreManagerInterface
+    public function getStoreManager()
     {
         return $this->storeManager;
     }
