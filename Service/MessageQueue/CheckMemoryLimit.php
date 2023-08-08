@@ -25,10 +25,10 @@ class CheckMemoryLimit
     protected $salesforceConfig;
 
     /** @var PublisherAdapter  */
-    protected PublisherAdapter $publisher;
+    protected $publisher;
 
     /** @var StoreManagerInterface  */
-    protected StoreManagerInterface $storeManager;
+    protected $storeManager;
 
     /**
      * @param Config $salesforceConfig
