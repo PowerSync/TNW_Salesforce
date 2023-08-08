@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace TNW\Salesforce\Model\ResourceModel;
 
 use Magento\Framework\App\ResourceConnection;
+use Psr\Log\LoggerInterface;
 
 class FilterBlockedQueueRecords
 {
@@ -32,6 +33,8 @@ class FilterBlockedQueueRecords
      */
     private $newStatuses;
 
+    private LoggerInterface $logger;
+
     /**
      * @param ResourceConnection $resourceConnection
      * @param string[] $processStatuses
@@ -40,11 +43,13 @@ class FilterBlockedQueueRecords
      */
     public function __construct(
         ResourceConnection $resourceConnection,
+        LoggerInterface                     $logger,
         array              $processStatuses = [],
         array              $errorStatuses = [],
         array              $newStatuses = []
     ) {
         $this->resourceConnection = $resourceConnection;
+        $this->logger = $logger;
         $this->processStatuses = $processStatuses;
         $this->errorStatuses = $errorStatuses;
         $this->newStatuses = $newStatuses;
@@ -76,6 +81,8 @@ class FilterBlockedQueueRecords
                 ->where('parent.status IN (?)', array_merge($this->processStatuses, $this->errorStatuses, $this->newStatuses))
                 ->where('child.queue_id IN (?)', $queueIds)
                 ->group('relation.queue_id');
+
+            $this->logger->debug('Candidates Filter  SQL: ' . $dependentFilter);
 
             $blockedIds = $connection->fetchCol($dependentFilter);
             if (!empty($blockedIds)) {
