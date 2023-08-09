@@ -144,6 +144,7 @@ class Queue
 
         // Filter To Website
         $collection->addFilterToWebsiteId($websiteId);
+        $this->logger->info('Use pre-check:' . (int)$this->salesforceConfig->usePreCheckQueue());
 
         // Check not empty
         if ($collection->getSize() === 0) {
@@ -162,7 +163,6 @@ class Queue
         }
 
         foreach ($this->sortGroup($syncJobs) as $groupKey => $group) {
-            $group->messageDebug('Use pre-check:' . (int)$this->salesforceConfig->usePreCheckQueue());
             $groupCode = $group->code();
             $this->logger->info('>>> Start Group: ' . $groupCode);
             $allowedStatuses = $codesAndStatuses[$groupCode] ?? [];
@@ -172,7 +172,7 @@ class Queue
 
             foreach ($this->phases as $phase) {
                 $startStatus = $phase['startStatus'] ?? '';
-                $this->logger->info('StartStatus : ' . $startStatus);
+                $this->logger->info('StartStatus, process records with the status : ' . $startStatus);
 
                 if ($this->salesforceConfig->usePreCheckQueue() && !in_array($startStatus, $allowedStatuses, true)) {
                     continue;
