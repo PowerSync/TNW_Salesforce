@@ -62,6 +62,7 @@ class FilterExisting
         }
 
         foreach ($groupByType as $magentoType => $entityIds) {
+            $createBy = $magentoType;
             $salesforceIdsByEntity = $this->massLoadObjectIds->execute($entityIds, $magentoType, (int)$websiteId);
             foreach ($salesforceIdsByEntity as $entityId => $salesforceIds) {
                 if (empty($salesforceIds) || empty($salesforceIds['Product2'])) {
