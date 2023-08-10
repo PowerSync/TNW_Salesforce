@@ -249,13 +249,14 @@ class Unit implements CleanableInstanceInterface
         int $priority = 0
     ) {
         $uniqueHash = hash('sha256', (sprintf(
-            '%s/%s/%s/%s/%s/%s',
+            '%s/%s/%s/%s/%s/%s/%s',
             $this->code(),
             $this->entityType,
             $entityId,
             $this->serializer->serialize($additionalLoad),
             $this->objectType,
-            $this->serializer->serialize($additionalToHash)
+            $this->serializer->serialize($additionalToHash),
+            $loadBy
         )));
 
         return $this->queueFactory->create(['data' => [
