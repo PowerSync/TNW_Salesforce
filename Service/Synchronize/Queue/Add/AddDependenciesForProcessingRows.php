@@ -52,17 +52,41 @@ class AddDependenciesForProcessingRows
                 $listOfCandidates[$uniqueHash] = $queueId;
             }
         }
+
         $parentItems = $this->getProcessingRowsDataByUniqueHashIds(array_keys($listOfCandidates));
         foreach ($parentItems as $parentUniqueHash => $parentQueueId) {
             $childQueueId = $listOfCandidates[$parentUniqueHash] ?? null;
             if ($parentQueueId && $parentUniqueHash && $childQueueId) {
                 $dependencies[] = [
                     'parent_id' => $parentQueueId,
-                    'queue_id' => $childQueueId
+                    'queue_id' => $childQueueId,
+                    'parent_status' => Queue::STATUS_NEW
                 ];
             }
         }
+        $dependencies = $this->addNullParentDependency($listOfCandidates, $dependencies);
 
+        return $dependencies;
+    }
+
+    /**
+     * @param $listOfCandidates
+     * @param $dependencies
+     * @return mixed
+     */
+    public function addNullParentDependency($listOfCandidates, $dependencies)
+    {
+        $parentIds = array_column($dependencies, 'queue_id');
+
+        $itemsWithoutParents = array_diff($listOfCandidates, $parentIds);
+
+        foreach ($itemsWithoutParents as $itemWithoutParents) {
+            $dependencies[] = [
+                'parent_id' => null,
+                'queue_id' => $itemWithoutParents,
+                'parent_status' => Queue::STATUS_COMPLETE
+            ];
+        }
         return $dependencies;
     }
 

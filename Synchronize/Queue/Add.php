@@ -25,7 +25,6 @@ use TNW\Salesforce\Model\Prequeue\Process;
 use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\PreQueue;
 use TNW\Salesforce\Service\Model\Grid\UpdateGridsByQueues;
-use TNW\Salesforce\Service\Model\Grid\UpdateTableByGetColumnData;
 use TNW\Salesforce\Service\Synchronize\Queue\Add\AddDependenciesForProcessingRows;
 use TNW\Salesforce\Service\Synchronize\Queue\Add\UnsetPendingStatusFromPool;
 use TNW\Salesforce\Synchronize\Entity\DivideEntityByWebsiteOrg\Pool;
@@ -269,7 +268,8 @@ class Add
                 if ($identify !== $queue->getIdentify() && $this->checkAdditional($queue, $parent)) {
                     $dependency[] = [
                         'parent_id' => $parent->getId(),
-                        'queue_id' => $queue->getId()
+                        'queue_id' => $queue->getId(),
+                        'parent_status' => Queue::STATUS_NEW
                     ];
                 }
             }
@@ -330,15 +330,12 @@ class Add
          * save related entities to the Queue
          */
         foreach ($unitsList as $key => $unit) {
-            $this->cleanableObjectsList->add($unit);
             $key = (sprintf(
                 '%s',
                 $unit->code()
             ));
-            $relatedUnitCode = $relatedUnitCode ?? $unit->code();
 
-            $current = $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId, $relatedUnitCode);
-//            $this->appendGraph($current);
+            $current = $this->getCurrent($unit, $loadBy, $entityIds, $loadAdditional, $websiteId, $relatedUnitCode);
 
             if (empty($current)) {
                 continue;
@@ -414,6 +411,23 @@ class Add
     }
 
     /**
+     * @param $unit
+     * @param $loadBy
+     * @param $entityIds
+     * @param $loadAdditional
+     * @param $websiteId
+     * @param $relatedUnitCode
+     * @return mixed
+     */
+    public function getCurrent($unit, $loadBy, $entityIds, $loadAdditional, $websiteId, $relatedUnitCode)
+    {
+        $this->cleanableObjectsList->add($unit);
+
+        $relatedUnitCode = $relatedUnitCode ?? $unit->code();
+        return $unit->generateQueues($loadBy, $entityIds, $loadAdditional, $websiteId, $relatedUnitCode);
+    }
+
+    /**
      * @param Unit $unit
      * @param $current
      * @param $dependencies
@@ -475,7 +489,6 @@ class Add
     ) {
         $dependencies = [];
 
-//        $this->openGraph();
         /**
          * collect all queue objects and build dependencies
          */
@@ -498,7 +511,6 @@ class Add
 
         $this->updateGridsByQueues->execute($queues);
 
-//        $this->closeGraph();
     }
 
     /**
@@ -514,83 +526,11 @@ class Add
             $this->saveDependency($dependencies);
             $this->updateRelationsWithErrors($queueDataToSave);
 
-//            $this->buildGraph($queueDataToSave, $dependencies);
-
             $connection->commit();
         } catch (Exception $e) {
             $connection->rollBack();
             throw $e;
         }
-    }
-
-    /**
-     *
-     */
-    public function openGraph()
-    {
-        $this->relation = [];
-        $graph = [
-            '@startdot',
-            sprintf('strict digraph %s {', $this->entityType),
-            sprintf("label = <<font color='green'><b>%s</b></font>>;", $this->entityType),
-            'labelloc = "t";'
-        ];
-
-        file_put_contents('dot/' . $this->entityType . '.dot', implode("\n", $graph));
-    }
-
-    protected $relation = [];
-
-    /**
-     * @param $current
-     */
-    public function appendGraph($current)
-    {
-        $fillcolor = 'green';
-        if (!empty($this->relation)) {
-            $fillcolor = 'white';
-        }
-
-        $graph = [];
-        foreach ($current as $queue) {
-            if (!in_array($queue['code'], $this->relation)) {
-                $graph[] = sprintf('%s [label="%s", style=filled, fillcolor=%s];', $queue['code'], $queue['code'], $fillcolor);
-            }
-            $this->relation[$queue['queue_id']] = $queue['code'];
-        }
-
-        file_put_contents('dot/' . $this->entityType . '.dot', implode("\n", $graph) . "\n", FILE_APPEND);
-
-        $first = false;
-    }
-
-    /**
-     *
-     */
-    public function closeGraph()
-    {
-        $graph[] = '}';
-        $graph[] = '@enddot';
-
-        file_put_contents('dot/' . $this->entityType . '.dot', implode("\n", $graph) . "\n", FILE_APPEND);
-    }
-
-    /**
-     * @param $queueDataToSave
-     * @param $dependencies
-     */
-    public function buildGraph($queueDataToSave, $dependencies)
-    {
-        $graph = [];
-
-        foreach ($dependencies as $queue) {
-            $parent_id = $this->relation[$queue['parent_id']];
-            $queue_id = $this->relation[$queue['queue_id']];
-
-            $graph[] = sprintf('%s -> %s ;', $parent_id, $queue_id);
-        }
-
-        file_put_contents('dot/' . $this->entityType . '.dot', implode("\n", $graph) . "\n", FILE_APPEND);
     }
 
     /**
