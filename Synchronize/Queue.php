@@ -183,15 +183,20 @@ class Queue
                 $lockCollection->addFilterToStatus($startStatus);
 
                 $syncType = $this->getSyncType($lockCollection);
+                $this->logger->debug('Candidates SQL: ' . $lockCollection->getSelectSql(true));
+                if (!$lockCollection->getSize()) {
+                    $this->logger->debug('Candidates list is empty, nothing sync');
+                    continue;
+                }
 
                 $iterations = 0;
                 $pageSize = $this->salesforceConfig->getPageSizeFromMagento(null, $syncType);
 
+                $this->logger->debug('Candidates SQL: ' . $lockCollection->getSelectSql(true));
                 $queueIds = $this->getQueueIds($lockCollection, $pageSize);
 
-                $this->logger->debug('Candidates SQL: ' . $lockCollection->getSelectSql(true));
                 if (count($queueIds) == 0) {
-                    $this->logger->debug('Candidates list is empty, nothing sync');
+                    $this->logger->debug('Filtered Candidates list is empty, nothing sync');
                     continue;
                 }
 
@@ -224,6 +229,8 @@ class Queue
 
                     // Save change status
                     $groupCollection->save();
+
+                    $this->updateRelationStatus($groupCollection);
                     $this->cleanLocalCacheForInstances->execute();
 
                     $this->pushMqMessage->sendMessage($syncType);
@@ -235,6 +242,29 @@ class Queue
                 }
             }
             $this->logger->debug('>>> END Group: ' . $groupCode);
+        }
+    }
+
+    /**
+     * @param $groupCollection
+     * @return void
+     */
+    public function updateRelationStatus($groupCollection)
+    {
+        $relationStatuses = [];
+        foreach ($groupCollection as $queue) {
+            $relationStatuses[$queue->getStatus()][] = $queue->getId();
+        }
+        $conection = $groupCollection->getConnection();
+
+        foreach ($relationStatuses as $status => $queueIds) {
+            foreach (array_chunk($queueIds, ChunkSizeInterface::CHUNK_SIZE_200) as $ids) {
+                $conection->update(
+                    $groupCollection->getTable('tnw_salesforce_entity_queue_relation'),
+                    ['parent_status' => $status],
+                    $conection->prepareSqlCondition('parent_id', ['in' => $ids])
+                );
+            }
         }
     }
 
@@ -254,17 +284,7 @@ class Queue
      */
     public function getQueueIds($lockCollection, $count)
     {
-        $queueIds = [];
-        $lockCollection->setPageSize($count);
-        $lastPageNumber = (int)$lockCollection->getLastPageNumber();
-
-        for ($i = 1; ($i <= $lastPageNumber && $count > 0); $i++) {
-            $this->logger->debug('Candidates filter page ' . $i . ' / ' . $lastPageNumber);
-            $lockCollection->clear();
-            $ids = $this->updateLock->getIdsBatch($lockCollection, $i, $count);
-            $count -= count($ids);
-            $queueIds = array_merge($queueIds, $ids);
-        }
+        $queueIds = $this->updateLock->getIdsBatch($lockCollection, $count);
 
         return array_unique($queueIds);
     }
