@@ -259,6 +259,7 @@ class Queue
         $lastPageNumber = (int)$lockCollection->getLastPageNumber();
 
         for ($i = 1; ($i <= $lastPageNumber && $count > 0); $i++) {
+            $this->logger->debug('Candidates filter page ' . $i . ' / ' . $lastPageNumber);
             $lockCollection->clear();
             $ids = $this->updateLock->getIdsBatch($lockCollection, $i, $count);
             $count -= count($ids);
