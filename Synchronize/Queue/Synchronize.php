@@ -171,7 +171,7 @@ class Synchronize
         );
 
         $collection->addOrder('priority');
-        $collection->addOrder('sync_at', Collection::SORT_ORDER_ASC);
+        $collection->addOrder('updated_at', Collection::SORT_ORDER_ASC);
         $collection->addOrder('sync_attempt', Collection::SORT_ORDER_ASC);
         $collection->addOrder($collection->getIdFieldName(), Collection::SORT_ORDER_ASC);
 
