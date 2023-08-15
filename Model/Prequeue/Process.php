@@ -119,6 +119,7 @@ class Process implements \TNW\Salesforce\Api\Model\Prequeue\ProcessInterface
             ->from([$this->resourcePreQueue->getTable('tnw_salesforce_entity_prequeue')], ['entity_id'])
             ->where('entity_type = :entity_type')
             ->where('sync_type = :sync_type')
+            ->order('entity_id')
             ->limit($this->config->getMaxItemsCountForQueue());
     }
 

@@ -144,9 +144,11 @@ class Queue
 
         // Filter To Website
         $collection->addFilterToWebsiteId($websiteId);
+        $this->logger->info('Use pre-check:' . (int)$this->salesforceConfig->usePreCheckQueue());
 
         // Check not empty
         if ($collection->getSize() === 0) {
+            $this->logger->info('SQL result is empty: ' . $collection->getSelectCountSql());
             return;
         }
         // Collection Clear to reset getSize() update
@@ -161,8 +163,8 @@ class Queue
         }
 
         foreach ($this->sortGroup($syncJobs) as $groupKey => $group) {
-            $group->messageDebug('Use pre-check:' . (int)$this->salesforceConfig->usePreCheckQueue());
             $groupCode = $group->code();
+            $this->logger->info('>>> Start Group: ' . $groupCode);
             $allowedStatuses = $codesAndStatuses[$groupCode] ?? [];
             if ($this->salesforceConfig->usePreCheckQueue() && !$allowedStatuses) {
                 continue;
@@ -170,6 +172,8 @@ class Queue
 
             foreach ($this->phases as $phase) {
                 $startStatus = $phase['startStatus'] ?? '';
+                $this->logger->info('StartStatus, process records with the status : ' . $startStatus);
+
                 if ($this->salesforceConfig->usePreCheckQueue() && !in_array($startStatus, $allowedStatuses, true)) {
                     continue;
                 }
@@ -185,7 +189,9 @@ class Queue
 
                 $queueIds = $this->getQueueIds($lockCollection, $pageSize);
 
+                $this->logger->info('Candidates SQL: ' . $lockCollection->getSelectSql(true));
                 if (count($queueIds) == 0) {
+                    $this->logger->info('Candidates list is empty, nothing sync');
                     continue;
                 }
 
@@ -228,6 +234,7 @@ class Queue
                     $this->afterSyncAction();
                 }
             }
+            $this->logger->info('>>> END Group: ' . $groupCode);
         }
     }
 
@@ -252,6 +259,7 @@ class Queue
         $lastPageNumber = (int)$lockCollection->getLastPageNumber();
 
         for ($i = 1; ($i <= $lastPageNumber && $count > 0); $i++) {
+            $this->logger->debug('Candidates filter page ' . $i . ' / ' . $lastPageNumber);
             $lockCollection->clear();
             $ids = $this->updateLock->getIdsBatch($lockCollection, $i, $count);
             $count -= count($ids);
@@ -268,7 +276,9 @@ class Queue
      */
     public function syncBatch($group, $groupCollection)
     {
+        $this->logger->info('Candidates sync batch SQL: ' . $groupCollection->getSelectSql());
         if ($groupCollection->getSize() == 0) {
+            $this->logger->info('Candidates sync batch is empty, nothing to sync');
             return false;
         }
 
