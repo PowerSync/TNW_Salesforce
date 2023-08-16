@@ -63,7 +63,7 @@ class Recurring implements InstallSchemaInterface
             'parent_id',
             $queueTable,
             'queue_id',
-            AdapterInterface::FK_ACTION_CASCADE,
+            AdapterInterface::FK_ACTION_SET_NULL,
             AdapterInterface::FK_ACTION_CASCADE
         );
     }

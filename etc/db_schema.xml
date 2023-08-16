@@ -211,7 +211,7 @@
             <column name="status_code" />
         </index>
         <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_SYNC_AT_QUEUE_ID_STATUS" indexType="btree">
-            <column name="sync_at" />
+            <column name="updated_at" />
             <column name="queue_id" />
             <column name="status" />
         </index>
@@ -236,13 +236,14 @@
             <column name="status" />
         </index>
         <index referenceId="TNW_SALESFORCE_ENTITY_SYNC_AT_STATUS" indexType="btree">
-            <column name="sync_at" />
+            <column name="updated_at" />
             <column name="status" />
         </index>
     </table>
     <table name="tnw_salesforce_entity_queue_relation" resource="default" engine="innodb" comment="tnw_salesforce_entity_queue_relation">
         <column xsi:type="varchar" name="queue_id" nullable="false" length="32" />
-        <column xsi:type="varchar" name="parent_id" nullable="false" length="32" />
+        <column xsi:type="varchar" name="parent_id" nullable="true" length="32" />
+        <column xsi:type="varchar" name="parent_status" nullable="false" length="30" default="new" comment="Status" />
         <constraint xsi:type="unique" referenceId="TNW_SALESFORCE_ENTITY_QUEUE_RELATION_QUEUE_ID_PARENT_ID">
             <column name="queue_id" />
             <column name="parent_id" />
@@ -250,6 +251,7 @@
         <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_RELATION_PARENT_ID_QUEUE_ID" indexType="btree">
             <column name="parent_id" />
             <column name="queue_id" />
+            <column name="parent_status" />
         </index>
     </table>
     <table name="tnw_salesforce_entity_prequeue" resource="default" engine="innodb" comment="tnw_salesforce_entity_prequeue">

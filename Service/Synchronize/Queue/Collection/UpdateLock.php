@@ -104,7 +104,7 @@ class UpdateLock
      * @return array
      * @throws LocalizedException
      */
-    public function getIdsBatch(Collection $idsCollection, int $page, int $count): array
+    public function getIdsBatch(Collection $idsCollection, int $count): array
     {
         if ($count <= 0) {
             return [];
@@ -112,18 +112,10 @@ class UpdateLock
 
         $this->resetCollection($idsCollection);
         if (!$idsCollection->getPageSize()) {
-            $idsCollection->setPageSize(ChunkSizeInterface::CHUNK_SIZE_200);
-        }
-
-        $idsCollection->setCurPage($page);
-
-        if ($page > $idsCollection->getLastPageNumber()) {
-            return [];
+            $idsCollection->setPageSize($count);
         }
 
         $ids = $idsCollection->getColumnValues($idsCollection->getResource()->getIdFieldName());
-        $ids = array_slice($ids, 0, $count);
-        $ids = $this->filterBlockedQueueRecords->execute($ids);
 
         return $ids;
     }
@@ -138,7 +130,32 @@ class UpdateLock
         $idsSelect = $idsCollection->getSelect();
         $idsSelect->reset(Select::COLUMNS);
         $idsSelect->columns($idsCollection->getIdFieldName());
+        $idsSelect->columns($idsCollection->getIdFieldName());
 
+        $idsSelect->distinct(true);
+        $idsSelect
+            ->joinInner(
+                ['relation' => $idsCollection->getTable('tnw_salesforce_entity_queue_relation')],
+                'main_table.queue_id = relation.queue_id',
+                []
+            );
+
+        $columnExpression = sprintf(
+            "IFNULL(SUM(relation.parent_status IN ('%s') OR relation.parent_id IS NULL), 0)",
+            implode("', '", Queue::SUCCESS_STATUSES)
+        );
+
+        $idsSelect->columns(
+            ['synced_parents' => new \Zend_Db_Expr($columnExpression)]
+        );
+
+        $idsSelect->columns(
+            ['total_parents' => new \Zend_Db_Expr('COUNT(relation.parent_status)')]
+        );
+
+        $idsSelect->having('total_parents = synced_parents');
+
+        $idsSelect->group('main_table.queue_id');
         return $idsCollection;
     }
 }

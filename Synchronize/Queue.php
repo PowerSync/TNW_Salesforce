@@ -144,11 +144,11 @@ class Queue
 
         // Filter To Website
         $collection->addFilterToWebsiteId($websiteId);
-        $this->logger->info('Use pre-check:' . (int)$this->salesforceConfig->usePreCheckQueue());
+        $this->logger->debug('Use pre-check:' . (int)$this->salesforceConfig->usePreCheckQueue());
 
         // Check not empty
         if ($collection->getSize() === 0) {
-            $this->logger->info('SQL result is empty: ' . $collection->getSelectCountSql());
+            $this->logger->debug('SQL result is empty: ' . $collection->getSelectCountSql());
             return;
         }
         // Collection Clear to reset getSize() update
@@ -164,7 +164,7 @@ class Queue
 
         foreach ($this->sortGroup($syncJobs) as $groupKey => $group) {
             $groupCode = $group->code();
-            $this->logger->info('>>> Start Group: ' . $groupCode);
+            $this->logger->debug('>>> Start Group: ' . $groupCode);
             $allowedStatuses = $codesAndStatuses[$groupCode] ?? [];
             if ($this->salesforceConfig->usePreCheckQueue() && !$allowedStatuses) {
                 continue;
@@ -172,7 +172,7 @@ class Queue
 
             foreach ($this->phases as $phase) {
                 $startStatus = $phase['startStatus'] ?? '';
-                $this->logger->info('StartStatus, process records with the status : ' . $startStatus);
+                $this->logger->debug('StartStatus, process records with the status : ' . $startStatus);
 
                 if ($this->salesforceConfig->usePreCheckQueue() && !in_array($startStatus, $allowedStatuses, true)) {
                     continue;
@@ -183,15 +183,20 @@ class Queue
                 $lockCollection->addFilterToStatus($startStatus);
 
                 $syncType = $this->getSyncType($lockCollection);
+                $this->logger->debug('Candidates SQL: ' . $lockCollection->getSelectSql(true));
+                if (!$lockCollection->getSize()) {
+                    $this->logger->debug('Candidates list is empty, nothing sync');
+                    continue;
+                }
 
                 $iterations = 0;
                 $pageSize = $this->salesforceConfig->getPageSizeFromMagento(null, $syncType);
 
+                $this->logger->debug('Candidates SQL: ' . $lockCollection->getSelectSql(true));
                 $queueIds = $this->getQueueIds($lockCollection, $pageSize);
 
-                $this->logger->info('Candidates SQL: ' . $lockCollection->getSelectSql(true));
                 if (count($queueIds) == 0) {
-                    $this->logger->info('Candidates list is empty, nothing sync');
+                    $this->logger->debug('Filtered Candidates list is empty, nothing sync');
                     continue;
                 }
 
@@ -224,6 +229,8 @@ class Queue
 
                     // Save change status
                     $groupCollection->save();
+
+                    $this->updateRelationStatus($groupCollection);
                     $this->cleanLocalCacheForInstances->execute();
 
                     $this->pushMqMessage->sendMessage($syncType);
@@ -234,7 +241,30 @@ class Queue
                     $this->afterSyncAction();
                 }
             }
-            $this->logger->info('>>> END Group: ' . $groupCode);
+            $this->logger->debug('>>> END Group: ' . $groupCode);
+        }
+    }
+
+    /**
+     * @param $groupCollection
+     * @return void
+     */
+    public function updateRelationStatus($groupCollection)
+    {
+        $relationStatuses = [];
+        foreach ($groupCollection as $queue) {
+            $relationStatuses[$queue->getStatus()][] = $queue->getId();
+        }
+        $conection = $groupCollection->getConnection();
+
+        foreach ($relationStatuses as $status => $queueIds) {
+            foreach (array_chunk($queueIds, ChunkSizeInterface::CHUNK_SIZE_200) as $ids) {
+                $conection->update(
+                    $groupCollection->getTable('tnw_salesforce_entity_queue_relation'),
+                    ['parent_status' => $status],
+                    $conection->prepareSqlCondition('parent_id', ['in' => $ids])
+                );
+            }
         }
     }
 
@@ -254,17 +284,7 @@ class Queue
      */
     public function getQueueIds($lockCollection, $count)
     {
-        $queueIds = [];
-        $lockCollection->setPageSize($count);
-        $lastPageNumber = (int)$lockCollection->getLastPageNumber();
-
-        for ($i = 1; ($i <= $lastPageNumber && $count > 0); $i++) {
-            $this->logger->debug('Candidates filter page ' . $i . ' / ' . $lastPageNumber);
-            $lockCollection->clear();
-            $ids = $this->updateLock->getIdsBatch($lockCollection, $i, $count);
-            $count -= count($ids);
-            $queueIds = array_merge($queueIds, $ids);
-        }
+        $queueIds = $this->updateLock->getIdsBatch($lockCollection, $count);
 
         return array_unique($queueIds);
     }
@@ -276,9 +296,9 @@ class Queue
      */
     public function syncBatch($group, $groupCollection)
     {
-        $this->logger->info('Candidates sync batch SQL: ' . $groupCollection->getSelectSql());
+        $this->logger->debug('Candidates sync batch SQL: ' . $groupCollection->getSelectSql());
         if ($groupCollection->getSize() == 0) {
-            $this->logger->info('Candidates sync batch is empty, nothing to sync');
+            $this->logger->debug('Candidates sync batch is empty, nothing to sync');
             return false;
         }
 
