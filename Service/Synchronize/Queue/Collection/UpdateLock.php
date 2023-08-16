@@ -130,6 +130,7 @@ class UpdateLock
         $idsSelect = $idsCollection->getSelect();
         $idsSelect->reset(Select::COLUMNS);
         $idsSelect->columns($idsCollection->getIdFieldName());
+        $idsSelect->columns($idsCollection->getIdFieldName());
 
         $idsSelect->distinct(true);
         $idsSelect
@@ -137,9 +138,24 @@ class UpdateLock
                 ['relation' => $idsCollection->getTable('tnw_salesforce_entity_queue_relation')],
                 'main_table.queue_id = relation.queue_id',
                 []
-            )
-            ->where('relation.parent_status IN (?) OR relation.parent_id IS NULL', [Queue::STATUS_COMPLETE, Queue::STATUS_SKIPPED]);
+            );
 
+        $columnExpression = sprintf(
+            "IFNULL(SUM(relation.parent_status IN ('%s') OR relation.parent_id IS NULL), 0)",
+            implode("', '", Queue::SUCCESS_STATUSES)
+        );
+
+        $idsSelect->columns(
+            ['synced_parents' => new \Zend_Db_Expr($columnExpression)]
+        );
+
+        $idsSelect->columns(
+            ['total_parents' => new \Zend_Db_Expr('COUNT(relation.parent_status)')]
+        );
+
+        $idsSelect->having('total_parents = synced_parents');
+
+        $idsSelect->group('main_table.queue_id');
         return $idsCollection;
     }
 }
