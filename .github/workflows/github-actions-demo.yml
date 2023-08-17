@@ -6,6 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: circleci/php:7.1-apache-stretch-node-browsers
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.github_token }}
 
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
