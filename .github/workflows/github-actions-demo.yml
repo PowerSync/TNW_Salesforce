@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: checkout repo
-        uses: actions/checkout
+        uses: actions/checkout@latest
       - name: Running composer install
         run: composer install
       - name: LS
