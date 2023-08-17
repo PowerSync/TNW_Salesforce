@@ -7,7 +7,7 @@ jobs:
     container:
       image: circleci/php:7.1-apache-stretch-node-browsers
       volumes:
-        - ${{ github.workspace }}:/app
+        - ./:/app
 
     steps:
       - name: checkout repo
