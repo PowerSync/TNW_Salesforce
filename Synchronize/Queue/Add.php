@@ -439,13 +439,24 @@ class Add
          * add parent dependency only, child has own relations
          * and will be created as parent dependency deeper in recursion generateQueueObjects
          */
-        foreach ($unit->parents() as $parent) {
-            $unitCode = $unit->code();
-            $newDependencies = $this->buildDependency($current, $parent->getQueuesGroupedByBaseEntityIds($unitCode));
-            if (!empty($newDependencies)) {
-                array_push($dependencies, ...$newDependencies);
+        if (!empty($unit->parents())) {
+            foreach ($unit->parents() as $parent) {
+                $unitCode = $unit->code();
+                $newDependencies = $this->buildDependency($current, $parent->getQueuesGroupedByBaseEntityIds($unitCode));
+                if (!empty($newDependencies)) {
+                    array_push($dependencies, ...$newDependencies);
+                }
+            }
+        } else {
+            foreach ($current as $queue) {
+                $dependencies[] = [
+                    'parent_id' => null,
+                    'queue_id' => $queue->getId(),
+                    'parent_status' => Queue::STATUS_COMPLETE
+                ];
             }
         }
+
         return $dependencies;
     }
 
