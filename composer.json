@@ -10,7 +10,7 @@
         "gpl-3.0"
     ],
     "type": "magento2-module",
-    "version": "2.9.55",
+    "version": "2.9.56",
     "autoload": {
         "files": [
             "registration.php"
