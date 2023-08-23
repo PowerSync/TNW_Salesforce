@@ -130,7 +130,6 @@ class UpdateLock
         $idsSelect = $idsCollection->getSelect();
         $idsSelect->reset(Select::COLUMNS);
         $idsSelect->columns($idsCollection->getIdFieldName());
-        $idsSelect->columns($idsCollection->getIdFieldName());
 
         $idsSelect->distinct(true);
         $idsSelect
