@@ -180,6 +180,12 @@
             <column name="website_id" />
             <column name="status" />
             <column name="code" />
+            <column name="queue_id" />
+        </index>
+        <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_SYNC_AT_STATUS" indexType="btree">
+            <column name="sync_at" />
+            <column name="status" />
+            <column name="queue_id" />
         </index>
         <index referenceId="TNW_SALESFORCE_ENTITY_QUEUE_STATUS_MESSAGE_STATUS_CODE_COMPOSITE_STATUS" indexType="btree">
             <column name="status" />
