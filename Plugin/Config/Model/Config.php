@@ -10,6 +10,7 @@ use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use TNW\Salesforce\Api\MessageQueue\PublisherAdapter;
+use TNW\Salesforce\Service\MessageQueue\RestartConsumers as RestartConsumersService;
 use TNW\SForceEnterprise\Model\Prequeue\Process as PrequeueProcess;
 use TNW\Salesforce\Api\Model\Synchronization\ConfigInterface as SalesforceConfig;
 
@@ -40,6 +41,8 @@ class Config
      */
     private $configScope;
 
+    /** @var RestartConsumersService  */
+    protected $restartConsumersService;
 
     /**
      * @param PublisherAdapter $publisher
@@ -51,12 +54,14 @@ class Config
         PublisherAdapter $publisher,
         ConfigInterface $configResource,
         StoreManagerInterface $storeManager,
-        SalesforceConfig $config
+        SalesforceConfig $config,
+        RestartConsumersService $restartConsumersService
     ) {
         $this->publisher = $publisher;
         $this->configResource = $configResource;
         $this->storeManager = $storeManager;
         $this->config = $config;
+        $this->restartConsumersService = $restartConsumersService;
     }
 
     /**
@@ -112,6 +117,7 @@ class Config
         if ($salesforceStatusBefore === false && $salesforceStatusAfter === true && $mqMode == 'amqp') {
             $this->publisher->publish(PrequeueProcess::MQ_TOPIC_NAME, false);
         }
+        $this->restartConsumersService->execute();
 
         return $result;
     }

@@ -167,6 +167,22 @@
                 type="TNW\Salesforce\Plugin\Synchronize\Unit\Mapping\CheckOwnerField" />
     </type>
 
+    <type name="TNW\Salesforce\Plugin\Magento\MessageQueue\Console\StartConsumerCommand">
+        <arguments>
+            <argument name="consumers" xsi:type="array">
+                <item name="tnwSalesforceSyncRealtimeAmqp" xsi:type="string">tnwSalesforceSyncRealtimeAmqp</item>
+                <item name="tnwSalesforceSyncRealtimeDb" xsi:type="string">tnwSalesforceSyncRealtimeDb</item>
+                <item name="tnwSalesforcePrequeueProcessDb" xsi:type="string">tnwSalesforcePrequeueProcessDb</item>
+                <item name="tnwSalesforcePrequeueProcessAmqp" xsi:type="string">tnwSalesforcePrequeueProcessAmqp</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\MessageQueue\Console\StartConsumerCommand">
+        <plugin name="tnw_salesforce"
+                type="TNW\Salesforce\Plugin\Magento\MessageQueue\Console\StartConsumerCommand" />
+    </type>
+
     <virtualType name="TNW\Unit\Customer\BusinessAccount\Mapping" type="TNW\Salesforce\Synchronize\Unit\Customer\Account\Mapping">
         <arguments>
             <argument name="name" xsi:type="string">mapping</argument>
@@ -728,6 +744,16 @@
     <type name="TNW\Salesforce\MessageQueue\PublisherAdapter">
         <arguments>
             <argument name="publisher" xsi:type="object">Magento\Framework\MessageQueue\PublisherInterface\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="TNW\Salesforce\Service\MessageQueue\RestartConsumers">
+        <arguments>
+            <argument name="publisher" xsi:type="object">Magento\Framework\MessageQueue\PublisherInterface\Proxy</argument>
+            <argument name="topics" xsi:type="array">
+                <item name="tnw_salesforce.sync.realtime" xsi:type="string">tnw_salesforce.sync.realtime</item>
+                <item name="tnw_salesforce.prequeue.process" xsi:type="string">tnw_salesforce.prequeue.process</item>
+            </argument>
         </arguments>
     </type>
 
