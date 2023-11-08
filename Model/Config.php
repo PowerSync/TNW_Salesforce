@@ -413,11 +413,11 @@ class Config extends DataObject implements ConfigInterface
      */
     public function logBaseDay()
     {
-        $baseDay = $this->scopeConfig->getValue(
+        $baseDay = (int)$this->scopeConfig->getValue(
             'tnwsforce_general/debug/logbaseday'
         );
 
-        if (!is_int($baseDay) || $baseDay < 1) {
+        if ($baseDay < 1 || $baseDay > 365) {
             $baseDay = self::BASE_DAY;
         }
 
