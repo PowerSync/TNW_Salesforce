@@ -109,10 +109,10 @@ class Config
     public function aroundSave(Subject $subject, \Closure $proceed)
     {
         $configScope = $this->retrieveConfigScope($subject);
-        $salesforceStatusBefore = $this->config->getSalesforceStatus($configScope['scopeId']);
+        $salesforceStatusBefore = $this->config->getSalesforceStatus();
         $result = $proceed();
-        $salesforceStatusAfter = $this->config->getSalesforceStatus($configScope['scopeId']);
-        $mqMode = $this->config->getMQMode($configScope['scopeId']);
+        $salesforceStatusAfter = $this->config->getSalesforceStatus();
+        $mqMode = $this->config->getMQMode();
 
         if ($salesforceStatusBefore === false && $salesforceStatusAfter === true && $mqMode == 'amqp') {
             $this->publisher->publish(PrequeueProcess::MQ_TOPIC_NAME, false);
