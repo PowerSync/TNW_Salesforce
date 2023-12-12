@@ -62,9 +62,15 @@ class RestartConsumers
                 } else {
                     $data = '';
                 }
-
                 $topicName = $topic .'.'. $item['value'];
-                $this->publisher->publish($topicName, $data);
+
+                try {
+                    $this->publisher->publish($topicName, $data);
+                } catch (\LogicException $e) {
+                    // avoid error messages if an amqp is not installed:
+                    // we should be able to publish message to stop/restart consumer
+                }
+
             }
         }
     }
