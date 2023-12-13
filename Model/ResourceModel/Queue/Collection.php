@@ -13,6 +13,7 @@ use Magento\Framework\Data\Collection\Db\FetchStrategyInterface;
 use Magento\Framework\Data\Collection\EntityFactoryInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\DB\Select;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
@@ -24,6 +25,7 @@ use TNW\Salesforce\Model\Queue;
 use TNW\Salesforce\Model\ResourceModel\FilterBlockedQueueRecords;
 use TNW\Salesforce\Model\ResourceModel\Queue as ResourceQueue;
 use TNW\Salesforce\Service\Model\ResourceModel\Queue\GetQueuesByIds;
+use Zend_Db_Expr;
 
 /**
  * Queue Collection
@@ -403,4 +405,33 @@ class Collection extends AbstractCollection
     {
         return $this->_bindParams;
     }
+
+    /**
+     * Get SQL for get record count
+     *
+     * @return Select
+     */
+    public function getSelectCountSql()
+    {
+        $this->_renderFilters();
+
+        $countSelect = clone $this->getSelect();
+        $countSelect->reset(Select::ORDER);
+        $countSelect->reset(Select::LIMIT_COUNT);
+        $countSelect->reset(Select::LIMIT_OFFSET);
+        $countSelect->reset(Select::COLUMNS);
+        $countSelect->reset(Select::HAVING);
+
+        $part = $this->getSelect()->getPart(Select::GROUP);
+        if (!is_array($part) || !count($part)) {
+            $countSelect->columns(new Zend_Db_Expr('COUNT(*)'));
+            return $countSelect;
+        }
+
+        $countSelect->reset(Select::GROUP);
+        $group = $this->getSelect()->getPart(Select::GROUP);
+        $countSelect->columns(new Zend_Db_Expr(("COUNT(DISTINCT ".implode(", ", $group).")")));
+        return $countSelect;
+    }
+
 }
