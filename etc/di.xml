@@ -1127,4 +1127,9 @@
             <argument name="cleanableExecutorsList" xsi:type="object">TNW\Salesforce\Service\Model\Grid\GetColumnsDataItems\CleanableObjectsList</argument>
         </arguments>
     </type>
+
+    <type name="Magento\Framework\MessageQueue\QueueInterface">
+        <plugin name="tnw_salesforce" type="TNW\Salesforce\Plugin\Magento\Framework\MessageQueue\TriggerSync" />
+    </type>
+
 </config>
