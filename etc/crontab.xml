@@ -21,6 +21,12 @@
              method="execute">
             <schedule>*/5 * * * *</schedule>
         </job>
+
+        <job name="salesforce_update_relation_status"
+             instance="TNW\Salesforce\Cron\UpdateRelationStatus"
+             method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
     </group>
 
     <group id="salesforce_sync_clear_db_log_cron">
@@ -44,6 +50,14 @@
              instance="TNW\Salesforce\Cron\RefreshGrids"
              method="execute">
             <schedule>*/5 * * * *</schedule>
+        </job>
+    </group>
+
+    <group id="salesforce_update_relation_status_cron">
+        <job name="salesforce_update_relation_status"
+             instance="TNW\Salesforce\Cron\UpdateRelationStatus"
+             method="execute">
+            <schedule>*/4 * * * *</schedule>
         </job>
     </group>
 </config>

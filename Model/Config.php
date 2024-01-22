@@ -39,6 +39,7 @@ class Config extends DataObject implements ConfigInterface
     const SYNC_MEMORY_LIMIT_XML = 'tnwsforce_general/synchronization/memory_limit';
     const SYNC_USE_PRE_CHECK_QUEUE_XML = 'tnwsforce_general/synchronization/use_pre_check_queue';
     public const SYNCHRONIZATION_NEED_REFRESH_GRIDS = 'tnwsforce_general/synchronization/need_refresh_grids';
+    public const SYNCHRONIZATION_NEED_UPDATE_RELATION_STATUS = 'tnwsforce_general/synchronization/need_update_relation_status';
 
     /**
      * Base batch limit for simple sync
@@ -173,6 +174,15 @@ class Config extends DataObject implements ConfigInterface
     public function needRefreshGrids(): bool
     {
         return (bool)$this->getStoreConfig(self::SYNCHRONIZATION_NEED_REFRESH_GRIDS);
+    }
+    /**
+     * Get is need refresh grids
+     *
+     * @return bool
+     */
+    public function needUpdateRelationStatus(): bool
+    {
+        return (bool)$this->getStoreConfig(self::SYNCHRONIZATION_NEED_UPDATE_RELATION_STATUS);
     }
 
 
