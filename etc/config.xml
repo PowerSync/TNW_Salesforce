@@ -22,6 +22,7 @@
                 <max_attempt_count>5</max_attempt_count>
                 <max_items_count_for_queue>200</max_items_count_for_queue>
                 <need_refresh_grids>0</need_refresh_grids>
+                <need_update_relation_status>1</need_update_relation_status>
                 <memory_limit>500</memory_limit>
                 <use_pre_check_queue>0</use_pre_check_queue>
             </synchronization>
