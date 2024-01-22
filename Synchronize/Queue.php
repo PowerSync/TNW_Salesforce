@@ -249,7 +249,7 @@ class Queue
      * @param $groupCollection
      * @return void
      */
-    public function updateRelationStatus($groupCollection)
+    public static function updateRelationStatus($groupCollection)
     {
         $relationStatuses = [];
         foreach ($groupCollection as $queue) {
