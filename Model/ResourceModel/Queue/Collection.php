@@ -52,6 +52,8 @@ class Collection extends AbstractCollection
     /** @var GetQueuesByIds */
     private $getQueuesByIds;
 
+    protected $loadCompositeStatus = true;
+
     /**
      * @param EntityFactoryInterface    $entityFactory
      * @param LoggerInterface           $logger
@@ -76,6 +78,16 @@ class Collection extends AbstractCollection
         $this->filterBlockedQueueRecords = $filterBlockedQueueRecords;
         $this->logger = $logger;
         $this->getQueuesByIds = $getQueuesByIds;
+    }
+
+    public function isLoadCompositeStatus(): bool
+    {
+        return $this->loadCompositeStatus;
+    }
+
+    public function setLoadCompositeStatus(bool $loadCompositeStatus): void
+    {
+        $this->loadCompositeStatus = $loadCompositeStatus;
     }
 
     /**
