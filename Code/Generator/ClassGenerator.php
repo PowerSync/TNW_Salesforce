@@ -48,7 +48,7 @@ class ClassGenerator extends \Magento\Framework\Code\Generator\ClassGenerator
             }
 
             if (isset($methodOptions['docblock']) && is_array($methodOptions['docblock'])) {
-                $docBlockObject = new \Zend\Code\Generator\DocBlockGenerator();
+                $docBlockObject = new \Laminas\Code\Generator\DocBlockGenerator();
                 $docBlockObject->setWordWrap(false);
                 $this->_setDataToObject($docBlockObject, $methodOptions['docblock'], $this->_docBlockOptions);
 

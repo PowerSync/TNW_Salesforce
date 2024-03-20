@@ -19,6 +19,7 @@
         <column xsi:type="smallint" name="skip_blank_values" unsigned="true" nullable="false" identity="false"
                 default="1" comment="Skip blank values"/>
         <column xsi:type="varchar" name="format_value" nullable="true" length="255" default="" comment="Value Format" />
+        <column xsi:type="varchar" name="magento_to_sf_when" nullable="true" length="255" default="Upsert" comment="When enable mapping" />
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="map_id" />
         </constraint>
