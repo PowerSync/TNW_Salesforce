@@ -6,7 +6,7 @@
 
 namespace TNW\Salesforce\Code\Generator;
 
-class ParameterGenerator extends \Zend\Code\Generator\ParameterGenerator
+class ParameterGenerator extends \Laminas\Code\Generator\ParameterGenerator
 {
     /**
      * @var bool
